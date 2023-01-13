@@ -16,7 +16,7 @@ import org.slf4j.Marker;
 public class Log implements Logging
 {
 	public static final Logger _parent = Logger.getLogger(Log.class.getName());
-	public static volatile Level _defaultLevel = Level.INFO;
+	public static volatile Level _defaultLevel = Level.FINEST;
 	public static volatile boolean _setDefaultParent = false;
 	public static final Handler _systemOutHandler = new Handler()
 	{
