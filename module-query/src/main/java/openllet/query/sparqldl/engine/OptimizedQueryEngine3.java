@@ -21,7 +21,7 @@ import java.util.logging.Logger;
 import openllet.aterm.ATermAppl;
 import openllet.core.KnowledgeBase;
 import openllet.query.sparqldl.model.Query;
-import openllet.query.sparqldl.model.Query.VarType;
+import openllet.query.sparqldl.model.UnionQuery.VarType;
 import openllet.query.sparqldl.model.QueryResult;
 import openllet.query.sparqldl.model.QueryResultImpl;
 import openllet.query.sparqldl.model.ResultBinding;

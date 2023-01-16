@@ -5,6 +5,7 @@ import openllet.query.sparqldl.engine.SimpleQueryEngine;
 import openllet.query.sparqldl.model.Query;
 import openllet.query.sparqldl.model.QueryImpl;
 import openllet.query.sparqldl.model.QueryResult;
+import openllet.query.sparqldl.model.UnionQuery;
 import org.junit.Test;
 
 import static openllet.core.utils.TermFactory.*;
@@ -28,7 +29,7 @@ public class LukasQueryTest extends AbstractQueryTest
         final Query q = new QueryImpl(_kb, true);
 
         q.addResultVar(x);
-        q.addDistVar(x, Query.VarType.INDIVIDUAL);
+        q.addDistVar(x, UnionQuery.VarType.INDIVIDUAL);
 
         q.add(PropertyValueAtom(x, _p, y));
         q.add(PropertyValueAtom(y, _p, z));
@@ -113,8 +114,8 @@ public class LukasQueryTest extends AbstractQueryTest
 
         q.addResultVar(x);
         q.addResultVar(y);
-        q.addDistVar(x, Query.VarType.INDIVIDUAL);
-        q.addDistVar(y, Query.VarType.INDIVIDUAL);
+        q.addDistVar(x, UnionQuery.VarType.INDIVIDUAL);
+        q.addDistVar(y, UnionQuery.VarType.INDIVIDUAL);
 
         q.add(TypeAtom(x, _C));
         q.add(TypeAtom(y, _D));

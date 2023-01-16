@@ -8,13 +8,18 @@ import java.util.Set;
 
 public interface UnionQuery
 {
+    enum VarType
+    {
+        CLASS, PROPERTY, INDIVIDUAL, LITERAL
+    }
+
     /**
      * Adds a distinguished variable to the query with its type - there can be more variable types to support punning.
      *
      * @param a the distinguished variable
      * @param type type of the variable
      */
-    void addDistVar(final ATermAppl a, final Query.VarType type);
+    void addDistVar(final ATermAppl a, final UnionQuery.VarType type);
 
     /**
      * @param a is the distinguished variable to add that appears in the result projection to the query;
@@ -102,7 +107,7 @@ public interface UnionQuery
      * @param queryType #VarType
      * @return variables that occur in the subquery specified by the given type.
      */
-    Set<ATermAppl> getDistVarsForType(final Query.VarType queryType);
+    Set<ATermAppl> getDistVarsForType(final UnionQuery.VarType queryType);
 
     /**
      * Replace the variables in the query with the values specified in the binding and return a new query instance (without modifying this query).

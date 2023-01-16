@@ -66,7 +66,7 @@ import openllet.jena.BuiltinTerm;
 import openllet.jena.JenaUtils;
 import openllet.jena.vocabulary.OWL2;
 import openllet.query.sparqldl.model.Query;
-import openllet.query.sparqldl.model.Query.VarType;
+import openllet.query.sparqldl.model.UnionQuery.VarType;
 import openllet.query.sparqldl.model.QueryAtomFactory;
 import openllet.query.sparqldl.model.QueryImpl;
 import openllet.shared.tools.Log;

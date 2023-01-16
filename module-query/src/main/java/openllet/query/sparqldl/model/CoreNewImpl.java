@@ -16,7 +16,7 @@ import java.util.Set;
 import openllet.aterm.ATermAppl;
 import openllet.core.KnowledgeBase;
 import openllet.core.utils.ATermUtils;
-import openllet.query.sparqldl.model.Query.VarType;
+import openllet.query.sparqldl.model.UnionQuery.VarType;
 
 /**
  * <p>

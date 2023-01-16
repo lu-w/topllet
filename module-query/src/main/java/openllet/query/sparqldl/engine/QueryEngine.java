@@ -40,7 +40,7 @@ import openllet.core.utils.SetUtils;
 import openllet.query.sparqldl.model.MultiQueryResults;
 import openllet.query.sparqldl.model.NotKnownQueryAtom;
 import openllet.query.sparqldl.model.Query;
-import openllet.query.sparqldl.model.Query.VarType;
+import openllet.query.sparqldl.model.UnionQuery.VarType;
 import openllet.query.sparqldl.model.QueryAtom;
 import openllet.query.sparqldl.model.QueryAtomFactory;
 import openllet.query.sparqldl.model.QueryImpl;

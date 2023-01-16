@@ -23,7 +23,7 @@ public class UnionQueryImpl implements UnionQuery
     protected Set<ATermAppl> _allVars;
 
     // VARIABLES
-    protected EnumMap<Query.VarType, Set<ATermAppl>> _distVars;
+    protected EnumMap<UnionQuery.VarType, Set<ATermAppl>> _distVars;
 
     protected Set<ATermAppl> _individualsAndLiterals;
 
@@ -44,9 +44,9 @@ public class UnionQueryImpl implements UnionQuery
         _resultVars = new ArrayList<>();
         _allVars = new HashSet<>();
         _individualsAndLiterals = new HashSet<>();
-        _distVars = new EnumMap<>(Query.VarType.class);
+        _distVars = new EnumMap<>(UnionQuery.VarType.class);
 
-        for (final Query.VarType type : Query.VarType.values())
+        for (final UnionQuery.VarType type : UnionQuery.VarType.values())
             _distVars.put(type, new HashSet<ATermAppl>());
 
         _distinct = distinct;
@@ -64,7 +64,7 @@ public class UnionQueryImpl implements UnionQuery
      * {@inheritDoc}
      */
     @Override
-    public Set<ATermAppl> getDistVarsForType(final Query.VarType type)
+    public Set<ATermAppl> getDistVarsForType(final UnionQuery.VarType type)
     {
         return _distVars.get(type);
     }
@@ -73,7 +73,7 @@ public class UnionQueryImpl implements UnionQuery
      * {@inheritDoc}
      */
     @Override
-    public void addDistVar(final ATermAppl a, final Query.VarType type)
+    public void addDistVar(final ATermAppl a, final UnionQuery.VarType type)
     {
         final Set<ATermAppl> set = _distVars.get(type);
 
@@ -108,7 +108,7 @@ public class UnionQueryImpl implements UnionQuery
     {
         final Set<ATermAppl> result = new HashSet<>();
 
-        for (final Query.VarType t : Query.VarType.values())
+        for (final UnionQuery.VarType t : UnionQuery.VarType.values())
             result.addAll(_distVars.get(t));
 
         return result;
@@ -210,7 +210,7 @@ public class UnionQueryImpl implements UnionQuery
             query._resultVars.addAll(_resultVars);
             query._resultVars.removeAll(binding.getAllVariables());
 
-            for (final Query.VarType type : Query.VarType.values())
+            for (final UnionQuery.VarType type : UnionQuery.VarType.values())
                 for (final ATermAppl atom : getDistVarsForType(type))
                     if (!binding.isBound(atom))
                         query.addDistVar(atom, type);

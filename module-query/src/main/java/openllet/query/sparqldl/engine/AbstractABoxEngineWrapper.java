@@ -18,7 +18,7 @@ import openllet.aterm.ATermAppl;
 import openllet.core.KnowledgeBase;
 import openllet.core.utils.ATermUtils;
 import openllet.query.sparqldl.model.Query;
-import openllet.query.sparqldl.model.Query.VarType;
+import openllet.query.sparqldl.model.UnionQuery.VarType;
 import openllet.query.sparqldl.model.QueryAtom;
 import openllet.query.sparqldl.model.QueryAtomFactory;
 import openllet.query.sparqldl.model.QueryImpl;

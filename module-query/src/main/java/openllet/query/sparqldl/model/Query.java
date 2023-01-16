@@ -28,10 +28,6 @@ import openllet.core.KnowledgeBase;
  */
 public interface Query extends UnionQuery
 {
-	public enum VarType
-	{
-		CLASS, PROPERTY, INDIVIDUAL, LITERAL // TODO move to UnionQuery at some point
-	}
 
 	/**
 	 * @return all the atoms in the query.
