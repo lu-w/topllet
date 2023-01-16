@@ -26,85 +26,12 @@ import openllet.core.KnowledgeBase;
  *
  * @author Petr Kremen
  */
-public interface Query
+public interface Query extends UnionQuery
 {
-
 	public enum VarType
 	{
-		CLASS, PROPERTY, INDIVIDUAL, LITERAL
+		CLASS, PROPERTY, INDIVIDUAL, LITERAL // TODO move to UnionQuery at some point
 	}
-
-	/**
-	 * @param filter to sets for this query.
-	 */
-	void setFilter(final Filter filter);
-
-	/**
-	 * @return the filter for this query.
-	 */
-	Filter getFilter();
-
-	/**
-	 * @return true if distinct results are required.
-	 */
-	boolean isDistinct();
-
-	/**
-	 * @param queryType #VarType
-	 * @return variables that occur in the subquery specified by the given type.
-	 */
-	Set<ATermAppl> getDistVarsForType(final VarType queryType);
-
-	/**
-	 * Adds an query atom to the query.
-	 *
-	 * @param atom
-	 */
-	void add(final QueryAtom atom);
-
-	/**
-	 * Adds a distinguished variable to the query with its type - there can be more variable types to support punning.
-	 *
-	 * @param a
-	 * @param type
-	 */
-	void addDistVar(final ATermAppl a, final VarType type);
-
-	/**
-	 * @param a is the distinguished variable to add that appears in the result projection to the query;
-	 */
-	void addResultVar(final ATermAppl a);
-
-	/**
-	 * @return all the variables used in this query.
-	 */
-	Set<ATermAppl> getVars();
-
-	/**
-	 * Return all undistinguished variables used in this query.
-	 *
-	 * @return Set of variables
-	 */
-	Set<ATermAppl> getUndistVars();
-
-	/**
-	 * @return individuals and literals used in this query.
-	 */
-	Set<ATermAppl> getConstants();
-
-	/**
-	 * Return all the variables that will be in the results. For SPARQL, these are the variables in the SELECT clause.
-	 *
-	 * @return Set of variables
-	 */
-	List<ATermAppl> getResultVars();
-
-	/**
-	 * Return all the distinguished variables. These are variables that will be bound to individuals (or _data values) existing in the KB.
-	 *
-	 * @return Set of variables
-	 */
-	Set<ATermAppl> getDistVars();
 
 	/**
 	 * @return all the atoms in the query.
@@ -112,31 +39,11 @@ public interface Query
 	List<QueryAtom> getAtoms();
 
 	/**
-	 * @return The KB that will be used to answer this query.
-	 */
-	KnowledgeBase getKB();
-
-	/**
-	 * Sets the KB that will be used to answer this query.
+	 * Adds a query atom to the query.
 	 *
-	 * @param kb KB that will be used to answer this query
+	 * @param atom
 	 */
-	void setKB(KnowledgeBase kb);
-
-	/**
-	 * Checks whether the query is ground.
-	 *
-	 * @return true iff the query is ground
-	 */
-	boolean isGround();
-
-	/**
-	 * Replace the variables in the query with the values specified in the binding and return a new query instance (without modifying this query).
-	 *
-	 * @param binding
-	 * @return the query changed
-	 */
-	Query apply(ResultBinding binding);
+	void add(final QueryAtom atom);
 
 	/**
 	 * @param distVar
@@ -166,28 +73,10 @@ public interface Query
 	List<QueryAtom> findAtoms(final QueryPredicate predicate, final ATermAppl... arguments);
 
 	/**
-	 * @param parameters to set for the query parameterization
-	 */
-	void setQueryParameters(QueryParameters parameters);
-
-	/**
-	 * Get the query parameterization values
+	 * Replace the variables in the query with the values specified in the binding and return a new query instance (without modifying this query).
 	 *
-	 * @return QueryParameters
+	 * @param binding the binding to apply
+	 * @return the query changed
 	 */
-	QueryParameters getQueryParameters();
-
-	/**
-	 * Return the name of this query
-	 *
-	 * @return name of the query
-	 */
-	ATermAppl getName();
-
-	/**
-	 * Sets the name of this query
-	 *
-	 * @param name name of the query
-	 */
-	void setName(ATermAppl name);
+	Query apply(ResultBinding binding);
 }
