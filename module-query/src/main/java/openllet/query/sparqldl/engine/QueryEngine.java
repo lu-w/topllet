@@ -571,12 +571,16 @@ public class QueryEngine
 	 * @param query
 	 * @return true if query is satisfied
 	 */
-	public static boolean execBooleanABoxQuery(final Query query)
+	public static boolean execBooleanABoxQuery(final Query query) // TODO should take a List of DisjunctiveQueries
 	{
 		// if (!query.getDistVars().isEmpty()) {
 		// throw new InternalReasonerException(
 		// "Executing execBoolean with nonboolean query : " + query);
 		// }
+
+		// Lukas: somewhere earlier, we would need to transform the query into CNF. Then, a CQ is just a special case of a UCQ in CNF and everything here should work as well.
+		// Functions used below (such as isKnownType or isType) can just include a check whether |atoms| == 1 (we are in the CQ case) and then proceed as already implemented. Otherwise, we will use the methods to check unions.
+		// TODO mark those lines that are dependent on the assumption |atoms| == 1 (i.e. those that I need to change)
 
 		boolean querySatisfied;
 
@@ -584,9 +588,9 @@ public class QueryEngine
 		kb.ensureConsistency();
 
 		// unless proven otherwise all (ground) triples are satisfied
-		Bool allTriplesSatisfied = Bool.TRUE;
+		Bool allTriplesSatisfied = Bool.TRUE; // TODO allConjunctsSatisfied
 
-		for (final QueryAtom atom : query.getAtoms())
+		for (final QueryAtom atom : query.getAtoms()) // TODO for UnionQuery in list
 		{
 			// by default we don't know if triple is satisfied
 			Bool tripleSatisfied = Bool.UNKNOWN;
@@ -643,7 +647,9 @@ public class QueryEngine
 
 				if (_logger.isLoggable(Level.FINER))
 					_logger.finer("Boolean query: " + testInd + " -> " + testClass);
-
+				// Lukas: isType performs the actual A u {(not C)(a)} cons. check! But only called if the ontology has
+				// not been realized before. For UCQ, we would adapt isType to accept sets of atoms and return true iff
+				// all models of O satisfy some element of the list (be using the (not C)(a), (not D)(b) method
 				querySatisfied = kb.isType(testInd, testClass);
 			}
 			else
@@ -658,7 +664,7 @@ public class QueryEngine
 
 				final ABox copy = kb.getABox().copy();
 				copy.setInitialized(false);
-				querySatisfied = !copy.isConsistent();
+				querySatisfied = !copy.isConsistent(); // TODO needs to change to UCQ method
 
 				if (added)
 					topObjectRole.removeDomain(newUC, DependencySet.INDEPENDENT);
@@ -667,6 +673,7 @@ public class QueryEngine
 		return querySatisfied;
 	}
 
+	// TODO should take a disjunctive query instead of an atom
 	public static boolean checkGround(final QueryAtom atom, final KnowledgeBase kb)
 	{
 

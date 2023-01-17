@@ -217,7 +217,7 @@ public class UnionQueryImpl implements UnionQuery
 
             for (final QueryAtom atom : atoms)
                 conjunct.add(atom);
-            query.add(conjunct);
+            query.addQuery(conjunct);
         }
 
         return query;
@@ -226,7 +226,7 @@ public class UnionQueryImpl implements UnionQuery
     /**
      * {@inheritDoc}
      */
-    public void add(final Query query) {
+    public void addQuery(final Query query) {
         this._queries.add(query);
     }
 
@@ -239,9 +239,9 @@ public class UnionQueryImpl implements UnionQuery
      * @return A list of union queries, where each conjunctive query of each union query contains only one atom
      * representing the CNF of the input query
      */
-    private List<UnionQuery> toCNFRec(UnionQuery query)
+    private List<DisjunctiveQuery> toCNFRec(UnionQuery query)
     {
-        List<UnionQuery> newCnf = new ArrayList<>();
+        List<DisjunctiveQuery> newCnf = new ArrayList<>();
         // Safety check: no queries given
         if (query.getQueries().size() == 0)
             return newCnf;
@@ -250,10 +250,10 @@ public class UnionQueryImpl implements UnionQuery
         else if (query.getQueries().size() == 1) {
             for (QueryAtom a : query.getQueries().get(0).getAtoms())
             {
-                UnionQuery singleUnion = new UnionQueryImpl(query);
+                DisjunctiveQuery singleUnion = new DisjunctiveQueryImpl(query.getKB(), query.isDistinct());
                 Query singleQuery = new QueryImpl(query.getQueries().get(0));
                 singleQuery.add(a);
-                singleUnion.add(singleQuery);
+                singleUnion.addQuery(singleQuery);
                 newCnf.add(singleUnion);
             }
             return newCnf;
@@ -262,20 +262,20 @@ public class UnionQueryImpl implements UnionQuery
         else
         {
             // Fetch CNF(q)
-            UnionQuery subQuery = new UnionQueryImpl(query);
+            UnionQuery subQuery = new UnionQueryImpl(query.getKB(), query.isDistinct());
             for (Query q : query.getQueries().subList(1, query.getQueries().size()))
-                subQuery.add(q);
-            List<UnionQuery> cnf = toCNFRec(subQuery);
+                subQuery.addQuery(q);
+            List<DisjunctiveQuery> cnf = toCNFRec(subQuery);
             // Create (x v c) for all atoms x and conjuncts c
             for (QueryAtom atom : query.getQueries().get(0).getAtoms())
-                for (UnionQuery conjunct : cnf)
+                for (DisjunctiveQuery conjunct : cnf)
                 {
-                    UnionQuery c = new UnionQueryImpl(query);
+                    DisjunctiveQuery c = new DisjunctiveQueryImpl(query.getKB(), query.isDistinct());
                     for (Query sq : conjunct.getQueries())
-                        c.add(sq);
+                        c.addQuery(sq);
                     Query q = new QueryImpl(query.getKB(), query.isDistinct());
                     q.add(atom);
-                    c.add(q);
+                    c.addQuery(q);
                     newCnf.add(c);
                 }
         }
@@ -286,7 +286,7 @@ public class UnionQueryImpl implements UnionQuery
      * {@inheritDoc}
      */
     @Override
-    public List<UnionQuery> toCNF()
+    public List<DisjunctiveQuery> toCNF()
     {
         return toCNFRec(this);
     }

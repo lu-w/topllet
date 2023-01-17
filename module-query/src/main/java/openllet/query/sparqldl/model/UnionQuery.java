@@ -148,12 +148,12 @@ public interface UnionQuery
      *
      * @param query the query to add
      */
-    void add(final Query query);
+    void addQuery(final Query query);
 
     /**
      * Converts this union query to conjunctive normal form, i.e. of the form (a v ... v b) ^ ... ^ (c v ... v d).
      * Does not change this query.
      * @return A list of union queries, where each conjunctive query of each union query contains only one atom.
      */
-    List<UnionQuery> toCNF();
+    List<DisjunctiveQuery> toCNF();
 }

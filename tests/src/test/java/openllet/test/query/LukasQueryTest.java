@@ -3,7 +3,6 @@ package openllet.test.query;
 import openllet.aterm.ATermAppl;
 import openllet.query.sparqldl.engine.SimpleQueryEngine;
 import openllet.query.sparqldl.model.*;
-import org.apache.jena.graph.compose.Union;
 import org.junit.Test;
 
 import java.util.List;
@@ -146,14 +145,14 @@ public class LukasQueryTest extends AbstractQueryTest
         q3.add(TypeAtom(x, _G));
         q3.add(TypeAtom(y, _H));
 
-        ucq.add(q1);
-        ucq.add(q2);
-        ucq.add(q3);
+        ucq.addQuery(q1);
+        ucq.addQuery(q2);
+        ucq.addQuery(q3);
 
 
         System.out.println(ucq.toString(true));
 
-        List<UnionQuery> cnfUcq = ucq.toCNF();
+        List<DisjunctiveQuery> cnfUcq = ucq.toCNF();
 
         System.out.println(cnfUcq);
     }
