@@ -2,11 +2,11 @@ package openllet.test.query;
 
 import openllet.aterm.ATermAppl;
 import openllet.query.sparqldl.engine.SimpleQueryEngine;
-import openllet.query.sparqldl.model.Query;
-import openllet.query.sparqldl.model.QueryImpl;
-import openllet.query.sparqldl.model.QueryResult;
-import openllet.query.sparqldl.model.UnionQuery;
+import openllet.query.sparqldl.model.*;
+import org.apache.jena.graph.compose.Union;
 import org.junit.Test;
+
+import java.util.List;
 
 import static openllet.core.utils.TermFactory.*;
 import static openllet.query.sparqldl.model.QueryAtomFactory.PropertyValueAtom;
@@ -122,5 +122,39 @@ public class LukasQueryTest extends AbstractQueryTest
         q.add(PropertyValueAtom(x, _p, y));
 
         testQuery(q, new ATermAppl[][] { { _a, _b } });
+    }
+    @Test
+    public void cnfTest()
+    {
+        UnionQueryImpl ucq = new UnionQueryImpl(_kb, true);
+
+        final Query q1 = new QueryImpl(_kb, true);
+        q1.addResultVar(x);
+        q1.addResultVar(y);
+        q1.add(TypeAtom(x, _C));
+        q1.add(TypeAtom(y, _D));
+
+        final Query q2 = new QueryImpl(_kb, true);
+        q2.addResultVar(x);
+        q2.addResultVar(y);
+        q2.add(TypeAtom(x, _E));
+        q2.add(TypeAtom(y, _F));
+
+        final Query q3 = new QueryImpl(_kb, true);
+        q3.addResultVar(x);
+        q3.addResultVar(y);
+        q3.add(TypeAtom(x, _G));
+        q3.add(TypeAtom(y, _H));
+
+        ucq.add(q1);
+        ucq.add(q2);
+        ucq.add(q3);
+
+
+        System.out.println(ucq.toString(true));
+
+        List<UnionQuery> cnfUcq = ucq.toCNF();
+
+        System.out.println(cnfUcq);
     }
 }

@@ -223,8 +223,72 @@ public class UnionQueryImpl implements UnionQuery
         return query;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public void add(final Query query) {
         this._queries.add(query);
+    }
+
+    /**
+     * Recursive implementation of toCNF.
+     * Note: This method creates new query and union query objects, but it does not create new atoms. It rather re-uses
+     * the atoms from the original query.
+     * TODO: check whether we need to do a deep copy of the atoms. For now, this should suffice.
+     * @param query The input union query (i.e. of the form (a ^ ... ^ b) v ... v (c ^ ... ^ d)) to convert into CNF
+     * @return A list of union queries, where each conjunctive query of each union query contains only one atom
+     * representing the CNF of the input query
+     */
+    private List<UnionQuery> toCNFRec(UnionQuery query)
+    {
+        List<UnionQuery> newCnf = new ArrayList<>();
+        // Safety check: no queries given
+        if (query.getQueries().size() == 0)
+            return newCnf;
+        // Base case: CNF(a_1 ^ ... ^ a_n) = a_1 ^ ... ^ a_n
+        // Return a list of atoms (wrapped in a Query and again in a UnionQuery) to represent this conjunction.
+        else if (query.getQueries().size() == 1) {
+            for (QueryAtom a : query.getQueries().get(0).getAtoms())
+            {
+                UnionQuery singleUnion = new UnionQueryImpl(query);
+                Query singleQuery = new QueryImpl(query.getQueries().get(0));
+                singleQuery.add(a);
+                singleUnion.add(singleQuery);
+                newCnf.add(singleUnion);
+            }
+            return newCnf;
+        }
+        // Recursive case: CNF((a_1 ^ ... ^ a_n) v q) = \bigwedge_{x \in a_1 ... a_n} \bigwedge_{c \in CNF(q)} (x v c)
+        else
+        {
+            // Fetch CNF(q)
+            UnionQuery subQuery = new UnionQueryImpl(query);
+            for (Query q : query.getQueries().subList(1, query.getQueries().size()))
+                subQuery.add(q);
+            List<UnionQuery> cnf = toCNFRec(subQuery);
+            // Create (x v c) for all atoms x and conjuncts c
+            for (QueryAtom atom : query.getQueries().get(0).getAtoms())
+                for (UnionQuery conjunct : cnf)
+                {
+                    UnionQuery c = new UnionQueryImpl(query);
+                    for (Query sq : conjunct.getQueries())
+                        c.add(sq);
+                    Query q = new QueryImpl(query.getKB(), query.isDistinct());
+                    q.add(atom);
+                    c.add(q);
+                    newCnf.add(c);
+                }
+        }
+        return newCnf;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public List<UnionQuery> toCNF()
+    {
+        return toCNFRec(this);
     }
 
     @Override
@@ -254,6 +318,12 @@ public class UnionQueryImpl implements UnionQuery
             for (int i = 0; i < _queries.size(); i++)
             {
                 final Query query = _queries.get(i);
+                if (i > 0)
+                {
+                    sb.append(" v");
+                    if (multiLine)
+                        sb.append("\n");
+                }
                 if (query.getAtoms().size() > 0)
                 {
                     if (multiLine)
@@ -268,12 +338,6 @@ public class UnionQueryImpl implements UnionQuery
 
                         sb.append(indent);
                         sb.append(a.toString()); // TODO qNameProvider
-                    }
-                    if (i > 0)
-                    {
-                        sb.append("v");
-                        if (multiLine)
-                            sb.append("\n");
                     }
                 }
             }

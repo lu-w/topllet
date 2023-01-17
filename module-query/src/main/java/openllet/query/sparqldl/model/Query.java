@@ -28,7 +28,6 @@ import openllet.core.KnowledgeBase;
  */
 public interface Query extends UnionQuery
 {
-
 	/**
 	 * @return all the atoms in the query.
 	 */
