@@ -25,8 +25,9 @@ public class Pair<F, S>
 
 	public Pair(final F first_, final S second_)
 	{
-		if (first_ == null || second_ == null)
-			throw new IllegalArgumentException();
+		// We allow nullable pair elements.
+		// if (first_ == null || second_ == null)
+		//	throw new IllegalArgumentException();
 
 		this.first = first_;
 		this.second = second_;
@@ -40,7 +41,14 @@ public class Pair<F, S>
 	@Override
 	public int hashCode()
 	{
-		return first.hashCode() + second.hashCode();
+		if (first != null && second != null)
+			return first.hashCode() + second.hashCode();
+		else if (first != null)
+			return first.hashCode();
+		else if (second != null)
+			return second.hashCode();
+		else
+			return -1;
 	}
 
 	@Override
@@ -54,12 +62,25 @@ public class Pair<F, S>
 
 		final Pair<?, ?> p = (Pair<?, ?>) o;
 
-		return first.equals(p.first) && second.equals(p.second);
+		if (first != null && p.first != null && second != null && p.second != null)
+			return first.equals(p.first) && second.equals(p.second);
+		else if (first != null && p.first != null)
+			return first.equals(p.first);
+		else if (second != null && p.second != null)
+			return second.equals(p.second);
+		else
+			return false;
 	}
 
 	@Override
 	public String toString()
 	{
-		return "[" + first + ", " + second + "]";
+		String f_string = "";
+		String s_string = "";
+		if (first != null)
+			f_string = first.toString();
+		if (second != null)
+			s_string = second.toString();
+		return "[" + f_string + ", " + s_string + "]";
 	}
 }
