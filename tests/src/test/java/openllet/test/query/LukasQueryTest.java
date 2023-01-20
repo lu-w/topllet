@@ -1,10 +1,14 @@
 package openllet.test.query;
 
+import openllet.aterm.ATerm;
 import openllet.aterm.ATermAppl;
+import openllet.core.utils.Pair;
 import openllet.query.sparqldl.engine.SimpleQueryEngine;
 import openllet.query.sparqldl.model.*;
 import org.junit.Test;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import static openllet.core.utils.TermFactory.*;
@@ -155,5 +159,36 @@ public class LukasQueryTest extends AbstractQueryTest
         List<DisjunctiveQuery> cnfUcq = ucq.toCNF();
 
         System.out.println(cnfUcq);
+    }
+
+    @Test
+    public void simpleUCQTest()
+    {
+        classes(_A, _B, _C);
+        _kb.addSubClass(_A, or(_B, _C));
+        individuals(_a);
+
+        _kb.addType(_a, _A);
+
+        _kb.isConsistent();
+
+        List<Pair<ATermAppl, ATermAppl>> q = new ArrayList<>();
+        q.add(new Pair<>(_a, _B));
+        q.add(new Pair<>(_a, _C));
+
+        System.out.println("Checking consistency (should be: true)!");
+
+        // TODO do I need to move isType to KBImpl? look at source code of QueryEngine
+        boolean isCons1 = _kb.getABox().isType(q);
+
+        System.out.println("Result:");
+        System.out.println(isCons1);
+
+        System.out.println("Checking consistency (should be: false)!");
+        q.remove(1);
+        boolean isCons2 = _kb.getABox().isType(q);
+
+        System.out.println("Result:");
+        System.out.println(isCons2);
     }
 }

@@ -33,17 +33,7 @@ package openllet.core.boxes.abox;
 import static java.lang.String.format;
 
 import java.io.PrintStream;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.IdentityHashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -80,11 +70,7 @@ import openllet.core.tracker.BranchEffectTracker;
 import openllet.core.tracker.IncrementalChangeTracker;
 import openllet.core.tracker.SimpleBranchEffectTracker;
 import openllet.core.tracker.SimpleIncrementalChangeTracker;
-import openllet.core.utils.ATermUtils;
-import openllet.core.utils.Bool;
-import openllet.core.utils.CandidateSet;
-import openllet.core.utils.MultiMapUtils;
-import openllet.core.utils.SetUtils;
+import openllet.core.utils.*;
 import openllet.core.utils.Timer;
 import openllet.core.utils.fsm.State;
 import openllet.core.utils.fsm.Transition;
@@ -891,6 +877,54 @@ public class ABoxImpl implements ABox
 		return isType;
 	}
 
+	/**
+	 * @inheritDoc
+	 */
+	public boolean isType(final List<Pair<ATermAppl, ATermAppl>> xcs)
+	{
+
+		_logger.fine("Checking disjunction of types:");
+		for (Pair<ATermAppl, ATermAppl> xc : xcs)
+			if (_logger.isLoggable(Level.FINE))
+				_logger.fine("- " + ATermUtils.toString(xc.second) + " for individual " + ATermUtils.toString(xc.first));
+
+		// Trivial check whether one type is already known -> the whole disjunction is satisfied
+		for (Pair<ATermAppl, ATermAppl> xc : xcs)
+		{
+
+			ATermAppl x = xc.first;
+			ATermAppl c = xc.second;
+			c = ATermUtils.normalize(c);
+
+			if (!doExplanation())
+			{
+				Set<ATermAppl> subs;
+				if (_kb.isClassified() && _kb.getTaxonomy().contains(c))
+				{
+					subs = _kb.getTaxonomy().getFlattenedSubs(c, false);
+					subs.remove(ATermUtils.BOTTOM);
+				}
+				else
+					subs = Collections.emptySet();
+
+				final Bool type = isKnownType(x, c, subs);
+				if (type.isKnown() && type.isTrue())
+					return true;
+			}
+		}
+
+		// Otherwise, add the types to the knowledge base and perform consistency check
+		List<Pair<Collection<ATermAppl>, ATermAppl>> updates = new ArrayList<>();
+		for (Pair<ATermAppl, ATermAppl> xc : xcs)
+			updates.add(new Pair<>(SetUtils.singleton(xc.first), ATermUtils.negate(xc.second)));
+
+		final Optional<Timer> timer = _kb.getTimers().startTimer("isType");
+		final boolean isType = !isConsistent(updates, false);
+		timer.ifPresent(Timer::stop);
+
+		return isType;
+	}
+
 	@Override
 	public boolean existType(final List<ATermAppl> inds, final ATermAppl cParam)
 	{
@@ -1330,74 +1364,113 @@ public class ABoxImpl implements ABox
 	 * The consistency checks will be done either on a copy of the ABox or its pseudo model depending on the situation. In either case this ABox will not be
 	 * modified at all. After the consistency check lastCompletion points to the modified ABox.
 	 *
-	 * @param individuals
+	 * @param individualsParam
 	 * @param c_
+	 * @param cacheModel
 	 * @return true if consistent.
 	 */
 	private boolean isConsistent(final Collection<ATermAppl> individualsParam, final ATermAppl c_, final boolean cacheModel)
 	{
-		Collection<ATermAppl> individuals = individualsParam;
-		ATermAppl c = c_;
+		return isConsistent(List.of(new Pair<>(individualsParam, c_)), cacheModel);
+	}
 
+	/**
+	 * TODO
+	 * @param ic A list of individuals and their types to check consistency for. Can be empty, then, only the current
+	 *             kb is checked for consistency.
+	 * @param cacheModel Whether to cache the results of the consistency check.
+	 * @return true if consistent.
+	 */
+	private boolean isConsistent(final List<Pair<Collection<ATermAppl>, ATermAppl>> ics, final boolean cacheModel)
+	{
 		final Optional<Timer> timer = _kb.getTimers().startTimer("isConsistent");
 
 		if (_logger.isLoggable(Level.FINE))
-			if (c == null)
-				_logger.fine("ABox consistency for " + individuals.size() + " individuals");
-			else
-			{
-				final StringBuilder sb = new StringBuilder();
-				sb.append("[");
-				final Iterator<ATermAppl> it = individuals.iterator();
-				for (int i = 0; i < 100 && it.hasNext(); i++)
-				{
-					if (i > 0)
-						sb.append(", ");
-					sb.append(ATermUtils.toString(it.next()));
-				}
-				if (it.hasNext())
-					sb.append(", ...");
-				sb.append("]");
-				_logger.fine("Consistency " + ATermUtils.toString(c) + " for " + individuals.size() + " individuals " + sb);
-			}
-
-		final Expressivity expr = _kb.getExpressivityChecker().getExpressivityWith(c);
-
-		// if c is null we are checking the consistency of this ABox as
-		// it is and we will not add anything extra
-		final boolean initialConsistencyCheck = c == null;
-
-		final boolean emptyConsistencyCheck = initialConsistencyCheck && isEmpty();
-
-		// if individuals is empty and we are not building the pseudo
-		// model then this is concept satisfiability
-		final boolean conceptSatisfiability = individuals.isEmpty() && (!initialConsistencyCheck || emptyConsistencyCheck);
-
-		// Check if there are any nominals in the KB or nominal
-		// reasoning is disabled
-		final boolean hasNominal = expr.hasNominal() && !OpenlletOptions.USE_PSEUDO_NOMINALS;
-
-		// Use empty model only if this is concept satisfiability for a KB
-		// where there are no nominals
-		final boolean canUseEmptyABox = conceptSatisfiability && !hasNominal;
-
-		ATermAppl x = null;
-		if (conceptSatisfiability)
 		{
-			x = ATermUtils.CONCEPT_SAT_IND;
-			individuals = SetUtils.singleton(x);
+			if (ics.size() > 1)
+				_logger.fine("Checking disjunctive consistency...");
+			for (Pair<Collection<ATermAppl>, ATermAppl> ic : ics)
+			{
+				Collection<ATermAppl> individuals = ic.first;
+				ATermAppl c = ic.second;
+				if (c == null)
+					_logger.fine("ABox consistency for " + individuals.size() + " individuals");
+				else
+				{
+					final StringBuilder sb = new StringBuilder();
+					sb.append("[");
+					final Iterator<ATermAppl> it = individuals.iterator();
+					for (int i = 0; i < 100 && it.hasNext(); i++)
+					{
+						if (i > 0)
+							sb.append(", ");
+						sb.append(ATermUtils.toString(it.next()));
+					}
+					if (it.hasNext())
+						sb.append(", ...");
+					sb.append("]");
+					_logger.fine("Consistency " + ATermUtils.toString(c) + " for " + individuals.size() +
+							" individuals " + sb);
+				}
+			}
 		}
 
-		if (emptyConsistencyCheck)
-			c = ATermUtils.TOP;
+		// Fetching the union of the expressivity of all given classes.
+		final List<ATermAppl> cs = new ArrayList<>();
+		for (Pair<Collection<ATermAppl>, ATermAppl> ic : ics)
+			if (ic.second != null)
+				cs.add(ic.second);
+		final Expressivity expr = _kb.getExpressivityChecker().getExpressivityWith(cs);
 
-		final ABox abox = canUseEmptyABox ? this.copy(x, false) : initialConsistencyCheck ? this : this.copy(x, true);
-
-		for (final ATermAppl ind : individuals)
+		// Check if there are any nominals in the KB or nominal reasoning is disabled
+		final boolean hasNominal = expr.hasNominal() && !OpenlletOptions.USE_PSEUDO_NOMINALS;
+		boolean initialConsistencyCheck = true;
+		boolean emptyConsistencyCheck = true;
+		boolean conceptSatisfiability = true;
+		for (Pair<Collection<ATermAppl>, ATermAppl> ic : ics)
 		{
-			abox.setSyntacticUpdate(true);
-			abox.addType(ind, c);
-			abox.setSyntacticUpdate(false);
+			// if all c's are null we are checking the consistency of this ABox as it is, and we will not add anything
+			// extra
+			initialConsistencyCheck &= ic.second == null;
+
+			emptyConsistencyCheck &= initialConsistencyCheck && isEmpty();
+
+			// if individuals is empty, and we are not building the pseudo model then this is concept satisfiability
+			conceptSatisfiability &=
+					(ic.first == null || ic.first.isEmpty()) && (!initialConsistencyCheck || emptyConsistencyCheck);
+		}
+
+		// Use empty model only if this is concept satisfiability for a KB where there are no nominals
+		final boolean canUseEmptyABox = conceptSatisfiability && !hasNominal;
+
+		// Looping over all disjunctions to create the new ABox to check consistency for
+		ABox abox = this;
+		ATermAppl x = null;
+		for (Pair<Collection<ATermAppl>, ATermAppl> ic : ics)
+		{
+			Collection<ATermAppl> individuals = ic.first;
+			ATermAppl c = ic.second;
+
+			if (conceptSatisfiability)
+			{
+				x = ATermUtils.CONCEPT_SAT_IND;
+				individuals = SetUtils.singleton(x);
+			}
+
+			if (emptyConsistencyCheck)
+				c = ATermUtils.TOP;
+
+			if (canUseEmptyABox)
+				abox = abox.copy(x, false); // TODO this seems very inefficient. maybe implement a copy(..)
+			else if (!initialConsistencyCheck)
+				abox = abox.copy(x, true); // TODO see above
+
+			for (final ATermAppl ind : individuals)
+			{
+				abox.setSyntacticUpdate(true);
+				abox.addType(ind, c);
+				abox.setSyntacticUpdate(false);
+			}
 		}
 
 		// synchronized (this) // We should not try to completion in the same time. -> only if parallel core is enable.
@@ -1413,8 +1486,11 @@ public class ABoxImpl implements ABox
 
 		final boolean consistent = !abox.isClosed();
 
-		if (x != null && c != null && cacheModel)
-			cache(abox.getIndividual(x), c, consistent);
+		// TODO we probably can not use caching for |ics| > 1 since we do not know *which* axiom was satisfied
+		// TODO maybe we can do caching for the whole list... but is this actually useful?
+		if (ics.size() == 1)
+			if (x != null && ics.get(0).second != null && cacheModel)
+				cache(abox.getIndividual(x), ics.get(0).second, consistent);
 
 		if (_logger.isLoggable(Level.FINE))
 			_logger.fine("Consistent: " + consistent //
@@ -1436,19 +1512,25 @@ public class ABoxImpl implements ABox
 		else
 		{
 			_lastClash = abox.getClash();
-			_logger.fine(() -> "Clash: " + abox.getClash().detailedString());
+			_logger.fine("Clash: " + abox.getClash().detailedString());
 			if (_doExplanation && OpenlletOptions.USE_TRACING)
 			{
-				if (individuals.size() == 1)
+				if (ics.size() == 1) // TODO can / should we identify missing axioms sets for |ics| > 1?
 				{
-					final ATermAppl ind = individuals.iterator().next();
+					Collection<ATermAppl> individuals = ics.get(0).first;
+					ATermAppl c = ics.get(0).second;
+					if (individuals.size() == 1)
+					{
+						final ATermAppl ind = individuals.iterator().next();
 
-					final ATermAppl tempAxiom = ATermUtils.makeTypeAtom(ind, c);
-					final Set<ATermAppl> explanationSet = getExplanationSet();
-					final boolean removed = explanationSet.remove(tempAxiom);
-					if (!removed)
-						if (_logger.isLoggable(Level.FINE))
-							_logger.fine("Explanation set is missing an axiom.\n\tAxiom: " + tempAxiom + "\n\tExplantionSet: " + explanationSet);
+						final ATermAppl tempAxiom = ATermUtils.makeTypeAtom(ind, c);
+						final Set<ATermAppl> explanationSet = getExplanationSet();
+						final boolean removed = explanationSet.remove(tempAxiom);
+						if (!removed)
+							if (_logger.isLoggable(Level.FINE))
+								_logger.fine("Explanation set is missing an axiom.\n\tAxiom: " + tempAxiom + "\n" +
+										"\tExplanationSet: " + explanationSet);
+					}
 				}
 				if (_logger.isLoggable(Level.FINE))
 				{

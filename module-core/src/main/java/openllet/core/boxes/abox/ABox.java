@@ -24,6 +24,7 @@ import openllet.core.tracker.BranchEffectTracker;
 import openllet.core.tracker.IncrementalChangeTracker;
 import openllet.core.utils.Bool;
 import openllet.core.utils.CandidateSet;
+import openllet.core.utils.Pair;
 import openllet.core.utils.fsm.State;
 import openllet.core.utils.fsm.TransitionGraph;
 import openllet.shared.tools.Logging;
@@ -113,6 +114,14 @@ public interface ABox extends Logging
 	 *         trying to construct a model where x belongs to not(c).
 	 */
 	boolean isType(final ATermAppl x, ATermAppl c);
+
+	/**
+	 * @param xcs A list of tuples (x,c) representing the set of terms of the form "x in c".
+	 * @return true if one of the individuals x_i belongs to its type c_i. This is a logical consequence of the KB if in
+	 * all possible models some tuple in the list exists where x_i belongs to c_i. This is checked by trying to
+	 * construct a model where x_1 belongs to not (c_1) and x_2 belongs to not (c_2) etc.
+	 */
+	boolean isType(final List<Pair<ATermAppl, ATermAppl>> xcs);
 
 	/**
 	 * @param c

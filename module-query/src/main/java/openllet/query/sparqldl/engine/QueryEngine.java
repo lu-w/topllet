@@ -679,6 +679,8 @@ public class QueryEngine
 
 		final List<ATermAppl> arguments = atom.getArguments();
 
+		// TODO the "isType" functions in the ABoxImpl need to be adapted to handle disjunctions (and should collapse
+		//  to the now implemented case for n=1.
 		switch (atom.getPredicate())
 		{
 			case Type:
