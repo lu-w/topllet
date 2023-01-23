@@ -19,3 +19,5 @@ test-persistence-classification.zip
 .#*
 .DS_Store
 dependency-reduced-pom.xml
+
+tests/src/test/resources/test-persistence-realization.zip
