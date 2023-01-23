@@ -2,6 +2,8 @@ package openllet.test.query;
 
 import openllet.aterm.ATerm;
 import openllet.aterm.ATermAppl;
+import openllet.core.taxonomy.Taxonomy;
+import openllet.core.taxonomy.TaxonomyUtils;
 import openllet.core.utils.Pair;
 import openllet.query.sparqldl.engine.SimpleQueryEngine;
 import openllet.query.sparqldl.model.*;
@@ -164,7 +166,7 @@ public class LukasQueryTest extends AbstractQueryTest
     @Test
     public void simpleUCQTest()
     {
-        classes(_A, _B, _C);
+        classes(_A, _B, _C, _D);
         _kb.addSubClass(_A, or(_B, _C));
         individuals(_a);
 
@@ -175,18 +177,18 @@ public class LukasQueryTest extends AbstractQueryTest
         List<Pair<ATermAppl, ATermAppl>> q = new ArrayList<>();
         q.add(new Pair<>(_a, _B));
         q.add(new Pair<>(_a, _C));
+        q.add(new Pair<>(_a, _D));
 
         System.out.println("Checking consistency (should be: true)!");
 
-        // TODO do I need to move isType to KBImpl? look at source code of QueryEngine
-        boolean isCons1 = _kb.getABox().isType(q);
+        boolean isCons1 = _kb.isType(q);
 
         System.out.println("Result:");
         System.out.println(isCons1);
 
         System.out.println("Checking consistency (should be: false)!");
         q.remove(1);
-        boolean isCons2 = _kb.getABox().isType(q);
+        boolean isCons2 = _kb.isType(q);
 
         System.out.println("Result:");
         System.out.println(isCons2);

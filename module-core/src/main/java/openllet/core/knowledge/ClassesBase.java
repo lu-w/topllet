@@ -5,6 +5,7 @@ import static openllet.core.utils.TermFactory.some;
 
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -16,6 +17,7 @@ import openllet.core.taxonomy.TaxonomyUtils;
 import openllet.core.taxonomy.printer.ClassTreePrinter;
 import openllet.core.utils.ATermUtils;
 import openllet.core.utils.Bool;
+import openllet.core.utils.Pair;
 import openllet.shared.tools.Logging;
 
 /**
@@ -281,6 +283,61 @@ public interface ClassesBase extends MessageBase, Logging, Base
 		}
 
 		return getABox().isType(x, c);
+	}
+
+
+	/**
+	 * @param xcs A list of tuples (x,c) representing the set of terms of the form "x in c".
+	 * @return true if one of the individuals x_i belongs to its type c_i. This is a logical consequence of the KB if in
+	 * all possible models some tuple in the list exists where x_i belongs to c_i. This is checked by trying to
+	 * construct a model where x_1 belongs to not (c_1) and x_2 belongs to not (c_2) etc.
+	 */
+	default boolean isType(final List<Pair<ATermAppl, ATermAppl>> xcs) {
+
+		if (xcs.size() == 0)
+			return false;
+
+		for (Pair<ATermAppl, ATermAppl> p : xcs)
+			if (null == p.first || null == p.second)
+				return false;
+
+		ensureConsistency();
+
+		boolean isType = false;
+		for (Pair<ATermAppl, ATermAppl> p : xcs)
+		{
+			final ATermAppl x = p.first;
+			final ATermAppl c = p.second;
+
+			if (!isIndividual(x))
+			{
+				Base.handleUndefinedEntity(x + _isNotAnIndividual);
+				return false;
+			}
+			if (!isClass(c))
+			{
+				Base.handleUndefinedEntity(c + _isNotAValidClassExpression);
+				return false;
+			}
+
+			if (isRealized() && !doExplanation())
+			{
+				final Taxonomy<ATermAppl> taxonomy = getTaxonomyBuilder().getTaxonomy();
+
+				if (taxonomy == null)
+					throw new NullPointerException("Taxonomy is null");
+
+				if (taxonomy.contains(c))
+					isType |= TaxonomyUtils.isType(taxonomy, x, c);
+			}
+		}
+		if (isRealized())
+			if (xcs.size() == 1)
+				return isType;
+			else if (isType) // under-approximating semantics for |xcs| > 1
+				return true;
+
+		return getABox().isType(xcs);
 	}
 
 	default boolean hasRange(final ATermAppl p, final ATermAppl c)
