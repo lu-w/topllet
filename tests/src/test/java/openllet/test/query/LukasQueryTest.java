@@ -5,6 +5,7 @@ import openllet.aterm.ATermAppl;
 import openllet.core.taxonomy.Taxonomy;
 import openllet.core.taxonomy.TaxonomyUtils;
 import openllet.core.utils.Pair;
+import openllet.query.sparqldl.engine.QueryEngine;
 import openllet.query.sparqldl.engine.SimpleQueryEngine;
 import openllet.query.sparqldl.model.*;
 import org.junit.Test;
@@ -155,7 +156,6 @@ public class LukasQueryTest extends AbstractQueryTest
         ucq.addQuery(q2);
         ucq.addQuery(q3);
 
-
         System.out.println(ucq.toString(true));
 
         List<DisjunctiveQuery> cnfUcq = ucq.toCNF();
@@ -171,8 +171,6 @@ public class LukasQueryTest extends AbstractQueryTest
         individuals(_a);
 
         _kb.addType(_a, _A);
-
-        _kb.isConsistent();
 
         List<Pair<ATermAppl, ATermAppl>> q = new ArrayList<>();
         q.add(new Pair<>(_a, _B));
@@ -192,5 +190,32 @@ public class LukasQueryTest extends AbstractQueryTest
 
         System.out.println("Result:");
         System.out.println(isCons2);
+    }
+
+    @Test
+    public void disjQueryEngineTest()
+    {
+        classes(_A, _B, _C, _D);
+        _kb.addSubClass(_A, or(_B, _C));
+        individuals(_a, _b, _c);
+
+        _kb.addType(_a, _A);
+        _kb.addPropertyValue(_r, _a, _b);
+
+        final UnionQuery q = new UnionQueryImpl(_kb, false);
+
+        final Query q1 = new QueryImpl(_kb, true); // unsat
+        final Query q2 = new QueryImpl(_kb, true); // sat
+        q1.add(TypeAtom(_a, _C));
+        q1.add(TypeAtom(_c, _D));
+        q2.add(TypeAtom(_b, _C));
+        q2.add(PropertyValueAtom(_r, _a, _b));
+
+        q.addQuery(q1);
+        q.addQuery(q2);
+
+        QueryResult res = QueryEngine.exec(q);
+
+        System.out.println(res);
     }
 }

@@ -192,7 +192,8 @@ public class TestMiscSPARQL
 		}
 	}
 
-	@Ignore("According to latest OWL 2 spec onDatatype property can only point to named datatypes so the input " + "ontology for this test is not valid anymore")
+	@Ignore("According to latest OWL 2 spec onDatatype property can only point to named datatypes so the input " +
+			"ontology for this test is not valid anymore")
 	@Test
 	public void test306()
 	{
