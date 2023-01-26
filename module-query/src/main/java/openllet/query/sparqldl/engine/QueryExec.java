@@ -8,6 +8,7 @@ package openllet.query.sparqldl.engine;
 
 import openllet.query.sparqldl.model.Query;
 import openllet.query.sparqldl.model.QueryResult;
+import openllet.query.sparqldl.model.UnionQuery;
 
 /**
  * <p>
@@ -28,7 +29,7 @@ import openllet.query.sparqldl.model.QueryResult;
 public interface QueryExec
 {
 
-	QueryResult exec(Query plan);
+	QueryResult exec(UnionQuery plan);
 
-	boolean supports(Query q);
+	boolean supports(UnionQuery q);
 }

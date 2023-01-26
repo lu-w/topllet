@@ -39,6 +39,7 @@ import openllet.core.utils.DisjointSet;
 import openllet.core.utils.SetUtils;
 import openllet.query.sparqldl.model.MultiQueryResults;
 import openllet.query.sparqldl.model.NotKnownQueryAtom;
+import openllet.query.sparqldl.model.UnionQuery;
 import openllet.query.sparqldl.model.Query;
 import openllet.query.sparqldl.model.UnionQuery.VarType;
 import openllet.query.sparqldl.model.QueryAtom;
@@ -76,9 +77,9 @@ public class QueryEngine
 		return new CombinedQueryEngine();
 	}
 
-	public static boolean supports(final Query query, @SuppressWarnings("unused") final KnowledgeBase kb)
+	public static boolean supports(final UnionQuery query, @SuppressWarnings("unused") final KnowledgeBase kb)
 	{
-		return getQueryExec().supports(query);
+		return getQueryExec().supports(query); // TODO for UnionQuery
 	}
 
 	public static QueryResult exec(final Query query, final KnowledgeBase kb)
@@ -92,7 +93,8 @@ public class QueryEngine
 
 	public static QueryResult exec(final Query query)
 	{
-		if (query.getAtoms().isEmpty())
+		if ((query.getQueries().size() == 0) ||
+				(query.getQueries().size() == 1 && query.getQueries().get(0).getAtoms().isEmpty()))
 		{
 			final QueryResultImpl results = new QueryResultImpl(query);
 			results.add(new ResultBindingImpl());
@@ -120,17 +122,16 @@ public class QueryEngine
 		QueryResult r = null;
 		if (queries.isEmpty())
 			throw new InternalReasonerException("Splitting query returned no results!");
+		else if (queries.size() == 1)
+			r = execSingleQuery(queries.get(0));
 		else
-			if (queries.size() == 1)
-				r = execSingleQuery(queries.get(0));
-			else
-			{
-				final List<QueryResult> results = new ArrayList<>(queries.size());
-				for (final Query q : queries)
-					results.add(execSingleQuery(q));
+		{
+			final List<QueryResult> results = new ArrayList<>(queries.size());
+			for (final Query q : queries)
+				results.add(execSingleQuery(q));
 
-				r = new MultiQueryResults(query.getResultVars(), results);
-			}
+			r = new MultiQueryResults(query.getResultVars(), results);
+		}
 
 		return r;
 	}
@@ -318,11 +319,13 @@ public class QueryEngine
 	 * If a query has disconnected components such as C(x), D(y) then it should be answered as two separate queries. The answers to each query should be
 	 * combined at the _end by taking Cartesian product.(we combine results on a tuple basis as results are iterated. This way we avoid generating the full
 	 * Cartesian product. Splitting the query ensures the correctness of the answer, e.g. rolling-up technique becomes applicable.
+	 * This version also considers individuals to split on (if set), so e.g. C(a), D(b) is split into two queries.
 	 *
 	 * @param query Query to be split
+	 * @param splitOnIndividuals Whether to split on individuals.
 	 * @return List of queries (contains the initial query if the initial query is connected)
 	 */
-	public static List<Query> split(final Query query)
+	public static List<Query> split(final Query query, boolean splitOnIndividuals)
 	{
 		try
 		{
@@ -336,7 +339,7 @@ public class QueryEngine
 
 				for (final ATermAppl arg : atom.getArguments())
 				{
-					if (!ATermUtils.isVar(arg))
+					if (!(ATermUtils.isVar(arg) || (splitOnIndividuals && query.getKB().isIndividual(arg))))
 						continue;
 
 					disjointSet.add(arg);
@@ -347,7 +350,6 @@ public class QueryEngine
 			}
 
 			final Collection<Set<ATermAppl>> equivalenceSets = disjointSet.getEquivalanceSets();
-
 			if (equivalenceSets.size() == 1)
 				return Collections.singletonList(query);
 
@@ -357,7 +359,7 @@ public class QueryEngine
 			{
 				ATermAppl representative = null;
 				for (final ATermAppl arg : atom.getArguments())
-					if (ATermUtils.isVar(arg))
+					if (ATermUtils.isVar(arg) || (splitOnIndividuals && query.getKB().isIndividual(arg)))
 					{
 						representative = disjointSet.find(arg);
 						break;
@@ -405,6 +407,20 @@ public class QueryEngine
 			return Collections.singletonList(query);
 		}
 	}
+
+	/**
+	 * If a query has disconnected components such as C(x), D(y) then it should be answered as two separate queries. The answers to each query should be
+	 * combined at the _end by taking Cartesian product.(we combine results on a tuple basis as results are iterated. This way we avoid generating the full
+	 * Cartesian product. Splitting the query ensures the correctness of the answer, e.g. rolling-up technique becomes applicable.
+	 *
+	 * @param query Query to be split
+	 * @return List of queries (contains the initial query if the initial query is connected)
+	 */
+	public static List<Query> split(final Query query)
+	{
+		return split(query, false);
+	}
+
 
 	/**
 	 * Simplifies the query.

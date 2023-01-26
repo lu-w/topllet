@@ -20,12 +20,8 @@ import java.util.logging.Logger;
 
 import openllet.aterm.ATermAppl;
 import openllet.core.KnowledgeBase;
-import openllet.query.sparqldl.model.Query;
+import openllet.query.sparqldl.model.*;
 import openllet.query.sparqldl.model.UnionQuery.VarType;
-import openllet.query.sparqldl.model.QueryResult;
-import openllet.query.sparqldl.model.QueryResultImpl;
-import openllet.query.sparqldl.model.ResultBinding;
-import openllet.query.sparqldl.model.ResultBindingImpl;
 import openllet.shared.tools.Log;
 
 /**
@@ -47,104 +43,110 @@ public class OptimizedQueryEngine3 extends AbstractABoxEngineWrapper
 	public static final Logger _logger = Log.getLogger(QueryEngine.class);
 
 	@Override
-	public boolean supports(final Query q)
+	public boolean supports(final UnionQuery q)
 	{
 		return true; // TODO
 	}
 
 	@Override
-	public QueryResult execABoxQuery(final Query q)
+	public QueryResult execABoxQuery(final UnionQuery query)
 	{
-		final QueryResult results = new QueryResultImpl(q);
-		final KnowledgeBase kb = q.getKB();
+		final QueryResult results = new QueryResultImpl(query);
 
-		final long satCount = kb.getABox().getStats()._satisfiabilityCount;
-		final long consCount = kb.getABox().getStats()._consistencyCount;
-
-		if (q.getDistVars().isEmpty())
+		if (query.getQueries().size() == 1)
 		{
-			if (QueryEngine.execBooleanABoxQuery(q))
-				results.add(new ResultBindingImpl());
-		}
-		else
-		{
-			final Map<ATermAppl, Set<ATermAppl>> varBindings = new HashMap<>();
+			Query q = query.getQueries().get(0);
+			final KnowledgeBase kb = q.getKB();
 
-			for (final ATermAppl currVar : q.getDistVarsForType(VarType.INDIVIDUAL))
+			final long satCount = kb.getABox().getStats()._satisfiabilityCount;
+			final long consCount = kb.getABox().getStats()._consistencyCount;
+
+			if (q.getDistVars().isEmpty())
 			{
-				final ATermAppl rolledUpClass = q.rollUpTo(currVar, Collections.emptySet(), false);
+				if (QueryEngine.execBooleanABoxQuery(q))
+					results.add(new ResultBindingImpl());
+			} else
+			{
+				final Map<ATermAppl, Set<ATermAppl>> varBindings = new HashMap<>();
+
+				for (final ATermAppl currVar : q.getDistVarsForType(VarType.INDIVIDUAL))
+				{
+					final ATermAppl rolledUpClass = q.rollUpTo(currVar, Collections.emptySet(), false);
+
+					if (_logger.isLoggable(Level.FINER))
+						_logger.finer("Rolled up class " + rolledUpClass);
+					varBindings.put(currVar, kb.getInstances(rolledUpClass));
+				}
 
 				if (_logger.isLoggable(Level.FINER))
-					_logger.finer("Rolled up class " + rolledUpClass);
-				varBindings.put(currVar, kb.getInstances(rolledUpClass));
-			}
+					_logger.finer("Var bindings: " + varBindings);
 
-			if (_logger.isLoggable(Level.FINER))
-				_logger.finer("Var bindings: " + varBindings);
+				final List<ATermAppl> varList = new ArrayList<>(varBindings.keySet()); // TODO
 
-			final List<ATermAppl> varList = new ArrayList<>(varBindings.keySet()); // TODO
+				final Map<ATermAppl, Collection<ResultBinding>> goodLists = new HashMap<>();
 
-			final Map<ATermAppl, Collection<ResultBinding>> goodLists = new HashMap<>();
+				final ATermAppl first = varList.get(0);
+				final Collection<ResultBinding> c = new HashSet<>();
 
-			final ATermAppl first = varList.get(0);
-			final Collection<ResultBinding> c = new HashSet<>();
+				for (final ATermAppl a : varBindings.get(first))
+				{
+					final ResultBinding bind = new ResultBindingImpl();
+					bind.setValue(first, a);
+					c.add(bind);
+				}
 
-			for (final ATermAppl a : varBindings.get(first))
-			{
-				final ResultBinding bind = new ResultBindingImpl();
-				bind.setValue(first, a);
-				c.add(bind);
-			}
+				goodLists.put(first, c);
 
-			goodLists.put(first, c);
+				Collection<ResultBinding> previous = goodLists.get(first);
+				for (int i = 1; i < varList.size(); i++)
+				{
+					final ATermAppl next = varList.get(i);
 
-			Collection<ResultBinding> previous = goodLists.get(first);
-			for (int i = 1; i < varList.size(); i++)
-			{
-				final ATermAppl next = varList.get(i);
+					final Collection<ResultBinding> newBindings = new HashSet<>();
 
-				final Collection<ResultBinding> newBindings = new HashSet<>();
-
-				for (final ResultBinding binding : previous)
-					for (final ATermAppl testBind : varBindings.get(next))
-					{
-						final ResultBinding bindingCandidate = binding.duplicate();
-
-						bindingCandidate.setValue(next, testBind);
-
-						final boolean queryTrue = QueryEngine.execBooleanABoxQuery(q.apply(bindingCandidate));
-						if (queryTrue)
+					for (final ResultBinding binding : previous)
+						for (final ATermAppl testBind : varBindings.get(next))
 						{
-							newBindings.add(bindingCandidate);
-							if (_logger.isLoggable(Level.FINER))
-								_logger.finer("Accepted binding: " + bindingCandidate);
-						}
-						else
-							if (_logger.isLoggable(Level.FINER))
+							final ResultBinding bindingCandidate = binding.duplicate();
+
+							bindingCandidate.setValue(next, testBind);
+
+							final boolean queryTrue = QueryEngine.execBooleanABoxQuery(q.apply(bindingCandidate));
+							if (queryTrue)
+							{
+								newBindings.add(bindingCandidate);
+								if (_logger.isLoggable(Level.FINER))
+									_logger.finer("Accepted binding: " + bindingCandidate);
+							} else if (_logger.isLoggable(Level.FINER))
 								_logger.finer("Rejected binding: " + bindingCandidate);
-					}
+						}
 
-				previous = newBindings;
-			}
+					previous = newBindings;
+				}
 
-			// no var. should be marked as both INDIVIDUAL and LITERAL in an
-			// ABox query.
-			final boolean hasLiterals = !q.getDistVarsForType(VarType.LITERAL).isEmpty();
+				// no var. should be marked as both INDIVIDUAL and LITERAL in an
+				// ABox query.
+				final boolean hasLiterals = !q.getDistVarsForType(VarType.LITERAL).isEmpty();
 
-			if (hasLiterals)
-				for (final ResultBinding b : previous)
-					for (final Iterator<ResultBinding> i = new LiteralIterator(q, b); i.hasNext();)
-						results.add(i.next());
-			else
-				for (final ResultBinding b : previous)
-					results.add(b);
-			if (_logger.isLoggable(Level.FINE))
-			{
-				_logger.fine("Results: " + results);
-				_logger.fine("Total satisfiability operations: " + (kb.getABox().getStats()._satisfiabilityCount - satCount));
-				_logger.fine("Total consistency operations: " + (kb.getABox().getStats()._consistencyCount - consCount));
+				if (hasLiterals)
+					for (final ResultBinding b : previous)
+						for (final Iterator<ResultBinding> i = new LiteralIterator(q, b); i.hasNext(); )
+							results.add(i.next());
+				else
+					for (final ResultBinding b : previous)
+						results.add(b);
+				if (_logger.isLoggable(Level.FINE))
+				{
+					_logger.fine("Results: " + results);
+					_logger.fine("Total satisfiability operations: " +
+							(kb.getABox().getStats()._satisfiabilityCount - satCount));
+					_logger.fine("Total consistency operations: " +
+							(kb.getABox().getStats()._consistencyCount - consCount));
+				}
 			}
 		}
+		else
+			_logger.warning("Can not handle union queries");
 		return results;
 	}
 }

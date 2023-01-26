@@ -37,19 +37,8 @@ import openllet.core.utils.ATermUtils;
 import openllet.core.utils.CandidateSet;
 import openllet.core.utils.DisjointSet;
 import openllet.core.utils.Timer;
-import openllet.query.sparqldl.model.CoreNewImpl;
-import openllet.query.sparqldl.model.NotKnownQueryAtom;
-import openllet.query.sparqldl.model.Query;
+import openllet.query.sparqldl.model.*;
 import openllet.query.sparqldl.model.UnionQuery.VarType;
-import openllet.query.sparqldl.model.QueryAtom;
-import openllet.query.sparqldl.model.QueryAtomFactory;
-import openllet.query.sparqldl.model.QueryImpl;
-import openllet.query.sparqldl.model.QueryPredicate;
-import openllet.query.sparqldl.model.QueryResult;
-import openllet.query.sparqldl.model.QueryResultImpl;
-import openllet.query.sparqldl.model.ResultBinding;
-import openllet.query.sparqldl.model.ResultBindingImpl;
-import openllet.query.sparqldl.model.UnionQueryAtom;
 import openllet.shared.tools.Log;
 
 /**
@@ -229,7 +218,7 @@ public class CombinedQueryEngine implements QueryExec
 	 * {@inheritDoc}
 	 */
 	@Override
-	public boolean supports(final Query q)
+	public boolean supports(final UnionQuery q)
 	{
 		// TODO cycles in undist vars and fully undist.vars queries are not supported !!!
 		return true;
@@ -239,20 +228,28 @@ public class CombinedQueryEngine implements QueryExec
 	 * {@inheritDoc}
 	 */
 	@Override
-	public QueryResult exec(final Query query)
+	public QueryResult exec(final UnionQuery query)
 	{
-		_logger.fine(() -> "Executing query " + query);
+		if (query.getQueries().size() == 1)
+		{
+			_logger.fine(() -> "Executing query " + query);
 
-		final Timer timer = new Timer("CombinedQueryEngine");
-		timer.start();
-		prepare(query);
-		branches = 0;
-		exec(new ResultBindingImpl());
-		timer.stop();
+			final Timer timer = new Timer("CombinedQueryEngine");
+			timer.start();
+			prepare(query.getQueries().get(0));
+			branches = 0;
+			exec(new ResultBindingImpl());
+			timer.stop();
 
-		_logger.fine(() -> "#B=" + branches + ", time=" + timer.getLast() + " ms.");
+			_logger.fine(() -> "#B=" + branches + ", time=" + timer.getLast() + " ms.");
 
-		return _result;
+			return _result;
+		}
+		else
+		{
+			_logger.warning("Union queries not yet supported: " + query);
+			return new QueryResultImpl(query); // TODO Lukas
+		}
 	}
 
 	private long branches;

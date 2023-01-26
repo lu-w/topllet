@@ -882,16 +882,14 @@ public class ABoxImpl implements ABox
 	 */
 	public boolean isType(final List<Pair<ATermAppl, ATermAppl>> xcs)
 	{
-
 		_logger.fine("Checking disjunction of types:");
 		for (Pair<ATermAppl, ATermAppl> xc : xcs)
 			if (_logger.isLoggable(Level.FINE))
-				_logger.fine("- " + ATermUtils.toString(xc.second) + " for individual " + ATermUtils.toString(xc.first));
+				_logger.fine("- " + ATermUtils.toString(xc.second) + " for individual/variable " + ATermUtils.toString(xc.first));
 
 		// Trivial check whether one type is already known -> the whole disjunction is satisfied
 		for (Pair<ATermAppl, ATermAppl> xc : xcs)
 		{
-
 			ATermAppl x = xc.first;
 			ATermAppl c = xc.second;
 			c = ATermUtils.normalize(c);

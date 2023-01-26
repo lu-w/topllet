@@ -16,13 +16,7 @@ import java.util.logging.Logger;
 import openllet.aterm.ATermAppl;
 import openllet.core.KnowledgeBase;
 import openllet.core.utils.ATermUtils;
-import openllet.query.sparqldl.model.Query;
-import openllet.query.sparqldl.model.QueryAtom;
-import openllet.query.sparqldl.model.QueryPredicate;
-import openllet.query.sparqldl.model.QueryResult;
-import openllet.query.sparqldl.model.QueryResultImpl;
-import openllet.query.sparqldl.model.ResultBinding;
-import openllet.query.sparqldl.model.ResultBindingImpl;
+import openllet.query.sparqldl.model.*;
 import openllet.shared.tools.Log;
 
 /**
@@ -51,7 +45,7 @@ public class OptimizedQueryEngine2 extends AbstractABoxEngineWrapper
 	 * {@inheritDoc}
 	 */
 	@Override
-	public boolean supports(final Query q)
+	public boolean supports(final UnionQuery q)
 	{
 		return !q.getDistVars().isEmpty();
 	}
@@ -82,7 +76,8 @@ public class OptimizedQueryEngine2 extends AbstractABoxEngineWrapper
 				instances.retainAll(_kb.retrieveIndividualsWithProperty(atom.getArguments().get(1)));
 
 			for (final QueryAtom atom : q.findAtoms(QueryPredicate.PropertyValue, null, null, var))
-				instances.retainAll(_kb.retrieveIndividualsWithProperty(ATermUtils.makeInv(atom.getArguments().get(1))));
+				instances.retainAll(
+						_kb.retrieveIndividualsWithProperty(ATermUtils.makeInv(atom.getArguments().get(1))));
 		}
 		else
 			instances = _kb.getInstances(clazz);
@@ -99,23 +94,30 @@ public class OptimizedQueryEngine2 extends AbstractABoxEngineWrapper
 	}
 
 	@Override
-	public QueryResult execABoxQuery(final Query q)
+	public QueryResult execABoxQuery(final UnionQuery query)
 	{
-		_results = new QueryResultImpl(q);
-
-		_kb = q.getKB();
-
-		final long satCount = _kb.getABox().getStats()._satisfiabilityCount;
-		final long consCount = _kb.getABox().getStats()._consistencyCount;
-
-		exec(q, new ResultBindingImpl(), true);
-
-		if (_logger.isLoggable(Level.FINE))
+		_results = new QueryResultImpl(query);
+		if (query.getQueries().size() == 1)
 		{
-			_logger.fine("Total satisfiability operations: " + (_kb.getABox().getStats()._satisfiabilityCount - satCount));
-			_logger.fine("Total consistency operations: " + (_kb.getABox().getStats()._consistencyCount - consCount));
-			_logger.fine("Results of ABox query : " + _results);
+			Query q = query.getQueries().get(0);
+			_kb = q.getKB();
+
+			final long satCount = _kb.getABox().getStats()._satisfiabilityCount;
+			final long consCount = _kb.getABox().getStats()._consistencyCount;
+
+			exec(q, new ResultBindingImpl(), true);
+
+			if (_logger.isLoggable(Level.FINE))
+			{
+				_logger.fine("Total satisfiability operations: " +
+						(_kb.getABox().getStats()._satisfiabilityCount - satCount));
+				_logger.fine("Total consistency operations: " +
+						(_kb.getABox().getStats()._consistencyCount - consCount));
+				_logger.fine("Results of ABox query : " + _results);
+			}
 		}
+		else
+			_logger.warning("Can not handle union queries");
 
 		return _results;
 	}

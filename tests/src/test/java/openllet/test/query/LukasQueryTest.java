@@ -5,9 +5,9 @@ import openllet.aterm.ATermAppl;
 import openllet.core.taxonomy.Taxonomy;
 import openllet.core.taxonomy.TaxonomyUtils;
 import openllet.core.utils.Pair;
-import openllet.query.sparqldl.engine.QueryEngine;
-import openllet.query.sparqldl.engine.SimpleQueryEngine;
+import openllet.query.sparqldl.engine.*;
 import openllet.query.sparqldl.model.*;
+import org.apache.jena.graph.compose.Union;
 import org.junit.Test;
 
 import java.util.ArrayList;
@@ -196,10 +196,12 @@ public class LukasQueryTest extends AbstractQueryTest
     public void disjQueryEngineTest()
     {
         classes(_A, _B, _C, _D);
-        _kb.addSubClass(_A, or(_B, _C));
         individuals(_a, _b, _c);
+        objectProperties(_r);
 
+        _kb.addSubClass(_A, or(_B, _C));
         _kb.addType(_a, _A);
+        _kb.addType(_b, _A);
         _kb.addPropertyValue(_r, _a, _b);
 
         final UnionQuery q = new UnionQueryImpl(_kb, false);
@@ -208,13 +210,35 @@ public class LukasQueryTest extends AbstractQueryTest
         final Query q2 = new QueryImpl(_kb, true); // sat
         q1.add(TypeAtom(_a, _C));
         q1.add(TypeAtom(_c, _D));
-        q2.add(TypeAtom(_b, _C));
-        q2.add(PropertyValueAtom(_r, _a, _b));
+        q2.add(TypeAtom(_b, _A));
+        q2.add(PropertyValueAtom(_a, _r, _b));
 
         q.addQuery(q1);
         q.addQuery(q2);
 
-        QueryResult res = QueryEngine.exec(q);
+        UnionQueryEngine qe = new UnionQueryEngine();
+        QueryResult res = qe.execABoxQuery(q);
+
+        System.out.println(res);
+    }
+
+    @Test
+    public void splitTest()
+    {
+        classes(_A, _B, _C, _D);
+        _kb.addSubClass(_A, or(_B, _C));
+        individuals(_a, _b, _c);
+        objectProperties(_r);
+
+        _kb.addType(_a, _A);
+        _kb.addPropertyValue(_r, _a, _b);
+
+        final Query q1 = new QueryImpl(_kb, true);
+
+        q1.add(TypeAtom(_a, _C));
+        q1.add(TypeAtom(_c, _D));
+
+        QueryResult res = QueryEngine.exec(q1);
 
         System.out.println(res);
     }

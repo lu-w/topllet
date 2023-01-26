@@ -17,16 +17,8 @@ import java.util.logging.Logger;
 import openllet.aterm.ATermAppl;
 import openllet.core.KnowledgeBase;
 import openllet.core.utils.ATermUtils;
-import openllet.query.sparqldl.model.Query;
+import openllet.query.sparqldl.model.*;
 import openllet.query.sparqldl.model.UnionQuery.VarType;
-import openllet.query.sparqldl.model.QueryAtom;
-import openllet.query.sparqldl.model.QueryAtomFactory;
-import openllet.query.sparqldl.model.QueryImpl;
-import openllet.query.sparqldl.model.QueryPredicate;
-import openllet.query.sparqldl.model.QueryResult;
-import openllet.query.sparqldl.model.QueryResultImpl;
-import openllet.query.sparqldl.model.ResultBinding;
-import openllet.query.sparqldl.model.ResultBindingImpl;
 import openllet.shared.tools.Log;
 
 /**
@@ -59,9 +51,9 @@ public abstract class AbstractABoxEngineWrapper implements QueryExec
 	 * {@inheritDoc}
 	 */
 	@Override
-	public QueryResult exec(final Query query)
+	public QueryResult exec(final UnionQuery query)
 	{
-		_logger.fine(() -> "Executing query " + query.getAtoms());
+		_logger.fine(() -> "Executing query " + query);
 
 		partitionQuery(query);
 
@@ -88,6 +80,7 @@ public abstract class AbstractABoxEngineWrapper implements QueryExec
 
 		_logger.fine(() -> "Partial _binding after schema query : " + result);
 
+		// TODO Lukas: later, iterate over bindings here for union queries as well.
 		if (aboxQuery.getAtoms().size() > 0)
 		{
 			newResult = new QueryResultImpl(query);
@@ -116,9 +109,9 @@ public abstract class AbstractABoxEngineWrapper implements QueryExec
 		return newResult;
 	}
 
-	private final void partitionQuery(final Query query)
+	protected final void partitionQuery(final UnionQuery unionQuery)
 	{
-
+		Query query = unionQuery.getQueries().get(0); // TODO Lukas
 		schemaQuery = new QueryImpl(query);
 		aboxQuery = new QueryImpl(query);
 
@@ -167,7 +160,7 @@ public abstract class AbstractABoxEngineWrapper implements QueryExec
 
 	}
 
-	protected abstract QueryResult execABoxQuery(final Query q);
+	protected abstract QueryResult execABoxQuery(final UnionQuery q);
 }
 
 class BindingIterator implements Iterator<ResultBinding>
