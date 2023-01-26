@@ -22,15 +22,18 @@ public class UnionQueryEngine extends AbstractABoxEngineWrapper
     @Override
     public QueryResult execABoxQuery(UnionQuery q)
     {
-        QueryResult result = new QueryResultImpl(q);
+        // TODO check assumption that disjuncts do not refer to the same undistinguished variables.
+
         if (_logger.isLoggable(Level.FINER))
-            _logger.finer("Exec union ABox query: " + q);
+            _logger.finer("Exec ABox query: " + q);
+        QueryResult result = new QueryResultImpl(q);
 
         // 1. ROLL-UP
         UnionQuery rolledUpUnionQuery = new UnionQueryImpl(q);
         for (Query conjunctiveQuery : q.getQueries())
         {
-            _logger.finer("Rolling up for conjunctive query: " + conjunctiveQuery);
+            if (_logger.isLoggable(Level.FINEST))
+                _logger.finer("Rolling up for conjunctive query: " + conjunctiveQuery);
             // 1. step: Find disjoint parts of the query
             List<Query> splitQueries = split(conjunctiveQuery, true);
 
@@ -38,13 +41,11 @@ public class UnionQueryEngine extends AbstractABoxEngineWrapper
             Query rolledUpQuery = new QueryImpl(q.getKB(), q.isDistinct());
             for (Query connectedQuery : splitQueries)
             {
-                _logger.finer("Connected sub-query of this conjunctive query is: " + connectedQuery);
                 final ATermAppl testIndOrVar;
                 if (!connectedQuery.getConstants().isEmpty())
                     testIndOrVar = connectedQuery.getConstants().iterator().next();
                 else
                     testIndOrVar = connectedQuery.getUndistVars().iterator().next();
-                _logger.finer("Test individual/variable is: " + testIndOrVar);
                 final ATermAppl testClass = connectedQuery.rollUpTo(testIndOrVar, Collections.emptySet(), false);
                 if (_logger.isLoggable(Level.FINEST))
                     _logger.finer("Boolean query: " + testIndOrVar + " -> " + testClass);
@@ -63,8 +64,14 @@ public class UnionQueryEngine extends AbstractABoxEngineWrapper
 
         // 3. TYPE CHECK EACH CONJUNCT
         boolean isEntailed = true;
+        // Query is entailed iff. all conjuncts are entailed
         for (DisjunctiveQuery disjunctiveQuery : cnfQuery)
         {
+            if (_logger.isLoggable(Level.FINER))
+                _logger.finer("Checking disjunctive query: " + disjunctiveQuery);
+            // Creates a list with the axioms to check (since they are already rolled-up, we only have concepts):
+            // - C(a) for individuals a and concepts C -> disjunctionInd
+            // - C(x) for undistinguished variables Cx and concepts C -> disjunctionVar
             List<Pair<ATermAppl, ATermAppl>> disjunctionInd = new ArrayList<>();
             List<ATermAppl> disjunctionVar = new ArrayList<>();
             for (Query atomicQuery : disjunctiveQuery.getQueries())
@@ -76,30 +83,61 @@ public class UnionQueryEngine extends AbstractABoxEngineWrapper
                         // TODO think: can we make the assumption that no two classes refer to the same undist. var?
                         // probably yes, because we rolled everything up before, right?
                         disjunctionVar.add(atomicQuery.getAtoms().get(0).getArguments().get(1));
-            // Case 1: no undist. vars in disjunction
+            // Case 1: No undistinguished variables in disjunction
             if (disjunctionVar.isEmpty())
-                isEntailed &= rolledUpUnionQuery.getKB().isType(disjunctionInd);
+            {
+                _logger.finer("No variables in disjunctive query -> checking type of disjunction in A-Box");
+                isEntailed = rolledUpUnionQuery.getKB().isType(disjunctionInd);
+            }
             else
             {
+                _logger.finer("Variables in disjunctive query found");
                 final ABox copy = q.getKB().getABox().copy();
+                final Role topObjectRole = q.getKB().getRole(TOP_OBJECT_PROPERTY);
+                List<ATermAppl> newUCs = new ArrayList<>();
                 for (ATermAppl testClass : disjunctionVar)
                 {
                     final ATermAppl newUC = ATermUtils.normalize(ATermUtils.makeNot(testClass));
-                    final Role topObjectRole = q.getKB().getRole(TOP_OBJECT_PROPERTY);
-                    topObjectRole.addDomain(newUC, DependencySet.INDEPENDENT);
+                    final boolean added = topObjectRole.addDomain(newUC, DependencySet.INDEPENDENT);
+                    if (added)
+                        newUCs.add(newUC);
+                    _logger.finer("Added axiom '" + newUC + " ⊑ T' to T-Box");
                 }
                 copy.setInitialized(false);
-                // Case 2: no individuals in disjunction
+                // Case 2: No individuals in disjunction
                 if (disjunctionInd.isEmpty())
-                    isEntailed &= !copy.isConsistent();
-                // Case 3: both individuals and undist. vars in disjunction
+                {
+                    _logger.finer("No individuals in disjunctive query -> checking this extended T-Box");
+                    isEntailed = !copy.isConsistent();
+                }
+                // Case 3: Both individuals and undistinguished variables in disjunction
                 else
-                    isEntailed &= rolledUpUnionQuery.getKB().isType(disjunctionInd);
+                {
+                    _logger.finer("Also found individuals in disjunctive query -> checking type of disjunction in " +
+                            "A-Box wrt. extended T-Box");
+                    // we only need to check for the type if the T-Box axioms do not lead to inconsistency because if
+                    // they do, we have found some axiom in the disjunction that is entailed and can continue the loop
+                    if (copy.isConsistent())
+                    {
+                        _logger.finest("T-Box is consistent. Forced to check type " + disjunctionInd + " in A-Box.");
+                        isEntailed = copy.isType(disjunctionInd);
+                    }
+                }
+                // Re-stores prior state of T-Box
+                for (ATermAppl newUC : newUCs)
+                    topObjectRole.removeDomain(newUC, DependencySet.INDEPENDENT);
             }
+            if (!isEntailed) // Early break if we find that the query can not be entailed anymore.
+                break;
         }
 
         if (isEntailed)
+        {
             result.add(new ResultBindingImpl());
+            _logger.fine("Query is entailed.");
+        }
+        else
+            _logger.fine("Query is not entailed.");
 
         return result;
     }
@@ -107,6 +145,6 @@ public class UnionQueryEngine extends AbstractABoxEngineWrapper
     @Override
     public boolean supports(UnionQuery q)
     {
-        return false;
+        return true; // TODO
     }
 }
