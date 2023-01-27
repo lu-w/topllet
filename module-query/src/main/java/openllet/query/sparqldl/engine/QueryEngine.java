@@ -39,7 +39,6 @@ import openllet.core.utils.DisjointSet;
 import openllet.core.utils.SetUtils;
 import openllet.query.sparqldl.model.MultiQueryResults;
 import openllet.query.sparqldl.model.NotKnownQueryAtom;
-import openllet.query.sparqldl.model.UnionQuery;
 import openllet.query.sparqldl.model.Query;
 import openllet.query.sparqldl.model.UnionQuery.VarType;
 import openllet.query.sparqldl.model.QueryAtom;
@@ -77,9 +76,9 @@ public class QueryEngine
 		return new CombinedQueryEngine();
 	}
 
-	public static boolean supports(final UnionQuery query, @SuppressWarnings("unused") final KnowledgeBase kb)
+	public static boolean supports(final Query query, @SuppressWarnings("unused") final KnowledgeBase kb)
 	{
-		return getQueryExec().supports(query); // TODO for UnionQuery
+		return getQueryExec().supports(query);
 	}
 
 	public static QueryResult exec(final Query query, final KnowledgeBase kb)
@@ -93,8 +92,7 @@ public class QueryEngine
 
 	public static QueryResult exec(final Query query)
 	{
-		if ((query.getQueries().size() == 0) ||
-				(query.getQueries().size() == 1 && query.getQueries().get(0).getAtoms().isEmpty()))
+		if (query.getAtoms().isEmpty())
 		{
 			final QueryResultImpl results = new QueryResultImpl(query);
 			results.add(new ResultBindingImpl());
@@ -122,16 +120,17 @@ public class QueryEngine
 		QueryResult r = null;
 		if (queries.isEmpty())
 			throw new InternalReasonerException("Splitting query returned no results!");
-		else if (queries.size() == 1)
-			r = execSingleQuery(queries.get(0));
 		else
-		{
-			final List<QueryResult> results = new ArrayList<>(queries.size());
-			for (final Query q : queries)
-				results.add(execSingleQuery(q));
+			if (queries.size() == 1)
+				r = execSingleQuery(queries.get(0));
+			else
+			{
+				final List<QueryResult> results = new ArrayList<>(queries.size());
+				for (final Query q : queries)
+					results.add(execSingleQuery(q));
 
-			r = new MultiQueryResults(query.getResultVars(), results);
-		}
+				r = new MultiQueryResults(query.getResultVars(), results);
+			}
 
 		return r;
 	}
@@ -587,16 +586,12 @@ public class QueryEngine
 	 * @param query
 	 * @return true if query is satisfied
 	 */
-	public static boolean execBooleanABoxQuery(final Query query) // TODO should take a List of DisjunctiveQueries
+	public static boolean execBooleanABoxQuery(final Query query)
 	{
 		// if (!query.getDistVars().isEmpty()) {
 		// throw new InternalReasonerException(
 		// "Executing execBoolean with nonboolean query : " + query);
 		// }
-
-		// Lukas: somewhere earlier, we would need to transform the query into CNF. Then, a CQ is just a special case of a UCQ in CNF and everything here should work as well.
-		// Functions used below (such as isKnownType or isType) can just include a check whether |atoms| == 1 (we are in the CQ case) and then proceed as already implemented. Otherwise, we will use the methods to check unions.
-		// TODO mark those lines that are dependent on the assumption |atoms| == 1 (i.e. those that I need to change)
 
 		boolean querySatisfied;
 
@@ -604,9 +599,9 @@ public class QueryEngine
 		kb.ensureConsistency();
 
 		// unless proven otherwise all (ground) triples are satisfied
-		Bool allTriplesSatisfied = Bool.TRUE; // TODO allConjunctsSatisfied
+		Bool allTriplesSatisfied = Bool.TRUE;
 
-		for (final QueryAtom atom : query.getAtoms()) // TODO for UnionQuery in list
+		for (final QueryAtom atom : query.getAtoms())
 		{
 			// by default we don't know if triple is satisfied
 			Bool tripleSatisfied = Bool.UNKNOWN;
@@ -663,9 +658,7 @@ public class QueryEngine
 
 				if (_logger.isLoggable(Level.FINER))
 					_logger.finer("Boolean query: " + testInd + " -> " + testClass);
-				// Lukas: isType performs the actual A u {(not C)(a)} cons. check! But only called if the ontology has
-				// not been realized before. For UCQ, we would adapt isType to accept sets of atoms and return true iff
-				// all models of O satisfy some element of the list (be using the (not C)(a), (not D)(b) method
+
 				querySatisfied = kb.isType(testInd, testClass);
 			}
 			else
@@ -680,7 +673,7 @@ public class QueryEngine
 
 				final ABox copy = kb.getABox().copy();
 				copy.setInitialized(false);
-				querySatisfied = !copy.isConsistent(); // TODO needs to change to UCQ method
+				querySatisfied = !copy.isConsistent();
 
 				if (added)
 					topObjectRole.removeDomain(newUC, DependencySet.INDEPENDENT);
@@ -689,14 +682,11 @@ public class QueryEngine
 		return querySatisfied;
 	}
 
-	// TODO should take a disjunctive query instead of an atom
 	public static boolean checkGround(final QueryAtom atom, final KnowledgeBase kb)
 	{
 
 		final List<ATermAppl> arguments = atom.getArguments();
 
-		// TODO the "isType" functions in the ABoxImpl need to be adapted to handle disjunctions (and should collapse
-		//  to the now implemented case for n=1.
 		switch (atom.getPredicate())
 		{
 			case Type:

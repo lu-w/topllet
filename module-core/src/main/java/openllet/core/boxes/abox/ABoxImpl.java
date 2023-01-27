@@ -1527,7 +1527,7 @@ public class ABoxImpl implements ABox
 	 */
 	private boolean isConsistent(final List<Pair<Collection<ATermAppl>, ATermAppl>> ics, final boolean cacheModel)
 	{
-		// TODO fix this. this causes bugs in testing
+		// TODO fix this. this causes bugs in testing (with CONCEPT_SAT_IND ia.)
 		final Optional<Timer> timer = _kb.getTimers().startTimer("isConsistent");
 
 		if (_logger.isLoggable(Level.FINE))

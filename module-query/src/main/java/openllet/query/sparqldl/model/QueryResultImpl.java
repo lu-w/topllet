@@ -78,9 +78,14 @@ public class QueryResultImpl implements QueryResult
 			if (!_bindings.equals(other._bindings))
 				return false;
 		if (_resultVars == null)
-			return other._resultVars == null;
+		{
+			if (other._resultVars != null)
+				return false;
+		}
 		else
-			return _resultVars.equals(other._resultVars);
+			if (!_resultVars.equals(other._resultVars))
+				return false;
+		return true;
 	}
 
 	/**

@@ -7,23 +7,21 @@ import openllet.core.boxes.rbox.Role;
 import openllet.core.utils.ATermUtils;
 import openllet.core.utils.Pair;
 import openllet.query.sparqldl.model.*;
+import openllet.shared.tools.Log;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import static openllet.core.utils.TermFactory.TOP_OBJECT_PROPERTY;
 import static openllet.query.sparqldl.engine.QueryEngine.split;
 
-// TODO do we really need to extend ABoxEngineWrapper? I have the feeling that we would need to re-write all its
-//  methods anyway (since this wrapper is mainly there fore binding etc.)
-//  So maybe add a new AbstractABoxUnionEngineWrapper or smth
-//  If so, I would also need to clean up all the UnionQuery remains in the other engines. Not really needed.
-public class UnionQueryEngine extends AbstractABoxEngineWrapper
+public class UnionQueryEngine
 {
+    public static final Logger _logger = Log.getLogger(UnionQueryEngine.class);
 
-    @Override
     public QueryResult execABoxQuery(UnionQuery q)
     {
         // TODO check assumption that disjuncts do not refer to the same undistinguished variables.
@@ -146,7 +144,6 @@ public class UnionQueryEngine extends AbstractABoxEngineWrapper
         return result;
     }
 
-    @Override
     public boolean supports(UnionQuery q)
     {
         return true; // TODO

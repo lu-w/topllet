@@ -196,8 +196,6 @@ public class UnionQueryImpl implements UnionQuery
     @Override
     public UnionQuery apply(final ResultBinding binding)
     {
-        // TODO adapt to UCQ - iterate over all _queries
-
         final UnionQueryImpl query = new UnionQueryImpl(this);
 
         for (final Query subquery : _queries) {

@@ -45,7 +45,7 @@ public class OptimizedQueryEngine2 extends AbstractABoxEngineWrapper
 	 * {@inheritDoc}
 	 */
 	@Override
-	public boolean supports(final UnionQuery q)
+	public boolean supports(final Query q)
 	{
 		return !q.getDistVars().isEmpty();
 	}
@@ -94,30 +94,23 @@ public class OptimizedQueryEngine2 extends AbstractABoxEngineWrapper
 	}
 
 	@Override
-	public QueryResult execABoxQuery(final UnionQuery query)
+	public QueryResult execABoxQuery(final Query q)
 	{
-		_results = new QueryResultImpl(query);
-		if (query.getQueries().size() == 1)
+		_results = new QueryResultImpl(q);
+
+		_kb = q.getKB();
+
+		final long satCount = _kb.getABox().getStats()._satisfiabilityCount;
+		final long consCount = _kb.getABox().getStats()._consistencyCount;
+
+		exec(q, new ResultBindingImpl(), true);
+
+		if (_logger.isLoggable(Level.FINE))
 		{
-			Query q = query.getQueries().get(0);
-			_kb = q.getKB();
-
-			final long satCount = _kb.getABox().getStats()._satisfiabilityCount;
-			final long consCount = _kb.getABox().getStats()._consistencyCount;
-
-			exec(q, new ResultBindingImpl(), true);
-
-			if (_logger.isLoggable(Level.FINE))
-			{
-				_logger.fine("Total satisfiability operations: " +
-						(_kb.getABox().getStats()._satisfiabilityCount - satCount));
-				_logger.fine("Total consistency operations: " +
-						(_kb.getABox().getStats()._consistencyCount - consCount));
-				_logger.fine("Results of ABox query : " + _results);
-			}
+			_logger.fine("Total satisfiability operations: " + (_kb.getABox().getStats()._satisfiabilityCount - satCount));
+			_logger.fine("Total consistency operations: " + (_kb.getABox().getStats()._consistencyCount - consCount));
+			_logger.fine("Results of ABox query : " + _results);
 		}
-		else
-			_logger.warning("Can not handle union queries");
 
 		return _results;
 	}

@@ -51,7 +51,7 @@ public abstract class AbstractABoxEngineWrapper implements QueryExec
 	 * {@inheritDoc}
 	 */
 	@Override
-	public QueryResult exec(final UnionQuery query)
+	public QueryResult exec(final Query query)
 	{
 		_logger.fine(() -> "Executing query " + query);
 
@@ -80,7 +80,6 @@ public abstract class AbstractABoxEngineWrapper implements QueryExec
 
 		_logger.fine(() -> "Partial _binding after schema query : " + result);
 
-		// TODO Lukas: later, iterate over bindings here for union queries as well.
 		if (aboxQuery.getAtoms().size() > 0)
 		{
 			newResult = new QueryResultImpl(query);
@@ -109,9 +108,8 @@ public abstract class AbstractABoxEngineWrapper implements QueryExec
 		return newResult;
 	}
 
-	protected final void partitionQuery(final UnionQuery unionQuery)
+	protected final void partitionQuery(final Query query)
 	{
-		Query query = unionQuery.getQueries().get(0); // TODO Lukas
 		schemaQuery = new QueryImpl(query);
 		aboxQuery = new QueryImpl(query);
 
@@ -160,7 +158,7 @@ public abstract class AbstractABoxEngineWrapper implements QueryExec
 
 	}
 
-	protected abstract QueryResult execABoxQuery(final UnionQuery q);
+	protected abstract QueryResult execABoxQuery(final Query q);
 }
 
 class BindingIterator implements Iterator<ResultBinding>

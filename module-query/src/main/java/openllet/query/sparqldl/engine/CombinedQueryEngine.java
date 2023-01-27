@@ -218,7 +218,7 @@ public class CombinedQueryEngine implements QueryExec
 	 * {@inheritDoc}
 	 */
 	@Override
-	public boolean supports(final UnionQuery q)
+	public boolean supports(final Query q)
 	{
 		// TODO cycles in undist vars and fully undist.vars queries are not supported !!!
 		return true;
@@ -228,28 +228,20 @@ public class CombinedQueryEngine implements QueryExec
 	 * {@inheritDoc}
 	 */
 	@Override
-	public QueryResult exec(final UnionQuery query)
+	public QueryResult exec(final Query query)
 	{
-		if (query.getQueries().size() == 1)
-		{
-			_logger.fine(() -> "Executing query " + query);
+		_logger.fine(() -> "Executing query " + query);
 
-			final Timer timer = new Timer("CombinedQueryEngine");
-			timer.start();
-			prepare(query.getQueries().get(0));
-			branches = 0;
-			exec(new ResultBindingImpl());
-			timer.stop();
+		final Timer timer = new Timer("CombinedQueryEngine");
+		timer.start();
+		prepare(query);
+		branches = 0;
+		exec(new ResultBindingImpl());
+		timer.stop();
 
-			_logger.fine(() -> "#B=" + branches + ", time=" + timer.getLast() + " ms.");
+		_logger.fine(() -> "#B=" + branches + ", time=" + timer.getLast() + " ms.");
 
-			return _result;
-		}
-		else
-		{
-			_logger.warning("Union queries not yet supported: " + query);
-			return new QueryResultImpl(query); // TODO Lukas
-		}
+		return _result;
 	}
 
 	private long branches;
