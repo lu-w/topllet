@@ -11,6 +11,7 @@ import openllet.core.KnowledgeBase;
 import openllet.core.el.ELExpressivityChecker;
 import openllet.core.utils.ATermUtils;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -63,18 +64,19 @@ public class ExpressivityChecker
 
 	public Expressivity getExpressivityWith(final ATermAppl c)
 	{
-		return getExpressivityWith(List.of(c));
+		return getExpressivityWith(c == null ? new ArrayList<>() : List.of(c));
 	}
 
 	public Expressivity getExpressivityWith(final Collection<ATermAppl> cs)
 	{
-		if (cs == null)
+		if (cs == null || cs.size() == 0)
 			return _expressivity;
 
 		final Expressivity newExp = new Expressivity(_expressivity);
 		for (ATermAppl c : cs)
 		{
-			_DLChecker.updateWith(newExp, c);
+			if (c != null)
+				_DLChecker.updateWith(newExp, c);
 		}
 
 		return newExp;

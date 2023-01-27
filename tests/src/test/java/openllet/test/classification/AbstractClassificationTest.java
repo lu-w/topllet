@@ -8,6 +8,7 @@
 
 package openllet.test.classification;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import openllet.test.PelletTestSuite;
