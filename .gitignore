@@ -21,3 +21,4 @@ test-persistence-classification.zip
 dependency-reduced-pom.xml
 
 tests/src/test/resources/test-persistence-realization.zip
+tests/src/test/resources/test-persistence.zip
