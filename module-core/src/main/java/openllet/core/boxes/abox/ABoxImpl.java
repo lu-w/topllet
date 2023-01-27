@@ -1453,24 +1453,24 @@ public class ABoxImpl implements ABox
 		// Looping over all disjunctions to create the new ABox to check consistency for
 		ABox abox = this;
 		ATermAppl x = null;
+		if (conceptSatisfiability)
+			x = ATermUtils.CONCEPT_SAT_IND;
+
+		if (canUseEmptyABox)
+			abox = abox.copy(x, false);
+		else if (!initialConsistencyCheck)
+			abox = abox.copy(x, true);
+
 		for (Pair<Collection<ATermAppl>, ATermAppl> ic : ics)
 		{
 			Collection<ATermAppl> individuals = ic.first;
 			ATermAppl c = ic.second;
 
 			if (conceptSatisfiability)
-			{
-				x = ATermUtils.CONCEPT_SAT_IND;
 				individuals = SetUtils.singleton(x);
-			}
 
 			if (emptyConsistencyCheck)
 				c = ATermUtils.TOP;
-
-			if (canUseEmptyABox)
-				abox = abox.copy(x, false); // TODO this seems very inefficient. maybe implement a copy(..)
-			else if (!initialConsistencyCheck)
-				abox = abox.copy(x, true); // TODO see above
 
 			for (final ATermAppl ind : individuals)
 			{
@@ -1480,7 +1480,7 @@ public class ABoxImpl implements ABox
 			}
 		}
 
-		// synchronized (this) // We should not try to completion in the same time. -> only if parallel core is enable.
+		// synchronized (this) // We should not try to completion in the same time. -> only if parallel core is enabled.
 		{
 			_logger.fine(() -> "Consistency check starts");
 
