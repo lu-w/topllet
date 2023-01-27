@@ -266,7 +266,14 @@ public class ABoxImpl implements ABox
 			_cache = kb.getABox().getCache();
 	}
 
-	public ABoxImpl(final KnowledgeBase kb, final ABoxImpl abox, final ATermAppl extraIndividual, final boolean copyIndividuals)
+	public ABoxImpl(final KnowledgeBase kb, final ABoxImpl abox, final ATermAppl extraIndividual,
+					final boolean copyIndividuals)
+	{
+		this(kb, abox, extraIndividual == null ? new HashSet<>() : Set.of(extraIndividual), copyIndividuals);
+	}
+
+	public ABoxImpl(final KnowledgeBase kb, final ABoxImpl abox, final Collection<ATermAppl> extraIndividuals,
+					final boolean copyIndividuals)
 	{
 		_kb = kb;
 		final Optional<Timer> timer = kb.getTimers().startTimer("cloneABox");
@@ -281,7 +288,7 @@ public class ABoxImpl implements ABox
 		_doExplanation = abox._doExplanation;
 		_disjBranchStats = abox.getDisjBranchStats();
 
-		final int extra = extraIndividual == null ? 0 : 1;
+		final int extra = (int) extraIndividuals.stream().filter(Objects::nonNull).count();
 		final int nodeCount = extra + (copyIndividuals ? abox._nodes.size() : 0);
 
 		_nodes = Collections.synchronizedMap(new IdentityHashMap<>(nodeCount));
@@ -298,7 +305,7 @@ public class ABoxImpl implements ABox
 			_branchEffects = null;
 
 		// copy the _queue - this must be done early so that the effects of
-		// adding the extra _individual do not get removed
+		// adding the extra _individuals do not get removed
 		if (OpenlletOptions.USE_COMPLETION_QUEUE)
 		{
 			if (copyIndividuals)
@@ -315,18 +322,20 @@ public class ABoxImpl implements ABox
 		else
 			_completionQueue = null;
 
-		if (extraIndividual != null)
+		for (ATermAppl extraIndividual : extraIndividuals)
 		{
-			final Individual n = new Individual(extraIndividual, this, null);
-			n.setNominalLevel(Node.BLOCKABLE);
-			n.setConceptRoot(true);
-			n.addType(ATermUtils.TOP, DependencySet.INDEPENDENT);
-			_nodes.put(extraIndividual, n);
-			_nodeList.add(extraIndividual);
-
-			if (OpenlletOptions.COPY_ON_WRITE)
-				_sourceABox = abox;
+			if (extraIndividual != null)
+			{
+				final Individual n = new Individual(extraIndividual, this, null);
+				n.setNominalLevel(Node.BLOCKABLE);
+				n.setConceptRoot(true);
+				n.addType(ATermUtils.TOP, DependencySet.INDEPENDENT);
+				_nodes.put(extraIndividual, n);
+				_nodeList.add(extraIndividual);
+			}
 		}
+		if (extra > 0 && OpenlletOptions.COPY_ON_WRITE)
+			_sourceABox = abox;
 
 		if (copyIndividuals)
 		{
@@ -370,7 +379,7 @@ public class ABoxImpl implements ABox
 		for (final Clash clash : abox._assertedClashes)
 			_assertedClashes.add(clash.copyTo(this));
 
-		if (extraIndividual == null || copyIndividuals)
+		if (extra == 0 || copyIndividuals)
 		{
 			setBranchIndex(abox._branchIndex);
 			_branches = new ArrayList<>(abox._branches.size());
@@ -407,7 +416,7 @@ public class ABoxImpl implements ABox
 	@Override
 	public ABoxImpl copy(final KnowledgeBase kb)
 	{
-		return new ABoxImpl(kb, this, null, true);
+		return new ABoxImpl(kb, this, (ATermAppl) null, true);
 	}
 
 	@Override
@@ -1374,7 +1383,7 @@ public class ABoxImpl implements ABox
 
 	/**
 	 * TODO
-	 * @param ic A list of individuals and their types to check consistency for. Can be empty, then, only the current
+	 * @param ics A list of individuals and their types to check consistency for. Can be empty, then, only the current
 	 *             kb is checked for consistency.
 	 * @param cacheModel Whether to cache the results of the consistency check.
 	 * @return true if consistent.
@@ -1794,7 +1803,8 @@ public class ABoxImpl implements ABox
 	/**
 	 * Helper function to add a literal.
 	 *
-	 * @param value The java object that represents the value of this literal
+	 * @param dataValue The java object that represents the value of this literal
+	 * @param ds
 	 * @return
 	 */
 	private Literal createLiteral(final ATermAppl dataValue, final DependencySet ds)

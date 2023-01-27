@@ -285,6 +285,8 @@ public class LukasQueryTest extends AbstractQueryTest
         ucq4.addQuery(q41);
         ucq4.addQuery(q42);
 
+        // TODO some more examples and then convert them to actual test cases
+
         UnionQueryEngine qe = new UnionQueryEngine();
 
         QueryResult res1 = qe.execABoxQuery(ucq1);

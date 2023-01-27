@@ -16,6 +16,10 @@ import java.util.logging.Level;
 import static openllet.core.utils.TermFactory.TOP_OBJECT_PROPERTY;
 import static openllet.query.sparqldl.engine.QueryEngine.split;
 
+// TODO do we really need to extend ABoxEngineWrapper? I have the feeling that we would need to re-write all its
+//  methods anyway (since this wrapper is mainly there fore binding etc.)
+//  So maybe add a new AbstractABoxUnionEngineWrapper or smth
+//  If so, I would also need to clean up all the UnionQuery remains in the other engines. Not really needed.
 public class UnionQueryEngine extends AbstractABoxEngineWrapper
 {
 
@@ -107,7 +111,7 @@ public class UnionQueryEngine extends AbstractABoxEngineWrapper
                 // Case 2: No individuals in disjunction
                 if (disjunctionInd.isEmpty())
                 {
-                    _logger.finer("No individuals in disjunctive query -> checking this extended T-Box");
+                    _logger.finer("No individuals in disjunctive query -> checking consistency of the extended T-Box");
                     isEntailed = !copy.isConsistent();
                 }
                 // Case 3: Both individuals and undistinguished variables in disjunction
@@ -119,7 +123,7 @@ public class UnionQueryEngine extends AbstractABoxEngineWrapper
                     // they do, we have found some axiom in the disjunction that is entailed and can continue the loop
                     if (copy.isConsistent())
                     {
-                        _logger.finest("T-Box is consistent. Forced to check type " + disjunctionInd + " in A-Box.");
+                        _logger.finest("T-Box is consistent -> forced to check type " + disjunctionInd + " in A-Box.");
                         isEntailed = copy.isType(disjunctionInd);
                     }
                 }
