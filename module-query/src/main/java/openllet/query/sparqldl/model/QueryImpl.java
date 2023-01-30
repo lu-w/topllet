@@ -38,23 +38,57 @@ import openllet.core.utils.TermFactory;
  *
  * @author Petr Kremen
  */
-public class QueryImpl extends UnionQueryImpl implements Query
+public class QueryImpl implements Query
 {
+	private static final ATermAppl DEFAULT_NAME = TermFactory.term("query");
+
+	// COMMON PART
+	private ATermAppl _name = DEFAULT_NAME;
 
 	private final List<QueryAtom> _allAtoms;
 
+	private KnowledgeBase _kb;
+
+	private List<ATermAppl> _resultVars;
+
+	private Set<ATermAppl> _allVars;
+
+	private Set<ATermAppl> _individualsAndLiterals;
+
+	private boolean _ground;
+
+	private final boolean _distinct;
+
+	private Filter _filter;
+
+	private QueryParameters _parameters;
+
+	// VARIABLES
+	private EnumMap<UnionQuery.VarType, Set<ATermAppl>> _distVars;
+
 	public QueryImpl(final KnowledgeBase kb, final boolean distinct)
 	{
-		super(kb, distinct);
+		_kb = kb;
+
+		_ground = true;
 		_allAtoms = new ArrayList<>();
-		_queries.add(this);
+		_resultVars = new ArrayList<>();
+		_allVars = new HashSet<>();
+		_individualsAndLiterals = new HashSet<>();
+		_distVars = new EnumMap<>(UnionQuery.VarType.class);
+
+		for (final UnionQuery.VarType type : UnionQuery.VarType.values())
+			_distVars.put(type, new HashSet<ATermAppl>());
+
+		_distinct = distinct;
 	}
 
 	public QueryImpl(final Query query)
 	{
-		super(query);
-		_allAtoms = new ArrayList<>();
-		_queries.add(this);
+		this(query.getKB(), query.isDistinct());
+
+		_name = query.getName();
+		_parameters = query.getQueryParameters();
 	}
 
 	/**
@@ -85,11 +119,148 @@ public class QueryImpl extends UnionQueryImpl implements Query
 	 * {@inheritDoc}
 	 */
 	@Override
+	public Set<ATermAppl> getDistVarsForType(final UnionQuery.VarType type)
+	{
+		return _distVars.get(type);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void addDistVar(final ATermAppl a, final UnionQuery.VarType type)
+	{
+		final Set<ATermAppl> set = _distVars.get(type);
+
+		if (!set.contains(a))
+			set.add(a);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void addResultVar(final ATermAppl a)
+	{
+		_resultVars.add(a);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
 	public List<QueryAtom> getAtoms()
 	{
 		return Collections.unmodifiableList(_allAtoms);
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public Set<ATermAppl> getConstants()
+	{
+		return Collections.unmodifiableSet(_individualsAndLiterals);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public Set<ATermAppl> getDistVars()
+	{
+		final Set<ATermAppl> result = new HashSet<>();
+
+		for (final UnionQuery.VarType t : UnionQuery.VarType.values())
+			result.addAll(_distVars.get(t));
+
+		return result;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public Set<ATermAppl> getUndistVars()
+	{
+		final Set<ATermAppl> result = new HashSet<>(_allVars);
+
+		result.removeAll(getDistVars());
+
+		return result;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public List<ATermAppl> getResultVars()
+	{
+		return Collections.unmodifiableList(_resultVars);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public Set<ATermAppl> getVars()
+	{
+		return Collections.unmodifiableSet(_allVars);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public boolean isGround()
+	{
+		return _ground;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public KnowledgeBase getKB()
+	{
+		return _kb;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void setKB(final KnowledgeBase kb)
+	{
+		_kb = kb;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public Query apply(final ResultBinding binding)
+	{
+		final List<QueryAtom> atoms = new ArrayList<>();
+
+		for (final QueryAtom atom : getAtoms())
+			atoms.add(atom.apply(binding));
+
+		final QueryImpl query = new QueryImpl(this);
+
+		query._resultVars.addAll(_resultVars);
+		query._resultVars.removeAll(binding.getAllVariables());
+
+		for (final UnionQuery.VarType type : UnionQuery.VarType.values())
+			for (final ATermAppl atom : getDistVarsForType(type))
+				if (!binding.isBound(atom))
+					query.addDistVar(atom, type);
+
+		for (final QueryAtom atom : atoms)
+			query.add(atom);
+
+		return query;
+	}
 
 	/**
 	 * {@inheritDoc} TODO
@@ -97,7 +268,7 @@ public class QueryImpl extends UnionQueryImpl implements Query
 	@Override
 	public ATermAppl rollUpTo(final ATermAppl var, final Collection<ATermAppl> stopList, final boolean stopOnConstants)
 	{
-		if (getDistVarsForType(VarType.LITERAL).contains(var) && !getDistVarsForType(VarType.INDIVIDUAL).contains(var) && !_individualsAndLiterals.contains(var))
+		if (getDistVarsForType(UnionQuery.VarType.LITERAL).contains(var) && !getDistVarsForType(UnionQuery.VarType.INDIVIDUAL).contains(var) && !_individualsAndLiterals.contains(var))
 			throw new InternalReasonerException("Trying to roll up to the variable '" + var + "' which is not distinguished and _individual.");
 
 		ATermList classParts = ATermUtils.EMPTY_LIST;
@@ -408,7 +579,7 @@ public class QueryImpl extends UnionQueryImpl implements Query
 		for (final ATermAppl a : toRemove)
 		{
 			_allVars.remove(a);
-			for (final Entry<VarType, Set<ATermAppl>> entry : _distVars.entrySet())
+			for (final Entry<UnionQuery.VarType, Set<ATermAppl>> entry : _distVars.entrySet())
 				entry.getValue().remove(a);
 			_resultVars.remove(a);
 			_individualsAndLiterals.remove(a);
@@ -416,14 +587,100 @@ public class QueryImpl extends UnionQueryImpl implements Query
 	}
 
 	@Override
-	public Query apply(final ResultBinding binding)
+	public String toString()
 	{
-		UnionQuery query = super.apply(binding);
-		List<Query> queries = query.getQueries();
-		if (queries.size() > 0) {
-			return queries.get(0);
-		} else {
-			return this;
+		return toString(false);
+	}
+
+	public String toString(final boolean multiLine)
+	{
+		final String indent = multiLine ? "     " : " ";
+		final StringBuffer sb = new StringBuffer();
+
+		sb.append(ATermUtils.toString(_name) + "(");
+		for (int i = 0; i < _resultVars.size(); i++)
+		{
+			final ATermAppl var = _resultVars.get(i);
+			if (i > 0)
+				sb.append(", ");
+			sb.append(ATermUtils.toString(var));
 		}
+		sb.append(")");
+
+		if (_allAtoms.size() > 0)
+		{
+			sb.append(" :-");
+			if (multiLine)
+				sb.append("\n");
+			for (int i = 0; i < _allAtoms.size(); i++)
+			{
+				final QueryAtom a = _allAtoms.get(i);
+				if (i > 0)
+				{
+					sb.append(",");
+					if (multiLine)
+						sb.append("\n");
+				}
+
+				sb.append(indent);
+				sb.append(a.toString()); // TODO qNameProvider
+			}
+		}
+
+		sb.append(".");
+		if (multiLine)
+			sb.append("\n");
+		return sb.toString();
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public boolean isDistinct()
+	{
+		return _distinct;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public Filter getFilter()
+	{
+		return _filter;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void setFilter(final Filter filter)
+	{
+		_filter = filter;
+	}
+
+	@Override
+	public void setQueryParameters(final QueryParameters parameters)
+	{
+		_parameters = parameters;
+	}
+
+	@Override
+	public QueryParameters getQueryParameters()
+	{
+		return _parameters;
+	}
+
+	@Override
+	public ATermAppl getName()
+	{
+		return _name;
+	}
+
+	@Override
+	public void setName(final ATermAppl name)
+	{
+		_name = name;
 	}
 }

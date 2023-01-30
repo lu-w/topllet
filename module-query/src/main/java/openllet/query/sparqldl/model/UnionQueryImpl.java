@@ -206,12 +206,17 @@ public class UnionQueryImpl implements UnionQuery
                 atoms.add(atom.apply(binding));
 
             query._resultVars.addAll(_resultVars);
+            conjunct.getResultVars().addAll(subquery.getResultVars());
             query._resultVars.removeAll(binding.getAllVariables());
+            conjunct.getResultVars().removeAll(binding.getAllVariables());
 
             for (final UnionQuery.VarType type : UnionQuery.VarType.values())
                 for (final ATermAppl atom : getDistVarsForType(type))
                     if (!binding.isBound(atom))
+                    {
                         query.addDistVar(atom, type);
+                        conjunct.addDistVar(atom, type);
+                    }
 
             for (final QueryAtom atom : atoms)
                 conjunct.add(atom);

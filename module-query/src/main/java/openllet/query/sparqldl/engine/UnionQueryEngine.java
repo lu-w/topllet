@@ -28,7 +28,7 @@ public class UnionQueryEngine
 
         if (_logger.isLoggable(Level.FINER))
             _logger.finer("Exec ABox query: " + q);
-        QueryResult result = new QueryResultImpl(q);
+        QueryResult result = new QueryResultImpl(q.getQueries().get(0)); // TODO Lukas
 
         // 1. ROLL-UP
         UnionQuery rolledUpUnionQuery = new UnionQueryImpl(q);

@@ -35,10 +35,10 @@ public class QueryResultImpl implements QueryResult
 	private Collection<ResultBinding> _bindings;
 
 	private final List<ATermAppl> _resultVars;
-	private final UnionQuery _query;
+	private final Query _query;
 	private final QueryParameters _parameters;
 
-	public QueryResultImpl(final UnionQuery query)
+	public QueryResultImpl(final Query query)
 	{
 		_query = query;
 		_parameters = query.getQueryParameters();
@@ -78,14 +78,9 @@ public class QueryResultImpl implements QueryResult
 			if (!_bindings.equals(other._bindings))
 				return false;
 		if (_resultVars == null)
-		{
-			if (other._resultVars != null)
-				return false;
-		}
+			return other._resultVars == null;
 		else
-			if (!_resultVars.equals(other._resultVars))
-				return false;
-		return true;
+			return _resultVars.equals(other._resultVars);
 	}
 
 	/**
