@@ -44,7 +44,6 @@ public class TestBooleanUnionQueries extends AbstractKBTests
     @Test
     public void testBooleanQueries()
     {
-
         classes(_A, _B, _C, _D, _E);
         individuals(_a, _b, _c);
         objectProperties(_r, _p);
@@ -58,48 +57,20 @@ public class TestBooleanUnionQueries extends AbstractKBTests
         _kb.addPropertyValue(_r, _a, _b);
 
         // UCQ 1: B(x) ^ r(x,b) v C(x) ^ r(x,b) -> is entailed but second disjunct can never be true
-        final UnionQuery ucq1 = new UnionQueryImpl(_kb, false);
-        final Query q11 = new QueryImpl(_kb, true); // sat
-        final Query q12 = new QueryImpl(_kb, true); // unsat
-        q11.add(TypeAtom(_x, _B));
-        q11.add(PropertyValueAtom(_x, _r, _b));
-        q12.add(TypeAtom(_x, _C));
-        q12.add(PropertyValueAtom(_x, _r, _b));
-        ucq1.addQuery(q11);
-        ucq1.addQuery(q12);
+        UnionQuery ucq1 = unionQuery(query(TypeAtom(_x, _B), PropertyValueAtom(_x, _r, _b)),
+                                     query(TypeAtom(_x, _C), PropertyValueAtom(_x, _r, _b)));
 
         // UCQ 2: B(x) ^ p(x,b) v C(x) ^ r(x,b) -> not entailed
-        final UnionQuery ucq2 = new UnionQueryImpl(_kb, false);
-        final Query q21 = new QueryImpl(_kb, true); // unsat
-        final Query q22 = new QueryImpl(_kb, true); // unsat
-        q21.add(TypeAtom(_x, _B));
-        q21.add(PropertyValueAtom(_x, _p, _b));
-        q22.add(TypeAtom(_x, _C));
-        q22.add(PropertyValueAtom(_x, _r, _b));
-        ucq2.addQuery(q21);
-        ucq2.addQuery(q22);
+        UnionQuery ucq2 = unionQuery(query(TypeAtom(_x, _B), PropertyValueAtom(_x, _p, _b)),
+                                     query(TypeAtom(_x, _C), PropertyValueAtom(_x, _r, _b)));
 
         // UCQ 3: B(a) ^ r(a,x) v D(z) ^ r(y,z) -> entailed (both disjuncts)
-        final UnionQuery ucq3 = new UnionQueryImpl(_kb, false);
-        final Query q31 = new QueryImpl(_kb, true); // sat
-        final Query q32 = new QueryImpl(_kb, true); // sat
-        q31.add(TypeAtom(_a, _B));
-        q31.add(PropertyValueAtom(_a, _p, _x));
-        q32.add(TypeAtom(_z, _D));
-        q32.add(PropertyValueAtom(_y, _r, _z));
-        ucq3.addQuery(q31);
-        ucq3.addQuery(q32);
+        UnionQuery ucq3 = unionQuery(query(TypeAtom(_a, _B), PropertyValueAtom(_a, _p, _x)),
+                                     query(TypeAtom(_z, _D), PropertyValueAtom(_y, _r, _z)));
 
         // UCQ 4: B(a) ^ r(a,x) v E(z) ^ r(y,z) -> entailed (only first disjunct)
-        final UnionQuery ucq4 = new UnionQueryImpl(_kb, false);
-        final Query q41 = new QueryImpl(_kb, true); // sat
-        final Query q42 = new QueryImpl(_kb, true); // unsat
-        q41.add(TypeAtom(_a, _B));
-        q41.add(PropertyValueAtom(_a, _p, _x));
-        q42.add(TypeAtom(_z, _E));
-        q42.add(PropertyValueAtom(_y, _r, _z));
-        ucq4.addQuery(q41);
-        ucq4.addQuery(q42);
+        UnionQuery ucq4 = unionQuery(query(TypeAtom(_a, _B), PropertyValueAtom(_a, _p, _x)),
+                                     query(TypeAtom(_z, _E), PropertyValueAtom(_y, _r, _z)));
 
         testBooleanABoxQuery(true, ucq1);
         testBooleanABoxQuery(false, ucq2);
