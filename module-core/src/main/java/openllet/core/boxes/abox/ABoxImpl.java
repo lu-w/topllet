@@ -1378,144 +1378,7 @@ public class ABoxImpl implements ABox
 	 */
 	private boolean isConsistent(final Collection<ATermAppl> individualsParam, final ATermAppl c_, final boolean cacheModel)
 	{
-		//return isConsistent(List.of(new Pair<>(individualsParam, c_)), cacheModel);
-		Collection<ATermAppl> individuals = individualsParam;
-		ATermAppl c = c_;
-
-		final Optional<Timer> timer = _kb.getTimers().startTimer("isConsistent");
-
-		if (_logger.isLoggable(Level.FINE))
-			if (c == null)
-				_logger.fine("ABox consistency for " + individuals.size() + " individuals");
-			else
-			{
-				final StringBuilder sb = new StringBuilder();
-				sb.append("[");
-				final Iterator<ATermAppl> it = individuals.iterator();
-				for (int i = 0; i < 100 && it.hasNext(); i++)
-				{
-					if (i > 0)
-						sb.append(", ");
-					sb.append(ATermUtils.toString(it.next()));
-				}
-				if (it.hasNext())
-					sb.append(", ...");
-				sb.append("]");
-				_logger.fine("Consistency " + ATermUtils.toString(c) + " for " + individuals.size() + " individuals " + sb);
-			}
-
-		final Expressivity expr = _kb.getExpressivityChecker().getExpressivityWith(c);
-
-		// if c is null we are checking the consistency of this ABox as
-		// it is and we will not add anything extra
-		final boolean initialConsistencyCheck = c == null;
-
-		final boolean emptyConsistencyCheck = initialConsistencyCheck && isEmpty();
-
-		// if individuals is empty and we are not building the pseudo
-		// model then this is concept satisfiability
-		final boolean conceptSatisfiability = individuals.isEmpty() && (!initialConsistencyCheck || emptyConsistencyCheck);
-
-		// Check if there are any nominals in the KB or nominal
-		// reasoning is disabled
-		final boolean hasNominal = expr.hasNominal() && !OpenlletOptions.USE_PSEUDO_NOMINALS;
-
-		// Use empty model only if this is concept satisfiability for a KB
-		// where there are no nominals
-		final boolean canUseEmptyABox = conceptSatisfiability && !hasNominal;
-
-		ATermAppl x = null;
-		if (conceptSatisfiability)
-		{
-			x = ATermUtils.CONCEPT_SAT_IND;
-			individuals = SetUtils.singleton(x);
-		}
-
-		if (emptyConsistencyCheck)
-			c = ATermUtils.TOP;
-
-		final ABox abox = canUseEmptyABox ? this.copy(x, false) : initialConsistencyCheck ? this : this.copy(x, true);
-
-		for (final ATermAppl ind : individuals)
-		{
-			abox.setSyntacticUpdate(true);
-			abox.addType(ind, c);
-			abox.setSyntacticUpdate(false);
-		}
-
-		// synchronized (this) // We should not try to completion in the same time. -> only if parallel core is enable.
-		{
-			_logger.fine(() -> "Consistency check starts");
-
-			final CompletionStrategy strategy = _kb.chooseStrategy(abox, expr);
-
-			_logger.fine(() -> "Strategy: " + strategy.getClass().getName());
-
-			_kb.getTimers().execute("complete", timers -> strategy.complete(expr));
-		}
-
-		final boolean consistent = !abox.isClosed();
-
-		if (x != null && c != null && cacheModel)
-			cache(abox.getIndividual(x), c, consistent);
-
-		if (_logger.isLoggable(Level.FINE))
-			_logger.fine("Consistent: " + consistent //
-					+ " Time: " + timer.map(Timer::getElapsed).orElse(0L)//
-					+ " Branches " + abox.getBranches().size()//
-					+ " Tree depth: " + abox.getStats()._treeDepth//
-					+ " Tree size: " + abox.getNodes().size()//
-					+ " Restores " + abox.getStats()._globalRestores//
-					+ " global " + abox.getStats()._localRestores//
-					+ " local"// FIXME something missing here ?
-					+ " Backtracks " + abox.getStats()._backtracks//
-					+ " avg backjump " + abox.getStats()._backjumps / (double) abox.getStats()._backtracks);
-
-		if (consistent)
-		{
-			if (initialConsistencyCheck && isEmpty())
-				setComplete(true);
-		}
-		else
-		{
-			_lastClash = abox.getClash();
-			_logger.fine(() -> "Clash: " + abox.getClash().detailedString());
-			if (_doExplanation && OpenlletOptions.USE_TRACING)
-			{
-				if (individuals.size() == 1)
-				{
-					final ATermAppl ind = individuals.iterator().next();
-
-					final ATermAppl tempAxiom = ATermUtils.makeTypeAtom(ind, c);
-					final Set<ATermAppl> explanationSet = getExplanationSet();
-					final boolean removed = explanationSet.remove(tempAxiom);
-					if (!removed)
-						if (_logger.isLoggable(Level.FINE))
-							_logger.fine("Explanation set is missing an axiom.\n\tAxiom: " + tempAxiom + "\n\tExplantionSet: " + explanationSet);
-				}
-				if (_logger.isLoggable(Level.FINE))
-				{
-					final StringBuilder sb = new StringBuilder();
-					for (final ATermAppl axiom : getExplanationSet())
-					{
-						sb.append("\n\t");
-						sb.append(ATermUtils.toString(axiom));
-					}
-					_logger.fine("Explanation: " + sb);
-				}
-			}
-		}
-
-		_stats._consistencyCount++;
-
-		if (_keepLastCompletion)
-			_lastCompletion = abox;
-		else
-			_lastCompletion = null;
-
-		timer.ifPresent(Timer::stop);
-
-		return consistent;
+		return isConsistent(List.of(new Pair<>(individualsParam, c_)), cacheModel);
 	}
 
 	/**
@@ -1527,7 +1390,6 @@ public class ABoxImpl implements ABox
 	 */
 	private boolean isConsistent(final List<Pair<Collection<ATermAppl>, ATermAppl>> ics, final boolean cacheModel)
 	{
-		// TODO fix this. this causes bugs in testing (with CONCEPT_SAT_IND ia.)
 		final Optional<Timer> timer = _kb.getTimers().startTimer("isConsistent");
 
 		if (_logger.isLoggable(Level.FINE))
@@ -1610,12 +1472,10 @@ public class ABoxImpl implements ABox
 			if (emptyConsistencyCheck)
 				c = ATermUtils.TOP;
 
+			abox.setSyntacticUpdate(true);
 			for (final ATermAppl ind : individuals)
-			{
-				abox.setSyntacticUpdate(true);
 				abox.addType(ind, c);
-				abox.setSyntacticUpdate(false);
-			}
+			abox.setSyntacticUpdate(false);
 		}
 
 		// synchronized (this) // We should not try to completion in the same time. -> only if parallel core is enabled.
@@ -1660,11 +1520,15 @@ public class ABoxImpl implements ABox
 			_logger.fine("Clash: " + abox.getClash().detailedString());
 			if (_doExplanation && OpenlletOptions.USE_TRACING)
 			{
-				if (ics.size() == 1) // TODO can / should we identify missing axioms sets for |ics| > 1?
+				if (ics.size() == 1) // TODO Lukas: can / should we identify missing axioms sets for |ics| > 1?
 				{
 					Collection<ATermAppl> individuals = ics.get(0).first;
+					if (conceptSatisfiability)
+						individuals = SetUtils.singleton(x);
 					ATermAppl c = ics.get(0).second;
-					if (individuals.size() == 1)
+					if (emptyConsistencyCheck)
+						c = ATermUtils.TOP;
+					if (individuals.size() == 1 && c != null)
 					{
 						final ATermAppl ind = individuals.iterator().next();
 
