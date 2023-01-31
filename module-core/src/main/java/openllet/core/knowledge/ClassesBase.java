@@ -255,36 +255,8 @@ public interface ClassesBase extends MessageBase, Logging, Base
 
 	default boolean isType(final ATermAppl x, final ATermAppl c)
 	{
-		if (null == x || null == c)
-			return false;
-
-		ensureConsistency();
-
-		if (!isIndividual(x))
-		{
-			Base.handleUndefinedEntity(x + _isNotAnIndividual);
-			return false;
-		}
-		if (!isClass(c))
-		{
-			Base.handleUndefinedEntity(c + _isNotAValidClassExpression);
-			return false;
-		}
-
-		if (isRealized() && !doExplanation())
-		{
-			final Taxonomy<ATermAppl> taxonomy = getTaxonomyBuilder().getTaxonomy();
-
-			if (taxonomy == null)
-				throw new NullPointerException("Taxonomy is null");
-
-			if (taxonomy.contains(c))
-				return TaxonomyUtils.isType(taxonomy, x, c);
-		}
-
-		return getABox().isType(x, c);
+		return isType(List.of(new Pair<>(x, c)));
 	}
-
 
 	/**
 	 * @param xcs A list of tuples (x,c) representing the set of terms of the form "x in c".
@@ -303,7 +275,7 @@ public interface ClassesBase extends MessageBase, Logging, Base
 
 		ensureConsistency();
 
-		boolean isType = false;
+		Bool isType = Bool.UNKNOWN;
 		for (Pair<ATermAppl, ATermAppl> p : xcs)
 		{
 			final ATermAppl x = p.first;
@@ -328,13 +300,14 @@ public interface ClassesBase extends MessageBase, Logging, Base
 					throw new NullPointerException("Taxonomy is null");
 
 				if (taxonomy.contains(c))
-					isType |= TaxonomyUtils.isType(taxonomy, x, c);
+					isType = isType.or(Bool.create(TaxonomyUtils.isType(taxonomy, x, c)));
 			}
 		}
-		if (isRealized())
+
+		if (isRealized() && !doExplanation() && isType.isKnown())
 			if (xcs.size() == 1)
-				return isType;
-			else if (isType) // under-approximating semantics for |xcs| > 1
+				return isType.isTrue();
+			else if (isType.isTrue()) // under-approximating semantics for |xcs| > 1
 				return true;
 
 		return getABox().isType(xcs);
