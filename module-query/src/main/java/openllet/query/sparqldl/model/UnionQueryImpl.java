@@ -237,7 +237,7 @@ public class UnionQueryImpl implements UnionQuery
      * Recursive implementation of toCNF.
      * Note: This method creates new query and union query objects, but it does not create new atoms. It rather re-uses
      * the atoms from the original query.
-     * TODO: check whether we need to do a deep copy of the atoms. For now, this should suffice.
+     * TODO Lukas: check whether we need to do a deep copy of the atoms. For now, this should suffice.
      * @param query The input union query (i.e. of the form (a ^ ... ^ b) v ... v (c ^ ... ^ d)) to convert into CNF
      * @return A list of union queries, where each conjunctive query of each union query contains only one atom
      * representing the CNF of the input query
@@ -292,6 +292,16 @@ public class UnionQueryImpl implements UnionQuery
     public List<DisjunctiveQuery> toCNF()
     {
         return toCNFRec(this);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public UnionQuery reorder(int[] queries)
+    {
+        // TODO Lukas: implement query reordering for UCQs.
+        return this;
     }
 
     @Override

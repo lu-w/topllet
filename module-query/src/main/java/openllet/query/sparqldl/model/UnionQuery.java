@@ -156,4 +156,12 @@ public interface UnionQuery
      * @return A list of union queries, where each conjunctive query of each union query contains only one atom.
      */
     List<DisjunctiveQuery> toCNF();
+
+    /**
+     * Creates a subquery from the given query. Queries are listed according to the 'queries' parameter.
+     *
+     * @param queries selected query indices
+     * @return subquery
+     */
+    UnionQuery reorder(int[] queries);
 }

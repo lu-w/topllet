@@ -24,11 +24,16 @@ public class UnionQueryEngine
 
     public QueryResult execABoxQuery(UnionQuery q)
     {
-        // TODO check assumption that disjuncts do not refer to the same undistinguished variables.
+        // TODO Lukas
+        return new QueryResultImpl(q.getQueries().get(0));
+    }
+
+    public boolean execBooleanABoxQuery(UnionQuery q)
+    {
+        // TODO Lukas: check assumption that disjuncts do not refer to the same undistinguished variables.
 
         if (_logger.isLoggable(Level.FINER))
             _logger.finer("Exec ABox query: " + q);
-        QueryResult result = new QueryResultImpl(q.getQueries().get(0)); // TODO Lukas
 
         // 1. ROLL-UP
         UnionQuery rolledUpUnionQuery = new UnionQueryImpl(q);
@@ -134,14 +139,11 @@ public class UnionQueryEngine
         }
 
         if (isEntailed)
-        {
-            result.add(new ResultBindingImpl());
             _logger.fine("Query is entailed.");
-        }
         else
             _logger.fine("Query is not entailed.");
 
-        return result;
+        return isEntailed;
     }
 
     public boolean supports(UnionQuery q)

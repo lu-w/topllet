@@ -11,7 +11,6 @@ package openllet.query.sparqldl.model;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.EnumMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map.Entry;
@@ -23,7 +22,6 @@ import openllet.atom.OpenError;
 import openllet.core.KnowledgeBase;
 import openllet.core.exceptions.InternalReasonerException;
 import openllet.core.utils.ATermUtils;
-import openllet.core.utils.TermFactory;
 
 /**
  * <p>
@@ -47,7 +45,7 @@ public class QueryImpl extends UnionQueryImpl implements Query
 	{
 		super(kb, distinct);
 
-		_queries = List.of(); // prevents adding disjunctions to a non-disjunctive query
+		_queries = List.of(); // prevents adding disjunctions to a non-disjunctive query (internally)
 		_allAtoms = new ArrayList<>();
 	}
 
@@ -292,7 +290,7 @@ public class QueryImpl extends UnionQueryImpl implements Query
 
 				if (ATermUtils.isVar(pred))
 					throw new InternalReasonerException("Variables as predicates are not supported yet");
-				// // TODO variables as predicates are not supported yet.
+				// TODO variables as predicates are not supported yet.
 				// return ATermUtils.TOP;
 
 				visited.add(obj);
