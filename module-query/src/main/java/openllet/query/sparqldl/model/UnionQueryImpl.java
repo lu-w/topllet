@@ -325,33 +325,34 @@ public class UnionQueryImpl implements UnionQuery
         }
         sb.append(")");
 
-        if (_queries.size() > 0) {
-            sb.append(" :-");
+        sb.append(" :-");
 
-            for (int i = 0; i < _queries.size(); i++)
+        List<Query> queries = _queries;
+        if (_queries.size() == 0)
+            queries = List.of((Query) this);
+        for (int i = 0; i < queries.size(); i++)
+        {
+            final Query query = queries.get(i);
+            if (i > 0)
             {
-                final Query query = _queries.get(i);
-                if (i > 0)
-                {
-                    sb.append(" v");
-                    if (multiLine)
-                        sb.append("\n");
-                }
-                if (query.getAtoms().size() > 0)
-                {
-                    if (multiLine)
-                        sb.append("\n");
-                    for (int j = 0; j < query.getAtoms().size(); j++) {
-                        final QueryAtom a = query.getAtoms().get(j);
-                        if (j > 0) {
-                            sb.append(",");
-                            if (multiLine)
-                                sb.append("\n");
-                        }
-
-                        sb.append(indent);
-                        sb.append(a.toString()); // TODO qNameProvider
+                sb.append(" v");
+                if (multiLine)
+                    sb.append("\n");
+            }
+            if (query.getAtoms().size() > 0)
+            {
+                if (multiLine)
+                    sb.append("\n");
+                for (int j = 0; j < query.getAtoms().size(); j++) {
+                    final QueryAtom a = query.getAtoms().get(j);
+                    if (j > 0) {
+                        sb.append(",");
+                        if (multiLine)
+                            sb.append("\n");
                     }
+
+                    sb.append(indent);
+                    sb.append(a.toString()); // TODO qNameProvider
                 }
             }
         }

@@ -18,6 +18,7 @@ import java.util.logging.Logger;
 import static openllet.core.utils.TermFactory.TOP_OBJECT_PROPERTY;
 import static openllet.query.sparqldl.engine.QueryEngine.split;
 
+// TODO Lukas: do we need an interface for this? It does not make sense to inherit from AbstractABoxEngineWrapper, right?
 public class UnionQueryEngine
 {
     public static final Logger _logger = Log.getLogger(UnionQueryEngine.class);
@@ -31,6 +32,7 @@ public class UnionQueryEngine
     public boolean execBooleanABoxQuery(UnionQuery q)
     {
         // TODO Lukas: check assumption that disjuncts do not refer to the same undistinguished variables.
+        // TODO Lukas: move the 4 steps to single functions
 
         if (_logger.isLoggable(Level.FINER))
             _logger.finer("Exec ABox query: " + q);
@@ -39,10 +41,15 @@ public class UnionQueryEngine
         UnionQuery rolledUpUnionQuery = new UnionQueryImpl(q);
         for (Query conjunctiveQuery : q.getQueries())
         {
-            if (_logger.isLoggable(Level.FINEST))
+            if (_logger.isLoggable(Level.FINER))
                 _logger.finer("Rolling up for conjunctive query: " + conjunctiveQuery);
             // 1. step: Find disjoint parts of the query
             List<Query> splitQueries = split(conjunctiveQuery, true);
+            if (_logger.isLoggable(Level.FINER))
+            {
+                _logger.finer("Split query: " + splitQueries);
+                _logger.finer("Now rolling up each separate element.");
+            }
 
             // 2. step: Roll each part up
             Query rolledUpQuery = new QueryImpl(q.getKB(), q.isDistinct());
@@ -54,8 +61,8 @@ public class UnionQueryEngine
                 else
                     testIndOrVar = connectedQuery.getUndistVars().iterator().next();
                 final ATermAppl testClass = connectedQuery.rollUpTo(testIndOrVar, Collections.emptySet(), false);
-                if (_logger.isLoggable(Level.FINEST))
-                    _logger.finer("Boolean query: " + testIndOrVar + " -> " + testClass);
+                if (_logger.isLoggable(Level.FINER))
+                    _logger.finer("Rolled-up Boolean query: " + testIndOrVar + " -> " + testClass);
                 QueryAtom rolledUpAtom = new QueryAtomImpl(QueryPredicate.Type, testIndOrVar, testClass);
                 rolledUpQuery.add(rolledUpAtom);
             }

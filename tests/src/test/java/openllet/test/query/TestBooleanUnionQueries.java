@@ -42,7 +42,7 @@ public class TestBooleanUnionQueries extends AbstractKBTests
     }
 
     @Test
-    public void testBooleanQueries()
+    public void testBooleanQueries1()
     {
         classes(_A, _B, _C, _D, _E);
         individuals(_a, _b, _c);
@@ -78,5 +78,76 @@ public class TestBooleanUnionQueries extends AbstractKBTests
         testBooleanABoxQuery(true, ucq4);
     }
 
+    @Test
+    public void testBooleanQueries2()
+    {
+        classes(_A, _B, _C);
+        individuals(_a, _b);
+        objectProperties(_r, _p);
+
+        _kb.addSubClass(_A, not(and(_B, _C)));
+        _kb.addType(_a, _A);
+
+        UnionQuery ucq1 = unionQuery(query(TypeAtom(_a, not(_B))));
+        UnionQuery ucq2 = unionQuery(query(TypeAtom(_a, not(_B))), query(TypeAtom(_a, not(_C))));
+        UnionQuery ucq3 = unionQuery(query(TypeAtom(_a, not(_B))), query(TypeAtom(_a, not(_C))),
+                                     query(TypeAtom(_b, _A)));
+
+        testBooleanABoxQuery(false, ucq1);
+        testBooleanABoxQuery(true, ucq2);
+        testBooleanABoxQuery(true, ucq3);
+    }
+
+    @Test
+    public void testOedipus()
+    {
+        final ATermAppl Patricide = term("Patricide");
+        final ATermAppl oedipus = term("oedipus");
+        final ATermAppl iokaste = term("iokaste");
+        final ATermAppl polyneikes = term("polyneikes");
+        final ATermAppl thersandros = term("thersandros");
+        final ATermAppl hasChild = term("hasChild");
+
+        classes(Patricide);
+        individuals(oedipus, iokaste, polyneikes, thersandros);
+        objectProperties(hasChild);
+
+        _kb.addPropertyValue(hasChild, iokaste, oedipus);
+        _kb.addPropertyValue(hasChild, oedipus, polyneikes);
+        _kb.addPropertyValue(hasChild, iokaste, polyneikes);
+        _kb.addPropertyValue(hasChild, polyneikes, thersandros);
+        _kb.addType(oedipus, Patricide);
+        _kb.addType(thersandros, not(Patricide));
+
+        UnionQuery ucq1 = unionQuery(query(TypeAtom(_x, Patricide), PropertyValueAtom(iokaste, hasChild, _x),
+                TypeAtom(_y, not(Patricide)), PropertyValueAtom(_x, hasChild, _y)));
+        UnionQuery ucq2 = unionQuery(query(TypeAtom(oedipus, Patricide), PropertyValueAtom(iokaste, hasChild, oedipus),
+                TypeAtom(polyneikes, not(Patricide)), PropertyValueAtom(oedipus, hasChild, polyneikes)));
+        UnionQuery ucq3 = unionQuery(query(TypeAtom(polyneikes, Patricide), PropertyValueAtom(iokaste, hasChild,
+                polyneikes), TypeAtom(thersandros, not(Patricide)), PropertyValueAtom(polyneikes, hasChild,
+                thersandros)));
+        UnionQuery ucq4 = unionQuery(
+                query(TypeAtom(oedipus, Patricide), PropertyValueAtom(iokaste, hasChild, oedipus),
+                        TypeAtom(polyneikes, not(Patricide)), PropertyValueAtom(oedipus, hasChild, polyneikes)),
+                query(TypeAtom(polyneikes, Patricide), PropertyValueAtom(iokaste, hasChild, polyneikes),
+                        TypeAtom(thersandros, not(Patricide)), PropertyValueAtom(polyneikes, hasChild,
+                        thersandros))
+        );
+
+        testBooleanABoxQuery(true, ucq1);
+        testBooleanABoxQuery(false, ucq2);
+        testBooleanABoxQuery(false, ucq3);
+        testBooleanABoxQuery(true, ucq4);
+    }
+
     // TODO Lukas: some more test cases for UCQs here...
+    // I'd like to have test cases for:
+    // - # disjuncts: =1 - done, >2 -done (incl. negation in ontology instead of union - done)
+    // - # conjuncts: =1 - done, >2 (incl. roles)
+    // - only undist. vars
+    // - only individuals
+    // - disjuncts share undist. vars
+    // - disjuncts are completely disjoint (can we check separately, then? if not, find a good test case for this)
+    // - with literals (for later concrete domains)
+    // - dist. vars (for later, only some very simple versions)
 }
