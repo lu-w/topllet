@@ -20,6 +20,7 @@ import openllet.aterm.ATermAppl;
 import openllet.aterm.ATermList;
 import openllet.atom.OpenError;
 import openllet.core.KnowledgeBase;
+import openllet.core.boxes.rbox.Role;
 import openllet.core.exceptions.InternalReasonerException;
 import openllet.core.utils.ATermUtils;
 
@@ -286,7 +287,13 @@ public class QueryImpl extends UnionQueryImpl implements Query
 				final ATermAppl subj = atom.getArguments().get(0);
 				final ATermAppl pred = atom.getArguments().get(1);
 				final ATermAppl obj = atom.getArguments().get(2);
-				final ATermAppl invPred = _kb.getRBox().getRole(pred).getInverse().getName();
+				Role inv = _kb.getRBox().getRole(pred).getInverse();
+				if (inv == null)
+				{
+
+					inv = _kb.getRBox().addInverseRole();
+				}
+				final ATermAppl invPred = inv.getName();
 
 				if (ATermUtils.isVar(pred))
 					throw new InternalReasonerException("Variables as predicates are not supported yet");

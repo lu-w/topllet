@@ -31,6 +31,7 @@ public class UnionQueryEngine
 
     public boolean execBooleanABoxQuery(UnionQuery q)
     {
+        // TODO Lukas: check for cycles in each disjunct (i.e., implement supports function)
         // TODO Lukas: check assumption that disjuncts do not refer to the same undistinguished variables.
         // TODO Lukas: move the 4 steps to single functions
 
@@ -117,21 +118,22 @@ public class UnionQueryEngine
                         newUCs.add(newUC);
                     _logger.finer("Added axiom '" + newUC + " ⊑ T' to T-Box");
                 }
-                copy.setInitialized(false);
+                copy.setInitialized(false); // TODO what does this do?
+                boolean isConsistent = copy.isConsistent();
                 // Case 2: No individuals in disjunction
                 if (disjunctionInd.isEmpty())
                 {
-                    _logger.finer("No individuals in disjunctive query -> checking consistency of the extended T-Box");
-                    isEntailed = !copy.isConsistent();
+                    _logger.finer("No individuals in disjunctive query -> consistency of the extended T-Box");
+                    isEntailed = !isConsistent;
                 }
                 // Case 3: Both individuals and undistinguished variables in disjunction
                 else
                 {
-                    _logger.finer("Also found individuals in disjunctive query -> checking type of disjunction in " +
+                    _logger.finer("Also found individuals in disjunctive query -> type of disjunction in " +
                             "A-Box wrt. extended T-Box");
                     // we only need to check for the type if the T-Box axioms do not lead to inconsistency because if
                     // they do, we have found some axiom in the disjunction that is entailed and can continue the loop
-                    if (copy.isConsistent())
+                    if (isConsistent)
                     {
                         _logger.finest("T-Box is consistent -> forced to check type " + disjunctionInd + " in A-Box.");
                         isEntailed = copy.isType(disjunctionInd);

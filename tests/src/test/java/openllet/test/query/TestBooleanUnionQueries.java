@@ -46,7 +46,7 @@ public class TestBooleanUnionQueries extends AbstractKBTests
     {
         classes(_A, _B, _C, _D, _E);
         individuals(_a, _b, _c);
-        objectProperties(_r, _p);
+        objectProperties(_r, _p, _q);
 
         _kb.addSubClass(_A, or(_B, _C));
         _kb.addSubClass(_A, not(_D));
@@ -72,10 +72,48 @@ public class TestBooleanUnionQueries extends AbstractKBTests
         UnionQuery ucq4 = unionQuery(query(TypeAtom(_a, _B), PropertyValueAtom(_a, _p, _x)),
                                      query(TypeAtom(_z, _E), PropertyValueAtom(_y, _r, _z)));
 
+        // UCQ 5: B(a) ^ r(a,x) ^ p(y,z) ^ D(y) v C(a) v B(a) ^ p(a,x) ^ r(a,y) ^ D(b) -> entailed
+        UnionQuery ucq5 = unionQuery(
+                query(TypeAtom(_a, _B), PropertyValueAtom(_a, _r, _x), PropertyValueAtom(_y, _p, _z), TypeAtom(_y, _D)),
+                query(TypeAtom(_a, _C)),
+                query(TypeAtom(_a, _B), PropertyValueAtom(_a, _p, _x), PropertyValueAtom(_a, _r, _y), TypeAtom(_b, _D))
+        );
+
+        // UCQ 6: B(a) ^ r(a,x) ^ p(y,z) ^ D(y) v B(a) ^ p(a,x) ^ r(a,y) ^ D(b) -> entailed
+        UnionQuery ucq6 = unionQuery(
+                query(TypeAtom(_a, _B), PropertyValueAtom(_a, _r, _x), PropertyValueAtom(_y, _p, _z), TypeAtom(_y, _D)),
+                query(TypeAtom(_a, _B), PropertyValueAtom(_a, _p, _x), PropertyValueAtom(_a, _r, _y), TypeAtom(_b, _D))
+        );
+
+        // UCQ 7: B(a) ^ r(a,x) ^ p(y,z) ^ D(y) v C(a) -> not entailed (_a can never be in _C)
+        UnionQuery ucq7 = unionQuery(
+                query(TypeAtom(_a, _B), PropertyValueAtom(_a, _r, _x), PropertyValueAtom(_y, _p, _z), TypeAtom(_y, _D)),
+                query(TypeAtom(_a, _C))
+        );
+
+        // UCQ 8: C(a) -> not entailed
+        UnionQuery ucq8 = unionQuery(query(TypeAtom(_a, _C)));
+
+        // UCQ 9: B(a) v C(a) -> entailed
+        UnionQuery ucq9 = unionQuery(query(TypeAtom(_a, _B)), query(TypeAtom(_a, _C)));
+
+        // UCQ 10: p(x,y) -> entailed
+        UnionQuery ucq10 = unionQuery(query(PropertyValueAtom(_x, _p, _y)));
+
+        // UCQ 11: p(x,y) -> not entailed
+        UnionQuery ucq11 = unionQuery(query(PropertyValueAtom(_x, _q, _y)));
+
         testBooleanABoxQuery(true, ucq1);
         testBooleanABoxQuery(false, ucq2);
         testBooleanABoxQuery(true, ucq3);
         testBooleanABoxQuery(true, ucq4);
+        testBooleanABoxQuery(true, ucq5);
+        testBooleanABoxQuery(true, ucq6);
+        testBooleanABoxQuery(false, ucq7);
+        testBooleanABoxQuery(false, ucq8);
+        testBooleanABoxQuery(true, ucq9);
+        testBooleanABoxQuery(true, ucq10);
+        testBooleanABoxQuery(false, ucq11);
     }
 
     @Test
@@ -89,8 +127,10 @@ public class TestBooleanUnionQueries extends AbstractKBTests
         _kb.addType(_a, _A);
 
         UnionQuery ucq1 = unionQuery(query(TypeAtom(_a, not(_B))));
-        UnionQuery ucq2 = unionQuery(query(TypeAtom(_a, not(_B))), query(TypeAtom(_a, not(_C))));
-        UnionQuery ucq3 = unionQuery(query(TypeAtom(_a, not(_B))), query(TypeAtom(_a, not(_C))),
+        UnionQuery ucq2 = unionQuery(query(TypeAtom(_a, not(_B))),
+                                     query(TypeAtom(_a, not(_C))));
+        UnionQuery ucq3 = unionQuery(query(TypeAtom(_a, not(_B))),
+                                     query(TypeAtom(_a, not(_C))),
                                      query(TypeAtom(_b, _A)));
 
         testBooleanABoxQuery(false, ucq1);
@@ -133,21 +173,87 @@ public class TestBooleanUnionQueries extends AbstractKBTests
                         TypeAtom(thersandros, not(Patricide)), PropertyValueAtom(polyneikes, hasChild,
                         thersandros))
         );
+        UnionQuery ucq5 = unionQuery(query(TypeAtom(_x, Patricide), PropertyValueAtom(_z, hasChild, _x),
+                TypeAtom(_y, not(Patricide)), PropertyValueAtom(_x, hasChild, _y)));
 
         testBooleanABoxQuery(true, ucq1);
         testBooleanABoxQuery(false, ucq2);
         testBooleanABoxQuery(false, ucq3);
         testBooleanABoxQuery(true, ucq4);
+        testBooleanABoxQuery(true, ucq5);
     }
 
-    // TODO Lukas: some more test cases for UCQs here...
-    // I'd like to have test cases for:
-    // - # disjuncts: =1 - done, >2 -done (incl. negation in ontology instead of union - done)
-    // - # conjuncts: =1 - done, >2 (incl. roles)
-    // - only undist. vars
-    // - only individuals
-    // - disjuncts share undist. vars
-    // - disjuncts are completely disjoint (can we check separately, then? if not, find a good test case for this)
-    // - with literals (for later concrete domains)
-    // - dist. vars (for later, only some very simple versions)
+    @Test
+    public void sharedUndistinguishedVarTest()
+    {
+        classes(_A, _B, _C);
+        individuals(_a, _b);
+        objectProperties(_r, _p);
+
+        _kb.addSubClass(_A, not(and(_B, _C)));
+        _kb.addType(_a, _A);
+
+        UnionQuery ucq1 = unionQuery(query(TypeAtom(_x, not(_B))),
+                                     query(TypeAtom(_x, not(_C))),
+                                     query(TypeAtom(_x, _A)));
+        UnionQuery ucq2 = unionQuery(query(TypeAtom(_a, not(_B))),
+                                     query(TypeAtom(_a, not(_C))),
+                                     query(TypeAtom(_a, _A)));
+
+        testBooleanABoxQuery(false, ucq1);
+        testBooleanABoxQuery(true, ucq2);
+    }
+
+    @Test
+    public void disjointDisjunctTest()
+    {
+        classes(_A, _B, _C, _D);
+        individuals(_a, _b);
+        objectProperties(_r);
+
+        _kb.addSubClass(_A, or(_B, _C));
+        _kb.addSubClass(_B, all(_r, _D));
+
+        _kb.addType(_a, _A);
+        _kb.addPropertyValue(_r, _a, _b);
+
+        UnionQuery ucq1 = unionQuery(query(TypeAtom(_x, _C)),
+                                     query(TypeAtom(_y, _D)));
+        UnionQuery ucq2 = unionQuery(query(TypeAtom(_a, _C)),
+                                     query(TypeAtom(_b, _D)));
+
+        testBooleanABoxQuery(true, ucq1);
+        testBooleanABoxQuery(true, ucq2);
+    }
+
+    @Test
+    public void literalTest()
+    {
+        classes(_A, _B, _C);
+        individuals(_a, _b);
+        objectProperties(_r, _p);
+        dataProperties(_q);
+
+        _kb.addSubClass(_A, or(_B, _C));
+        _kb.addType(_a, _A);
+        _kb.addPropertyValue(_q, _a, literal(10));
+
+        UnionQuery ucq1 = unionQuery(query(PropertyValueAtom(_a, _q, literal(10)), TypeAtom(_a, _A)));
+        UnionQuery ucq2 = unionQuery(query(PropertyValueAtom(_x, _q, literal(10))));
+        UnionQuery ucq3 = unionQuery(query(TypeAtom(_a, _B), PropertyValueAtom(_a, _q, literal(9))),
+                                     query(TypeAtom(_a, _C)));
+        UnionQuery ucq4 = unionQuery(query(TypeAtom(_a, _B), PropertyValueAtom(_a, _q, literal(10))),
+                                     query(TypeAtom(_a, _C)));
+
+        testBooleanABoxQuery(true, ucq1);
+        testBooleanABoxQuery(true, ucq2);
+        testBooleanABoxQuery(false, ucq3);
+        testBooleanABoxQuery(true, ucq4);
+    }
+
+    @Test
+    public void simpleDistinguishedVariableTest()
+    {
+        // TODO but only once interface for this is done
+    }
 }
