@@ -33,9 +33,15 @@ public class UnionQueryEngine
     {
         // TODO Lukas: check for cycles in each disjunct (i.e., implement supports function)
         // TODO Lukas: check assumption that disjuncts do not refer to the same undistinguished variables.
-        // TODO Lukas: move the 4 steps to single functions
+        // TODO Lukas: move the 4 steps to single function
+
         if (_logger.isLoggable(Level.FINER))
             _logger.finer("Exec ABox query: " + q);
+
+        if (_logger.isLoggable(Level.INFO) && q.disjunctsShareUndistVars())
+            _logger.info("Union query " + q + " contains disjuncts that share undistinguished variables. Will treat " +
+                    "them as different variables.");
+
 
         // PRELIMINARY CONSISTENCY CHECK
         q.getKB().ensureConsistency();
@@ -97,7 +103,7 @@ public class UnionQueryEngine
                         disjunctionInd.add(new Pair<>(atomicQuery.getAtoms().get(0).getArguments().get(0),
                                 atomicQuery.getAtoms().get(0).getArguments().get(1)));
                     else
-                        // TODO think: can we make the assumption that no two classes refer to the same undist. var?
+                        // TODO Lukas: can we make the assumption that no two classes refer to the same undist. var?
                         // probably yes, because we rolled everything up before, right?
                         disjunctionVar.add(atomicQuery.getAtoms().get(0).getArguments().get(1));
             // Case 1: No undistinguished variables in disjunction
@@ -120,7 +126,7 @@ public class UnionQueryEngine
                         newUCs.add(newUC);
                     _logger.finer("Added axiom '" + newUC + " ⊑ T' to T-Box");
                 }
-                copy.setInitialized(false); // TODO Lukas: what does this do?
+                copy.setInitialized(false);
                 boolean isConsistent = copy.isConsistent();
                 // Case 2: No individuals in disjunction
                 if (disjunctionInd.isEmpty())

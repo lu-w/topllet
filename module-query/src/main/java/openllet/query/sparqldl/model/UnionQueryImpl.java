@@ -304,6 +304,23 @@ public class UnionQueryImpl implements UnionQuery
         return this;
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean disjunctsShareUndistVars()
+    {
+        boolean shared = false;
+        if (_queries.size() > 1)
+        {
+            Set<ATermAppl> undistVars = _queries.get(0).getUndistVars();
+            for (Query query : _queries.subList(1, _queries.size()))
+                undistVars.retainAll(query.getUndistVars());
+            shared = !undistVars.isEmpty();
+        }
+        return shared;
+    }
+
     @Override
     public String toString()
     {

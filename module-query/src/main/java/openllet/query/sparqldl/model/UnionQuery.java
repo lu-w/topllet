@@ -8,6 +8,7 @@ import java.util.Set;
 
 public interface UnionQuery
 {
+
     enum VarType
     {
         CLASS, PROPERTY, INDIVIDUAL, LITERAL
@@ -164,4 +165,10 @@ public interface UnionQuery
      * @return subquery
      */
     UnionQuery reorder(int[] queries);
+
+    /**
+     * Checks if there are two disjuncts that share a common undistinguished variable.
+     * @return True iff there are two disjuncts that share a common undistinguished variable
+     */
+    boolean disjunctsShareUndistVars();
 }
