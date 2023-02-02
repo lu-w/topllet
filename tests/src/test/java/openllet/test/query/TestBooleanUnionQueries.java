@@ -287,6 +287,8 @@ public class TestBooleanUnionQueries extends AbstractKBTests
         UnionQuery ucq6 = unionQuery(query(PropertyValueAtom(_x, _p, _y), PropertyValueAtom(_y, _q, _z)));
         UnionQuery ucq7 = unionQuery(query(PropertyValueAtom(_x, _p, _y), PropertyValueAtom(_y, _p, _z),
                 PropertyValueAtom(_z, _p, _x)));
+        UnionQuery ucq8 = unionQuery(query(PropertyValueAtom(_x1, _p, _y1), PropertyValueAtom(_y1, _p, _z1),
+                PropertyValueAtom(_x, _p, _y), PropertyValueAtom(_y, _p, _z), PropertyValueAtom(_z, _p, _x)));
 
         UnionQueryEngine eng = new UnionQueryEngine();
         assertFalse(eng.supports(ucq1));
@@ -296,6 +298,7 @@ public class TestBooleanUnionQueries extends AbstractKBTests
         assertFalse(eng.supports(ucq5));
         assertTrue(eng.supports(ucq6));
         assertFalse(eng.supports(ucq7));
+        assertFalse(eng.supports(ucq8));
     }
 
 
