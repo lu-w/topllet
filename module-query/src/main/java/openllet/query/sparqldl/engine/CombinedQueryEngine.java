@@ -220,8 +220,8 @@ public class CombinedQueryEngine implements QueryExec
 	@Override
 	public boolean supports(final Query q)
 	{
-		// TODO cycles in undist vars and fully undist.vars queries are not supported !!!
-		return true;
+		// TODO fully undist.vars queries are not supported !!!
+		return q.hasCycle();
 	}
 
 	/**
