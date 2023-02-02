@@ -486,7 +486,7 @@ public class QueryImpl extends UnionQueryImpl implements Query
 	 * @param prevNode The node that DFS was called from (null at the beginning)
 	 * @return True iff. a cycle is reachable from curNode in the given edges
 	 */
-	private boolean cycle(ATermAppl curNode, Set<ATermAppl> visitedNodes, Set<ATermAppl> finishedNodes,
+	private boolean cycle(ATermAppl curNode, Collection<ATermAppl> visitedNodes, Collection<ATermAppl> finishedNodes,
 						  Collection<QueryAtom> edges, ATermAppl prevNode)
 	{
 		if (finishedNodes.contains(curNode))
@@ -516,12 +516,32 @@ public class QueryImpl extends UnionQueryImpl implements Query
 	}
 
 	/**
+	 * Entry point for recursive DFS to search for cycles in the (undirected) query graph. Excludes trivial cycles
+	 * (i.e. a single undirected edge) but considers self-loops.
+	 * @param nodes The nodes of the query graph
+	 * @param edges The edges of the query graph
+	 * @return True iff the query contains a cycle
+	 */
+	private boolean cycle(Collection<ATermAppl> nodes, Collection<QueryAtom> edges)
+	{
+		boolean hasCycle = false;
+		if (nodes.size() > 1)
+		{
+			Set<ATermAppl> visitedNodes = new HashSet<>();
+			Set<ATermAppl> finishedNodes = new HashSet<>();
+			for (ATermAppl node : nodes)
+				hasCycle |= cycle(node, visitedNodes, finishedNodes, edges, null);
+		}
+		return hasCycle;
+	}
+
+	/**
 	 * {@inheritDoc}
 	 */
 	@Override
 	public boolean hasCycle()
 	{
-		boolean hasCycle = false;
+		// Find all edges: We shall only consider binary elements of the query as edges.
 		List<QueryAtom> binaryAtomsWithOnlyUndistVars =
 				_allAtoms.stream().filter(
 						(a) -> (ternaryQueryPredicates.contains(a.getPredicate()) &&
@@ -532,6 +552,7 @@ public class QueryImpl extends UnionQueryImpl implements Query
 										getUndistVars().contains(a.getArguments().get(0))&&
 										getUndistVars().contains(a.getArguments().get(1))))
 				).toList();
+		// Find all nodes of these edges
 		Set<ATermAppl> nodes = new HashSet<>();
 		for (QueryAtom edge : binaryAtomsWithOnlyUndistVars)
 		{
@@ -541,9 +562,7 @@ public class QueryImpl extends UnionQueryImpl implements Query
 			else
 				nodes.add(edge.getArguments().get(1));
 		}
-		if (binaryAtomsWithOnlyUndistVars.size() > 1)
-			for (ATermAppl node : nodes)
-				hasCycle |= cycle(node, new HashSet<>(), new HashSet<>(), binaryAtomsWithOnlyUndistVars, null);
-		return hasCycle;
+		// Recursive DFS for cycle identification
+		return cycle(nodes, binaryAtomsWithOnlyUndistVars);
 	}
 }
