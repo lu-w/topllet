@@ -22,12 +22,12 @@ import openllet.aterm.pure.ATermApplImpl;
 import openllet.atom.OpenError;
 import openllet.core.DependencySet;
 import openllet.core.KnowledgeBase;
-import openllet.core.boxes.abox.Literal;
 import openllet.core.boxes.rbox.Role;
 import openllet.core.exceptions.InternalReasonerException;
 import openllet.core.utils.ATermUtils;
 
 import static openllet.core.utils.TermFactory.term;
+import static openllet.query.sparqldl.model.QueryPredicate.*;
 
 /**
  * <p>
@@ -44,6 +44,12 @@ import static openllet.core.utils.TermFactory.term;
  */
 public class QueryImpl extends UnionQueryImpl implements Query
 {
+	private final Set<QueryPredicate> ternaryQueryPredicates = Set.of(PropertyValue, NegativePropertyValue);
+
+	private final Set<QueryPredicate> binaryQueryPredicates = Set.of(SameAs, DifferentFrom, SubClassOf, EquivalentClass,
+			DisjointWith, ComplementOf, SubPropertyOf, EquivalentProperty, Domain, Range, InverseOf,
+			propertyDisjointWith, Annotation, StrictSubClassOf, DirectSubClassOf, DirectSubPropertyOf,
+			StrictSubPropertyOf, DirectType);
 
 	private final List<QueryAtom> _allAtoms;
 
@@ -151,13 +157,13 @@ public class QueryImpl extends UnionQueryImpl implements Query
 		if (stopOnConstants)
 			visited.addAll(getConstants());
 
-		final Collection<QueryAtom> inEdges = findAtoms(QueryPredicate.PropertyValue, null, null, var);
+		final Collection<QueryAtom> inEdges = findAtoms(PropertyValue, null, null, var);
 		for (final QueryAtom a : inEdges)
-			classParts = classParts.append(rollEdgeIn(QueryPredicate.PropertyValue, a, visited, stopList));
+			classParts = classParts.append(rollEdgeIn(PropertyValue, a, visited, stopList));
 
-		final Collection<QueryAtom> outEdges = findAtoms(QueryPredicate.PropertyValue, var, null, null);
+		final Collection<QueryAtom> outEdges = findAtoms(PropertyValue, var, null, null);
 		for (final QueryAtom a : outEdges)
-			classParts = classParts.append(rollEdgeOut(QueryPredicate.PropertyValue, a, visited, stopList));
+			classParts = classParts.append(rollEdgeOut(PropertyValue, a, visited, stopList));
 
 		classParts = classParts.concat(getClasses(var));
 
@@ -469,5 +475,75 @@ public class QueryImpl extends UnionQueryImpl implements Query
 			_resultVars.remove(a);
 			_individualsAndLiterals.remove(a);
 		}
+	}
+
+	/**
+	 * Recursive implementation of DFS cycle detection.
+	 * @param curNode The node to start the DFS from
+	 * @param visitedNodes The node that have been or are currently visited (empty set at the beginning)
+	 * @param finishedNodes The nodes that the DFS was already finished on (empty set at the beginning)
+	 * @param edges The set of edges
+	 * @param prevNode The node that DFS was called from (null at the beginning)
+	 * @return True iff. a cycle is reachable from curNode in the given edges
+	 */
+	private boolean cycle(ATermAppl curNode, Set<ATermAppl> visitedNodes, Set<ATermAppl> finishedNodes,
+						  Collection<QueryAtom> edges, ATermAppl prevNode)
+	{
+		if (finishedNodes.contains(curNode))
+			return false;
+		if (visitedNodes.contains(curNode))
+			return true;
+		visitedNodes.add(curNode);
+		Set<ATermAppl> neighbors = new HashSet<>();
+		for (QueryAtom edge : edges)
+		{
+			ATermAppl n1 = edge.getArguments().get(0);
+			ATermAppl n2;
+			if (ternaryQueryPredicates.contains(edge.getPredicate()))
+				n2 = edge.getArguments().get(2);
+			else
+				n2 = edge.getArguments().get(1);
+			if (n1 == curNode && n2 != prevNode)
+				neighbors.add(n2);
+			if (n1 != prevNode && n2 == curNode)
+				neighbors.add(n1);
+		}
+		boolean hasCycle = false;
+		for (ATermAppl neighbor : neighbors)
+			hasCycle |= cycle(neighbor, visitedNodes, finishedNodes, edges, curNode);
+		finishedNodes.add(curNode);
+		return hasCycle;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public boolean hasCycle()
+	{
+		boolean hasCycle = false;
+		List<QueryAtom> binaryAtomsWithOnlyUndistVars =
+				_allAtoms.stream().filter(
+						(a) -> (ternaryQueryPredicates.contains(a.getPredicate()) &&
+									getUndistVars().contains(a.getArguments().get(0))&&
+									getUndistVars().contains(a.getArguments().get(2))
+								||
+								(binaryQueryPredicates.contains(a.getPredicate()) &&
+										getUndistVars().contains(a.getArguments().get(0))&&
+										getUndistVars().contains(a.getArguments().get(1))))
+				).toList();
+		Set<ATermAppl> nodes = new HashSet<>();
+		for (QueryAtom edge : binaryAtomsWithOnlyUndistVars)
+		{
+			nodes.add(edge.getArguments().get(0));
+			if (ternaryQueryPredicates.contains(edge.getPredicate()))
+				nodes.add(edge.getArguments().get(2));
+			else
+				nodes.add(edge.getArguments().get(1));
+		}
+		if (binaryAtomsWithOnlyUndistVars.size() > 1)
+			for (ATermAppl node : nodes)
+				hasCycle |= cycle(node, new HashSet<>(), new HashSet<>(), binaryAtomsWithOnlyUndistVars, null);
+		return hasCycle;
 	}
 }

@@ -32,7 +32,7 @@ public class UnionQueryEngine
 
     public boolean execBooleanABoxQuery(UnionQuery q)
     {
-        // TODO Lukas: check for cycles in each disjunct (i.e., implement supports function)
+        assert(supports(q));
 
         if (_logger.isLoggable(Level.FINER))
             _logger.finer("Exec ABox query: " + q);
@@ -64,7 +64,7 @@ public class UnionQueryEngine
 
     /**
      * Core of the UCQ Engine. Checks whether a given query in conjunctive normal form (CNF) is entailed.
-     * @param cnfQuery The query in CNF to check. The list rerpresents the conjunction, each element is a disjunction
+     * @param cnfQuery The query in CNF to check. The list represents the conjunction, each element is a disjunction
      * @return True iff. the given query is entailed by the knowledge base
      */
     private boolean isEntailed(List<DisjunctiveQuery> cnfQuery, KnowledgeBase kb)
@@ -142,6 +142,6 @@ public class UnionQueryEngine
 
     public boolean supports(UnionQuery q)
     {
-        return true; // TODO
+        return !q.hasCycle();
     }
 }

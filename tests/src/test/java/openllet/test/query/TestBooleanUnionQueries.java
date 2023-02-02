@@ -12,7 +12,7 @@ import static openllet.core.utils.TermFactory.*;
 import static openllet.core.utils.TermFactory.TOP;
 import static openllet.query.sparqldl.model.QueryAtomFactory.PropertyValueAtom;
 import static openllet.query.sparqldl.model.QueryAtomFactory.TypeAtom;
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
 public class TestBooleanUnionQueries extends AbstractKBTests
 {
@@ -266,6 +266,38 @@ public class TestBooleanUnionQueries extends AbstractKBTests
         testBooleanABoxQuery(false, ucq4);
         testBooleanABoxQuery(true, ucq5);
     }
+
+    @Test
+    public void cycleTest()
+    {
+        classes(_A, _B, _C);
+        individuals(_a, _b);
+        objectProperties(_p, _q, _r);
+
+        UnionQuery ucq1 = unionQuery(query(PropertyValueAtom(_x, _p, _y), PropertyValueAtom(_z, _q, _y),
+                PropertyValueAtom(_z, _r, _x)));
+        UnionQuery ucq2 = unionQuery(query(PropertyValueAtom(_x, _p, _y), PropertyValueAtom(_z, _q, _y),
+                PropertyValueAtom(_a, _r, _x)));
+        UnionQuery ucq3 = unionQuery(query(PropertyValueAtom(_x, _p, _y), PropertyValueAtom(_z, _q, _y)),
+                query(PropertyValueAtom(_y, _r, _x)));
+        UnionQuery ucq4 = unionQuery(query(PropertyValueAtom(_x, _p, _y), PropertyValueAtom(_y, _q, _z),
+                PropertyValueAtom(_z, _r, _x)));
+        UnionQuery ucq5 = unionQuery(query(PropertyValueAtom(_x, _p, _y), PropertyValueAtom(_y, _q, _z),
+                PropertyValueAtom(_z, _r, _z)));
+        UnionQuery ucq6 = unionQuery(query(PropertyValueAtom(_x, _p, _y), PropertyValueAtom(_y, _q, _z)));
+        UnionQuery ucq7 = unionQuery(query(PropertyValueAtom(_x, _p, _y), PropertyValueAtom(_y, _p, _z),
+                PropertyValueAtom(_z, _p, _x)));
+
+        UnionQueryEngine eng = new UnionQueryEngine();
+        assertFalse(eng.supports(ucq1));
+        assertTrue(eng.supports(ucq2));
+        assertTrue(eng.supports(ucq3));
+        assertFalse(eng.supports(ucq4));
+        assertFalse(eng.supports(ucq5));
+        assertTrue(eng.supports(ucq6));
+        assertFalse(eng.supports(ucq7));
+    }
+
 
     @Test
     public void simpleDistinguishedVariableTest()

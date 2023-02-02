@@ -367,6 +367,15 @@ public class UnionQueryImpl implements UnionQuery
     }
 
     @Override
+    public boolean hasCycle()
+    {
+        boolean hasCycle = false;
+        for (Query q : _queries)
+            hasCycle |= q.hasCycle();
+        return hasCycle;
+    }
+
+    @Override
     public String toString()
     {
         return toString(false);
