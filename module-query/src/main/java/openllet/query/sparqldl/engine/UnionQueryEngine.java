@@ -47,36 +47,7 @@ public class UnionQueryEngine
         q.getKB().ensureConsistency();
 
         // 1. ROLL-UP
-        UnionQuery rolledUpUnionQuery = new UnionQueryImpl(q);
-        for (Query conjunctiveQuery : q.getQueries())
-        {
-            if (_logger.isLoggable(Level.FINER))
-                _logger.finer("Rolling up for conjunctive query: " + conjunctiveQuery);
-            // 1. step: Find disjoint parts of the query
-            List<Query> splitQueries = split(conjunctiveQuery, true);
-            if (_logger.isLoggable(Level.FINER))
-            {
-                _logger.finer("Split query: " + splitQueries);
-                _logger.finer("Now rolling up each separate element.");
-            }
-
-            // 2. step: Roll each part up
-            Query rolledUpQuery = new QueryImpl(q.getKB(), q.isDistinct());
-            for (Query connectedQuery : splitQueries)
-            {
-                final ATermAppl testIndOrVar;
-                if (!connectedQuery.getConstants().isEmpty())
-                    testIndOrVar = connectedQuery.getConstants().iterator().next();
-                else
-                    testIndOrVar = connectedQuery.getUndistVars().iterator().next();
-                final ATermAppl testClass = connectedQuery.rollUpTo(testIndOrVar, Collections.emptySet(), false);
-                if (_logger.isLoggable(Level.FINER))
-                    _logger.finer("Rolled-up Boolean query: " + testIndOrVar + " -> " + testClass);
-                QueryAtom rolledUpAtom = new QueryAtomImpl(QueryPredicate.Type, testIndOrVar, testClass);
-                rolledUpQuery.add(rolledUpAtom);
-            }
-            rolledUpUnionQuery.addQuery(rolledUpQuery);
-        }
+        UnionQuery rolledUpUnionQuery = q.rollUp();
         if (_logger.isLoggable(Level.FINER))
             _logger.finer("Rolled-up union query: " + rolledUpUnionQuery);
 

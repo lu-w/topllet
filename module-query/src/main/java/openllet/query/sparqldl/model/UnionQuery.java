@@ -171,4 +171,10 @@ public interface UnionQuery
      * @return True iff there are two disjuncts that share a common undistinguished variable
      */
     boolean disjunctsShareUndistVars();
+
+    /**
+     * Rolls this query up by applying the rolling-up procedure to each disjunct separately.
+     * @return A new rolled-up union query.
+     */
+    UnionQuery rollUp();
 }

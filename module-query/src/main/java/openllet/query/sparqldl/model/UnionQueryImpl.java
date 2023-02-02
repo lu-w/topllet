@@ -1,14 +1,22 @@
 package openllet.query.sparqldl.model;
 
 import openllet.aterm.ATermAppl;
+import openllet.core.DependencySet;
 import openllet.core.KnowledgeBase;
 import openllet.core.utils.ATermUtils;
 import openllet.core.utils.TermFactory;
+import openllet.shared.tools.Log;
 
 import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import static openllet.query.sparqldl.engine.QueryEngine.split;
 
 public class UnionQueryImpl implements UnionQuery
 {
+    public static final Logger _logger = Log.getLogger(UnionQueryImpl.class);
+
     protected static final ATermAppl DEFAULT_NAME = TermFactory.term("query");
 
     // COMMON PART
@@ -319,6 +327,43 @@ public class UnionQueryImpl implements UnionQuery
             shared = !undistVars.isEmpty();
         }
         return shared;
+    }
+
+    @Override
+    public UnionQuery rollUp()
+    {
+        UnionQuery rolledUpUnionQuery = new UnionQueryImpl(this);
+        for (Query conjunctiveQuery : _queries)
+        {
+            if (_logger.isLoggable(Level.FINER))
+                _logger.finer("Rolling up for conjunctive query: " + conjunctiveQuery);
+
+            // 1. step: Find disjoint parts of the query
+            List<Query> splitQueries = split(conjunctiveQuery, true);
+            if (_logger.isLoggable(Level.FINER))
+            {
+                _logger.finer("Split query: " + splitQueries);
+                _logger.finer("Now rolling up each separate element.");
+            }
+
+            // 2. step: Roll each part up
+            Query rolledUpQuery = new QueryImpl(this.getKB(), this.isDistinct());
+            for (Query connectedQuery : splitQueries)
+            {
+                final ATermAppl testIndOrVar;
+                if (!connectedQuery.getConstants().isEmpty())
+                    testIndOrVar = connectedQuery.getConstants().iterator().next();
+                else
+                    testIndOrVar = connectedQuery.getUndistVars().iterator().next();
+                final ATermAppl testClass = connectedQuery.rollUpTo(testIndOrVar, Collections.emptySet(), false);
+                if (_logger.isLoggable(Level.FINER))
+                    _logger.finer("Rolled-up Boolean query: " + testIndOrVar + " -> " + testClass);
+                QueryAtom rolledUpAtom = new QueryAtomImpl(QueryPredicate.Type, testIndOrVar, testClass);
+                rolledUpQuery.add(rolledUpAtom);
+            }
+            rolledUpUnionQuery.addQuery(rolledUpQuery);
+        }
+        return rolledUpUnionQuery;
     }
 
     @Override
