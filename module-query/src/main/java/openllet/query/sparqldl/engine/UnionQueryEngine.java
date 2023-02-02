@@ -2,6 +2,7 @@ package openllet.query.sparqldl.engine;
 
 import openllet.aterm.ATermAppl;
 import openllet.core.DependencySet;
+import openllet.core.KnowledgeBase;
 import openllet.core.boxes.abox.ABox;
 import openllet.core.boxes.rbox.Role;
 import openllet.core.utils.ATermUtils;
@@ -32,8 +33,6 @@ public class UnionQueryEngine
     public boolean execBooleanABoxQuery(UnionQuery q)
     {
         // TODO Lukas: check for cycles in each disjunct (i.e., implement supports function)
-        // TODO Lukas: check assumption that disjuncts do not refer to the same undistinguished variables.
-        // TODO Lukas: move the 4 steps to single function
 
         if (_logger.isLoggable(Level.FINER))
             _logger.finer("Exec ABox query: " + q);
@@ -42,21 +41,34 @@ public class UnionQueryEngine
             _logger.info("Union query " + q + " contains disjuncts that share undistinguished variables. Will treat " +
                     "them as different variables.");
 
-
-        // PRELIMINARY CONSISTENCY CHECK
+        // 1. PRELIMINARY CONSISTENCY CHECK
         q.getKB().ensureConsistency();
 
-        // 1. ROLL-UP
+        // 2. ROLL-UP UCQ
         UnionQuery rolledUpUnionQuery = q.rollUp();
         if (_logger.isLoggable(Level.FINER))
             _logger.finer("Rolled-up union query: " + rolledUpUnionQuery);
 
-        // 2. CNF
+        // 3. CONVERT TO CNF
         List<DisjunctiveQuery> cnfQuery = rolledUpUnionQuery.toCNF();
         if (_logger.isLoggable(Level.FINER))
             _logger.finer("Rolled-up union query in CNF is: " + cnfQuery);
 
-        // 3. TYPE CHECK EACH CONJUNCT
+        // 4. CHECK ENTAILMENT FOR EACH CONJUNCT
+        boolean isEntailed = isEntailed(cnfQuery, q.getKB());
+        if (_logger.isLoggable(Level.FINE))
+            _logger.fine("Query is " + (!isEntailed ? "not" : "") + " entailed.");
+
+        return isEntailed;
+    }
+
+    /**
+     * Core of the UCQ Engine. Checks whether a given query in conjunctive normal form (CNF) is entailed.
+     * @param cnfQuery The query in CNF to check. The list rerpresents the conjunction, each element is a disjunction
+     * @return True iff. the given query is entailed by the knowledge base
+     */
+    private boolean isEntailed(List<DisjunctiveQuery> cnfQuery, KnowledgeBase kb)
+    {
         boolean isEntailed = true;
         // Query is entailed iff. all conjuncts are entailed
         for (DisjunctiveQuery disjunctiveQuery : cnfQuery)
@@ -70,7 +82,7 @@ public class UnionQueryEngine
             List<ATermAppl> disjunctionVar = new ArrayList<>();
             for (Query atomicQuery : disjunctiveQuery.getQueries())
                 if (atomicQuery.getAtoms().size() == 1)
-                    if (q.getKB().getABox().getIndividual(atomicQuery.getAtoms().get(0).getArguments().get(0)) != null)
+                    if (kb.getABox().getIndividual(atomicQuery.getAtoms().get(0).getArguments().get(0)) != null)
                         disjunctionInd.add(new Pair<>(atomicQuery.getAtoms().get(0).getArguments().get(0),
                                 atomicQuery.getAtoms().get(0).getArguments().get(1)));
                     else
@@ -81,13 +93,13 @@ public class UnionQueryEngine
             if (disjunctionVar.isEmpty())
             {
                 _logger.finer("No variables in disjunctive query -> checking type of disjunction in A-Box");
-                isEntailed = rolledUpUnionQuery.getKB().isType(disjunctionInd);
+                isEntailed = kb.isType(disjunctionInd);
             }
             else
             {
                 _logger.finer("Variables in disjunctive query found");
-                final ABox copy = q.getKB().getABox().copy();
-                final Role topObjectRole = q.getKB().getRole(TOP_OBJECT_PROPERTY);
+                final ABox copy = kb.getABox().copy();
+                final Role topObjectRole = kb.getRole(TOP_OBJECT_PROPERTY);
                 List<ATermAppl> newUCs = new ArrayList<>();
                 for (ATermAppl testClass : disjunctionVar)
                 {
@@ -125,12 +137,6 @@ public class UnionQueryEngine
             if (!isEntailed) // Early break if we find that the query can not be entailed anymore.
                 break;
         }
-
-        if (isEntailed)
-            _logger.fine("Query is entailed.");
-        else
-            _logger.fine("Query is not entailed.");
-
         return isEntailed;
     }
 
