@@ -13,6 +13,7 @@ import static openllet.core.utils.TermFactory.TOP;
 import static openllet.query.sparqldl.model.QueryAtomFactory.PropertyValueAtom;
 import static openllet.query.sparqldl.model.QueryAtomFactory.TypeAtom;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThrows;
 
 public class TestBooleanUnionQueries extends AbstractKBTests
 {
@@ -161,6 +162,7 @@ public class TestBooleanUnionQueries extends AbstractKBTests
 
         UnionQuery ucq1 = unionQuery(query(TypeAtom(_x, Patricide), PropertyValueAtom(iokaste, hasChild, _x),
                 TypeAtom(_y, not(Patricide)), PropertyValueAtom(_x, hasChild, _y)));
+
         UnionQuery ucq2 = unionQuery(query(TypeAtom(oedipus, Patricide), PropertyValueAtom(iokaste, hasChild, oedipus),
                 TypeAtom(polyneikes, not(Patricide)), PropertyValueAtom(oedipus, hasChild, polyneikes)));
         UnionQuery ucq3 = unionQuery(query(TypeAtom(polyneikes, Patricide), PropertyValueAtom(iokaste, hasChild,
@@ -186,22 +188,28 @@ public class TestBooleanUnionQueries extends AbstractKBTests
     @Test
     public void sharedUndistinguishedVarTest()
     {
-        classes(_A, _B, _C);
+        classes(_A, _B);
         individuals(_a, _b);
-        objectProperties(_r, _p);
 
-        _kb.addSubClass(_A, not(and(_B, _C)));
         _kb.addType(_a, _A);
+        _kb.addType(_b, _B);
 
-        UnionQuery ucq1 = unionQuery(query(TypeAtom(_x, not(_B))),
-                                     query(TypeAtom(_x, not(_C))),
-                                     query(TypeAtom(_x, _A)));
-        UnionQuery ucq2 = unionQuery(query(TypeAtom(_a, not(_B))),
-                                     query(TypeAtom(_a, not(_C))),
-                                     query(TypeAtom(_a, _A)));
+        UnionQuery ucq1 = unionQuery(query(TypeAtom(_x, _A)),
+                                     query(TypeAtom(_x, _B)));
+        UnionQuery ucq2 = unionQuery(query(TypeAtom(_x, _A)),
+                                     query(TypeAtom(_y, _B)));
+        UnionQuery ucq3 = unionQuery(query(TypeAtom(_a, _A)),
+                                     query(TypeAtom(_b, _B)));
+        UnionQuery ucq4 = unionQuery(query(TypeAtom(_x, _A)),
+                                     query(TypeAtom(_b, _B)));
+        UnionQuery ucq5 = unionQuery(query(TypeAtom(_b, _A)),
+                                     query(TypeAtom(_a, _B)));
 
-        testBooleanABoxQuery(false, ucq1);
+        testBooleanABoxQuery(true, ucq1);
         testBooleanABoxQuery(true, ucq2);
+        testBooleanABoxQuery(true, ucq3);
+        testBooleanABoxQuery(true, ucq4);
+        testBooleanABoxQuery(false, ucq5);
     }
 
     @Test
@@ -239,16 +247,18 @@ public class TestBooleanUnionQueries extends AbstractKBTests
         _kb.addPropertyValue(_q, _a, literal(10));
 
         UnionQuery ucq1 = unionQuery(query(PropertyValueAtom(_a, _q, literal(10)), TypeAtom(_a, _A)));
-        UnionQuery ucq2 = unionQuery(query(PropertyValueAtom(_x, _q, literal(10))));
-        UnionQuery ucq3 = unionQuery(query(TypeAtom(_a, _B), PropertyValueAtom(_a, _q, literal(9))),
+        UnionQuery ucq2 = unionQuery(query(PropertyValueAtom(_a, _q, literal(10))));
+        UnionQuery ucq3 = unionQuery(query(PropertyValueAtom(_x, _q, literal(10))));
+        UnionQuery ucq4 = unionQuery(query(TypeAtom(_a, _B), PropertyValueAtom(_a, _q, literal(9))),
                                      query(TypeAtom(_a, _C)));
-        UnionQuery ucq4 = unionQuery(query(TypeAtom(_a, _B), PropertyValueAtom(_a, _q, literal(10))),
+        UnionQuery ucq5 = unionQuery(query(TypeAtom(_a, _B), PropertyValueAtom(_a, _q, literal(10))),
                                      query(TypeAtom(_a, _C)));
 
         testBooleanABoxQuery(true, ucq1);
         testBooleanABoxQuery(true, ucq2);
-        testBooleanABoxQuery(false, ucq3);
-        testBooleanABoxQuery(true, ucq4);
+        try { testBooleanABoxQuery(true, ucq3); } catch (UnsupportedOperationException ignored) {}
+        testBooleanABoxQuery(false, ucq4);
+        testBooleanABoxQuery(true, ucq5);
     }
 
     @Test

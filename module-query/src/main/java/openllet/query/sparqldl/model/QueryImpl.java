@@ -18,11 +18,16 @@ import java.util.Set;
 
 import openllet.aterm.ATermAppl;
 import openllet.aterm.ATermList;
+import openllet.aterm.pure.ATermApplImpl;
 import openllet.atom.OpenError;
+import openllet.core.DependencySet;
 import openllet.core.KnowledgeBase;
+import openllet.core.boxes.abox.Literal;
 import openllet.core.boxes.rbox.Role;
 import openllet.core.exceptions.InternalReasonerException;
 import openllet.core.utils.ATermUtils;
+
+import static openllet.core.utils.TermFactory.term;
 
 /**
  * <p>
@@ -278,7 +283,6 @@ public class QueryImpl extends UnionQueryImpl implements Query
 		}
 	}
 
-	// TODO this should die if called on a literal _node
 	private ATermAppl rollEdgeIn(final QueryPredicate allowed, final QueryAtom atom, final Set<ATermAppl> visited, final Collection<ATermAppl> stopList)
 	{
 		switch (atom.getPredicate())
@@ -287,13 +291,20 @@ public class QueryImpl extends UnionQueryImpl implements Query
 				final ATermAppl subj = atom.getArguments().get(0);
 				final ATermAppl pred = atom.getArguments().get(1);
 				final ATermAppl obj = atom.getArguments().get(2);
+				if (ATermUtils.isLiteral(obj))
+					throw new UnsupportedOperationException("Can not roll edge " + subj + " -" + pred + "-> " + obj +
+							" in because it ends on a literal.");
+				// We may not assume the existence of an inverse role. If this is not present, we'll create it.
 				Role inv = _kb.getRBox().getRole(pred).getInverse();
+				ATermAppl invPred;
 				if (inv == null)
 				{
-
-					inv = _kb.getRBox().addInverseRole();
+					invPred = term(pred + "__INV__");
+					_kb.getRBox().addRole(invPred);
+					_kb.getRBox().addInverseRole(pred, invPred, DependencySet.INDEPENDENT);
 				}
-				final ATermAppl invPred = inv.getName();
+				else
+					invPred = inv.getName();
 
 				if (ATermUtils.isVar(pred))
 					throw new InternalReasonerException("Variables as predicates are not supported yet");

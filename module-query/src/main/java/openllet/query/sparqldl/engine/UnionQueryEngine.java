@@ -34,9 +34,11 @@ public class UnionQueryEngine
         // TODO Lukas: check for cycles in each disjunct (i.e., implement supports function)
         // TODO Lukas: check assumption that disjuncts do not refer to the same undistinguished variables.
         // TODO Lukas: move the 4 steps to single functions
-
         if (_logger.isLoggable(Level.FINER))
             _logger.finer("Exec ABox query: " + q);
+
+        // PRELIMINARY CONSISTENCY CHECK
+        q.getKB().ensureConsistency();
 
         // 1. ROLL-UP
         UnionQuery rolledUpUnionQuery = new UnionQueryImpl(q);
@@ -118,7 +120,7 @@ public class UnionQueryEngine
                         newUCs.add(newUC);
                     _logger.finer("Added axiom '" + newUC + " ⊑ T' to T-Box");
                 }
-                copy.setInitialized(false); // TODO what does this do?
+                copy.setInitialized(false); // TODO Lukas: what does this do?
                 boolean isConsistent = copy.isConsistent();
                 // Case 2: No individuals in disjunction
                 if (disjunctionInd.isEmpty())
