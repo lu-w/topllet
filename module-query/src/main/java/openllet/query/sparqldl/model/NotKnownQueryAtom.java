@@ -72,6 +72,15 @@ public class NotKnownQueryAtom implements QueryAtom
 	}
 
 	@Override
+	public QueryAtom copy()
+	{
+		List<QueryAtom> notKnownAtoms = new ArrayList<>();
+		for (QueryAtom atom : _atoms)
+			notKnownAtoms.add(atom.copy());
+		return new NotKnownQueryAtom(notKnownAtoms);
+	}
+
+	@Override
 	public boolean equals(final Object obj)
 	{
 		if (!(obj instanceof NotKnownQueryAtom))

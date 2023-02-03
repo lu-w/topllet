@@ -376,6 +376,15 @@ public class UnionQueryImpl implements UnionQuery
     }
 
     @Override
+    public UnionQuery copy()
+    {
+        UnionQuery copy = new UnionQueryImpl(this);
+        for (Query q : _queries)
+            copy.addQuery((Query) q.copy());
+        return copy;
+    }
+
+    @Override
     public String toString()
     {
         return toString(false);

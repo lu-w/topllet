@@ -109,6 +109,12 @@ public class QueryAtomImpl implements QueryAtom
 	}
 
 	@Override
+	public QueryAtom copy()
+	{
+		return new QueryAtomImpl(this._predicate, this._arguments);
+	}
+
+	@Override
 	public int hashCode()
 	{
 		return 31 * _predicate.hashCode() + _arguments.hashCode();

@@ -55,4 +55,10 @@ public interface QueryAtom
 	 * @return a query atom with applied query binding
 	 */
 	QueryAtom apply(final ResultBinding binding);
+
+	/**
+	 * Returns a (deep) copy of this query atom.
+	 * @return a copy of this query atom
+	 */
+	QueryAtom copy();
 }

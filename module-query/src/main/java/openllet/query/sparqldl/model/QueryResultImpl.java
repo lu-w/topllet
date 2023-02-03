@@ -35,10 +35,10 @@ public class QueryResultImpl implements QueryResult
 	private Collection<ResultBinding> _bindings;
 
 	private final List<ATermAppl> _resultVars;
-	private final Query _query;
+	private final UnionQuery _query;
 	private final QueryParameters _parameters;
 
-	public QueryResultImpl(final Query query)
+	public QueryResultImpl(final UnionQuery query)
 	{
 		_query = query;
 		_parameters = query.getQueryParameters();

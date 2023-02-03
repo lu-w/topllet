@@ -184,4 +184,10 @@ public interface UnionQuery
      * @return True iff one of the disjuncts contains a cycle
      */
     boolean hasCycle();
+
+    /**
+     * Returns a new (deep) copy of this query.
+     * @return A copy of this query.
+     */
+    UnionQuery copy();
 }

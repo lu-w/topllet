@@ -76,6 +76,20 @@ public class UnionQueryAtom implements QueryAtom
 	}
 
 	@Override
+	public QueryAtom copy()
+	{
+		List<List<QueryAtom>> unionCopy = new ArrayList<>();
+		for (List<QueryAtom> disjunct : _union)
+		{
+			List<QueryAtom> disjunctCopy = new ArrayList<>();
+			for (QueryAtom atom : disjunct)
+				disjunctCopy.add(atom.copy());
+			unionCopy.add(disjunctCopy);
+		}
+		return new UnionQueryAtom(unionCopy);
+	}
+
+	@Override
 	public boolean equals(final Object obj)
 	{
 		if (!(obj instanceof UnionQueryAtom))

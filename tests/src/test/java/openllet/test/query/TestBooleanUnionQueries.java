@@ -312,6 +312,6 @@ public class TestBooleanUnionQueries extends AbstractKBTests
     @Test
     public void simpleDistinguishedVariableTest()
     {
-        // TODO but only once interface for this is done
+        // TODO Lukas: but only once interface for this is done
     }
 }

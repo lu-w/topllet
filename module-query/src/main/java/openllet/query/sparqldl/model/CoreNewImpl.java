@@ -104,6 +104,12 @@ public class CoreNewImpl implements Core
 	}
 
 	@Override
+	public QueryAtom copy()
+	{
+		return _atom.copy();
+	}
+
+	@Override
 	public int hashCode()
 	{
 		return _atom.hashCode() + 7 * _query.hashCode();

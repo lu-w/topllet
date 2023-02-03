@@ -44,17 +44,26 @@ public class UnionQueryEngine
         // 1. PRELIMINARY CONSISTENCY CHECK
         q.getKB().ensureConsistency();
 
-        // 2. ROLL-UP UCQ
+        // 2. TRY UNDER-APPROXIMATING SEMANTICS
+        boolean someDisjunctEntailed = execUnderapproximatingSemanticsBoolean(q);
+        if (someDisjunctEntailed)
+        {
+            if (_logger.isLoggable(Level.FINE))
+                _logger.fine("Under-approximation returned true, hence some query disjunct is entailed.");
+            return true;
+        }
+
+        // 3. ROLL-UP UCQ
         UnionQuery rolledUpUnionQuery = q.rollUp();
         if (_logger.isLoggable(Level.FINER))
             _logger.finer("Rolled-up union query: " + rolledUpUnionQuery);
 
-        // 3. CONVERT TO CNF
+        // 4. CONVERT TO CNF
         List<DisjunctiveQuery> cnfQuery = rolledUpUnionQuery.toCNF();
         if (_logger.isLoggable(Level.FINER))
             _logger.finer("Rolled-up union query in CNF is: " + cnfQuery);
 
-        // 4. CHECK ENTAILMENT FOR EACH CONJUNCT
+        // 5. CHECK ENTAILMENT FOR EACH CONJUNCT
         boolean isEntailed = isEntailed(cnfQuery, q.getKB());
         if (_logger.isLoggable(Level.FINE))
             _logger.fine("Query is " + (!isEntailed ? "not" : "") + " entailed.");
@@ -143,5 +152,23 @@ public class UnionQueryEngine
     public boolean supports(UnionQuery q)
     {
         return !q.hasCycle();
+    }
+
+    private boolean execUnderapproximatingSemanticsBoolean(UnionQuery q)
+    {
+        return !execUnderapproximatingSemantics(q).isEmpty();
+    }
+
+    private QueryResult execUnderapproximatingSemantics(UnionQuery q)
+    {
+        QueryResult result = new QueryResultImpl(q);
+        UnionQuery qCopy = q.copy();
+        for (Query conjunctiveQuery : qCopy.getQueries())
+        {
+            QueryResult conjunctiveQueryResult = QueryEngine.exec(conjunctiveQuery);
+            for (ResultBinding binding : conjunctiveQueryResult)
+                result.add(binding);
+        }
+        return result;
     }
 }

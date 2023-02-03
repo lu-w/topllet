@@ -18,7 +18,6 @@ import java.util.Set;
 
 import openllet.aterm.ATermAppl;
 import openllet.aterm.ATermList;
-import openllet.aterm.pure.ATermApplImpl;
 import openllet.atom.OpenError;
 import openllet.core.DependencySet;
 import openllet.core.KnowledgeBase;
@@ -564,5 +563,14 @@ public class QueryImpl extends UnionQueryImpl implements Query
 		}
 		// Recursive DFS for cycle identification
 		return cycle(nodes, binaryAtomsWithOnlyUndistVars);
+	}
+
+	@Override
+	public UnionQuery copy()
+	{
+		Query copy = new QueryImpl(this);
+		for (QueryAtom atom : _allAtoms)
+			copy.add(atom.copy());
+		return copy;
 	}
 }
