@@ -1,7 +1,7 @@
 package openllet.test.query;
 
 import openllet.aterm.ATermAppl;
-import openllet.query.sparqldl.engine.UnionQueryEngine;
+import openllet.query.sparqldl.engine.SimpleBooleanUnionQueryEngine;
 import openllet.query.sparqldl.model.*;
 import openllet.test.AbstractKBTests;
 import org.junit.Test;
@@ -40,8 +40,11 @@ public class TestBooleanUnionQueries extends AbstractKBTests
 
     private static void testBooleanABoxQuery(final boolean expected, final UnionQuery query)
     {
-        UnionQueryEngine engine = new UnionQueryEngine();
-        assertEquals(expected, engine.execBooleanABoxQuery(query));
+        SimpleBooleanUnionQueryEngine engine = new SimpleBooleanUnionQueryEngine();
+        QueryResult result = new QueryResultImpl(query);
+        if (expected)
+            result.add(new ResultBindingImpl());
+        assertEquals(result, engine.exec(query));
     }
 
     @Test
@@ -295,7 +298,7 @@ public class TestBooleanUnionQueries extends AbstractKBTests
                 query(PropertyValueAtom(_x, _p, _a), PropertyValueAtom(_z, _q, _a), PropertyValueAtom(_z, _r, _x)),
                 query(PropertyValueAtom(_x, _p, _y), PropertyValueAtom(_z, _q, _y), PropertyValueAtom(_z, _r, _x)));
 
-        UnionQueryEngine eng = new UnionQueryEngine();
+        SimpleBooleanUnionQueryEngine eng = new SimpleBooleanUnionQueryEngine();
         assertFalse(eng.supports(ucq1));
         assertTrue(eng.supports(ucq2));
         assertTrue(eng.supports(ucq3));

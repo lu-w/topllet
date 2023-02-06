@@ -11,7 +11,6 @@ import openllet.query.sparqldl.model.*;
 import openllet.shared.tools.Log;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -19,28 +18,13 @@ import java.util.logging.Logger;
 import static openllet.core.utils.TermFactory.TOP_OBJECT_PROPERTY;
 import static openllet.query.sparqldl.engine.QueryEngine.split;
 
-// TODO Lukas: do we need an interface for this? It does not make sense to inherit from AbstractABoxEngineWrapper, right?
-public class UnionQueryEngine
+public class SimpleBooleanUnionQueryEngine extends AbstractBooleanUnionQueryEngine
 {
-    public static final Logger _logger = Log.getLogger(UnionQueryEngine.class);
+    public static final Logger _logger = Log.getLogger(SimpleBooleanUnionQueryEngine.class);
 
-    public QueryResult execABoxQuery(UnionQuery q)
+    @Override
+    protected boolean execBooleanABoxQuery(UnionQuery q)
     {
-        // TODO Lukas
-        return new QueryResultImpl(q.getQueries().get(0));
-    }
-
-    public boolean execBooleanABoxQuery(UnionQuery q)
-    {
-        assert(supports(q));
-
-        if (_logger.isLoggable(Level.FINER))
-            _logger.finer("Exec ABox query: " + q);
-
-        if (_logger.isLoggable(Level.INFO) && q.disjunctsShareUndistVars())
-            _logger.info("Union query " + q + " contains disjuncts that share undistinguished variables. Will treat " +
-                    "them as different variables.");
-
         // 1. PRELIMINARY CONSISTENCY CHECK
         q.getKB().ensureConsistency();
 
@@ -64,11 +48,7 @@ public class UnionQueryEngine
             _logger.finer("Rolled-up union query in CNF is: " + cnfQuery);
 
         // 5. CHECK ENTAILMENT FOR EACH CONJUNCT
-        boolean isEntailed = isEntailed(cnfQuery, q.getKB());
-        if (_logger.isLoggable(Level.FINE))
-            _logger.fine("Query is " + (!isEntailed ? "not" : "") + " entailed.");
-
-        return isEntailed;
+        return isEntailed(cnfQuery, q.getKB());
     }
 
     /**
@@ -154,11 +134,6 @@ public class UnionQueryEngine
                 break;
         }
         return isEntailed;
-    }
-
-    public boolean supports(UnionQuery q)
-    {
-        return !q.hasCycle();
     }
 
     /**
