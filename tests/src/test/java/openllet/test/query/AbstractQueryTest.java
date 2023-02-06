@@ -52,6 +52,11 @@ public abstract class AbstractQueryTest extends AbstractKBTests
 		return atoms;
 	}
 
+	protected Query[] where(final Query... queries)
+	{
+		return queries;
+	}
+
 	protected Query ask(final QueryAtom... atoms)
 	{
 		return query(new ATermAppl[0], atoms);
@@ -82,8 +87,17 @@ public abstract class AbstractQueryTest extends AbstractKBTests
 
 	protected UnionQuery unionQuery(final Query... queries)
 	{
-		final UnionQuery q = new UnionQueryImpl(_kb, true);
+		final UnionQuery q = new UnionQueryImpl(_kb, false);
 		q.setQueries(Arrays.stream(queries).toList());
+		return q;
+	}
+
+	protected UnionQuery unionQuery(final ATermAppl[] vars, final Query[] queries)
+	{
+		final UnionQuery q = new UnionQueryImpl(_kb, false);
+		q.setQueries(Arrays.stream(queries).toList());
+		for (final ATermAppl var : vars)
+			q.addResultVar(var);
 		return q;
 	}
 
@@ -141,18 +155,24 @@ public abstract class AbstractQueryTest extends AbstractKBTests
 
 	protected void testUnionQuery(final UnionQuery query, final ATermAppl[]... values)
 	{
+		List<List<ATermAppl>> valuesList = new ArrayList<>();
+		for (ATermAppl[] answer : values)
+			valuesList.add(Arrays.stream(answer).toList());
+		testUnionQuery(query, valuesList);
+	}
+
+	protected void testUnionQuery(final UnionQuery query, final List<List<ATermAppl>> values)
+	{
 		final List<ATermAppl> resultVars = query.getResultVars();
 
 		final Map<List<ATermAppl>, Integer> answers = new HashMap<>();
-		for (final ATermAppl[] value : values)
+		for (final List<ATermAppl> answer : values)
 		{
-			final List<ATermAppl> answer = Arrays.asList(value);
 			final Integer count = answers.get(answer);
 			if (count == null)
 				answers.put(answer, 1);
 			else
 				answers.put(answer, count + 1);
-
 		}
 
 		UnionQueryExec engine = new SimpleUnionQueryEngine();
