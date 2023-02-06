@@ -44,7 +44,7 @@ public class UnionQueryEngine
         // 1. PRELIMINARY CONSISTENCY CHECK
         q.getKB().ensureConsistency();
 
-        // 2. TRY UNDER-APPROXIMATING SEMANTICS
+        // 2. TRY UNDER-APPROXIMATING SEMANTICS (TODO Lukas: check if this actually improves performance)
         boolean someDisjunctEntailed = execUnderapproximatingSemanticsBoolean(q);
         if (someDisjunctEntailed)
         {
@@ -95,18 +95,20 @@ public class UnionQueryEngine
                         disjunctionInd.add(new Pair<>(atomicQuery.getAtoms().get(0).getArguments().get(0),
                                 atomicQuery.getAtoms().get(0).getArguments().get(1)));
                     else
-                        // TODO Lukas: can we make the assumption that no two classes refer to the same undist. var?
-                        // probably yes, because we rolled everything up before, right?
                         disjunctionVar.add(atomicQuery.getAtoms().get(0).getArguments().get(1));
+                else if (_logger.isLoggable(Level.WARNING))
+                     _logger.warning("Found query atom of size >1, shouldn't happen after rolling-up: " + atomicQuery);
             // Case 1: No undistinguished variables in disjunction
             if (disjunctionVar.isEmpty())
             {
-                _logger.finer("No variables in disjunctive query -> checking type of disjunction in A-Box");
+                if (_logger.isLoggable(Level.FINER))
+                    _logger.finer("No variables in disjunctive query -> checking type of disjunction in A-Box");
                 isEntailed = kb.isType(disjunctionInd);
             }
             else
             {
-                _logger.finer("Variables in disjunctive query found");
+                if (_logger.isLoggable(Level.FINER))
+                    _logger.finer("Variables in disjunctive query found");
                 final ABox copy = kb.getABox().copy();
                 final Role topObjectRole = kb.getRole(TOP_OBJECT_PROPERTY);
                 List<ATermAppl> newUCs = new ArrayList<>();
@@ -116,26 +118,31 @@ public class UnionQueryEngine
                     final boolean added = topObjectRole.addDomain(newUC, DependencySet.INDEPENDENT);
                     if (added)
                         newUCs.add(newUC);
-                    _logger.finer("Added axiom '" + newUC + " ⊑ T' to T-Box");
+                    if (_logger.isLoggable(Level.FINER))
+                        _logger.finer("Added axiom '" + newUC + " ⊑ T' to T-Box");
                 }
                 copy.setInitialized(false);
                 boolean isConsistent = copy.isConsistent();
                 // Case 2: No individuals in disjunction
                 if (disjunctionInd.isEmpty())
                 {
-                    _logger.finer("No individuals in disjunctive query -> consistency of the extended T-Box");
+                    if (_logger.isLoggable(Level.FINER))
+                        _logger.finer("No individuals in disjunctive query -> consistency of the extended T-Box");
                     isEntailed = !isConsistent;
                 }
                 // Case 3: Both individuals and undistinguished variables in disjunction
                 else
                 {
-                    _logger.finer("Also found individuals in disjunctive query -> type of disjunction in " +
-                            "A-Box wrt. extended T-Box");
+                    if (_logger.isLoggable(Level.FINER))
+                        _logger.finer("Also found individuals in disjunctive query -> type of disjunction in " +
+                                "A-Box wrt. extended T-Box");
                     // we only need to check for the type if the T-Box axioms do not lead to inconsistency because if
                     // they do, we have found some axiom in the disjunction that is entailed and can continue the loop
                     if (isConsistent)
                     {
-                        _logger.finest("T-Box is consistent -> forced to check type " + disjunctionInd + " in A-Box.");
+                        if (_logger.isLoggable(Level.FINER))
+                            _logger.finer("T-Box is consistent -> forced to check type " + disjunctionInd + " in " +
+                                    "A-Box.");
                         isEntailed = copy.isType(disjunctionInd);
                     }
                 }
@@ -154,11 +161,23 @@ public class UnionQueryEngine
         return !q.hasCycle();
     }
 
+    /**
+     * Checks whether we find one of the queries of the disjunction is separately entailed - if so, the whole
+     * disjunction is entailed.
+     * @param q The query to check
+     * @return True only if the query is entailed
+     */
     private boolean execUnderapproximatingSemanticsBoolean(UnionQuery q)
     {
         return !execUnderapproximatingSemantics(q).isEmpty();
     }
 
+    /**
+     * Searches for answers to the disjunctive query by combining all separate answers from its disjuncts. This is an
+     * under-approximating semantics.
+     * @param q The query to check
+     * @return The answers for all its disjuncts
+     */
     private QueryResult execUnderapproximatingSemantics(UnionQuery q)
     {
         QueryResult result = new QueryResultImpl(q);
