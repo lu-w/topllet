@@ -31,7 +31,7 @@ import openllet.sparqlowl.parser.test.ParserTest;
 		TestParameterizedQuery.class, //
 		TestGroundBooleanQueryComponents.class, //
 		TestNegatedQueries.class, //
-		TestUnionQueries.class, //
+		TestNaiveUnionQueries.class, //
 		TestMiscQueries.class, //
 		TestMiscSPARQL.class, //
 		SparqlDawgTestSuite.class, //

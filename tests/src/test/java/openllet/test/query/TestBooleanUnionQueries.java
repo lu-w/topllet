@@ -3,10 +3,7 @@ package openllet.test.query;
 import openllet.aterm.ATermAppl;
 import openllet.query.sparqldl.engine.SimpleBooleanUnionQueryEngine;
 import openllet.query.sparqldl.model.*;
-import openllet.test.AbstractKBTests;
 import org.junit.Test;
-
-import java.util.Arrays;
 
 import static openllet.core.utils.TermFactory.*;
 import static openllet.core.utils.TermFactory.TOP;
@@ -14,39 +11,8 @@ import static openllet.query.sparqldl.model.QueryAtomFactory.PropertyValueAtom;
 import static openllet.query.sparqldl.model.QueryAtomFactory.TypeAtom;
 import static org.junit.Assert.*;
 
-public class TestBooleanUnionQueries extends AbstractKBTests
+public class TestBooleanUnionQueries extends AbstractQueryTest
 {
-    private static final ATermAppl _x = var("x");
-    private static final ATermAppl _y = var("y");
-    private static final ATermAppl _z = var("z");
-    private static final ATermAppl _x1 = var("x1");
-    private static final ATermAppl _y1 = var("y1");
-    private static final ATermAppl _z1 = var("z1");
-
-    private Query query(final QueryAtom... atoms)
-    {
-        final Query q = new QueryImpl(_kb, true);
-        for (final QueryAtom atom : atoms)
-            q.add(atom);
-        return q;
-    }
-
-    private UnionQuery unionQuery(final Query... queries)
-    {
-        final UnionQuery q = new UnionQueryImpl(_kb, true);
-        q.setQueries(Arrays.stream(queries).toList());
-        return q;
-    }
-
-    private static void testBooleanABoxQuery(final boolean expected, final UnionQuery query)
-    {
-        SimpleBooleanUnionQueryEngine engine = new SimpleBooleanUnionQueryEngine();
-        QueryResult result = new QueryResultImpl(query);
-        if (expected)
-            result.add(new ResultBindingImpl());
-        assertEquals(result, engine.exec(query));
-    }
-
     @Test
     public void testBooleanQueries1()
     {
@@ -63,39 +29,39 @@ public class TestBooleanUnionQueries extends AbstractKBTests
         _kb.addPropertyValue(_r, _a, _b);
 
         // UCQ 1: B(x) ^ r(x,b) v C(x) ^ r(x,b) -> is entailed but second disjunct can never be true
-        UnionQuery ucq1 = unionQuery(query(TypeAtom(_x, _B), PropertyValueAtom(_x, _r, _b)),
-                                     query(TypeAtom(_y, _C), PropertyValueAtom(_y, _r, _b)));
+        UnionQuery ucq1 = unionQuery(query(TypeAtom(x, _B), PropertyValueAtom(x, _r, _b)),
+                                     query(TypeAtom(y, _C), PropertyValueAtom(y, _r, _b)));
 
         // UCQ 2: B(x) ^ p(x,b) v C(x) ^ r(x,b) -> not entailed
-        UnionQuery ucq2 = unionQuery(query(TypeAtom(_x, _B), PropertyValueAtom(_x, _p, _b)),
-                                     query(TypeAtom(_y, _C), PropertyValueAtom(_y, _r, _b)));
+        UnionQuery ucq2 = unionQuery(query(TypeAtom(x, _B), PropertyValueAtom(x, _p, _b)),
+                                     query(TypeAtom(y, _C), PropertyValueAtom(y, _r, _b)));
 
         // UCQ 3: B(a) ^ r(a,x) v D(z) ^ r(y,z) -> entailed (both disjuncts)
-        UnionQuery ucq3 = unionQuery(query(TypeAtom(_a, _B), PropertyValueAtom(_a, _p, _x)),
-                                     query(TypeAtom(_z, _D), PropertyValueAtom(_y, _r, _z)));
+        UnionQuery ucq3 = unionQuery(query(TypeAtom(_a, _B), PropertyValueAtom(_a, _p, x)),
+                                     query(TypeAtom(z, _D), PropertyValueAtom(y, _r, z)));
 
         // UCQ 4: B(a) ^ r(a,x) v E(z) ^ r(y,z) -> entailed (only first disjunct)
-        UnionQuery ucq4 = unionQuery(query(TypeAtom(_a, _B), PropertyValueAtom(_a, _p, _x)),
-                                     query(TypeAtom(_z, _E), PropertyValueAtom(_y, _r, _z)));
+        UnionQuery ucq4 = unionQuery(query(TypeAtom(_a, _B), PropertyValueAtom(_a, _p, x)),
+                                     query(TypeAtom(z, _E), PropertyValueAtom(y, _r, z)));
 
         // UCQ 5: B(a) ^ r(a,x) ^ p(y,z) ^ D(y) v C(a) v B(a) ^ p(a,x) ^ r(a,y) ^ D(b) -> entailed
         UnionQuery ucq5 = unionQuery(
-                query(TypeAtom(_a, _B), PropertyValueAtom(_a, _r, _x), PropertyValueAtom(_y, _p, _z), TypeAtom(_y, _D)),
+                query(TypeAtom(_a, _B), PropertyValueAtom(_a, _r, x), PropertyValueAtom(y, _p, z), TypeAtom(y, _D)),
                 query(TypeAtom(_a, _C)),
-                query(TypeAtom(_a, _B), PropertyValueAtom(_a, _p, _x1), PropertyValueAtom(_a, _r, _y1), TypeAtom(_b,
+                query(TypeAtom(_a, _B), PropertyValueAtom(_a, _p, x1), PropertyValueAtom(_a, _r, y1), TypeAtom(_b,
                         _D))
         );
 
         // UCQ 6: B(a) ^ r(a,x) ^ p(y,z) ^ D(y) v B(a) ^ p(a,x) ^ r(a,y) ^ D(b) -> entailed
         UnionQuery ucq6 = unionQuery(
-                query(TypeAtom(_a, _B), PropertyValueAtom(_a, _r, _x), PropertyValueAtom(_y, _p, _z), TypeAtom(_y, _D)),
-                query(TypeAtom(_a, _B), PropertyValueAtom(_a, _p, _x1), PropertyValueAtom(_a, _r, _y1), TypeAtom(_b,
+                query(TypeAtom(_a, _B), PropertyValueAtom(_a, _r, x), PropertyValueAtom(y, _p, z), TypeAtom(y, _D)),
+                query(TypeAtom(_a, _B), PropertyValueAtom(_a, _p, x1), PropertyValueAtom(_a, _r, y1), TypeAtom(_b,
                         _D))
         );
 
         // UCQ 7: B(a) ^ r(a,x) ^ p(y,z) ^ D(y) v C(a) -> not entailed (_a can never be in _C)
         UnionQuery ucq7 = unionQuery(
-                query(TypeAtom(_a, _B), PropertyValueAtom(_a, _r, _x), PropertyValueAtom(_y, _p, _z), TypeAtom(_y, _D)),
+                query(TypeAtom(_a, _B), PropertyValueAtom(_a, _r, x), PropertyValueAtom(y, _p, z), TypeAtom(y, _D)),
                 query(TypeAtom(_a, _C))
         );
 
@@ -106,22 +72,22 @@ public class TestBooleanUnionQueries extends AbstractKBTests
         UnionQuery ucq9 = unionQuery(query(TypeAtom(_a, _B)), query(TypeAtom(_a, _C)));
 
         // UCQ 10: p(x,y) -> entailed
-        UnionQuery ucq10 = unionQuery(query(PropertyValueAtom(_x, _p, _y)));
+        UnionQuery ucq10 = unionQuery(query(PropertyValueAtom(x, _p, y)));
 
         // UCQ 11: p(x,y) -> not entailed
-        UnionQuery ucq11 = unionQuery(query(PropertyValueAtom(_x, _q, _y)));
+        UnionQuery ucq11 = unionQuery(query(PropertyValueAtom(x, _q, y)));
 
-        testBooleanABoxQuery(true, ucq1);
-        testBooleanABoxQuery(false, ucq2);
-        testBooleanABoxQuery(true, ucq3);
-        testBooleanABoxQuery(true, ucq4);
-        testBooleanABoxQuery(true, ucq5);
-        testBooleanABoxQuery(true, ucq6);
-        testBooleanABoxQuery(false, ucq7);
-        testBooleanABoxQuery(false, ucq8);
-        testBooleanABoxQuery(true, ucq9);
-        testBooleanABoxQuery(true, ucq10);
-        testBooleanABoxQuery(false, ucq11);
+        testUnionQuery(ucq1, true);
+        testUnionQuery(ucq2, false);
+        testUnionQuery(ucq3, true);
+        testUnionQuery(ucq4, true);
+        testUnionQuery(ucq5, true);
+        testUnionQuery(ucq6, true);
+        testUnionQuery(ucq7, false);
+        testUnionQuery(ucq8, false);
+        testUnionQuery(ucq9, true);
+        testUnionQuery(ucq10, true);
+        testUnionQuery(ucq11, false);
     }
 
     @Test
@@ -141,9 +107,9 @@ public class TestBooleanUnionQueries extends AbstractKBTests
                                      query(TypeAtom(_a, not(_C))),
                                      query(TypeAtom(_b, _A)));
 
-        testBooleanABoxQuery(false, ucq1);
-        testBooleanABoxQuery(true, ucq2);
-        testBooleanABoxQuery(true, ucq3);
+        testUnionQuery(ucq1, false);
+        testUnionQuery(ucq2, true);
+        testUnionQuery(ucq3, true);
     }
 
     @Test
@@ -167,8 +133,8 @@ public class TestBooleanUnionQueries extends AbstractKBTests
         _kb.addType(oedipus, Patricide);
         _kb.addType(thersandros, not(Patricide));
 
-        UnionQuery ucq1 = unionQuery(query(TypeAtom(_x, Patricide), PropertyValueAtom(iokaste, hasChild, _x),
-                TypeAtom(_y, not(Patricide)), PropertyValueAtom(_x, hasChild, _y)));
+        UnionQuery ucq1 = unionQuery(query(TypeAtom(x, Patricide), PropertyValueAtom(iokaste, hasChild, x),
+                TypeAtom(y, not(Patricide)), PropertyValueAtom(x, hasChild, y)));
 
         UnionQuery ucq2 = unionQuery(query(TypeAtom(oedipus, Patricide), PropertyValueAtom(iokaste, hasChild, oedipus),
                 TypeAtom(polyneikes, not(Patricide)), PropertyValueAtom(oedipus, hasChild, polyneikes)));
@@ -182,14 +148,14 @@ public class TestBooleanUnionQueries extends AbstractKBTests
                         TypeAtom(thersandros, not(Patricide)), PropertyValueAtom(polyneikes, hasChild,
                         thersandros))
         );
-        UnionQuery ucq5 = unionQuery(query(TypeAtom(_x, Patricide), PropertyValueAtom(_z, hasChild, _x),
-                TypeAtom(_y, not(Patricide)), PropertyValueAtom(_x, hasChild, _y)));
+        UnionQuery ucq5 = unionQuery(query(TypeAtom(x, Patricide), PropertyValueAtom(z, hasChild, x),
+                TypeAtom(y, not(Patricide)), PropertyValueAtom(x, hasChild, y)));
 
-        testBooleanABoxQuery(true, ucq1);
-        testBooleanABoxQuery(false, ucq2);
-        testBooleanABoxQuery(false, ucq3);
-        testBooleanABoxQuery(true, ucq4);
-        testBooleanABoxQuery(true, ucq5);
+        testUnionQuery(ucq1, true);
+        testUnionQuery(ucq2, false);
+        testUnionQuery(ucq3, false);
+        testUnionQuery(ucq4, true);
+        testUnionQuery(ucq5, true);
     }
 
     @Test
@@ -203,22 +169,22 @@ public class TestBooleanUnionQueries extends AbstractKBTests
 
         // _kb.addSubClass(_A, or(_B, _C)); // TODO Lukas: this leads to SEVERE warning: Invalid _clash dependency
 
-        UnionQuery ucq1 = unionQuery(query(TypeAtom(_x, _A)),
-                                     query(TypeAtom(_x, _B)));
-        UnionQuery ucq2 = unionQuery(query(TypeAtom(_x, _A)),
-                                     query(TypeAtom(_y, _B)));
+        UnionQuery ucq1 = unionQuery(query(TypeAtom(x, _A)),
+                                     query(TypeAtom(x, _B)));
+        UnionQuery ucq2 = unionQuery(query(TypeAtom(x, _A)),
+                                     query(TypeAtom(y, _B)));
         UnionQuery ucq3 = unionQuery(query(TypeAtom(_a, _A)),
                                      query(TypeAtom(_b, _B)));
-        UnionQuery ucq4 = unionQuery(query(TypeAtom(_x, _A)),
+        UnionQuery ucq4 = unionQuery(query(TypeAtom(x, _A)),
                                      query(TypeAtom(_b, _B)));
         UnionQuery ucq5 = unionQuery(query(TypeAtom(_b, _A)),
                                      query(TypeAtom(_a, _B)));
 
-        testBooleanABoxQuery(true, ucq1);
-        testBooleanABoxQuery(true, ucq2);
-        testBooleanABoxQuery(true, ucq3);
-        testBooleanABoxQuery(true, ucq4);
-        testBooleanABoxQuery(false, ucq5);
+        testUnionQuery(ucq1, true);
+        testUnionQuery(ucq2, true);
+        testUnionQuery(ucq3, true);
+        testUnionQuery(ucq4, true);
+        testUnionQuery(ucq5, false);
     }
 
     @Test
@@ -234,13 +200,13 @@ public class TestBooleanUnionQueries extends AbstractKBTests
         _kb.addType(_a, _A);
         _kb.addPropertyValue(_r, _a, _b);
 
-        UnionQuery ucq1 = unionQuery(query(TypeAtom(_x, _C)),
-                                     query(TypeAtom(_y, _D)));
+        UnionQuery ucq1 = unionQuery(query(TypeAtom(x, _C)),
+                                     query(TypeAtom(y, _D)));
         UnionQuery ucq2 = unionQuery(query(TypeAtom(_a, _C)),
                                      query(TypeAtom(_b, _D)));
 
-        testBooleanABoxQuery(true, ucq1);
-        testBooleanABoxQuery(true, ucq2);
+        testUnionQuery(ucq1, true);
+        testUnionQuery(ucq2, true);
     }
 
     @Test
@@ -257,17 +223,17 @@ public class TestBooleanUnionQueries extends AbstractKBTests
 
         UnionQuery ucq1 = unionQuery(query(PropertyValueAtom(_a, _q, literal(10)), TypeAtom(_a, _A)));
         UnionQuery ucq2 = unionQuery(query(PropertyValueAtom(_a, _q, literal(10))));
-        UnionQuery ucq3 = unionQuery(query(PropertyValueAtom(_x, _q, literal(10))));
+        UnionQuery ucq3 = unionQuery(query(PropertyValueAtom(x, _q, literal(10))));
         UnionQuery ucq4 = unionQuery(query(TypeAtom(_a, _B), PropertyValueAtom(_a, _q, literal(9))),
                                      query(TypeAtom(_a, _C)));
         UnionQuery ucq5 = unionQuery(query(TypeAtom(_a, _B), PropertyValueAtom(_a, _q, literal(10))),
                                      query(TypeAtom(_a, _C)));
 
-        testBooleanABoxQuery(true, ucq1);
-        testBooleanABoxQuery(true, ucq2);
-        try { testBooleanABoxQuery(true, ucq3); } catch (UnsupportedOperationException ignored) {}
-        testBooleanABoxQuery(false, ucq4);
-        testBooleanABoxQuery(true, ucq5);
+        testUnionQuery(ucq1, true);
+        testUnionQuery(ucq2, true);
+        try { testUnionQuery(ucq3, true); } catch (UnsupportedOperationException ignored) {}
+        testUnionQuery(ucq4, false);
+        testUnionQuery(ucq5, true);
     }
 
     @Test
@@ -277,26 +243,26 @@ public class TestBooleanUnionQueries extends AbstractKBTests
         individuals(_a, _b);
         objectProperties(_p, _q, _r);
 
-        UnionQuery ucq1 = unionQuery(query(PropertyValueAtom(_x, _p, _y), PropertyValueAtom(_z, _q, _y),
-                PropertyValueAtom(_z, _r, _x)));
-        UnionQuery ucq2 = unionQuery(query(PropertyValueAtom(_x, _p, _y), PropertyValueAtom(_z, _q, _y),
-                PropertyValueAtom(_a, _r, _x)));
-        UnionQuery ucq3 = unionQuery(query(PropertyValueAtom(_x, _p, _y), PropertyValueAtom(_z, _q, _y)),
-                query(PropertyValueAtom(_y, _r, _x)));
-        UnionQuery ucq4 = unionQuery(query(PropertyValueAtom(_x, _p, _y), PropertyValueAtom(_y, _q, _z),
-                PropertyValueAtom(_z, _r, _x)));
-        UnionQuery ucq5 = unionQuery(query(PropertyValueAtom(_x, _p, _y), PropertyValueAtom(_y, _q, _z),
-                PropertyValueAtom(_z, _r, _z)));
-        UnionQuery ucq6 = unionQuery(query(PropertyValueAtom(_x, _p, _y), PropertyValueAtom(_y, _q, _z)));
-        UnionQuery ucq7 = unionQuery(query(PropertyValueAtom(_x, _p, _y), PropertyValueAtom(_y, _p, _z),
-                PropertyValueAtom(_z, _p, _x)));
-        UnionQuery ucq8 = unionQuery(query(PropertyValueAtom(_x1, _p, _y1), PropertyValueAtom(_y1, _p, _z1),
-                PropertyValueAtom(_x, _p, _y), PropertyValueAtom(_y, _p, _z), PropertyValueAtom(_z, _p, _x)));
-        UnionQuery ucq9 = unionQuery(query(PropertyValueAtom(_x, _p, _a), PropertyValueAtom(_z, _q, _a),
-                PropertyValueAtom(_z, _r, _x)));
+        UnionQuery ucq1 = unionQuery(query(PropertyValueAtom(x, _p, y), PropertyValueAtom(z, _q, y),
+                PropertyValueAtom(z, _r, x)));
+        UnionQuery ucq2 = unionQuery(query(PropertyValueAtom(x, _p, y), PropertyValueAtom(z, _q, y),
+                PropertyValueAtom(_a, _r, x)));
+        UnionQuery ucq3 = unionQuery(query(PropertyValueAtom(x, _p, y), PropertyValueAtom(z, _q, y)),
+                query(PropertyValueAtom(y, _r, x)));
+        UnionQuery ucq4 = unionQuery(query(PropertyValueAtom(x, _p, y), PropertyValueAtom(y, _q, z),
+                PropertyValueAtom(z, _r, x)));
+        UnionQuery ucq5 = unionQuery(query(PropertyValueAtom(x, _p, y), PropertyValueAtom(y, _q, z),
+                PropertyValueAtom(z, _r, z)));
+        UnionQuery ucq6 = unionQuery(query(PropertyValueAtom(x, _p, y), PropertyValueAtom(y, _q, z)));
+        UnionQuery ucq7 = unionQuery(query(PropertyValueAtom(x, _p, y), PropertyValueAtom(y, _p, z),
+                PropertyValueAtom(z, _p, x)));
+        UnionQuery ucq8 = unionQuery(query(PropertyValueAtom(x1, _p, y1), PropertyValueAtom(y1, _p, z1),
+                PropertyValueAtom(x, _p, y), PropertyValueAtom(y, _p, z), PropertyValueAtom(z, _p, x)));
+        UnionQuery ucq9 = unionQuery(query(PropertyValueAtom(x, _p, _a), PropertyValueAtom(z, _q, _a),
+                PropertyValueAtom(z, _r, x)));
         UnionQuery ucq10 = unionQuery(
-                query(PropertyValueAtom(_x, _p, _a), PropertyValueAtom(_z, _q, _a), PropertyValueAtom(_z, _r, _x)),
-                query(PropertyValueAtom(_x, _p, _y), PropertyValueAtom(_z, _q, _y), PropertyValueAtom(_z, _r, _x)));
+                query(PropertyValueAtom(x, _p, _a), PropertyValueAtom(z, _q, _a), PropertyValueAtom(z, _r, x)),
+                query(PropertyValueAtom(x, _p, y), PropertyValueAtom(z, _q, y), PropertyValueAtom(z, _r, x)));
 
         SimpleBooleanUnionQueryEngine eng = new SimpleBooleanUnionQueryEngine();
         assertFalse(eng.supports(ucq1));
@@ -309,12 +275,5 @@ public class TestBooleanUnionQueries extends AbstractKBTests
         assertFalse(eng.supports(ucq8));
         assertTrue(eng.supports(ucq9));
         assertFalse(eng.supports(ucq10));
-    }
-
-
-    @Test
-    public void simpleDistinguishedVariableTest()
-    {
-        // TODO Lukas: but only once interface for this is done
     }
 }
