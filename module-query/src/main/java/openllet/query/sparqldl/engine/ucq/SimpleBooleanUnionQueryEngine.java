@@ -62,7 +62,6 @@ public class SimpleBooleanUnionQueryEngine extends AbstractBooleanUnionQueryEngi
         return isEntailed(cnfQuery, q.getKB());
     }
 
-
     @Override
     protected boolean execBooleanABoxQuery(CNFQuery q)
     {

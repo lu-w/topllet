@@ -189,7 +189,8 @@ public abstract class AbstractQueryTest extends AbstractKBTests
 				answers.put(answer, count + 1);
 		}
 
-		UnionQueryExec engine = new BindingIterationUnionQueryEngine();
+		BindingIterationUnionQueryEngine engine = new BindingIterationUnionQueryEngine();
+		engine.setBindingTime(BindingIterationUnionQueryEngine.BindingTime.AFTER_CNF);
 		final QueryResult result = engine.exec(query);
 		for (final ResultBinding binding : result)
 		{
