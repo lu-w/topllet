@@ -30,10 +30,6 @@ abstract public class AbstractBooleanUnionQueryEngine implements UnionQueryExec
         if (_logger.isLoggable(Level.FINER))
             _logger.finer("Exec Boolean ABox query: " + q);
 
-        if (_logger.isLoggable(Level.INFO) && q.disjunctsShareUndistVars())
-            _logger.info("Union query " + q + " contains disjuncts that share undistinguished variables. Will treat " +
-                    "them as different variables.");
-
         KnowledgeBase kb = q.getKB();
         final long satCount = kb.getABox().getStats()._satisfiabilityCount;
         final long consCount = kb.getABox().getStats()._consistencyCount;
@@ -51,7 +47,7 @@ abstract public class AbstractBooleanUnionQueryEngine implements UnionQueryExec
             _logger.fine("Total time: " + timer.getLast() + " ms.");
             _logger.fine("Total satisfiability operations: " + (kb.getABox().getStats()._satisfiabilityCount - satCount));
             _logger.fine("Total consistency operations: " + (kb.getABox().getStats()._consistencyCount - consCount));
-            _logger.fine("Result of Boolean union query : " + (isEntailed ? "entailed" : "not entailed"));
+            _logger.fine("Result of Boolean union query: " + (isEntailed ? "entailed" : "not entailed"));
         }
 
         return results;

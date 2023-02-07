@@ -7,10 +7,9 @@
 package openllet.test.query;
 
 import openllet.aterm.ATermAppl;
-import openllet.core.utils.ATermUtils;
 import openllet.query.sparqldl.engine.QueryEngine;
 import openllet.query.sparqldl.engine.SimpleBooleanUnionQueryEngine;
-import openllet.query.sparqldl.engine.SimpleUnionQueryEngine;
+import openllet.query.sparqldl.engine.BindingIterationUnionQueryEngine;
 import openllet.query.sparqldl.engine.UnionQueryExec;
 import openllet.query.sparqldl.model.*;
 import openllet.query.sparqldl.model.UnionQuery.VarType;
@@ -95,9 +94,17 @@ public abstract class AbstractQueryTest extends AbstractKBTests
 	protected UnionQuery unionQuery(final ATermAppl[] vars, final Query[] queries)
 	{
 		final UnionQuery q = new UnionQueryImpl(_kb, false);
-		q.setQueries(Arrays.stream(queries).toList());
 		for (final ATermAppl var : vars)
+		{
 			q.addResultVar(var);
+			q.addDistVar(var, VarType.INDIVIDUAL);
+			for (Query query : queries)
+			{
+				query.addResultVar(var);
+				query.addDistVar(var, VarType.INDIVIDUAL);
+			}
+		}
+		q.setQueries(Arrays.stream(queries).toList());
 		return q;
 	}
 
@@ -175,7 +182,7 @@ public abstract class AbstractQueryTest extends AbstractKBTests
 				answers.put(answer, count + 1);
 		}
 
-		UnionQueryExec engine = new SimpleUnionQueryEngine();
+		UnionQueryExec engine = new BindingIterationUnionQueryEngine();
 		final QueryResult result = engine.exec(query);
 		for (final ResultBinding binding : result)
 		{

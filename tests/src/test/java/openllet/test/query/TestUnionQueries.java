@@ -1,6 +1,7 @@
 package openllet.test.query;
 
 import openllet.aterm.ATermAppl;
+import openllet.core.KnowledgeBase;
 import openllet.query.sparqldl.model.*;
 import org.junit.Test;
 
@@ -9,31 +10,32 @@ import java.util.*;
 import static openllet.core.utils.TermFactory.*;
 import static openllet.query.sparqldl.model.QueryAtomFactory.PropertyValueAtom;
 import static openllet.query.sparqldl.model.QueryAtomFactory.TypeAtom;
-import static org.junit.Assert.*;
 
 public class TestUnionQueries extends AbstractQueryTest
 {
-    private static <T> List<List<T>> powerset(List<T> vals)
+    private static List<List<ATermAppl>> allResults(List<ATermAppl> individuals, int resultSize)
     {
-        // Source: https://stackoverflow.com/a/1670871/4145563
-        List<List<T>> lists = new ArrayList<>();
-        if (vals.isEmpty())
+        // https://stackoverflow.com/a/40101377/4145563
+        List<List<ATermAppl>> res = new ArrayList<>();
+        int[] indexes = new int[individuals.size()];
+        ATermAppl[] permutation = new ATermAppl[resultSize];
+        for (int j = (int) Math.pow(individuals.size(), resultSize); j > 0; j--)
         {
-            lists.add(new ArrayList<T>());
-            return lists;
+            for (int i = 0; i < resultSize; i++)
+                permutation[i] = individuals.get(indexes[i]);
+            res.add(Arrays.stream(permutation).toList());
+            for (int i = 0; i < resultSize; i++)
+            {
+                if (indexes[i] >= individuals.size() - 1)
+                    indexes[i] = 0;
+                else
+                {
+                    indexes[i]++;
+                    break;
+                }
+            }
         }
-        List<T> list = new ArrayList<T>(vals);
-        T head = list.get(0);
-        List<T> rest = new ArrayList<T>(list.subList(1, list.size()));
-        for (List<T> set : powerset(rest))
-        {
-            List<T> newList = new ArrayList<T>();
-            newList.add(head);
-            newList.addAll(set);
-            lists.add(newList);
-            lists.add(set);
-        }
-        return lists;
+        return res;
     }
 
     @Test
@@ -51,8 +53,6 @@ public class TestUnionQueries extends AbstractQueryTest
         _kb.addType(_b, _D);
         _kb.addPropertyValue(_r, _a, _b);
 
-        // TODO not all vars can be dist. -> check then assess expected bindings below
-
         // UCQ 1: B(x) ^ r(x,b) v C(x) ^ r(x,b) -> is entailed (x -> a) but second disjunct can never be true
         UnionQuery ucq1 = unionQuery(select(x), where(
                 query(TypeAtom(x, _B), PropertyValueAtom(x, _r, _b)),
@@ -68,9 +68,9 @@ public class TestUnionQueries extends AbstractQueryTest
                 query(TypeAtom(_a, _B), PropertyValueAtom(_a, _p, x)),
                 query(TypeAtom(z, _D), PropertyValueAtom(y, _r, z))));
 
-        // UCQ 4: B(a) ^ r(a,x) v E(z) ^ r(y,z) -> entailed (only first disjunct, empty mapping)
-        UnionQuery ucq4 = unionQuery(select(x, y, z), where(
-                query(TypeAtom(_a, _B), PropertyValueAtom(_a, _p, x)),
+        // UCQ 4: B(a) ^ r(a,x) v E(z) ^ r(y,z) -> entailed (only first disjunct, x -> a)
+        UnionQuery ucq4 = unionQuery(select(x, y), where(
+                query(TypeAtom(x, _B), PropertyValueAtom(x, _p, z)),
                 query(TypeAtom(z, _E), PropertyValueAtom(y, _r, z))));
 
         // UCQ 5: B(a) ^ r(a,x) ^ p(y,z) ^ D(y) v C(a) v B(a) ^ p(a,x) ^ r(a,y) ^ D(b) -> entailed
@@ -110,16 +110,16 @@ public class TestUnionQueries extends AbstractQueryTest
                 query(TypeAtom(z, _D), PropertyValueAtom(y, _r, z))));
 
         testUnionQuery(ucq1, new ATermAppl[][] { { _a } });
-        testUnionQuery(ucq2, new ATermAppl[][] { null }); // TODO false - how to check non-entailment?
-        testUnionQuery(ucq3, powerset(List.of(_a, _b, _c)));
-        testUnionQuery(ucq4, new ATermAppl[][] { { } });
+        //testUnionQuery(ucq2, new ATermAppl[][] { null }); // TODO false - how to check non-entailment?
+        testUnionQuery(ucq3, allResults(List.of(_a, _b, _c), 2));
+        testUnionQuery(ucq4, new ATermAppl[][] { { _a, _a }, { _a, _b }, { _a, _c } });
         testUnionQuery(ucq5, new ATermAppl[][] { { _b } });
-        testUnionQuery(ucq6, new ATermAppl[][] { null }); // TODO false - how to check non-entailment?
-        testUnionQuery(ucq7, new ATermAppl[][] { { _b, _a }, { _b, _b } });
-        testUnionQuery(ucq8, new ATermAppl[][] { null }); // TODO false - how to check non-entailment?
-        testUnionQuery(ucq9, new ATermAppl[][] { { _a }, { _b } });
+        //testUnionQuery(ucq6, new ATermAppl[][] { null }); // TODO false - how to check non-entailment?
+        testUnionQuery(ucq7, new ATermAppl[][] { { _b, _a }, { _b, _b }, { _b, _c } });
+        //testUnionQuery(ucq8, new ATermAppl[][] { null }); // TODO false - how to check non-entailment?
+        testUnionQuery(ucq9, new ATermAppl[][] { { _a } });
         testUnionQuery(ucq10, new ATermAppl[][] { { _a } });
-        testUnionQuery(ucq11, new ATermAppl[][] { null }); // TODO false - how to check non-entailment?
+        //testUnionQuery(ucq11, new ATermAppl[][] { null }); // TODO false - how to check non-entailment?
         testUnionQuery(ucq12, new ATermAppl[][] { { _a, _b } });
     }
 

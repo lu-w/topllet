@@ -1,7 +1,6 @@
 package openllet.query.sparqldl.model;
 
 import openllet.aterm.ATermAppl;
-import openllet.core.DependencySet;
 import openllet.core.KnowledgeBase;
 import openllet.core.utils.ATermUtils;
 import openllet.core.utils.TermFactory;
@@ -196,6 +195,9 @@ public class UnionQueryImpl implements UnionQuery
     public void setQueries(List<Query> queries)
     {
         _queries = queries;
+        if (_logger.isLoggable(Level.FINE) && disjunctsShareUndistVars())
+            _logger.fine("Union query " + this + " contains disjuncts that share undistinguished variables. Will " +
+                    "treat them as different variables.");
     }
 
     /**
@@ -204,31 +206,13 @@ public class UnionQueryImpl implements UnionQuery
     @Override
     public UnionQuery apply(final ResultBinding binding)
     {
-        final UnionQueryImpl query = new UnionQueryImpl(this);
+        final UnionQuery query = copy();
+        query.setQueries(new ArrayList<>());
 
-        for (final Query subquery : _queries) {
-            final QueryImpl conjunct = new QueryImpl(this.getKB(), this.isDistinct());
-            final List<QueryAtom> atoms = new ArrayList<>();
-
-            for (final QueryAtom atom : subquery.getAtoms())
-                atoms.add(atom.apply(binding));
-
-            query._resultVars.addAll(_resultVars);
-            conjunct.getResultVars().addAll(subquery.getResultVars());
-            query._resultVars.removeAll(binding.getAllVariables());
-            conjunct.getResultVars().removeAll(binding.getAllVariables());
-
-            for (final UnionQuery.VarType type : UnionQuery.VarType.values())
-                for (final ATermAppl atom : getDistVarsForType(type))
-                    if (!binding.isBound(atom))
-                    {
-                        query.addDistVar(atom, type);
-                        conjunct.addDistVar(atom, type);
-                    }
-
-            for (final QueryAtom atom : atoms)
-                conjunct.add(atom);
-            query.addQuery(conjunct);
+        for (Query disjunct : _queries)
+        {
+            Query boundDisjunct = disjunct.apply(binding);
+            query.addQuery(boundDisjunct);
         }
 
         return query;

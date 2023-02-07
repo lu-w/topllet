@@ -16,7 +16,7 @@ abstract public class AbstractUnionQueryEngine implements UnionQueryExec
     public static final Logger _logger = Log.getLogger(SimpleBooleanUnionQueryEngine.class);
     protected AbstractBooleanUnionQueryEngine _booleanEngine;
 
-    protected AbstractUnionQueryEngine()
+    public AbstractUnionQueryEngine()
     {
         _booleanEngine = new SimpleBooleanUnionQueryEngine();
     }
@@ -36,21 +36,19 @@ abstract public class AbstractUnionQueryEngine implements UnionQueryExec
         if (_logger.isLoggable(Level.FINER))
             _logger.finer("Exec union query query: " + q);
 
-        if (_logger.isLoggable(Level.INFO) && q.disjunctsShareUndistVars())
-            _logger.info("Union query " + q + " contains disjuncts that share undistinguished variables. Will treat " +
-                    "them as different variables.");
-
         KnowledgeBase kb = q.getKB();
         final long satCount = kb.getABox().getStats()._satisfiabilityCount;
         final long consCount = kb.getABox().getStats()._consistencyCount;
 
         final Timer timer = new Timer("UnionQueryEngine");
         timer.start();
-        QueryResult results;
-        if (q.getDistVars().isEmpty())
+        QueryResult results = new QueryResultImpl(q);
+        if (q.getResultVars().isEmpty())
             results = _booleanEngine.exec(q);
-        else
+        else if (q.getKB().getIndividualsCount() > 0)
             results = execABoxQuery(q);
+        else
+            _logger.warning("Got non-Boolean union query on a knowledge base with no individuals. Nothing to do here.");
         timer.stop();
 
         if (_logger.isLoggable(Level.FINE))
