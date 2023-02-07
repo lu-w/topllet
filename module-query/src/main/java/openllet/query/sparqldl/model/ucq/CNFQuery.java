@@ -9,7 +9,7 @@ import java.util.List;
  */
 public interface CNFQuery extends Query
 {
-    public void setQueries(List<DisjunctiveQuery> queries);
+    void setQueries(List<DisjunctiveQuery> queries);
 
-    public List<DisjunctiveQuery> getQueries();
+    List<DisjunctiveQuery> getQueries();
 }

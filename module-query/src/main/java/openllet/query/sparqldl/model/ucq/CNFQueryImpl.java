@@ -1,9 +1,12 @@
 package openllet.query.sparqldl.model.ucq;
 
+import openllet.aterm.ATermAppl;
 import openllet.core.KnowledgeBase;
+import openllet.core.utils.ATermUtils;
 import openllet.query.sparqldl.model.AbstractQuery;
 import openllet.query.sparqldl.model.Query;
 import openllet.query.sparqldl.model.cq.ConjunctiveQuery;
+import openllet.query.sparqldl.model.cq.QueryAtom;
 import openllet.query.sparqldl.model.results.ResultBinding;
 
 import java.util.ArrayList;
@@ -50,5 +53,64 @@ public class CNFQueryImpl extends AbstractQuery implements CNFQuery
         for (DisjunctiveQuery q : _queries)
             hasCycle |= q.hasCycle();
         return hasCycle;
+    }
+
+    @Override
+    public String toString()
+    {
+        return toString(false);
+    }
+
+    public String toString(final boolean multiLine)
+    {
+        final String indent = multiLine ? "     " : " ";
+        final StringBuilder sb = new StringBuilder();
+
+        sb.append(ATermUtils.toString(_name)).append("(");
+        for (int i = 0; i < _resultVars.size(); i++)
+        {
+            final ATermAppl var = _resultVars.get(i);
+            if (i > 0)
+                sb.append(", ");
+            sb.append(ATermUtils.toString(var));
+        }
+        sb.append(")");
+
+        sb.append(" :-");
+
+        List<DisjunctiveQuery> queries = _queries;
+        if (_queries.size() == 0)
+            queries = List.of((DisjunctiveQuery) this);
+        for (int i = 0; i < queries.size(); i++)
+        {
+            final DisjunctiveQuery query = queries.get(i);
+            if (i > 0)
+            {
+                sb.append(" v");
+                if (multiLine)
+                    sb.append("\n");
+            }
+            if (query.getQueries().size() == 1 && query.getQueries().get(0).getAtoms().size() > 0)
+            {
+                if (multiLine)
+                    sb.append("\n");
+                for (int j = 0; j < query.getQueries().get(0).getAtoms().size(); j++) {
+                    final QueryAtom a = query.getQueries().get(0).getAtoms().get(j);
+                    if (j > 0) {
+                        sb.append(",");
+                        if (multiLine)
+                            sb.append("\n");
+                    }
+
+                    sb.append(indent);
+                    sb.append(a.toString()); // TODO qNameProvider
+                }
+            }
+        }
+
+        sb.append(".");
+        if (multiLine)
+            sb.append("\n");
+        return sb.toString();
     }
 }

@@ -562,4 +562,51 @@ public class ConjunctiveQueryImpl extends AbstractQuery implements ConjunctiveQu
 			copy.add(atom.copy());
 		return copy;
 	}
+
+	@Override
+	public String toString()
+	{
+		return toString(false);
+	}
+
+	public String toString(final boolean multiLine)
+	{
+		final String indent = multiLine ? "     " : " ";
+		final StringBuffer sb = new StringBuffer();
+
+		sb.append(ATermUtils.toString(_name) + "(");
+		for (int i = 0; i < _resultVars.size(); i++)
+		{
+			final ATermAppl var = _resultVars.get(i);
+			if (i > 0)
+				sb.append(", ");
+			sb.append(ATermUtils.toString(var));
+		}
+		sb.append(")");
+
+		if (_allAtoms.size() > 0)
+		{
+			sb.append(" :-");
+			if (multiLine)
+				sb.append("\n");
+			for (int i = 0; i < _allAtoms.size(); i++)
+			{
+				final QueryAtom a = _allAtoms.get(i);
+				if (i > 0)
+				{
+					sb.append(",");
+					if (multiLine)
+						sb.append("\n");
+				}
+
+				sb.append(indent);
+				sb.append(a.toString()); // TODO qNameProvider
+			}
+		}
+
+		sb.append(".");
+		if (multiLine)
+			sb.append("\n");
+		return sb.toString();
+	}
 }
