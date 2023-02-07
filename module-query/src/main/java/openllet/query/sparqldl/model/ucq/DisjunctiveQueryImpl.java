@@ -11,9 +11,9 @@ public class DisjunctiveQueryImpl extends UnionQueryImpl implements DisjunctiveQ
         super(kb, distinct);
     }
 
-    public DisjunctiveQueryImpl(DisjunctiveQuery query)
+    public DisjunctiveQueryImpl(DisjunctiveQuery q)
     {
-        super(query);
+        super(q);
     }
 
     @Override
@@ -21,5 +21,14 @@ public class DisjunctiveQueryImpl extends UnionQueryImpl implements DisjunctiveQ
     {
         assert(query.getAtoms().size() <= 1);
         super.addQuery(query);
+    }
+
+    @Override
+    public DisjunctiveQuery copy()
+    {
+        DisjunctiveQuery copy = new DisjunctiveQueryImpl(this);
+        for (ConjunctiveQuery q : _queries)
+            copy.addQuery((ConjunctiveQuery) q.copy());
+        return copy;
     }
 }

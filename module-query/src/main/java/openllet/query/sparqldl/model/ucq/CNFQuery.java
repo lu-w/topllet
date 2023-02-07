@@ -11,5 +11,7 @@ public interface CNFQuery extends Query
 {
     void setQueries(List<DisjunctiveQuery> queries);
 
+    void addQuery(DisjunctiveQuery query);
+
     List<DisjunctiveQuery> getQueries();
 }

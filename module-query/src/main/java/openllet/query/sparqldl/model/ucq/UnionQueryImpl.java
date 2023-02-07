@@ -149,6 +149,7 @@ public class UnionQueryImpl extends AbstractQuery implements UnionQuery
     @Override
     public UnionQuery rollUp()
     {
+        //assert(!getConstants().isEmpty() || !getUndistVars().isEmpty() || !getDistVars().isEmpty());
         UnionQuery rolledUpUnionQuery = new UnionQueryImpl(this);
         for (ConjunctiveQuery conjunctiveQuery : _queries)
         {
@@ -170,8 +171,13 @@ public class UnionQueryImpl extends AbstractQuery implements UnionQuery
                 final ATermAppl testIndOrVar;
                 if (!connectedQuery.getConstants().isEmpty())
                     testIndOrVar = connectedQuery.getConstants().iterator().next();
-                else
+                else if (!connectedQuery.getUndistVars().isEmpty())
                     testIndOrVar = connectedQuery.getUndistVars().iterator().next();
+                else if (!connectedQuery.getDistVars().isEmpty())
+                    testIndOrVar = connectedQuery.getDistVars().iterator().next();
+                else
+                    throw new RuntimeException("Rolling up procedure did not find any individual or variable to roll " +
+                            "up to.");
                 final ATermAppl testClass = connectedQuery.rollUpTo(testIndOrVar, Collections.emptySet(), false);
                 if (_logger.isLoggable(Level.FINER))
                     _logger.finer("Rolled-up Boolean query: " + testIndOrVar + " -> " + testClass);

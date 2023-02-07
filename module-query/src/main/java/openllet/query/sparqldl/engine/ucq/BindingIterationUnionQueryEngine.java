@@ -33,6 +33,7 @@ public class BindingIterationUnionQueryEngine extends AbstractUnionQueryEngine
     {
         _bindingGenerator = new NaiveUnionQueryCandidateGenerator(q);
         QueryResult result = new QueryResultImpl(q);
+        // APPLY BINDINGS
         for (ResultBinding candidateBinding : _bindingGenerator)
         {
             if (_logger.isLoggable(Level.FINE))

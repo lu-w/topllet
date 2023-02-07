@@ -12,7 +12,6 @@ import openllet.query.sparqldl.model.results.ResultBinding;
 import java.util.ArrayList;
 import java.util.List;
 
-// TODO Lukas
 public class CNFQueryImpl extends AbstractQuery implements CNFQuery
 {
     List<DisjunctiveQuery> _queries = new ArrayList<>();
@@ -23,21 +22,38 @@ public class CNFQueryImpl extends AbstractQuery implements CNFQuery
     }
 
     @Override
-    public Query apply(ResultBinding binding)
+    public CNFQuery apply(ResultBinding binding)
     {
-        return null;
+        final CNFQuery query = copy();
+        query.setQueries(new ArrayList<>());
+        for (DisjunctiveQuery disjunct : _queries)
+        {
+            DisjunctiveQuery boundDisjunct = (DisjunctiveQuery) disjunct.apply(binding);
+            query.addQuery(boundDisjunct);
+        }
+        return query;
     }
 
     @Override
-    public Query copy()
+    public CNFQuery copy()
     {
-        return null;
+        // TODO Lukas
+        CNFQuery copy = new CNFQueryImpl(getKB(), isDistinct());
+        for (DisjunctiveQuery q : _queries)
+            copy.addQuery((DisjunctiveQuery) q.copy());
+        return copy;
     }
 
     @Override
     public void setQueries(List<DisjunctiveQuery> queries)
     {
         _queries = queries;
+    }
+
+    @Override
+    public void addQuery(DisjunctiveQuery query)
+    {
+        _queries.add(query);
     }
 
     @Override
