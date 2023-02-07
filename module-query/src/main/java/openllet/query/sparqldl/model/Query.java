@@ -139,4 +139,11 @@ public interface Query
      * @return A copy of this query.
      */
     Query copy();
+
+    /**
+     * Checks if one of the disjuncts contains a cycle in its query graph. Note that this function only looks for
+     * cycles in property atoms. It ignores other kind of atom types (e.g. same as).
+     * @return True iff one of the disjuncts contains a cycle
+     */
+    boolean hasCycle();
 }

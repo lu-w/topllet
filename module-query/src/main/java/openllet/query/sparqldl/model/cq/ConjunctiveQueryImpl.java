@@ -24,9 +24,8 @@ import openllet.core.KnowledgeBase;
 import openllet.core.boxes.rbox.Role;
 import openllet.core.exceptions.InternalReasonerException;
 import openllet.core.utils.ATermUtils;
+import openllet.query.sparqldl.model.AbstractQuery;
 import openllet.query.sparqldl.model.results.ResultBinding;
-import openllet.query.sparqldl.model.ucq.UnionQuery;
-import openllet.query.sparqldl.model.ucq.UnionQueryImpl;
 
 import static openllet.core.utils.TermFactory.term;
 import static openllet.query.sparqldl.model.cq.QueryPredicate.*;
@@ -44,7 +43,7 @@ import static openllet.query.sparqldl.model.cq.QueryPredicate.*;
  *
  * @author Petr Kremen
  */
-public class ConjunctiveQueryImpl extends UnionQueryImpl implements ConjunctiveQuery
+public class ConjunctiveQueryImpl extends AbstractQuery implements ConjunctiveQuery
 {
 	private final Set<QueryPredicate> ternaryQueryPredicates = Set.of(PropertyValue, NegativePropertyValue);
 
@@ -59,7 +58,6 @@ public class ConjunctiveQueryImpl extends UnionQueryImpl implements ConjunctiveQ
 	{
 		super(kb, distinct);
 
-		_queries = List.of(); // prevents adding disjunctions to a non-disjunctive query (internally)
 		_allAtoms = new ArrayList<>();
 	}
 
@@ -69,18 +67,6 @@ public class ConjunctiveQueryImpl extends UnionQueryImpl implements ConjunctiveQ
 
 		_name = query.getName();
 		_parameters = query.getQueryParameters();
-	}
-
-	@Override
-	public void setQueries(List<ConjunctiveQuery> queries)
-	{
-		throw new UnsupportedOperationException("Can not set disjunctions for a conjunctive query.");
-	}
-
-	@Override
-	public void addQuery(ConjunctiveQuery query)
-	{
-		throw new UnsupportedOperationException("Can not add disjunctions to a conjunctive query.");
 	}
 
 	/**
@@ -149,7 +135,7 @@ public class ConjunctiveQueryImpl extends UnionQueryImpl implements ConjunctiveQ
 	@Override
 	public ATermAppl rollUpTo(final ATermAppl var, final Collection<ATermAppl> stopList, final boolean stopOnConstants)
 	{
-		if (getDistVarsForType(VarType.LITERAL).contains(var) && !getDistVarsForType(UnionQuery.VarType.INDIVIDUAL).contains(var) && !_individualsAndLiterals.contains(var))
+		if (getDistVarsForType(VarType.LITERAL).contains(var) && !getDistVarsForType(VarType.INDIVIDUAL).contains(var) && !_individualsAndLiterals.contains(var))
 			throw new InternalReasonerException("Trying to roll up to the variable '" + var + "' which is not distinguished and _individual.");
 
 		ATermList classParts = ATermUtils.EMPTY_LIST;
@@ -569,7 +555,7 @@ public class ConjunctiveQueryImpl extends UnionQueryImpl implements ConjunctiveQ
 	}
 
 	@Override
-	public UnionQuery copy()
+	public ConjunctiveQuery copy()
 	{
 		ConjunctiveQuery copy = new ConjunctiveQueryImpl(this);
 		for (QueryAtom atom : _allAtoms)

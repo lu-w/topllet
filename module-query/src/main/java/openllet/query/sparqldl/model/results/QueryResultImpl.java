@@ -18,7 +18,6 @@ import java.util.Set;
 import openllet.aterm.ATermAppl;
 import openllet.query.sparqldl.model.Query;
 import openllet.query.sparqldl.model.cq.QueryParameters;
-import openllet.query.sparqldl.model.ucq.UnionQuery;
 
 /**
  * <p>
@@ -41,7 +40,7 @@ public class QueryResultImpl implements QueryResult
 	private final Query _query;
 	private final QueryParameters _parameters;
 
-	public QueryResultImpl(final UnionQuery query)
+	public QueryResultImpl(final Query query)
 	{
 		_query = query;
 		_parameters = query.getQueryParameters();

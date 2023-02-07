@@ -10,8 +10,8 @@ import java.util.Collection;
 import java.util.List;
 
 import openllet.aterm.ATermAppl;
+import openllet.query.sparqldl.model.Query;
 import openllet.query.sparqldl.model.results.ResultBinding;
-import openllet.query.sparqldl.model.ucq.UnionQuery;
 
 /**
  * <p>
@@ -26,7 +26,7 @@ import openllet.query.sparqldl.model.ucq.UnionQuery;
  *
  * @author Petr Kremen
  */
-public interface ConjunctiveQuery extends UnionQuery
+public interface ConjunctiveQuery extends Query
 {
 	/**
 	 * Adds a query atom to the query.
