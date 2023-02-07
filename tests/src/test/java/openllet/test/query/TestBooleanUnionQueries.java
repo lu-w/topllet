@@ -1,14 +1,14 @@
 package openllet.test.query;
 
 import openllet.aterm.ATermAppl;
-import openllet.query.sparqldl.engine.SimpleBooleanUnionQueryEngine;
-import openllet.query.sparqldl.model.*;
+import openllet.query.sparqldl.engine.ucq.SimpleBooleanUnionQueryEngine;
+import openllet.query.sparqldl.model.ucq.UnionQuery;
 import org.junit.Test;
 
 import static openllet.core.utils.TermFactory.*;
 import static openllet.core.utils.TermFactory.TOP;
-import static openllet.query.sparqldl.model.QueryAtomFactory.PropertyValueAtom;
-import static openllet.query.sparqldl.model.QueryAtomFactory.TypeAtom;
+import static openllet.query.sparqldl.model.cq.QueryAtomFactory.PropertyValueAtom;
+import static openllet.query.sparqldl.model.cq.QueryAtomFactory.TypeAtom;
 import static org.junit.Assert.*;
 
 public class TestBooleanUnionQueries extends AbstractQueryTest

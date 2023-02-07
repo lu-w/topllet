@@ -21,10 +21,10 @@ import org.semanticweb.owlapi.model.OWLSameIndividualAxiom;
 import openllet.aterm.ATermAppl;
 import openllet.core.utils.ATermUtils;
 import openllet.owlapi.facet.FacetReasonerOWL;
-import openllet.query.sparqldl.engine.QueryEngine;
-import openllet.query.sparqldl.model.Query;
-import openllet.query.sparqldl.model.QueryAtomFactory;
-import openllet.query.sparqldl.model.QueryImpl;
+import openllet.query.sparqldl.engine.cq.QueryEngine;
+import openllet.query.sparqldl.model.cq.Query;
+import openllet.query.sparqldl.model.cq.QueryAtomFactory;
+import openllet.query.sparqldl.model.cq.QueryImpl;
 import openllet.query.sparqldl.model.QueryResult;
 
 public class EntailmentQueryVisitor implements OWLAxiomVisitor, FacetReasonerOWL

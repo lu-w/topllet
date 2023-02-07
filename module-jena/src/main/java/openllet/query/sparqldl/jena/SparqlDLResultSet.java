@@ -22,7 +22,7 @@ import org.apache.jena.sparql.engine.binding.BindingMap;
 
 import openllet.aterm.ATermAppl;
 import openllet.jena.JenaUtils;
-import openllet.query.sparqldl.model.QueryParameters;
+import openllet.query.sparqldl.model.cq.QueryParameters;
 import openllet.query.sparqldl.model.QueryResult;
 import openllet.query.sparqldl.model.ResultBinding;
 

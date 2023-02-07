@@ -11,8 +11,8 @@ import org.junit.Test;
 import openllet.core.KnowledgeBase;
 import openllet.jena.PelletInfGraph;
 import openllet.jena.PelletReasonerFactory;
-import openllet.query.sparqldl.engine.QuerySubsumption;
-import openllet.query.sparqldl.model.Query;
+import openllet.query.sparqldl.engine.cq.QuerySubsumption;
+import openllet.query.sparqldl.model.cq.Query;
 import openllet.query.sparqldl.parser.QueryEngineBuilder;
 import openllet.query.sparqldl.parser.QueryParser;
 

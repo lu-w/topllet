@@ -8,16 +8,16 @@
 
 package openllet.test.query;
 
-import static openllet.query.sparqldl.model.QueryAtomFactory.PropertyValueAtom;
-import static openllet.query.sparqldl.model.QueryAtomFactory.TypeAtom;
-import static openllet.query.sparqldl.model.QueryAtomFactory.UnionAtom;
+import static openllet.query.sparqldl.model.cq.QueryAtomFactory.PropertyValueAtom;
+import static openllet.query.sparqldl.model.cq.QueryAtomFactory.TypeAtom;
+import static openllet.query.sparqldl.model.cq.QueryAtomFactory.UnionAtom;
 
 import java.util.Arrays;
 
 import org.junit.Test;
 
 import openllet.aterm.ATermAppl;
-import openllet.query.sparqldl.model.Query;
+import openllet.query.sparqldl.model.cq.Query;
 
 /**
  * <p>

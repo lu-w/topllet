@@ -2,6 +2,7 @@ package openllet.query.sparqldl.model;
 
 import java.util.Iterator;
 
+import openllet.query.sparqldl.model.cq.QueryParameters;
 import org.apache.jena.query.QuerySolution;
 import org.apache.jena.query.QuerySolutionMap;
 

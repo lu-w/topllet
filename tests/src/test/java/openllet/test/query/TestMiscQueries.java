@@ -8,12 +8,12 @@ import static openllet.core.utils.TermFactory.TOP_DATA_PROPERTY;
 import static openllet.core.utils.TermFactory.TOP_OBJECT_PROPERTY;
 import static openllet.core.utils.TermFactory.literal;
 import static openllet.core.utils.TermFactory.var;
-import static openllet.query.sparqldl.model.QueryAtomFactory.DatatypeAtom;
-import static openllet.query.sparqldl.model.QueryAtomFactory.DomainAtom;
-import static openllet.query.sparqldl.model.QueryAtomFactory.InverseOfAtom;
-import static openllet.query.sparqldl.model.QueryAtomFactory.ObjectPropertyAtom;
-import static openllet.query.sparqldl.model.QueryAtomFactory.PropertyValueAtom;
-import static openllet.query.sparqldl.model.QueryAtomFactory.RangeAtom;
+import static openllet.query.sparqldl.model.cq.QueryAtomFactory.DatatypeAtom;
+import static openllet.query.sparqldl.model.cq.QueryAtomFactory.DomainAtom;
+import static openllet.query.sparqldl.model.cq.QueryAtomFactory.InverseOfAtom;
+import static openllet.query.sparqldl.model.cq.QueryAtomFactory.ObjectPropertyAtom;
+import static openllet.query.sparqldl.model.cq.QueryAtomFactory.PropertyValueAtom;
+import static openllet.query.sparqldl.model.cq.QueryAtomFactory.RangeAtom;
 
 import org.junit.Test;
 
@@ -22,7 +22,7 @@ import openllet.core.OpenlletOptions;
 import openllet.core.datatypes.Datatypes;
 import openllet.core.utils.ATermUtils;
 import openllet.core.utils.Namespaces;
-import openllet.query.sparqldl.model.Query;
+import openllet.query.sparqldl.model.cq.Query;
 import openllet.query.sparqldl.parser.ARQParser;
 
 public class TestMiscQueries extends AbstractQueryTest

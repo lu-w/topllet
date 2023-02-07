@@ -16,6 +16,8 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import openllet.aterm.ATermAppl;
+import openllet.query.sparqldl.model.cq.QueryParameters;
+import openllet.query.sparqldl.model.ucq.UnionQuery;
 
 /**
  * <p>

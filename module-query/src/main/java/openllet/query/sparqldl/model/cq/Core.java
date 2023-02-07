@@ -4,17 +4,13 @@
 // Please see LICENSE.txt for full license terms, including the availability of proprietary exceptions.
 // Questions, comments, or requests for clarification: licensing@clarkparsia.com
 
-package openllet.query.sparqldl.parser;
+package openllet.query.sparqldl.model.cq;
 
-import java.io.InputStream;
+import java.util.Collection;
 
-import openllet.core.KnowledgeBase;
-import openllet.query.sparqldl.model.cq.Query;
+import openllet.aterm.ATermAppl;
 
 /**
- * <p>
- * Title: SPARQL-DL Query Parser Interface
- * </p>
  * <p>
  * Copyright: Copyright (c) 2007
  * </p>
@@ -24,12 +20,13 @@ import openllet.query.sparqldl.model.cq.Query;
  *
  * @author Petr Kremen
  */
-public interface QueryParser
+public interface Core extends QueryAtom
 {
 
-	Query parse(final String queryString, KnowledgeBase kb);
+	Collection<ATermAppl> getConstants();
 
-	Query parse(final InputStream stream, KnowledgeBase kb);
+	Collection<ATermAppl> getDistVars();
 
-	Query parse(final org.apache.jena.query.Query stream, KnowledgeBase kb);
+	Collection<ATermAppl> getUndistVars();
+
 }

@@ -7,12 +7,17 @@
 package openllet.test.query;
 
 import openllet.aterm.ATermAppl;
-import openllet.query.sparqldl.engine.QueryEngine;
-import openllet.query.sparqldl.engine.SimpleBooleanUnionQueryEngine;
-import openllet.query.sparqldl.engine.BindingIterationUnionQueryEngine;
-import openllet.query.sparqldl.engine.UnionQueryExec;
+import openllet.query.sparqldl.engine.cq.QueryEngine;
+import openllet.query.sparqldl.engine.ucq.SimpleBooleanUnionQueryEngine;
+import openllet.query.sparqldl.engine.ucq.BindingIterationUnionQueryEngine;
+import openllet.query.sparqldl.engine.ucq.UnionQueryExec;
 import openllet.query.sparqldl.model.*;
-import openllet.query.sparqldl.model.UnionQuery.VarType;
+import openllet.query.sparqldl.model.ucq.UnionQuery;
+import openllet.query.sparqldl.model.ucq.UnionQuery.VarType;
+import openllet.query.sparqldl.model.cq.Query;
+import openllet.query.sparqldl.model.cq.QueryAtom;
+import openllet.query.sparqldl.model.cq.QueryImpl;
+import openllet.query.sparqldl.model.ucq.UnionQueryImpl;
 import openllet.test.AbstractKBTests;
 import org.junit.Assert;
 

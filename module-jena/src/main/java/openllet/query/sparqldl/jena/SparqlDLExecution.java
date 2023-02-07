@@ -18,6 +18,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import openllet.query.sparqldl.engine.cq.QueryEngine;
 import org.apache.jena.atlas.json.JsonArray;
 import org.apache.jena.atlas.json.JsonObject;
 import org.apache.jena.atlas.lib.NotImplemented;
@@ -48,7 +49,7 @@ import openllet.core.KnowledgeBase;
 import openllet.core.OpenlletOptions;
 import openllet.core.exceptions.UnsupportedQueryException;
 import openllet.jena.PelletInfGraph;
-import openllet.query.sparqldl.model.QueryParameters;
+import openllet.query.sparqldl.model.cq.QueryParameters;
 import openllet.query.sparqldl.model.QueryParametersBuilder;
 import openllet.query.sparqldl.parser.ARQParser;
 import openllet.shared.tools.Log;
@@ -235,14 +236,14 @@ class SparqlDLExecution implements QueryExecution
 			// (i.e. variables) in the _query
 			parser.setInitialBinding(_initialBinding);
 
-			final openllet.query.sparqldl.model.Query q = parser.parse(_query, kb);
+			final openllet.query.sparqldl.model.cq.Query q = parser.parse(_query, kb);
 			// The _query uses the _query parameterization to resolve bindings
 			// (i.e. for instance if the parameter variable is in _query
 			// projection, we need to add the initial binding to the resulting
 			// bindings manually)
 			q.setQueryParameters(queryParameters);
 
-			ResultSet results = new SparqlDLResultSet(openllet.query.sparqldl.engine.QueryEngine.exec(q), _source.getDefaultModel(), queryParameters);
+			ResultSet results = new SparqlDLResultSet(QueryEngine.exec(q), _source.getDefaultModel(), queryParameters);
 
 			final List<SortCondition> sortConditions = _query.getOrderBy();
 			if (sortConditions != null && !sortConditions.isEmpty())

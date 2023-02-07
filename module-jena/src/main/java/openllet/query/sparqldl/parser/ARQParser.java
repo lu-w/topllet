@@ -65,10 +65,10 @@ import openllet.core.utils.TermFactory;
 import openllet.jena.BuiltinTerm;
 import openllet.jena.JenaUtils;
 import openllet.jena.vocabulary.OWL2;
-import openllet.query.sparqldl.model.Query;
-import openllet.query.sparqldl.model.UnionQuery.VarType;
-import openllet.query.sparqldl.model.QueryAtomFactory;
-import openllet.query.sparqldl.model.QueryImpl;
+import openllet.query.sparqldl.model.cq.Query;
+import openllet.query.sparqldl.model.ucq.UnionQuery.VarType;
+import openllet.query.sparqldl.model.cq.QueryAtomFactory;
+import openllet.query.sparqldl.model.cq.QueryImpl;
 import openllet.shared.tools.Log;
 
 /**

@@ -4,17 +4,9 @@
 // Please see LICENSE.txt for full license terms, including the availability of proprietary exceptions.
 // Questions, comments, or requests for clarification: licensing@clarkparsia.com
 
-package openllet.query.sparqldl.parser;
-
-import java.io.InputStream;
-
-import openllet.core.KnowledgeBase;
-import openllet.query.sparqldl.model.cq.Query;
+package openllet.query.sparqldl.engine.cq;
 
 /**
- * <p>
- * Title: SPARQL-DL Query Parser Interface
- * </p>
  * <p>
  * Copyright: Copyright (c) 2007
  * </p>
@@ -24,12 +16,7 @@ import openllet.query.sparqldl.model.cq.Query;
  *
  * @author Petr Kremen
  */
-public interface QueryParser
+public enum CoreStrategy
 {
-
-	Query parse(final String queryString, KnowledgeBase kb);
-
-	Query parse(final InputStream stream, KnowledgeBase kb);
-
-	Query parse(final org.apache.jena.query.Query stream, KnowledgeBase kb);
+	SIMPLE, ALLFAST;
 }

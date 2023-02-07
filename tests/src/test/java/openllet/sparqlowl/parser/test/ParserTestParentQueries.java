@@ -104,10 +104,10 @@ public class ParserTestParentQueries
 	public void compareQuery() throws FileNotFoundException, IOException
 	{
 		final Query sparql = QueryFactory.create(FileUtils.readFile(base + _sparqlFile), Syntax.syntaxSPARQL);
-		final openllet.query.sparqldl.model.Query expected = _parser.parse(sparql, _kb);
+		final openllet.query.sparqldl.model.cq.Query expected = _parser.parse(sparql, _kb);
 
 		final Query sparqlOWL = QueryFactory.create(FileUtils.readFile(base + _sparqlOWLFile), TerpSyntax.getInstance());
-		final openllet.query.sparqldl.model.Query actual = _parser.parse(sparqlOWL, _kb);
+		final openllet.query.sparqldl.model.cq.Query actual = _parser.parse(sparqlOWL, _kb);
 
 		assertEquals(expected.getAtoms(), actual.getAtoms());
 	}
