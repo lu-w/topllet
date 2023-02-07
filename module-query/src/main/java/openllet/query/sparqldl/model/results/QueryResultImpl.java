@@ -16,6 +16,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import openllet.aterm.ATermAppl;
+import openllet.query.sparqldl.model.Query;
 import openllet.query.sparqldl.model.cq.QueryParameters;
 import openllet.query.sparqldl.model.ucq.UnionQuery;
 
@@ -37,7 +38,7 @@ public class QueryResultImpl implements QueryResult
 	private Collection<ResultBinding> _bindings;
 
 	private final List<ATermAppl> _resultVars;
-	private final UnionQuery _query;
+	private final Query _query;
 	private final QueryParameters _parameters;
 
 	public QueryResultImpl(final UnionQuery query)
