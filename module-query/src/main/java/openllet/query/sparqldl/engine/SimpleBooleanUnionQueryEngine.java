@@ -21,6 +21,7 @@ import static openllet.query.sparqldl.engine.QueryEngine.split;
 public class SimpleBooleanUnionQueryEngine extends AbstractBooleanUnionQueryEngine
 {
     public static final Logger _logger = Log.getLogger(SimpleBooleanUnionQueryEngine.class);
+    private boolean useUnderapproximatingSemantics = false;
 
     @Override
     protected boolean execBooleanABoxQuery(UnionQuery q)
@@ -29,12 +30,15 @@ public class SimpleBooleanUnionQueryEngine extends AbstractBooleanUnionQueryEngi
         q.getKB().ensureConsistency();
 
         // 2. TRY UNDER-APPROXIMATING SEMANTICS (TODO Lukas: check if this actually improves performance)
-        boolean someDisjunctEntailed = execUnderapproximatingSemanticsBoolean(q);
-        if (someDisjunctEntailed)
+        if (useUnderapproximatingSemantics)
         {
-            if (_logger.isLoggable(Level.FINE))
-                _logger.fine("Under-approximation returned true, hence some query disjunct is entailed.");
-            return true;
+            boolean someDisjunctEntailed = execUnderapproximatingSemanticsBoolean(q);
+            if (someDisjunctEntailed)
+            {
+                if (_logger.isLoggable(Level.FINE))
+                    _logger.fine("Under-approximation returned true, hence some query disjunct is entailed.");
+                return true;
+            }
         }
 
         // 3. ROLL-UP UCQ
@@ -164,5 +168,15 @@ public class SimpleBooleanUnionQueryEngine extends AbstractBooleanUnionQueryEngi
                 result.add(binding);
         }
         return result;
+    }
+
+    public boolean isUseUnderapproximatingSemantics()
+    {
+        return useUnderapproximatingSemantics;
+    }
+
+    public void setUseUnderapproximatingSemantics(boolean useUnderapproximatingSemantics)
+    {
+        this.useUnderapproximatingSemantics = useUnderapproximatingSemantics;
     }
 }
