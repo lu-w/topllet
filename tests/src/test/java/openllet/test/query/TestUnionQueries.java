@@ -110,16 +110,16 @@ public class TestUnionQueries extends AbstractQueryTest
                 query(TypeAtom(z, _D), PropertyValueAtom(y, _r, z))));
 
         testUnionQuery(ucq1, new ATermAppl[][] { { _a } });
-        //testUnionQuery(ucq2, new ATermAppl[][] { null }); // TODO false - how to check non-entailment?
+        testUnionQuery(ucq2, new ATermAppl[] {  });
         testUnionQuery(ucq3, allResults(List.of(_a, _b, _c), 2));
         testUnionQuery(ucq4, new ATermAppl[][] { { _a, _a }, { _a, _b }, { _a, _c } });
         testUnionQuery(ucq5, new ATermAppl[][] { { _b } });
-        //testUnionQuery(ucq6, new ATermAppl[][] { null }); // TODO false - how to check non-entailment?
+        testUnionQuery(ucq6, new ATermAppl[] {  });
         testUnionQuery(ucq7, new ATermAppl[][] { { _b, _a }, { _b, _b }, { _b, _c } });
-        //testUnionQuery(ucq8, new ATermAppl[][] { null }); // TODO false - how to check non-entailment?
+        testUnionQuery(ucq8, new ATermAppl[] {  });
         testUnionQuery(ucq9, new ATermAppl[][] { { _a } });
         testUnionQuery(ucq10, new ATermAppl[][] { { _a } });
-        //testUnionQuery(ucq11, new ATermAppl[][] { null }); // TODO false - how to check non-entailment?
+        testUnionQuery(ucq11, new ATermAppl[] {  });
         testUnionQuery(ucq12, new ATermAppl[][] { { _a, _b } });
     }
 

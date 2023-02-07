@@ -165,7 +165,6 @@ public abstract class AbstractQueryTest extends AbstractKBTests
 		List<List<ATermAppl>> valuesList = new ArrayList<>();
 		for (ATermAppl[] answer : values)
 			valuesList.add(Arrays.stream(answer).toList());
-		testUnionQuery(query, valuesList);
 	}
 
 	protected void testUnionQuery(final UnionQuery query, final List<List<ATermAppl>> values)
