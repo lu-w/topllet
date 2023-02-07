@@ -37,8 +37,11 @@ import openllet.core.utils.ATermUtils;
 import openllet.core.utils.CandidateSet;
 import openllet.core.utils.DisjointSet;
 import openllet.core.utils.Timer;
-import openllet.query.sparqldl.model.*;
-import openllet.query.sparqldl.model.ucq.UnionQuery.VarType;
+import openllet.query.sparqldl.model.results.QueryResult;
+import openllet.query.sparqldl.model.results.QueryResultImpl;
+import openllet.query.sparqldl.model.results.ResultBinding;
+import openllet.query.sparqldl.model.results.ResultBindingImpl;
+import openllet.query.sparqldl.model.Query.VarType;
 import openllet.query.sparqldl.model.cq.*;
 import openllet.shared.tools.Log;
 
@@ -68,15 +71,15 @@ public class CombinedQueryEngine implements QueryExec
 
 	protected QueryPlan _plan;
 
-	protected Query _oldQuery;
+	protected ConjunctiveQuery _oldQuery;
 
-	protected Query _query;
+	protected ConjunctiveQuery _query;
 
 	private QueryResult _result;
 
 	private Set<ATermAppl> _downMonotonic;
 
-	private void prepare(final Query query)
+	private void prepare(final ConjunctiveQuery query)
 	{
 		if (_logger.isLoggable(Level.FINE))
 			_logger.fine("Preparing plan ...");
@@ -120,7 +123,7 @@ public class CombinedQueryEngine implements QueryExec
 	}
 
 	// computes cores of undistinguished variables
-	private Query setupCores(final Query query)
+	private ConjunctiveQuery setupCores(final ConjunctiveQuery query)
 	{
 		final Iterator<ATermAppl> undistVarIterator = query.getUndistVars().iterator();
 		if (!undistVarIterator.hasNext())
@@ -170,7 +173,7 @@ public class CombinedQueryEngine implements QueryExec
 			}
 		}
 
-		final Query transformedQuery = query.apply(new ResultBindingImpl());
+		final ConjunctiveQuery transformedQuery = query.apply(new ResultBindingImpl());
 
 		for (final Set<Object> set : coreVertices.getEquivalanceSets())
 		{
@@ -195,7 +198,7 @@ public class CombinedQueryEngine implements QueryExec
 
 	// down-monotonic variables = Class variables in Type atoms and Property
 	// variables in PropertyValue atoms
-	private void setupDownMonotonicVariables(final Query query)
+	private void setupDownMonotonicVariables(final ConjunctiveQuery query)
 	{
 		for (final QueryAtom atom : query.getAtoms())
 		{
@@ -219,7 +222,7 @@ public class CombinedQueryEngine implements QueryExec
 	 * {@inheritDoc}
 	 */
 	@Override
-	public boolean supports(final Query q)
+	public boolean supports(final ConjunctiveQuery q)
 	{
 		// TODO fully undist.vars queries are not supported !!!
 		return q.hasCycle();
@@ -229,7 +232,7 @@ public class CombinedQueryEngine implements QueryExec
 	 * {@inheritDoc}
 	 */
 	@Override
-	public QueryResult exec(final Query query)
+	public QueryResult exec(final ConjunctiveQuery query)
 	{
 		_logger.fine(() -> "Executing query " + query);
 
@@ -1072,7 +1075,7 @@ public class CombinedQueryEngine implements QueryExec
 
 			case NotKnown:
 			{
-				final Query newQuery = new QueryImpl(_kb, true);
+				final ConjunctiveQuery newQuery = new ConjunctiveQueryImpl(_kb, true);
 				for (final QueryAtom atom : ((NotKnownQueryAtom) current).getAtoms())
 					newQuery.add(atom.apply(binding));
 
@@ -1093,7 +1096,7 @@ public class CombinedQueryEngine implements QueryExec
 			{
 				for (final List<QueryAtom> atoms : ((UnionQueryAtom) current).getUnion())
 				{
-					final Query newQuery = new QueryImpl(_kb, true);
+					final ConjunctiveQuery newQuery = new ConjunctiveQueryImpl(_kb, true);
 					for (final QueryAtom atom : atoms)
 						newQuery.add(atom.apply(binding));
 					for (final ATermAppl var : newQuery.getUndistVars())
@@ -1138,7 +1141,7 @@ public class CombinedQueryEngine implements QueryExec
 
 	private final boolean STOP_ROLLING_ON_CONSTANTS = false;
 
-	private void execSimpleCore(final Query q, final ResultBinding binding, final Collection<ATermAppl> distVars)
+	private void execSimpleCore(final ConjunctiveQuery q, final ResultBinding binding, final Collection<ATermAppl> distVars)
 	{
 		final Map<ATermAppl, Set<ATermAppl>> varBindings = new HashMap<>();
 
@@ -1181,7 +1184,7 @@ public class CombinedQueryEngine implements QueryExec
 		}
 	}
 
-	private Map<ATermAppl, Boolean> fastPrune(final Query q, final ATermAppl var)
+	private Map<ATermAppl, Boolean> fastPrune(final ConjunctiveQuery q, final ATermAppl var)
 	{
 		final ATermAppl c = q.rollUpTo(var, Collections.<ATermAppl> emptySet(), STOP_ROLLING_ON_CONSTANTS);
 		if (_logger.isLoggable(Level.FINER))
@@ -1200,7 +1203,7 @@ public class CombinedQueryEngine implements QueryExec
 		return map;
 	}
 
-	private void execAllFastCore(final Query q, final ResultBinding binding, final Collection<ATermAppl> distVars, final Collection<ATermAppl> undistVars)
+	private void execAllFastCore(final ConjunctiveQuery q, final ResultBinding binding, final Collection<ATermAppl> distVars, final Collection<ATermAppl> undistVars)
 	{
 		if (distVars.isEmpty())
 			exec(binding);
@@ -1217,7 +1220,7 @@ public class CombinedQueryEngine implements QueryExec
 				final ResultBinding newBinding = binding.duplicate();
 
 				newBinding.setValue(var, b);
-				final Query q2 = q.apply(newBinding);
+				final ConjunctiveQuery q2 = q.apply(newBinding);
 
 				if (entry.getValue() || QueryEngine.execBooleanABoxQuery(q2))
 					execAllFastCore(q2, newBinding, distVars, undistVars);

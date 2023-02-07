@@ -12,9 +12,9 @@ import openllet.core.KnowledgeBase;
 import openllet.jena.PelletInfGraph;
 import openllet.jena.PelletReasonerFactory;
 import openllet.query.sparqldl.engine.cq.QuerySubsumption;
-import openllet.query.sparqldl.model.cq.Query;
-import openllet.query.sparqldl.model.QueryResult;
-import openllet.query.sparqldl.model.ResultBinding;
+import openllet.query.sparqldl.model.cq.ConjunctiveQuery;
+import openllet.query.sparqldl.model.results.QueryResult;
+import openllet.query.sparqldl.model.results.ResultBinding;
 import openllet.query.sparqldl.parser.QueryEngineBuilder;
 import openllet.query.sparqldl.parser.QueryParser;
 import org.apache.jena.ontology.OntModel;
@@ -54,7 +54,7 @@ public class QuerySubsumptionExample
 		_parser = QueryEngineBuilder.getParser();
 	}
 
-	public Query query(final String queryStr)
+	public ConjunctiveQuery query(final String queryStr)
 	{
 		return _parser.parse(prefix + queryStr + suffix, _kb);
 	}
@@ -76,8 +76,8 @@ public class QuerySubsumptionExample
 	 */
 	public void example1()
 	{
-		final Query q1 = query("?x a family:Male .");
-		final Query q2 = query("?x a family:Person .");
+		final ConjunctiveQuery q1 = query("?x a family:Male .");
+		final ConjunctiveQuery q2 = query("?x a family:Person .");
 
 		System.out.println("Example 1");
 		System.out.println("=========");
@@ -95,8 +95,8 @@ public class QuerySubsumptionExample
 	 */
 	public void example2()
 	{
-		final Query q3 = query("?x family:isMarriedTo ?y . ?y rdf:type family:Male");
-		final Query q4 = query("?x a family:Female .");
+		final ConjunctiveQuery q3 = query("?x family:isMarriedTo ?y . ?y rdf:type family:Male");
+		final ConjunctiveQuery q4 = query("?x a family:Female .");
 
 		System.out.println("Example 2");
 		System.out.println("=========");
@@ -114,8 +114,8 @@ public class QuerySubsumptionExample
 	 */
 	public void example3()
 	{
-		final Query q5 = query("?x family:hasFather ?y . ");
-		final Query q6 = query("?x family:hasParent ?y . ?y a family:Male .");
+		final ConjunctiveQuery q5 = query("?x family:hasFather ?y . ");
+		final ConjunctiveQuery q6 = query("?x family:hasParent ?y . ?y a family:Male .");
 
 		System.out.println("Example 3");
 		System.out.println("=========");
@@ -135,8 +135,8 @@ public class QuerySubsumptionExample
 	 */
 	public void example4()
 	{
-		final Query q7 = query("?x a family:Female; family:hasBrother ?y . ");
-		final Query q8 = query("?x a family:Female; family:hasSibling ?z .");
+		final ConjunctiveQuery q7 = query("?x a family:Female; family:hasBrother ?y . ");
+		final ConjunctiveQuery q8 = query("?x a family:Female; family:hasSibling ?z .");
 
 		System.out.println("Example 4");
 		System.out.println("=========");

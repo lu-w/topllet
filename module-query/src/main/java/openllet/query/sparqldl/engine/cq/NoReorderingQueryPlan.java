@@ -6,9 +6,9 @@
 
 package openllet.query.sparqldl.engine.cq;
 
-import openllet.query.sparqldl.model.cq.Query;
+import openllet.query.sparqldl.model.cq.ConjunctiveQuery;
 import openllet.query.sparqldl.model.cq.QueryAtom;
-import openllet.query.sparqldl.model.ResultBinding;
+import openllet.query.sparqldl.model.results.ResultBinding;
 
 /**
  * <p>
@@ -30,7 +30,7 @@ public class NoReorderingQueryPlan extends QueryPlan
 
 	private final int _size;
 
-	public NoReorderingQueryPlan(final Query query)
+	public NoReorderingQueryPlan(final ConjunctiveQuery query)
 	{
 		super(query);
 

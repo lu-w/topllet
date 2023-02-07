@@ -14,7 +14,7 @@ import java.util.List;
 
 import openllet.aterm.ATermAppl;
 import openllet.core.utils.ATermUtils;
-import openllet.query.sparqldl.model.ResultBinding;
+import openllet.query.sparqldl.model.results.ResultBinding;
 
 /**
  * <p>

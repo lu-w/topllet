@@ -16,8 +16,8 @@ import java.util.Set;
 import openllet.aterm.ATermAppl;
 import openllet.core.KnowledgeBase;
 import openllet.core.utils.ATermUtils;
-import openllet.query.sparqldl.model.ResultBinding;
-import openllet.query.sparqldl.model.ucq.UnionQuery.VarType;
+import openllet.query.sparqldl.model.results.ResultBinding;
+import openllet.query.sparqldl.model.Query.VarType;
 
 /**
  * <p>
@@ -37,11 +37,11 @@ public class CoreNewImpl implements Core
 
 	private final QueryAtom _atom;
 
-	private final Query _query;
+	private final ConjunctiveQuery _query;
 
 	public CoreNewImpl(final Collection<QueryAtom> atoms, final Collection<ATermAppl> uv, final KnowledgeBase kb)
 	{
-		_query = new QueryImpl(kb, false);
+		_query = new ConjunctiveQueryImpl(kb, false);
 
 		final List<ATermAppl> signature = new ArrayList<>();
 
@@ -75,7 +75,7 @@ public class CoreNewImpl implements Core
 		_atom = new QueryAtomImpl(QueryPredicate.UndistVarCore, signature);
 	}
 
-	private CoreNewImpl(final Query query, final QueryAtom atom)
+	private CoreNewImpl(final ConjunctiveQuery query, final QueryAtom atom)
 	{
 		_atom = atom;
 		_query = query;
@@ -160,7 +160,7 @@ public class CoreNewImpl implements Core
 		return _atom.getPredicate();
 	}
 
-	public Query getQuery()
+	public ConjunctiveQuery getQuery()
 	{
 		return _query;
 	}

@@ -6,7 +6,7 @@
 
 package openllet.query.sparqldl.model.cq;
 
-import openllet.query.sparqldl.model.ResultBinding;
+import openllet.query.sparqldl.model.results.ResultBinding;
 
 /**
  * <p>

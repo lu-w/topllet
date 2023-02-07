@@ -6,9 +6,9 @@
 
 package openllet.query.sparqldl.engine.cq;
 
-import openllet.query.sparqldl.model.cq.Query;
+import openllet.query.sparqldl.model.cq.ConjunctiveQuery;
 import openllet.query.sparqldl.model.cq.QueryAtom;
-import openllet.query.sparqldl.model.ResultBinding;
+import openllet.query.sparqldl.model.results.ResultBinding;
 
 /**
  * <p>
@@ -25,14 +25,14 @@ import openllet.query.sparqldl.model.ResultBinding;
  */
 public abstract class QueryPlan
 {
-	protected Query _query;
+	protected ConjunctiveQuery _query;
 
-	public QueryPlan(final Query query)
+	public QueryPlan(final ConjunctiveQuery query)
 	{
 		_query = query;
 	}
 
-	public Query getQuery()
+	public ConjunctiveQuery getQuery()
 	{
 		return _query;
 	}

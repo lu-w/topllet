@@ -37,18 +37,18 @@ import openllet.core.utils.ATermUtils;
 import openllet.core.utils.Bool;
 import openllet.core.utils.DisjointSet;
 import openllet.core.utils.SetUtils;
-import openllet.query.sparqldl.model.MultiQueryResults;
+import openllet.query.sparqldl.model.results.MultiQueryResults;
 import openllet.query.sparqldl.model.cq.NotKnownQueryAtom;
-import openllet.query.sparqldl.model.cq.Query;
-import openllet.query.sparqldl.model.ucq.UnionQuery.VarType;
+import openllet.query.sparqldl.model.cq.ConjunctiveQuery;
+import openllet.query.sparqldl.model.Query.VarType;
 import openllet.query.sparqldl.model.cq.QueryAtom;
 import openllet.query.sparqldl.model.cq.QueryAtomFactory;
-import openllet.query.sparqldl.model.cq.QueryImpl;
+import openllet.query.sparqldl.model.cq.ConjunctiveQueryImpl;
 import openllet.query.sparqldl.model.cq.QueryPredicate;
-import openllet.query.sparqldl.model.QueryResult;
-import openllet.query.sparqldl.model.QueryResultImpl;
-import openllet.query.sparqldl.model.ResultBinding;
-import openllet.query.sparqldl.model.ResultBindingImpl;
+import openllet.query.sparqldl.model.results.QueryResult;
+import openllet.query.sparqldl.model.results.QueryResultImpl;
+import openllet.query.sparqldl.model.results.ResultBinding;
+import openllet.query.sparqldl.model.results.ResultBindingImpl;
 import openllet.query.sparqldl.model.cq.UnionQueryAtom;
 import openllet.shared.tools.Log;
 
@@ -76,12 +76,12 @@ public class QueryEngine
 		return new CombinedQueryEngine();
 	}
 
-	public static boolean supports(final Query query, @SuppressWarnings("unused") final KnowledgeBase kb)
+	public static boolean supports(final ConjunctiveQuery query, @SuppressWarnings("unused") final KnowledgeBase kb)
 	{
 		return getQueryExec().supports(query);
 	}
 
-	public static QueryResult exec(final Query query, final KnowledgeBase kb)
+	public static QueryResult exec(final ConjunctiveQuery query, final KnowledgeBase kb)
 	{
 		final KnowledgeBase queryKB = query.getKB();
 		query.setKB(kb);
@@ -90,7 +90,7 @@ public class QueryEngine
 		return result;
 	}
 
-	public static QueryResult exec(final Query query)
+	public static QueryResult exec(final ConjunctiveQuery query)
 	{
 		if (query.getAtoms().isEmpty())
 		{
@@ -102,7 +102,7 @@ public class QueryEngine
 
 		// PREPROCESSING
 		_logger.fine(() -> "Preprocessing:\n" + query);
-		final Query preprocessed = preprocess(query);
+		final ConjunctiveQuery preprocessed = preprocess(query);
 
 		// SIMPLIFICATION
 		if (OpenlletOptions.SIMPLIFY_QUERY)
@@ -115,7 +115,7 @@ public class QueryEngine
 		// SPLITTING
 		_logger.fine(() -> "Splitting:\n" + preprocessed);
 
-		final List<Query> queries = split(preprocessed);
+		final List<ConjunctiveQuery> queries = split(preprocessed);
 
 		QueryResult r = null;
 		if (queries.isEmpty())
@@ -126,7 +126,7 @@ public class QueryEngine
 			else
 			{
 				final List<QueryResult> results = new ArrayList<>(queries.size());
-				for (final Query q : queries)
+				for (final ConjunctiveQuery q : queries)
 					results.add(execSingleQuery(q));
 
 				r = new MultiQueryResults(query.getResultVars(), results);
@@ -301,12 +301,12 @@ public class QueryEngine
 		return false;
 	}
 
-	private static boolean hasUndefinedTerm(final Query query)
+	private static boolean hasUndefinedTerm(final ConjunctiveQuery query)
 	{
 		return hasUndefinedTerm(query.getAtoms(), query.getKB());
 	}
 
-	private static QueryResult execSingleQuery(final Query query)
+	private static QueryResult execSingleQuery(final ConjunctiveQuery query)
 	{
 		if (hasUndefinedTerm(query))
 			return new QueryResultImpl(query);
@@ -324,7 +324,7 @@ public class QueryEngine
 	 * @param splitOnIndividuals Whether to split on individuals.
 	 * @return List of queries (contains the initial query if the initial query is connected)
 	 */
-	public static List<Query> split(final Query query, boolean splitOnIndividuals)
+	public static List<ConjunctiveQuery> split(final ConjunctiveQuery query, boolean splitOnIndividuals)
 	{
 		try
 		{
@@ -352,8 +352,8 @@ public class QueryEngine
 			if (equivalenceSets.size() == 1)
 				return Collections.singletonList(query);
 
-			final Map<ATermAppl, Query> queries = new HashMap<>();
-			Query groundQuery = null;
+			final Map<ATermAppl, ConjunctiveQuery> queries = new HashMap<>();
+			ConjunctiveQuery groundQuery = null;
 			for (final QueryAtom atom : query.getAtoms())
 			{
 				ATermAppl representative = null;
@@ -364,11 +364,11 @@ public class QueryEngine
 						break;
 					}
 
-				Query newQuery = null;
+				ConjunctiveQuery newQuery = null;
 				if (representative == null)
 				{
 					if (groundQuery == null)
-						groundQuery = new QueryImpl(query);
+						groundQuery = new ConjunctiveQueryImpl(query);
 					newQuery = groundQuery;
 				}
 				else
@@ -376,7 +376,7 @@ public class QueryEngine
 					newQuery = queries.get(representative);
 					if (newQuery == null)
 					{
-						newQuery = new QueryImpl(query);
+						newQuery = new ConjunctiveQueryImpl(query);
 						queries.put(representative, newQuery);
 					}
 					for (final ATermAppl arg : atom.getArguments())
@@ -393,7 +393,7 @@ public class QueryEngine
 				newQuery.add(atom);
 			}
 
-			final List<Query> list = new ArrayList<>(queries.values());
+			final List<ConjunctiveQuery> list = new ArrayList<>(queries.values());
 
 			if (groundQuery != null)
 				list.add(0, groundQuery);
@@ -415,7 +415,7 @@ public class QueryEngine
 	 * @param query Query to be split
 	 * @return List of queries (contains the initial query if the initial query is connected)
 	 */
-	public static List<Query> split(final Query query)
+	public static List<ConjunctiveQuery> split(final ConjunctiveQuery query)
 	{
 		return split(query, false);
 	}
@@ -426,14 +426,14 @@ public class QueryEngine
 	 *
 	 * @param query
 	 */
-	private static void simplify(final Query query)
+	private static void simplify(final ConjunctiveQuery query)
 	{
 		domainRangeSimplification(query);
 	}
 
-	private static Query preprocess(final Query query)
+	private static ConjunctiveQuery preprocess(final ConjunctiveQuery query)
 	{
-		Query q = query;
+		ConjunctiveQuery q = query;
 
 		final Set<ATermAppl> undistVars = q.getUndistVars();
 
@@ -532,7 +532,7 @@ public class QueryEngine
 		return STRATEGY;
 	}
 
-	private static void domainRangeSimplification(final Query query)
+	private static void domainRangeSimplification(final ConjunctiveQuery query)
 	{
 		final Map<ATermAppl, Set<ATermAppl>> allInferredTypes = new HashMap<>();
 
@@ -586,7 +586,7 @@ public class QueryEngine
 	 * @param query
 	 * @return true if query is satisfied
 	 */
-	public static boolean execBooleanABoxQuery(final Query query)
+	public static boolean execBooleanABoxQuery(final ConjunctiveQuery query)
 	{
 		// if (!query.getDistVars().isEmpty()) {
 		// throw new InternalReasonerException(

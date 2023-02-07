@@ -12,7 +12,7 @@ import openllet.core.KnowledgeBase;
 import openllet.jena.PelletInfGraph;
 import openllet.jena.PelletReasonerFactory;
 import openllet.query.sparqldl.engine.cq.QuerySubsumption;
-import openllet.query.sparqldl.model.cq.Query;
+import openllet.query.sparqldl.model.cq.ConjunctiveQuery;
 import openllet.query.sparqldl.parser.QueryEngineBuilder;
 import openllet.query.sparqldl.parser.QueryParser;
 
@@ -43,7 +43,7 @@ public class TestQuerySubsumption
 		_parser = QueryEngineBuilder.getParser();
 	}
 
-	private Query query(final String queryStr)
+	private ConjunctiveQuery query(final String queryStr)
 	{
 		return _parser.parse(_prefix + queryStr + suffix, _kb);
 	}
@@ -51,7 +51,7 @@ public class TestQuerySubsumption
 	@Test
 	public void testIsEquivalentTo()
 	{
-		Query[] queries = new Query[2];
+		ConjunctiveQuery[] queries = new ConjunctiveQuery[2];
 
 		queries = example1();
 		assertFalse(QuerySubsumption.isEquivalentTo(queries[0], queries[1]));
@@ -70,7 +70,7 @@ public class TestQuerySubsumption
 	public void testIsSubsumedBy()
 	{
 
-		Query[] queries = new Query[2];
+		ConjunctiveQuery[] queries = new ConjunctiveQuery[2];
 
 		queries = example1();
 		assertTrue(QuerySubsumption.isSubsumedBy(queries[0], queries[1]));
@@ -93,9 +93,9 @@ public class TestQuerySubsumption
 	 * Simple query subsumption similar to standard concept subsumption. Every Male is a Person so query 1 is subsumed by query 2. The converse is obviously not
 	 * true.
 	 */
-	private Query[] example1()
+	private ConjunctiveQuery[] example1()
 	{
-		final Query[] queries = new Query[2];
+		final ConjunctiveQuery[] queries = new ConjunctiveQuery[2];
 
 		queries[0] = query("?x a family:Male .");
 		queries[1] = query("?x a family:Person .");
@@ -109,9 +109,9 @@ public class TestQuerySubsumption
 	 *
 	 * @return examples queries
 	 */
-	public Query[] example2()
+	public ConjunctiveQuery[] example2()
 	{
-		final Query[] queries = new Query[2];
+		final ConjunctiveQuery[] queries = new ConjunctiveQuery[2];
 
 		queries[0] = query("?x family:isMarriedTo ?y . ?y rdf:type family:Male");
 		queries[1] = query("?x a family:Female .");
@@ -125,9 +125,9 @@ public class TestQuerySubsumption
 	 *
 	 * @return examples queries
 	 */
-	public Query[] example3()
+	public ConjunctiveQuery[] example3()
 	{
-		final Query[] queries = new Query[2];
+		final ConjunctiveQuery[] queries = new ConjunctiveQuery[2];
 
 		queries[0] = query("?x family:hasFather ?y . ");
 		queries[1] = query("?x family:hasParent ?y . ?y a family:Male .");
@@ -140,10 +140,10 @@ public class TestQuerySubsumption
 	 * 
 	 * @return examples queries
 	 */
-	public Query[] example4()
+	public ConjunctiveQuery[] example4()
 	{
 
-		final Query[] queries = new Query[2];
+		final ConjunctiveQuery[] queries = new ConjunctiveQuery[2];
 
 		queries[0] = query("?x a family:Female; family:hasBrother ?y . ");
 		queries[1] = query("?x a family:Female; family:hasSibling ?z .");

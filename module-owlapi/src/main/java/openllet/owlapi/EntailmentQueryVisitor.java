@@ -22,10 +22,10 @@ import openllet.aterm.ATermAppl;
 import openllet.core.utils.ATermUtils;
 import openllet.owlapi.facet.FacetReasonerOWL;
 import openllet.query.sparqldl.engine.cq.QueryEngine;
-import openllet.query.sparqldl.model.cq.Query;
+import openllet.query.sparqldl.model.cq.ConjunctiveQuery;
 import openllet.query.sparqldl.model.cq.QueryAtomFactory;
-import openllet.query.sparqldl.model.cq.QueryImpl;
-import openllet.query.sparqldl.model.QueryResult;
+import openllet.query.sparqldl.model.cq.ConjunctiveQueryImpl;
+import openllet.query.sparqldl.model.results.QueryResult;
 
 public class EntailmentQueryVisitor implements OWLAxiomVisitor, FacetReasonerOWL
 {
@@ -33,7 +33,7 @@ public class EntailmentQueryVisitor implements OWLAxiomVisitor, FacetReasonerOWL
 
 	private final OpenlletReasoner _reasoner;
 
-	private Query _query;
+	private ConjunctiveQuery _query;
 
 	@Override
 	public OpenlletReasoner getReasoner()
@@ -85,7 +85,7 @@ public class EntailmentQueryVisitor implements OWLAxiomVisitor, FacetReasonerOWL
 
 	public void reset()
 	{
-		_query = new QueryImpl(_reasoner.getKB(), false);
+		_query = new ConjunctiveQueryImpl(_reasoner.getKB(), false);
 	}
 
 	@Override

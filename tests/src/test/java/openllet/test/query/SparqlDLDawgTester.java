@@ -39,9 +39,9 @@ import openllet.jena.PelletReasonerFactory;
 import openllet.query.sparqldl.engine.cq.QueryEngine;
 import openllet.query.sparqldl.jena.JenaIOUtils;
 import openllet.query.sparqldl.jena.SparqlDLResultSet;
-import openllet.query.sparqldl.model.cq.Query;
-import openllet.query.sparqldl.model.QueryResult;
-import openllet.query.sparqldl.model.ResultBinding;
+import openllet.query.sparqldl.model.cq.ConjunctiveQuery;
+import openllet.query.sparqldl.model.results.QueryResult;
+import openllet.query.sparqldl.model.results.ResultBinding;
 import openllet.query.sparqldl.parser.QueryEngineBuilder;
 import openllet.shared.tools.Log;
 
@@ -62,7 +62,7 @@ public class SparqlDLDawgTester implements SparqlDawgTester
 	private Set<String> _graphURIs = new HashSet<>();
 	private Set<String> _namedGraphURIs = new HashSet<>();
 	private OntModel _model = null;
-	private Query _query = null;
+	private ConjunctiveQuery _query = null;
 	private String _resultURI = null;
 	private final boolean _allOrderings;
 	private final boolean _writeResults = true;
@@ -212,7 +212,7 @@ public class SparqlDLDawgTester implements SparqlDawgTester
 		}
 	}
 
-	private static QueryResult runSingleTest(final Query query)
+	private static QueryResult runSingleTest(final ConjunctiveQuery query)
 	{
 		final Timer t = new Timer("Single _query execution");
 
@@ -225,7 +225,7 @@ public class SparqlDLDawgTester implements SparqlDawgTester
 		return bindings;
 	}
 
-	private final boolean runSingleAskTest(final Query query, final Boolean expected)
+	private final boolean runSingleAskTest(final ConjunctiveQuery query, final Boolean expected)
 	{
 		final QueryResult bindings = runSingleTest(query);
 
@@ -242,7 +242,7 @@ public class SparqlDLDawgTester implements SparqlDawgTester
 		return ok;
 	}
 
-	private final boolean runSingleSelectTest(final Query query, final ResultSetRewindable expected)
+	private final boolean runSingleSelectTest(final ConjunctiveQuery query, final ResultSetRewindable expected)
 	{
 		final QueryResult bindings = runSingleTest(query);
 

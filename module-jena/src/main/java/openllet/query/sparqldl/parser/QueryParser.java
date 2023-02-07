@@ -9,7 +9,7 @@ package openllet.query.sparqldl.parser;
 import java.io.InputStream;
 
 import openllet.core.KnowledgeBase;
-import openllet.query.sparqldl.model.cq.Query;
+import openllet.query.sparqldl.model.cq.ConjunctiveQuery;
 
 /**
  * <p>
@@ -27,9 +27,9 @@ import openllet.query.sparqldl.model.cq.Query;
 public interface QueryParser
 {
 
-	Query parse(final String queryString, KnowledgeBase kb);
+	ConjunctiveQuery parse(final String queryString, KnowledgeBase kb);
 
-	Query parse(final InputStream stream, KnowledgeBase kb);
+	ConjunctiveQuery parse(final InputStream stream, KnowledgeBase kb);
 
-	Query parse(final org.apache.jena.query.Query stream, KnowledgeBase kb);
+	ConjunctiveQuery parse(final org.apache.jena.query.Query stream, KnowledgeBase kb);
 }

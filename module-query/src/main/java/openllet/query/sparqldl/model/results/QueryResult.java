@@ -4,7 +4,7 @@
 // Please see LICENSE.txt for full license terms, including the availability of proprietary exceptions.
 // Questions, comments, or requests for clarification: licensing@clarkparsia.com
 
-package openllet.query.sparqldl.model;
+package openllet.query.sparqldl.model.results;
 
 import java.util.List;
 

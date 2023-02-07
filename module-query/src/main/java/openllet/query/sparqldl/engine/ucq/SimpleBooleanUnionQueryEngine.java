@@ -8,9 +8,13 @@ import openllet.core.boxes.rbox.Role;
 import openllet.core.utils.ATermUtils;
 import openllet.core.utils.Pair;
 import openllet.query.sparqldl.engine.cq.QueryEngine;
-import openllet.query.sparqldl.model.*;
-import openllet.query.sparqldl.model.cq.Query;
+import openllet.query.sparqldl.model.cq.ConjunctiveQuery;
+import openllet.query.sparqldl.model.results.QueryResult;
+import openllet.query.sparqldl.model.results.QueryResultImpl;
+import openllet.query.sparqldl.model.results.ResultBinding;
+import openllet.query.sparqldl.model.ucq.CNFQueryImpl;
 import openllet.query.sparqldl.model.ucq.DisjunctiveQuery;
+import openllet.query.sparqldl.model.ucq.CNFQuery;
 import openllet.query.sparqldl.model.ucq.UnionQuery;
 import openllet.shared.tools.Log;
 
@@ -20,7 +24,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import static openllet.core.utils.TermFactory.TOP_OBJECT_PROPERTY;
-import static openllet.query.sparqldl.engine.cq.QueryEngine.split;
 
 public class SimpleBooleanUnionQueryEngine extends AbstractBooleanUnionQueryEngine
 {
@@ -51,7 +54,7 @@ public class SimpleBooleanUnionQueryEngine extends AbstractBooleanUnionQueryEngi
             _logger.finer("Rolled-up union query: " + rolledUpUnionQuery);
 
         // 4. CONVERT TO CNF
-        List<DisjunctiveQuery> cnfQuery = rolledUpUnionQuery.toCNF();
+        CNFQuery cnfQuery = rolledUpUnionQuery.toCNF();
         if (_logger.isLoggable(Level.FINER))
             _logger.finer("Rolled-up union query in CNF is: " + cnfQuery);
 
@@ -59,16 +62,27 @@ public class SimpleBooleanUnionQueryEngine extends AbstractBooleanUnionQueryEngi
         return isEntailed(cnfQuery, q.getKB());
     }
 
+
+    @Override
+    protected boolean execBooleanABoxQuery(CNFQuery q)
+    {
+        // 1. PRELIMINARY CONSISTENCY CHECK
+        q.getKB().ensureConsistency();
+
+        // 2. CHECK ENTAILMENT FOR EACH CONJUNCT
+        return isEntailed(q, q.getKB());
+    }
+
     /**
      * Core of the UCQ Engine. Checks whether a given query in conjunctive normal form (CNF) is entailed.
      * @param cnfQuery The query in CNF to check. The list represents the conjunction, each element is a disjunction
      * @return True iff. the given query is entailed by the knowledge base
      */
-    private boolean isEntailed(List<DisjunctiveQuery> cnfQuery, KnowledgeBase kb)
+    private boolean isEntailed(CNFQuery cnfQuery, KnowledgeBase kb)
     {
         boolean isEntailed = true;
         // Query is entailed iff. all conjuncts are entailed
-        for (DisjunctiveQuery disjunctiveQuery : cnfQuery)
+        for (DisjunctiveQuery disjunctiveQuery : cnfQuery.getQueries())
         {
             if (_logger.isLoggable(Level.FINER))
                 _logger.finer("Checking disjunctive query: " + disjunctiveQuery);
@@ -77,7 +91,7 @@ public class SimpleBooleanUnionQueryEngine extends AbstractBooleanUnionQueryEngi
             // - C(x) for undistinguished variables Cx and concepts C -> disjunctionVar
             List<Pair<ATermAppl, ATermAppl>> disjunctionInd = new ArrayList<>();
             List<ATermAppl> disjunctionVar = new ArrayList<>();
-            for (Query atomicQuery : disjunctiveQuery.getQueries())
+            for (ConjunctiveQuery atomicQuery : disjunctiveQuery.getQueries())
                 if (atomicQuery.getAtoms().size() == 1)
                     if (kb.getABox().getIndividual(atomicQuery.getAtoms().get(0).getArguments().get(0)) != null)
                         disjunctionInd.add(new Pair<>(atomicQuery.getAtoms().get(0).getArguments().get(0),
@@ -164,8 +178,8 @@ public class SimpleBooleanUnionQueryEngine extends AbstractBooleanUnionQueryEngi
     private QueryResult execUnderapproximatingSemantics(UnionQuery q)
     {
         QueryResult result = new QueryResultImpl(q);
-        UnionQuery qCopy = q.copy();
-        for (Query conjunctiveQuery : qCopy.getQueries())
+        UnionQuery qCopy = (UnionQuery) q.copy();
+        for (ConjunctiveQuery conjunctiveQuery : qCopy.getQueries())
         {
             QueryResult conjunctiveQueryResult = QueryEngine.exec(conjunctiveQuery);
             for (ResultBinding binding : conjunctiveQueryResult)

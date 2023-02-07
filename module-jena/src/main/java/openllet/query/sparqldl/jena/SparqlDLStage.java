@@ -32,10 +32,10 @@ import openllet.core.utils.ATermUtils;
 import openllet.jena.PelletInfGraph;
 import openllet.jena.graph.loader.GraphLoader;
 import openllet.query.sparqldl.engine.cq.QueryEngine;
-import openllet.query.sparqldl.model.cq.Query;
-import openllet.query.sparqldl.model.QueryResult;
-import openllet.query.sparqldl.model.ResultBinding;
-import openllet.query.sparqldl.model.ResultBindingImpl;
+import openllet.query.sparqldl.model.cq.ConjunctiveQuery;
+import openllet.query.sparqldl.model.results.QueryResult;
+import openllet.query.sparqldl.model.results.ResultBinding;
+import openllet.query.sparqldl.model.results.ResultBindingImpl;
 import openllet.query.sparqldl.parser.ARQParser;
 import openllet.shared.tools.Log;
 
@@ -102,7 +102,7 @@ class SparqlDLStage
 
 		pellet.prepare();
 
-		final Query query = parsePattern(pellet);
+		final ConjunctiveQuery query = parsePattern(pellet);
 
 		if (query != null)
 			return new PelletQueryIterator(pellet, query, input, execCxt);
@@ -110,7 +110,7 @@ class SparqlDLStage
 			return new StageGeneratorGenericStar().execute(_pattern, input, execCxt);
 	}
 
-	private Query parsePattern(final PelletInfGraph pellet)
+	private ConjunctiveQuery parsePattern(final PelletInfGraph pellet)
 	{
 		try
 		{
@@ -128,9 +128,9 @@ class SparqlDLStage
 	private static class PelletQueryIterator extends QueryIterRepeatApply
 	{
 		private final PelletInfGraph _pellet;
-		private final Query _query;
+		private final ConjunctiveQuery _query;
 
-		public PelletQueryIterator(final PelletInfGraph pellet, final Query query, final QueryIterator input, final ExecutionContext execCxt)
+		public PelletQueryIterator(final PelletInfGraph pellet, final ConjunctiveQuery query, final QueryIterator input, final ExecutionContext execCxt)
 		{
 			super(input, execCxt);
 
@@ -163,7 +163,7 @@ class SparqlDLStage
 		@Override
 		protected QueryIterator nextStage(final Binding binding)
 		{
-			final Query newQuery = _query.apply(convertBinding(binding));
+			final ConjunctiveQuery newQuery = _query.apply(convertBinding(binding));
 
 			final QueryResult results = QueryEngine.exec(newQuery);
 

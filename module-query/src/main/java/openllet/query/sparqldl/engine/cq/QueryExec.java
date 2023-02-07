@@ -6,8 +6,8 @@
 
 package openllet.query.sparqldl.engine.cq;
 
-import openllet.query.sparqldl.model.cq.Query;
-import openllet.query.sparqldl.model.QueryResult;
+import openllet.query.sparqldl.model.cq.ConjunctiveQuery;
+import openllet.query.sparqldl.model.results.QueryResult;
 
 /**
  * <p>
@@ -28,7 +28,7 @@ import openllet.query.sparqldl.model.QueryResult;
 public interface QueryExec
 {
 
-	QueryResult exec(Query plan);
+	QueryResult exec(ConjunctiveQuery plan);
 
-	boolean supports(Query q);
+	boolean supports(ConjunctiveQuery q);
 }

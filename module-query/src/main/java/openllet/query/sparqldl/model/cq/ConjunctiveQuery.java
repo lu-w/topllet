@@ -10,7 +10,7 @@ import java.util.Collection;
 import java.util.List;
 
 import openllet.aterm.ATermAppl;
-import openllet.query.sparqldl.model.ResultBinding;
+import openllet.query.sparqldl.model.results.ResultBinding;
 import openllet.query.sparqldl.model.ucq.UnionQuery;
 
 /**
@@ -26,7 +26,7 @@ import openllet.query.sparqldl.model.ucq.UnionQuery;
  *
  * @author Petr Kremen
  */
-public interface Query extends UnionQuery
+public interface ConjunctiveQuery extends UnionQuery
 {
 	/**
 	 * Adds a query atom to the query.
@@ -46,7 +46,7 @@ public interface Query extends UnionQuery
 	 * @param binding
 	 * @return the query changed
 	 */
-	Query apply(ResultBinding binding);
+	ConjunctiveQuery apply(ResultBinding binding);
 
 	/**
 	 * @param distVar
@@ -62,7 +62,7 @@ public interface Query extends UnionQuery
 	 * @param atoms selected atom indices
 	 * @return subquery
 	 */
-	Query reorder(int[] atoms);
+	ConjunctiveQuery reorder(int[] atoms);
 
 	void remove(final QueryAtom atom);
 

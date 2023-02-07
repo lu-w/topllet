@@ -18,10 +18,10 @@ import java.util.logging.Logger;
 import openllet.aterm.ATermAppl;
 import openllet.core.exceptions.UnsupportedQueryException;
 import openllet.core.utils.ATermUtils;
-import openllet.query.sparqldl.model.cq.Query;
+import openllet.query.sparqldl.model.cq.ConjunctiveQuery;
 import openllet.query.sparqldl.model.cq.QueryAtom;
 import openllet.query.sparqldl.model.cq.QueryPredicate;
-import openllet.query.sparqldl.model.ResultBinding;
+import openllet.query.sparqldl.model.results.ResultBinding;
 import openllet.shared.tools.Log;
 
 /**
@@ -49,7 +49,7 @@ public class CostBasedQueryPlanNew extends QueryPlan
 
 	private QueryCost _cost;
 
-	public CostBasedQueryPlanNew(final Query query)
+	public CostBasedQueryPlanNew(final ConjunctiveQuery query)
 	{
 		super(query);
 

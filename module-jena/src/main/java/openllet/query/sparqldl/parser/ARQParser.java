@@ -65,10 +65,10 @@ import openllet.core.utils.TermFactory;
 import openllet.jena.BuiltinTerm;
 import openllet.jena.JenaUtils;
 import openllet.jena.vocabulary.OWL2;
-import openllet.query.sparqldl.model.cq.Query;
-import openllet.query.sparqldl.model.ucq.UnionQuery.VarType;
+import openllet.query.sparqldl.model.cq.ConjunctiveQuery;
+import openllet.query.sparqldl.model.Query.VarType;
 import openllet.query.sparqldl.model.cq.QueryAtomFactory;
-import openllet.query.sparqldl.model.cq.QueryImpl;
+import openllet.query.sparqldl.model.cq.ConjunctiveQueryImpl;
 import openllet.shared.tools.Log;
 
 /**
@@ -119,7 +119,7 @@ public class ARQParser implements QueryParser
 	 * {@inheritDoc}
 	 */
 	@Override
-	public Query parse(final InputStream stream, final KnowledgeBase kb)
+	public ConjunctiveQuery parse(final InputStream stream, final KnowledgeBase kb)
 	{
 		try
 		{
@@ -137,14 +137,14 @@ public class ARQParser implements QueryParser
 	 * {@inheritDoc}
 	 */
 	@Override
-	public Query parse(final String queryStr, final KnowledgeBase kb)
+	public ConjunctiveQuery parse(final String queryStr, final KnowledgeBase kb)
 	{
 		final org.apache.jena.query.Query sparql = QueryFactory.create(queryStr, Syntax.syntaxSPARQL);
 
 		return parse(sparql, kb);
 	}
 
-	private Query parse(final Reader in, final KnowledgeBase kb) throws IOException
+	private ConjunctiveQuery parse(final Reader in, final KnowledgeBase kb) throws IOException
 	{
 		final StringBuffer queryString = new StringBuffer();
 		final BufferedReader r = new BufferedReader(in);
@@ -160,7 +160,7 @@ public class ARQParser implements QueryParser
 	}
 
 	@Override
-	public Query parse(final org.apache.jena.query.Query sparql, final KnowledgeBase kb)
+	public ConjunctiveQuery parse(final org.apache.jena.query.Query sparql, final KnowledgeBase kb)
 	{
 		_kb = kb;
 
@@ -212,12 +212,12 @@ public class ARQParser implements QueryParser
 		_terms.put(OWL2.bottomDataProperty.asNode(), BOTTOM_DATA_PROPERTY);
 	}
 
-	public Query parse(final BasicPattern basicPattern, final Collection<?> resultVars, final KnowledgeBase kb, final boolean isDistinct) throws UnsupportedQueryException
+	public ConjunctiveQuery parse(final BasicPattern basicPattern, final Collection<?> resultVars, final KnowledgeBase kb, final boolean isDistinct) throws UnsupportedQueryException
 	{
 		return parse(basicPattern.getList(), resultVars, kb, isDistinct);
 	}
 
-	public Query parse(final List<Triple> basicPattern, final Collection<?> resultVars, final KnowledgeBase kb, final boolean isDistinct) throws UnsupportedQueryException
+	public ConjunctiveQuery parse(final List<Triple> basicPattern, final Collection<?> resultVars, final KnowledgeBase kb, final boolean isDistinct) throws UnsupportedQueryException
 	{
 		_kb = kb;
 
@@ -243,7 +243,7 @@ public class ARQParser implements QueryParser
 		// substitute the variables with initial bindings, if applicable
 		_triples = new LinkedHashSet<>(resolveParameterization(basicPattern));
 
-		final Query query = new QueryImpl(kb, isDistinct);
+		final ConjunctiveQuery query = new ConjunctiveQueryImpl(kb, isDistinct);
 
 		for (final Object name : resultVars)
 		{

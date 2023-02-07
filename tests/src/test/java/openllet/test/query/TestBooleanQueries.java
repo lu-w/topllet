@@ -25,12 +25,12 @@ import org.junit.Test;
 import openllet.aterm.ATermAppl;
 import openllet.core.utils.ATermUtils;
 import openllet.query.sparqldl.engine.cq.QueryEngine;
-import openllet.query.sparqldl.model.cq.Query;
-import openllet.query.sparqldl.model.ucq.UnionQuery.VarType;
+import openllet.query.sparqldl.model.cq.ConjunctiveQuery;
+import openllet.query.sparqldl.model.Query.VarType;
 import openllet.query.sparqldl.model.cq.QueryAtom;
-import openllet.query.sparqldl.model.cq.QueryImpl;
-import openllet.query.sparqldl.model.QueryResult;
-import openllet.query.sparqldl.model.ResultBinding;
+import openllet.query.sparqldl.model.cq.ConjunctiveQueryImpl;
+import openllet.query.sparqldl.model.results.QueryResult;
+import openllet.query.sparqldl.model.results.ResultBinding;
 import openllet.test.AbstractKBTests;
 
 /**
@@ -48,20 +48,20 @@ public class TestBooleanQueries extends AbstractKBTests
 	private static final ATermAppl x = ATermUtils.makeVar("x");
 	private static final ATermAppl y = ATermUtils.makeVar("y");
 
-	private Query query(final QueryAtom... atoms)
+	private ConjunctiveQuery query(final QueryAtom... atoms)
 	{
-		final Query q = new QueryImpl(_kb, true);
+		final ConjunctiveQuery q = new ConjunctiveQueryImpl(_kb, true);
 		for (final QueryAtom atom : atoms)
 			q.add(atom);
 		return q;
 	}
 
-	private static void testQuery(final boolean expected, final Query query)
+	private static void testQuery(final boolean expected, final ConjunctiveQuery query)
 	{
 		assertEquals(expected, !QueryEngine.exec(query).isEmpty());
 	}
 
-	private static void testABoxQuery(final boolean expected, final Query query)
+	private static void testABoxQuery(final boolean expected, final ConjunctiveQuery query)
 	{
 		assertEquals(expected, QueryEngine.execBooleanABoxQuery(query));
 	}
@@ -78,12 +78,12 @@ public class TestBooleanQueries extends AbstractKBTests
 
 		_kb.addPropertyValue(_p, _a, _b);
 
-		final Query q1 = query(TypeAtom(x, _A));
-		final Query q2 = query(TypeAtom(x, _B));
-		final Query q3 = query(PropertyValueAtom(x, _p, y), TypeAtom(y, _B));
-		final Query q4 = query(TypeAtom(x, _A), PropertyValueAtom(x, _p, y), TypeAtom(y, _B));
-		final Query q5 = query(TypeAtom(x, _C));
-		final Query q6 = query(TypeAtom(x, _A), TypeAtom(x, _C));
+		final ConjunctiveQuery q1 = query(TypeAtom(x, _A));
+		final ConjunctiveQuery q2 = query(TypeAtom(x, _B));
+		final ConjunctiveQuery q3 = query(PropertyValueAtom(x, _p, y), TypeAtom(y, _B));
+		final ConjunctiveQuery q4 = query(TypeAtom(x, _A), PropertyValueAtom(x, _p, y), TypeAtom(y, _B));
+		final ConjunctiveQuery q5 = query(TypeAtom(x, _C));
+		final ConjunctiveQuery q6 = query(TypeAtom(x, _A), TypeAtom(x, _C));
 
 		testABoxQuery(true, q1);
 		testABoxQuery(true, q2);
@@ -122,7 +122,7 @@ public class TestBooleanQueries extends AbstractKBTests
 
 		_kb.addType(_a, _A);
 
-		final Query q1 = query(SubClassOfAtom(x, _C), TypeAtom(y, x));
+		final ConjunctiveQuery q1 = query(SubClassOfAtom(x, _C), TypeAtom(y, x));
 		q1.addDistVar(x, VarType.CLASS);
 		q1.addResultVar(x);
 
@@ -146,10 +146,10 @@ public class TestBooleanQueries extends AbstractKBTests
 
 		_kb.addType(_a, _A);
 
-		final Query q1 = query(NotKnownAtom(TypeAtom(_a, _A)));
-		final Query q2 = query(NotKnownAtom(TypeAtom(_a, _B)));
-		final Query q3 = query(NotKnownAtom(TypeAtom(_a, not(_A))));
-		final Query q4 = query(NotKnownAtom(TypeAtom(_a, not(_B))));
+		final ConjunctiveQuery q1 = query(NotKnownAtom(TypeAtom(_a, _A)));
+		final ConjunctiveQuery q2 = query(NotKnownAtom(TypeAtom(_a, _B)));
+		final ConjunctiveQuery q3 = query(NotKnownAtom(TypeAtom(_a, not(_A))));
+		final ConjunctiveQuery q4 = query(NotKnownAtom(TypeAtom(_a, not(_B))));
 
 		testQuery(false, q1);
 		testQuery(true, q2);

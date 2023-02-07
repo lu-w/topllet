@@ -15,10 +15,10 @@ import java.util.logging.Logger;
 
 import openllet.core.exceptions.InternalReasonerException;
 import openllet.core.utils.SetUtils;
-import openllet.query.sparqldl.model.cq.Query;
+import openllet.query.sparqldl.model.cq.ConjunctiveQuery;
 import openllet.query.sparqldl.model.cq.QueryAtom;
 import openllet.query.sparqldl.model.cq.QueryPredicate;
-import openllet.query.sparqldl.model.ResultBinding;
+import openllet.query.sparqldl.model.results.ResultBinding;
 import openllet.shared.tools.Log;
 
 /**
@@ -45,7 +45,7 @@ public class IncrementalQueryPlan extends QueryPlan
 	private final int _size;
 	private final QueryCost _cost;
 
-	public IncrementalQueryPlan(final Query query)
+	public IncrementalQueryPlan(final ConjunctiveQuery query)
 	{
 		super(query);
 

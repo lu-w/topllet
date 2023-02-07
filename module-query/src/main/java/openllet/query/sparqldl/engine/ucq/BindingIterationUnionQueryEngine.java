@@ -1,9 +1,9 @@
 package openllet.query.sparqldl.engine.ucq;
 
 import openllet.core.utils.Bool;
-import openllet.query.sparqldl.model.QueryResult;
-import openllet.query.sparqldl.model.QueryResultImpl;
-import openllet.query.sparqldl.model.ResultBinding;
+import openllet.query.sparqldl.model.results.QueryResult;
+import openllet.query.sparqldl.model.results.QueryResultImpl;
+import openllet.query.sparqldl.model.results.ResultBinding;
 import openllet.query.sparqldl.model.ucq.UnionQuery;
 
 import java.util.logging.Level;
@@ -24,7 +24,7 @@ public class BindingIterationUnionQueryEngine extends AbstractUnionQueryEngine
         {
             if (_logger.isLoggable(Level.FINE))
                 _logger.fine("Trying candidate binding: " + candidateBinding);
-            QueryResult booleanResult = _booleanEngine.exec(q.apply(candidateBinding));
+            QueryResult booleanResult = _booleanEngine.exec((UnionQuery) q.apply(candidateBinding));
             if (_logger.isLoggable(Level.FINE))
                 _logger.fine("Boolean engine returned: " + (booleanResult.isEmpty() ? "false" : "true"));
             if (!booleanResult.isEmpty())

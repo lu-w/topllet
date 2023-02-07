@@ -18,7 +18,7 @@ import org.junit.Test;
 
 import openllet.aterm.ATermAppl;
 import openllet.core.utils.TermFactory;
-import openllet.query.sparqldl.model.cq.Query;
+import openllet.query.sparqldl.model.cq.ConjunctiveQuery;
 
 /**
  * <p>
@@ -42,7 +42,7 @@ public class TestNegatedQueries extends AbstractQueryTest
 		_kb.addType(_b, _A);
 		_kb.addType(_b, _B);
 
-		final Query q = query(select(x), where(TypeAtom(x, _A), NotKnownAtom(TypeAtom(x, _B))));
+		final ConjunctiveQuery q = query(select(x), where(TypeAtom(x, _A), NotKnownAtom(TypeAtom(x, _B))));
 
 		testQuery(q, new ATermAppl[][] { { _a } });
 	}
@@ -57,7 +57,7 @@ public class TestNegatedQueries extends AbstractQueryTest
 		_kb.addType(_b, _A);
 		_kb.addType(_b, _B);
 
-		final Query q = query(select(x), where(TypeAtom(x, _A), NotKnownAtom(TypeAtom(x, not(_B)))));
+		final ConjunctiveQuery q = query(select(x), where(TypeAtom(x, _A), NotKnownAtom(TypeAtom(x, not(_B)))));
 
 		testQuery(q, new ATermAppl[][] { { _a }, { _b } });
 	}
@@ -75,7 +75,7 @@ public class TestNegatedQueries extends AbstractQueryTest
 
 		_kb.addPropertyValue(_p, _a, _c);
 
-		final Query q = query(select(x, y), where(TypeAtom(x, _A), NotKnownAtom(PropertyValueAtom(x, _p, y)), TypeAtom(y, _B)));
+		final ConjunctiveQuery q = query(select(x, y), where(TypeAtom(x, _A), NotKnownAtom(PropertyValueAtom(x, _p, y)), TypeAtom(y, _B)));
 
 		testQuery(q, new ATermAppl[][] { { _a, _b } });
 	}
@@ -86,7 +86,7 @@ public class TestNegatedQueries extends AbstractQueryTest
 		classes(_A, _B);
 		individuals(_a, _b);
 
-		final Query q = ask(NotKnownAtom(TypeAtom(x, _B)));
+		final ConjunctiveQuery q = ask(NotKnownAtom(TypeAtom(x, _B)));
 
 		testQuery(q, true);
 	}
@@ -99,7 +99,7 @@ public class TestNegatedQueries extends AbstractQueryTest
 
 		_kb.addType(_b, _B);
 
-		final Query q = ask(NotKnownAtom(TypeAtom(x, _B)));
+		final ConjunctiveQuery q = ask(NotKnownAtom(TypeAtom(x, _B)));
 
 		testQuery(q, false);
 	}
@@ -112,7 +112,7 @@ public class TestNegatedQueries extends AbstractQueryTest
 
 		_kb.addType(_b, _B);
 
-		final Query q = query(select(x), where(TypeAtom(x, TermFactory.TOP), NotKnownAtom(TypeAtom(x, _B))));
+		final ConjunctiveQuery q = query(select(x), where(TypeAtom(x, TermFactory.TOP), NotKnownAtom(TypeAtom(x, _B))));
 
 		testQuery(q, new ATermAppl[][] { { _a }, { _c } });
 	}
@@ -127,7 +127,7 @@ public class TestNegatedQueries extends AbstractQueryTest
 		_kb.addType(_b, _A);
 		_kb.addType(_b, _B);
 
-		final Query q = query(select(x), where(TypeAtom(x, _A), NotKnownAtom(TypeAtom(x, _B))));
+		final ConjunctiveQuery q = query(select(x), where(TypeAtom(x, _A), NotKnownAtom(TypeAtom(x, _B))));
 
 		testQuery(q, new ATermAppl[][] { { _a } });
 	}
@@ -140,11 +140,11 @@ public class TestNegatedQueries extends AbstractQueryTest
 
 		_kb.addType(_a, _A);
 
-		final Query q1 = query(select(x), where(TypeAtom(x, TOP), NotKnownAtom(TypeAtom(x, _A)), NotKnownAtom(TypeAtom(x, _B))));
+		final ConjunctiveQuery q1 = query(select(x), where(TypeAtom(x, TOP), NotKnownAtom(TypeAtom(x, _A)), NotKnownAtom(TypeAtom(x, _B))));
 
 		testQuery(q1, new ATermAppl[][] { { _b }, { _c } });
 
-		final Query q2 = query(select(x), where(TypeAtom(x, TOP), NotKnownAtom(TypeAtom(x, _A), TypeAtom(x, _B))));
+		final ConjunctiveQuery q2 = query(select(x), where(TypeAtom(x, TOP), NotKnownAtom(TypeAtom(x, _A), TypeAtom(x, _B))));
 
 		testQuery(q2, new ATermAppl[][] { { _a }, { _b }, { _c } });
 	}
@@ -158,11 +158,11 @@ public class TestNegatedQueries extends AbstractQueryTest
 
 		_kb.addPropertyValue(_p, _a, _b);
 
-		final Query q1 = query(select(x), where(TypeAtom(x, TOP), NotKnownAtom(PropertyValueAtom(x, _p, y)), NotKnownAtom(PropertyValueAtom(x, _q, z))));
+		final ConjunctiveQuery q1 = query(select(x), where(TypeAtom(x, TOP), NotKnownAtom(PropertyValueAtom(x, _p, y)), NotKnownAtom(PropertyValueAtom(x, _q, z))));
 
 		testQuery(q1, new ATermAppl[][] { { _b }, { _c } });
 
-		final Query q2 = query(select(x), where(TypeAtom(x, TOP), NotKnownAtom(PropertyValueAtom(x, _p, y), PropertyValueAtom(x, _q, z))));
+		final ConjunctiveQuery q2 = query(select(x), where(TypeAtom(x, TOP), NotKnownAtom(PropertyValueAtom(x, _p, y), PropertyValueAtom(x, _q, z))));
 
 		testQuery(q2, new ATermAppl[][] { { _a }, { _b }, { _c } });
 	}

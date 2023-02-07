@@ -16,10 +16,13 @@ import java.util.logging.Logger;
 import openllet.aterm.ATermAppl;
 import openllet.core.KnowledgeBase;
 import openllet.core.utils.ATermUtils;
-import openllet.query.sparqldl.model.*;
-import openllet.query.sparqldl.model.cq.Query;
+import openllet.query.sparqldl.model.cq.ConjunctiveQuery;
 import openllet.query.sparqldl.model.cq.QueryAtom;
 import openllet.query.sparqldl.model.cq.QueryPredicate;
+import openllet.query.sparqldl.model.results.QueryResult;
+import openllet.query.sparqldl.model.results.QueryResultImpl;
+import openllet.query.sparqldl.model.results.ResultBinding;
+import openllet.query.sparqldl.model.results.ResultBindingImpl;
 import openllet.shared.tools.Log;
 
 /**
@@ -48,12 +51,12 @@ public class OptimizedQueryEngine2 extends AbstractABoxEngineWrapper
 	 * {@inheritDoc}
 	 */
 	@Override
-	public boolean supports(final Query q)
+	public boolean supports(final ConjunctiveQuery q)
 	{
 		return !q.getDistVars().isEmpty();
 	}
 
-	private void exec(final Query q, final ResultBinding binding, final boolean first)
+	private void exec(final ConjunctiveQuery q, final ResultBinding binding, final boolean first)
 	{
 		if (q.getDistVars().isEmpty())
 		{
@@ -91,13 +94,13 @@ public class OptimizedQueryEngine2 extends AbstractABoxEngineWrapper
 			final ResultBinding newBinding = binding.duplicate();
 
 			newBinding.setValue(var, b);
-			final Query q2 = q.apply(newBinding);
+			final ConjunctiveQuery q2 = q.apply(newBinding);
 			exec(q2, newBinding, false);
 		}
 	}
 
 	@Override
-	public QueryResult execABoxQuery(final Query q)
+	public QueryResult execABoxQuery(final ConjunctiveQuery q)
 	{
 		_results = new QueryResultImpl(q);
 

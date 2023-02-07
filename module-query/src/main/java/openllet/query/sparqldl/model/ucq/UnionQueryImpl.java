@@ -3,8 +3,8 @@ package openllet.query.sparqldl.model.ucq;
 import openllet.aterm.ATermAppl;
 import openllet.core.KnowledgeBase;
 import openllet.core.utils.ATermUtils;
-import openllet.core.utils.TermFactory;
-import openllet.query.sparqldl.model.ResultBinding;
+import openllet.query.sparqldl.model.AbstractQuery;
+import openllet.query.sparqldl.model.results.ResultBinding;
 import openllet.query.sparqldl.model.cq.*;
 import openllet.shared.tools.Log;
 
@@ -14,187 +14,30 @@ import java.util.logging.Logger;
 
 import static openllet.query.sparqldl.engine.cq.QueryEngine.split;
 
-public class UnionQueryImpl implements UnionQuery
+public class UnionQueryImpl extends AbstractQuery implements UnionQuery
 {
     public static final Logger _logger = Log.getLogger(UnionQueryImpl.class);
 
-    protected static final ATermAppl DEFAULT_NAME = TermFactory.term("query");
-
-    // COMMON PART
-    protected ATermAppl _name = DEFAULT_NAME;
-
-    protected KnowledgeBase _kb;
-
-    protected Filter _filter;
-
-    protected List<ATermAppl> _resultVars;
-
-    protected Set<ATermAppl> _allVars;
-
-    // VARIABLES
-    protected EnumMap<UnionQuery.VarType, Set<ATermAppl>> _distVars;
-
-    protected Set<ATermAppl> _individualsAndLiterals;
-
-    protected boolean _ground;
-
-    protected final boolean _distinct;
-
-    protected List<Query> _queries;
-
-    protected QueryParameters _parameters;
+    protected List<ConjunctiveQuery> _queries = new ArrayList<>();
 
     public UnionQueryImpl(final KnowledgeBase kb, final boolean distinct)
     {
-        _kb = kb;
-
-        _ground = true;
-        _queries = new ArrayList<>();
-        _resultVars = new ArrayList<>();
-        _allVars = new HashSet<>();
-        _individualsAndLiterals = new HashSet<>();
-        _distVars = new EnumMap<>(UnionQuery.VarType.class);
-
-        for (final UnionQuery.VarType type : UnionQuery.VarType.values())
-            _distVars.put(type, new HashSet<ATermAppl>());
-
-        _distinct = distinct;
+        super(kb, distinct);
     }
 
     public UnionQueryImpl(final UnionQuery query)
     {
         this(query.getKB(), query.isDistinct());
-
-        _name = query.getName();
-        _parameters = query.getQueryParameters();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    public Set<ATermAppl> getDistVarsForType(final UnionQuery.VarType type)
-    {
-        return _distVars.get(type);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void addDistVar(final ATermAppl a, final UnionQuery.VarType type)
-    {
-        final Set<ATermAppl> set = _distVars.get(type);
-
-        if (!set.contains(a))
-            set.add(a);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void addResultVar(final ATermAppl a)
-    {
-        _resultVars.add(a);
-    }
-
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Set<ATermAppl> getConstants()
-    {
-        return Collections.unmodifiableSet(_individualsAndLiterals);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Set<ATermAppl> getDistVars()
-    {
-        final Set<ATermAppl> result = new HashSet<>();
-
-        for (final UnionQuery.VarType t : UnionQuery.VarType.values())
-            result.addAll(_distVars.get(t));
-
-        return result;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Set<ATermAppl> getUndistVars()
-    {
-        final Set<ATermAppl> result = new HashSet<>(_allVars);
-
-        result.removeAll(getDistVars());
-
-        return result;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public List<ATermAppl> getResultVars()
-    {
-        return Collections.unmodifiableList(_resultVars);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Set<ATermAppl> getVars()
-    {
-        return Collections.unmodifiableSet(_allVars);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public boolean isGround()
-    {
-        return _ground;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public KnowledgeBase getKB()
-    {
-        return _kb;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void setKB(final KnowledgeBase kb)
-    {
-        _kb = kb;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public List<Query> getQueries()
+    public List<ConjunctiveQuery> getQueries()
     {
         return _queries;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    public void setQueries(List<Query> queries)
+    public void setQueries(List<ConjunctiveQuery> queries)
     {
         _queries = queries;
         if (_logger.isLoggable(Level.FINE) && disjunctsShareUndistVars())
@@ -202,28 +45,22 @@ public class UnionQueryImpl implements UnionQuery
                     "treat them as different variables.");
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public UnionQuery apply(final ResultBinding binding)
     {
         final UnionQuery query = copy();
         query.setQueries(new ArrayList<>());
 
-        for (Query disjunct : _queries)
+        for (ConjunctiveQuery disjunct : _queries)
         {
-            Query boundDisjunct = disjunct.apply(binding);
+            ConjunctiveQuery boundDisjunct = disjunct.apply(binding);
             query.addQuery(boundDisjunct);
         }
 
         return query;
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public void addQuery(final Query query) {
+    public void addQuery(final ConjunctiveQuery query) {
         this._queries.add(query);
     }
 
@@ -248,7 +85,7 @@ public class UnionQueryImpl implements UnionQuery
             for (QueryAtom a : query.getQueries().get(0).getAtoms())
             {
                 DisjunctiveQuery singleUnion = new DisjunctiveQueryImpl(query.getKB(), query.isDistinct());
-                Query singleQuery = new QueryImpl(query.getQueries().get(0));
+                ConjunctiveQuery singleQuery = new ConjunctiveQueryImpl(query.getQueries().get(0));
                 singleQuery.add(a);
                 singleUnion.addQuery(singleQuery);
                 newCnf.add(singleUnion);
@@ -260,7 +97,7 @@ public class UnionQueryImpl implements UnionQuery
         {
             // Fetch CNF(q)
             UnionQuery subQuery = new UnionQueryImpl(query.getKB(), query.isDistinct());
-            for (Query q : query.getQueries().subList(1, query.getQueries().size()))
+            for (ConjunctiveQuery q : query.getQueries().subList(1, query.getQueries().size()))
                 subQuery.addQuery(q);
             List<DisjunctiveQuery> cnf = toCNFRec(subQuery);
             // Create (x v c) for all atoms x and conjuncts c
@@ -268,9 +105,9 @@ public class UnionQueryImpl implements UnionQuery
                 for (DisjunctiveQuery conjunct : cnf)
                 {
                     DisjunctiveQuery c = new DisjunctiveQueryImpl(query.getKB(), query.isDistinct());
-                    for (Query sq : conjunct.getQueries())
+                    for (ConjunctiveQuery sq : conjunct.getQueries())
                         c.addQuery(sq);
-                    Query q = new QueryImpl(query.getKB(), query.isDistinct());
+                    ConjunctiveQuery q = new ConjunctiveQueryImpl(query.getKB(), query.isDistinct());
                     q.add(atom);
                     c.addQuery(q);
                     newCnf.add(c);
@@ -279,18 +116,15 @@ public class UnionQueryImpl implements UnionQuery
         return newCnf;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    public List<DisjunctiveQuery> toCNF()
+    public CNFQuery toCNF()
     {
-        return toCNFRec(this);
+        List<DisjunctiveQuery> cnf = toCNFRec(this);
+        CNFQuery cnfQuery = new CNFQueryImpl(this.getKB(), this.isDistinct());
+        cnfQuery.setQueries(cnf);
+        return cnfQuery;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public UnionQuery reorder(int[] queries)
     {
@@ -298,9 +132,6 @@ public class UnionQueryImpl implements UnionQuery
         return this;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public boolean disjunctsShareUndistVars()
     {
@@ -308,7 +139,7 @@ public class UnionQueryImpl implements UnionQuery
         if (_queries.size() > 1)
         {
             Set<ATermAppl> undistVars = _queries.get(0).getUndistVars();
-            for (Query query : _queries.subList(1, _queries.size()))
+            for (ConjunctiveQuery query : _queries.subList(1, _queries.size()))
                 undistVars.retainAll(query.getUndistVars());
             shared = !undistVars.isEmpty();
         }
@@ -319,13 +150,13 @@ public class UnionQueryImpl implements UnionQuery
     public UnionQuery rollUp()
     {
         UnionQuery rolledUpUnionQuery = new UnionQueryImpl(this);
-        for (Query conjunctiveQuery : _queries)
+        for (ConjunctiveQuery conjunctiveQuery : _queries)
         {
             if (_logger.isLoggable(Level.FINER))
                 _logger.finer("Rolling up for conjunctive query: " + conjunctiveQuery);
 
             // 1. step: Find disjoint parts of the query
-            List<Query> splitQueries = split(conjunctiveQuery, true);
+            List<ConjunctiveQuery> splitQueries = split(conjunctiveQuery, true);
             if (_logger.isLoggable(Level.FINER))
             {
                 _logger.finer("Split query: " + splitQueries);
@@ -333,8 +164,8 @@ public class UnionQueryImpl implements UnionQuery
             }
 
             // 2. step: Roll each part up
-            Query rolledUpQuery = new QueryImpl(this.getKB(), this.isDistinct());
-            for (Query connectedQuery : splitQueries)
+            ConjunctiveQuery rolledUpQuery = new ConjunctiveQueryImpl(this.getKB(), this.isDistinct());
+            for (ConjunctiveQuery connectedQuery : splitQueries)
             {
                 final ATermAppl testIndOrVar;
                 if (!connectedQuery.getConstants().isEmpty())
@@ -356,7 +187,7 @@ public class UnionQueryImpl implements UnionQuery
     public boolean hasCycle()
     {
         boolean hasCycle = false;
-        for (Query q : _queries)
+        for (ConjunctiveQuery q : _queries)
             hasCycle |= q.hasCycle();
         return hasCycle;
     }
@@ -365,8 +196,8 @@ public class UnionQueryImpl implements UnionQuery
     public UnionQuery copy()
     {
         UnionQuery copy = new UnionQueryImpl(this);
-        for (Query q : _queries)
-            copy.addQuery((Query) q.copy());
+        for (ConjunctiveQuery q : _queries)
+            copy.addQuery((ConjunctiveQuery) q.copy());
         return copy;
     }
 
@@ -393,12 +224,12 @@ public class UnionQueryImpl implements UnionQuery
 
         sb.append(" :-");
 
-        List<Query> queries = _queries;
+        List<ConjunctiveQuery> queries = _queries;
         if (_queries.size() == 0)
-            queries = List.of((Query) this);
+            queries = List.of((ConjunctiveQuery) this);
         for (int i = 0; i < queries.size(); i++)
         {
-            final Query query = queries.get(i);
+            final ConjunctiveQuery query = queries.get(i);
             if (i > 0)
             {
                 sb.append(" v");
@@ -428,56 +259,4 @@ public class UnionQueryImpl implements UnionQuery
             sb.append("\n");
         return sb.toString();
     }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public boolean isDistinct()
-    {
-        return _distinct;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Filter getFilter()
-    {
-        return _filter;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void setFilter(final Filter filter)
-    {
-        _filter = filter;
-    }
-
-    @Override
-    public ATermAppl getName()
-    {
-        return _name;
-    }
-
-    @Override
-    public void setName(final ATermAppl name)
-    {
-        _name = name;
-    }
-
-    @Override
-    public void setQueryParameters(final QueryParameters parameters)
-    {
-        _parameters = parameters;
-    }
-
-    @Override
-    public QueryParameters getQueryParameters()
-    {
-        return _parameters;
-    }
-
 }

@@ -1,6 +1,6 @@
 package openllet.query.sparqldl.engine.ucq;
 
-import openllet.query.sparqldl.model.QueryResult;
+import openllet.query.sparqldl.model.results.QueryResult;
 import openllet.query.sparqldl.model.ucq.UnionQuery;
 
 public interface UnionQueryExec

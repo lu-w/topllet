@@ -1,7 +1,7 @@
 package openllet.query.sparqldl.model.ucq;
 
 import openllet.core.KnowledgeBase;
-import openllet.query.sparqldl.model.cq.Query;
+import openllet.query.sparqldl.model.cq.ConjunctiveQuery;
 
 public class DisjunctiveQueryImpl extends UnionQueryImpl implements DisjunctiveQuery
 {
@@ -17,7 +17,7 @@ public class DisjunctiveQueryImpl extends UnionQueryImpl implements DisjunctiveQ
     }
 
     @Override
-    public void addQuery(Query query)
+    public void addQuery(ConjunctiveQuery query)
     {
         assert(query.getAtoms().size() <= 1);
         super.addQuery(query);

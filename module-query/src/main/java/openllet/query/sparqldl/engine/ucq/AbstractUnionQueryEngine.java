@@ -2,8 +2,8 @@ package openllet.query.sparqldl.engine.ucq;
 
 import openllet.core.KnowledgeBase;
 import openllet.core.utils.Timer;
-import openllet.query.sparqldl.model.QueryResult;
-import openllet.query.sparqldl.model.QueryResultImpl;
+import openllet.query.sparqldl.model.results.QueryResult;
+import openllet.query.sparqldl.model.results.QueryResultImpl;
 import openllet.query.sparqldl.model.ucq.UnionQuery;
 import openllet.shared.tools.Log;
 

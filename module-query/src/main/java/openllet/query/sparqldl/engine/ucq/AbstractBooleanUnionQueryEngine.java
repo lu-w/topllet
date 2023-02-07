@@ -2,10 +2,11 @@ package openllet.query.sparqldl.engine.ucq;
 
 import openllet.core.KnowledgeBase;
 import openllet.core.utils.Timer;
-import openllet.query.sparqldl.model.QueryResult;
-import openllet.query.sparqldl.model.QueryResultImpl;
-import openllet.query.sparqldl.model.ResultBindingImpl;
+import openllet.query.sparqldl.model.results.QueryResult;
+import openllet.query.sparqldl.model.results.QueryResultImpl;
+import openllet.query.sparqldl.model.results.ResultBindingImpl;
 import openllet.query.sparqldl.model.ucq.UnionQuery;
+import openllet.query.sparqldl.model.ucq.CNFQuery;
 import openllet.shared.tools.Log;
 
 import java.util.logging.Level;
@@ -60,4 +61,12 @@ abstract public class AbstractBooleanUnionQueryEngine implements UnionQueryExec
      * @return True iff. the Boolean union query is entailed in its knowledge base
      */
     abstract protected boolean execBooleanABoxQuery(UnionQuery q);
+
+    /**
+     * Executes the entailment check of the given Boolean query in CNF. Complementary to execBooleanABoxQuery for
+     * UnionQuery, but directly runs on the CNF.
+     * @param q The CNF query to execute
+     * @return True iff. the Boolean CNF query is entailed in its knowledge base
+     */
+    abstract protected boolean execBooleanABoxQuery(CNFQuery q);
 }

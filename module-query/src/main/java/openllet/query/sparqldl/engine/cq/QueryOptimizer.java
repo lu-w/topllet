@@ -9,7 +9,7 @@ package openllet.query.sparqldl.engine.cq;
 import java.util.logging.Logger;
 
 import openllet.core.OpenlletOptions;
-import openllet.query.sparqldl.model.cq.Query;
+import openllet.query.sparqldl.model.cq.ConjunctiveQuery;
 import openllet.shared.tools.Log;
 
 /**
@@ -30,7 +30,7 @@ public class QueryOptimizer
 
 	private static final Logger _logger = Log.getLogger(QueryOptimizer.class);
 
-	public QueryPlan getExecutionPlan(final Query query)
+	public QueryPlan getExecutionPlan(final ConjunctiveQuery query)
 	{
 		if (OpenlletOptions.SAMPLING_RATIO == 0)
 			return new NoReorderingQueryPlan(query);

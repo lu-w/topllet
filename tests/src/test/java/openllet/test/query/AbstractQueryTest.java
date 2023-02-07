@@ -11,12 +11,15 @@ import openllet.query.sparqldl.engine.cq.QueryEngine;
 import openllet.query.sparqldl.engine.ucq.SimpleBooleanUnionQueryEngine;
 import openllet.query.sparqldl.engine.ucq.BindingIterationUnionQueryEngine;
 import openllet.query.sparqldl.engine.ucq.UnionQueryExec;
-import openllet.query.sparqldl.model.*;
+import openllet.query.sparqldl.model.results.QueryResult;
+import openllet.query.sparqldl.model.results.QueryResultImpl;
+import openllet.query.sparqldl.model.results.ResultBinding;
+import openllet.query.sparqldl.model.results.ResultBindingImpl;
 import openllet.query.sparqldl.model.ucq.UnionQuery;
-import openllet.query.sparqldl.model.ucq.UnionQuery.VarType;
-import openllet.query.sparqldl.model.cq.Query;
+import openllet.query.sparqldl.model.Query.VarType;
+import openllet.query.sparqldl.model.cq.ConjunctiveQuery;
 import openllet.query.sparqldl.model.cq.QueryAtom;
-import openllet.query.sparqldl.model.cq.QueryImpl;
+import openllet.query.sparqldl.model.cq.ConjunctiveQueryImpl;
 import openllet.query.sparqldl.model.ucq.UnionQueryImpl;
 import openllet.test.AbstractKBTests;
 import org.junit.Assert;
@@ -56,19 +59,19 @@ public abstract class AbstractQueryTest extends AbstractKBTests
 		return atoms;
 	}
 
-	protected Query[] where(final Query... queries)
+	protected ConjunctiveQuery[] where(final ConjunctiveQuery... queries)
 	{
 		return queries;
 	}
 
-	protected Query ask(final QueryAtom... atoms)
+	protected ConjunctiveQuery ask(final QueryAtom... atoms)
 	{
 		return query(new ATermAppl[0], atoms);
 	}
 
-	protected Query query(final ATermAppl[] vars, final QueryAtom[] atoms)
+	protected ConjunctiveQuery query(final ATermAppl[] vars, final QueryAtom[] atoms)
 	{
-		final Query q = new QueryImpl(_kb, true);
+		final ConjunctiveQuery q = new ConjunctiveQueryImpl(_kb, true);
 		for (final ATermAppl var : vars)
 			q.addResultVar(var);
 
@@ -81,29 +84,29 @@ public abstract class AbstractQueryTest extends AbstractKBTests
 		return q;
 	}
 
-	protected Query query(final QueryAtom... atoms)
+	protected ConjunctiveQuery query(final QueryAtom... atoms)
 	{
-		final Query q = new QueryImpl(_kb, true);
+		final ConjunctiveQuery q = new ConjunctiveQueryImpl(_kb, true);
 		for (final QueryAtom atom : atoms)
 			q.add(atom);
 		return q;
 	}
 
-	protected UnionQuery unionQuery(final Query... queries)
+	protected UnionQuery unionQuery(final ConjunctiveQuery... queries)
 	{
 		final UnionQuery q = new UnionQueryImpl(_kb, false);
 		q.setQueries(Arrays.stream(queries).toList());
 		return q;
 	}
 
-	protected UnionQuery unionQuery(final ATermAppl[] vars, final Query[] queries)
+	protected UnionQuery unionQuery(final ATermAppl[] vars, final ConjunctiveQuery[] queries)
 	{
 		final UnionQuery q = new UnionQueryImpl(_kb, false);
 		for (final ATermAppl var : vars)
 		{
 			q.addResultVar(var);
 			q.addDistVar(var, VarType.INDIVIDUAL);
-			for (Query query : queries)
+			for (ConjunctiveQuery query : queries)
 			{
 				query.addResultVar(var);
 				query.addDistVar(var, VarType.INDIVIDUAL);
@@ -113,14 +116,14 @@ public abstract class AbstractQueryTest extends AbstractKBTests
 		return q;
 	}
 
-	protected void testQuery(final Query query, final boolean expected)
+	protected void testQuery(final ConjunctiveQuery query, final boolean expected)
 	{
 		final QueryResult result = QueryEngine.exec(query);
 
 		assertEquals(expected, !result.isEmpty());
 	}
 
-	protected void testQuery(final Query query, final ATermAppl[]... values)
+	protected void testQuery(final ConjunctiveQuery query, final ATermAppl[]... values)
 	{
 		final List<ATermAppl> resultVars = query.getResultVars();
 

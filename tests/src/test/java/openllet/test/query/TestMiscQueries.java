@@ -22,7 +22,7 @@ import openllet.core.OpenlletOptions;
 import openllet.core.datatypes.Datatypes;
 import openllet.core.utils.ATermUtils;
 import openllet.core.utils.Namespaces;
-import openllet.query.sparqldl.model.cq.Query;
+import openllet.query.sparqldl.model.cq.ConjunctiveQuery;
 import openllet.query.sparqldl.parser.ARQParser;
 
 public class TestMiscQueries extends AbstractQueryTest
@@ -41,7 +41,7 @@ public class TestMiscQueries extends AbstractQueryTest
 		final ATermAppl pv = var("pv");
 		final ATermAppl cv = var("cv");
 
-		final Query query = query(select(pv, cv), where(DomainAtom(pv, cv)));
+		final ConjunctiveQuery query = query(select(pv, cv), where(DomainAtom(pv, cv)));
 
 		testQuery(query, new ATermAppl[][] { { _p, TOP }, { _q, TOP }, { _r, TOP }, { TOP_OBJECT_PROPERTY, TOP }, { TOP_DATA_PROPERTY, TOP }, { BOTTOM_OBJECT_PROPERTY, TOP }, { BOTTOM_DATA_PROPERTY, TOP }, { BOTTOM_DATA_PROPERTY, BOTTOM }, { BOTTOM_OBJECT_PROPERTY, BOTTOM }, { _p, _C }, { _q, _C }, { BOTTOM_DATA_PROPERTY, _C }, { BOTTOM_OBJECT_PROPERTY, _C }, { BOTTOM_DATA_PROPERTY, _D }, { BOTTOM_OBJECT_PROPERTY, _D } });
 
@@ -59,7 +59,7 @@ public class TestMiscQueries extends AbstractQueryTest
 
 		final ATermAppl cv = var("cv");
 
-		final Query query = query(select(cv), where(DomainAtom(_q, cv)));
+		final ConjunctiveQuery query = query(select(cv), where(DomainAtom(_q, cv)));
 
 		testQuery(query, new ATermAppl[][] { { TOP }, { _C } });
 
@@ -77,7 +77,7 @@ public class TestMiscQueries extends AbstractQueryTest
 
 		final ATermAppl pv = var("pv");
 
-		final Query query = query(select(pv), where(DomainAtom(pv, _C)));
+		final ConjunctiveQuery query = query(select(pv), where(DomainAtom(pv, _C)));
 
 		testQuery(query, new ATermAppl[][] { { _p }, { _q }, { BOTTOM_OBJECT_PROPERTY }, { BOTTOM_DATA_PROPERTY } });
 
@@ -96,7 +96,7 @@ public class TestMiscQueries extends AbstractQueryTest
 		final ATermAppl pv = var("pv");
 		final ATermAppl cv = var("cv");
 
-		final Query query = query(select(pv, cv), where(RangeAtom(pv, cv), ObjectPropertyAtom(pv)));
+		final ConjunctiveQuery query = query(select(pv, cv), where(RangeAtom(pv, cv), ObjectPropertyAtom(pv)));
 
 		testQuery(query, new ATermAppl[][] { { _p, TOP }, { _q, TOP }, { TOP_OBJECT_PROPERTY, TOP }, { BOTTOM_OBJECT_PROPERTY, TOP }, { BOTTOM_OBJECT_PROPERTY, BOTTOM }, { _p, _C }, { _q, _C }, { BOTTOM_OBJECT_PROPERTY, _C }, { BOTTOM_OBJECT_PROPERTY, _D } });
 
@@ -114,7 +114,7 @@ public class TestMiscQueries extends AbstractQueryTest
 
 		final ATermAppl cv = var("cv");
 
-		final Query query = query(select(cv), where(RangeAtom(_q, cv)));
+		final ConjunctiveQuery query = query(select(cv), where(RangeAtom(_q, cv)));
 
 		testQuery(query, new ATermAppl[][] { { TOP }, { _C } });
 
@@ -130,11 +130,11 @@ public class TestMiscQueries extends AbstractQueryTest
 		_kb.addPropertyValue(_p, _b, literal(300));
 		_kb.addPropertyValue(_p, _b, literal("3"));
 
-		final Query query1 = query(select(x), where(PropertyValueAtom(x, _p, y), DatatypeAtom(y, Datatypes.INTEGER)));
+		final ConjunctiveQuery query1 = query(select(x), where(PropertyValueAtom(x, _p, y), DatatypeAtom(y, Datatypes.INTEGER)));
 
 		testQuery(query1, new ATermAppl[][] { { _a }, { _b } });
 
-		final Query query2 = query(select(x), where(PropertyValueAtom(x, _p, y), DatatypeAtom(y, Datatypes.BYTE)));
+		final ConjunctiveQuery query2 = query(select(x), where(PropertyValueAtom(x, _p, y), DatatypeAtom(y, Datatypes.BYTE)));
 
 		testQuery(query2, new ATermAppl[][] { { _a } });
 
@@ -145,7 +145,7 @@ public class TestMiscQueries extends AbstractQueryTest
 	{
 		classes(_A, _B, _C);
 
-		final Query query1 = new ARQParser().parse("PREFIX rdf: <" + Namespaces.RDF + "> " + "PREFIX owl: <" + Namespaces.OWL + "> " + "SELECT ?c WHERE { ?c rdf:type owl:Class }", _kb);
+		final ConjunctiveQuery query1 = new ARQParser().parse("PREFIX rdf: <" + Namespaces.RDF + "> " + "PREFIX owl: <" + Namespaces.OWL + "> " + "SELECT ?c WHERE { ?c rdf:type owl:Class }", _kb);
 
 		testQuery(query1, new ATermAppl[][] { { _A }, { _B }, { _C }, { TOP }, { BOTTOM } });
 	}
@@ -161,7 +161,7 @@ public class TestMiscQueries extends AbstractQueryTest
 
 		final ATermAppl v = var("v");
 
-		final Query query = query(select(v), where(InverseOfAtom(_q, v)));
+		final ConjunctiveQuery query = query(select(v), where(InverseOfAtom(_q, v)));
 
 		if (OpenlletOptions.RETURN_NON_PRIMITIVE_EQUIVALENT_PROPERTIES)
 			testQuery(query, new ATermAppl[][] { { ATermUtils.makeInv(_q) }, { _p } });
@@ -180,7 +180,7 @@ public class TestMiscQueries extends AbstractQueryTest
 
 		final ATermAppl v = var("v");
 
-		final Query query = query(select(v), where(InverseOfAtom(v, v)));
+		final ConjunctiveQuery query = query(select(v), where(InverseOfAtom(v, v)));
 
 		testQuery(query, new ATermAppl[][] { { _r }, { TOP_OBJECT_PROPERTY }, { BOTTOM_OBJECT_PROPERTY } });
 

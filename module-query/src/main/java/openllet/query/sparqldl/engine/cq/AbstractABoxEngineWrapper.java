@@ -17,8 +17,11 @@ import java.util.logging.Logger;
 import openllet.aterm.ATermAppl;
 import openllet.core.KnowledgeBase;
 import openllet.core.utils.ATermUtils;
-import openllet.query.sparqldl.model.*;
-import openllet.query.sparqldl.model.ucq.UnionQuery.VarType;
+import openllet.query.sparqldl.model.results.QueryResult;
+import openllet.query.sparqldl.model.results.QueryResultImpl;
+import openllet.query.sparqldl.model.results.ResultBinding;
+import openllet.query.sparqldl.model.results.ResultBindingImpl;
+import openllet.query.sparqldl.model.Query.VarType;
 import openllet.query.sparqldl.model.cq.*;
 import openllet.shared.tools.Log;
 
@@ -44,15 +47,15 @@ public abstract class AbstractABoxEngineWrapper implements QueryExec
 
 	public static final QueryExec distCombinedQueryExec = new CombinedQueryEngine();
 
-	protected Query schemaQuery;
+	protected ConjunctiveQuery schemaQuery;
 
-	protected Query aboxQuery;
+	protected ConjunctiveQuery aboxQuery;
 
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
-	public QueryResult exec(final Query query)
+	public QueryResult exec(final ConjunctiveQuery query)
 	{
 		_logger.fine(() -> "Executing query " + query);
 
@@ -86,7 +89,7 @@ public abstract class AbstractABoxEngineWrapper implements QueryExec
 			newResult = new QueryResultImpl(query);
 			for (final ResultBinding binding : result)
 			{
-				final Query query2 = aboxQuery.apply(binding);
+				final ConjunctiveQuery query2 = aboxQuery.apply(binding);
 
 				if (_logger.isLoggable(Level.FINE))
 					_logger.fine("Executing ABox query: " + query2);
@@ -109,10 +112,10 @@ public abstract class AbstractABoxEngineWrapper implements QueryExec
 		return newResult;
 	}
 
-	protected final void partitionQuery(final Query query)
+	protected final void partitionQuery(final ConjunctiveQuery query)
 	{
-		schemaQuery = new QueryImpl(query);
-		aboxQuery = new QueryImpl(query);
+		schemaQuery = new ConjunctiveQueryImpl(query);
+		aboxQuery = new ConjunctiveQueryImpl(query);
 
 		for (final QueryAtom atom : query.getAtoms())
 			switch (atom.getPredicate())
@@ -159,7 +162,7 @@ public abstract class AbstractABoxEngineWrapper implements QueryExec
 
 	}
 
-	protected abstract QueryResult execABoxQuery(final Query q);
+	protected abstract QueryResult execABoxQuery(final ConjunctiveQuery q);
 }
 
 class BindingIterator implements Iterator<ResultBinding>
@@ -257,7 +260,7 @@ class LiteralIterator implements Iterator<ResultBinding>
 
 	private boolean _more = true;
 
-	public LiteralIterator(final Query q, final ResultBinding binding)
+	public LiteralIterator(final ConjunctiveQuery q, final ResultBinding binding)
 	{
 		final KnowledgeBase kb = q.getKB();
 		_binding = binding;

@@ -17,7 +17,7 @@ import java.util.Arrays;
 import org.junit.Test;
 
 import openllet.aterm.ATermAppl;
-import openllet.query.sparqldl.model.cq.Query;
+import openllet.query.sparqldl.model.cq.ConjunctiveQuery;
 
 /**
  * <p>
@@ -40,7 +40,7 @@ public class TestNaiveUnionQueries extends AbstractQueryTest
 		_kb.addType(_a, _A);
 		_kb.addType(_b, _B);
 
-		final Query q = query(select(x), where(UnionAtom(Arrays.asList(Arrays.asList(TypeAtom(x, _A)), Arrays.asList(TypeAtom(x, _B))))));
+		final ConjunctiveQuery q = query(select(x), where(UnionAtom(Arrays.asList(Arrays.asList(TypeAtom(x, _A)), Arrays.asList(TypeAtom(x, _B))))));
 
 		testQuery(q, new ATermAppl[][] { { _a }, { _b } });
 	}
@@ -57,7 +57,7 @@ public class TestNaiveUnionQueries extends AbstractQueryTest
 		_kb.addType(_b, _A);
 		_kb.addType(_b, _B);
 
-		final Query q = query(select(x), where(TypeAtom(x, _A), UnionAtom(Arrays.asList(Arrays.asList(TypeAtom(x, _B)), Arrays.asList(TypeAtom(x, _C))))));
+		final ConjunctiveQuery q = query(select(x), where(TypeAtom(x, _A), UnionAtom(Arrays.asList(Arrays.asList(TypeAtom(x, _B)), Arrays.asList(TypeAtom(x, _C))))));
 
 		testQuery(q, new ATermAppl[][] { { _a }, { _b } });
 	}
@@ -74,7 +74,7 @@ public class TestNaiveUnionQueries extends AbstractQueryTest
 		_kb.addPropertyValue(_p, _a, _c);
 		_kb.addPropertyValue(_p, _b, _c);
 
-		final Query q1 = query(select(x, y), where(TypeAtom(x, _A), UnionAtom(Arrays.asList(Arrays.asList(PropertyValueAtom(x, _p, y)), Arrays.asList(PropertyValueAtom(x, _q, y))))));
+		final ConjunctiveQuery q1 = query(select(x, y), where(TypeAtom(x, _A), UnionAtom(Arrays.asList(Arrays.asList(PropertyValueAtom(x, _p, y)), Arrays.asList(PropertyValueAtom(x, _q, y))))));
 
 		testQuery(q1, new ATermAppl[][] { { _a, _c }, { _b, _c } });
 	}

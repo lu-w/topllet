@@ -9,7 +9,7 @@ package openllet.query.sparqldl.model.cq;
 import java.util.List;
 
 import openllet.aterm.ATermAppl;
-import openllet.query.sparqldl.model.ResultBinding;
+import openllet.query.sparqldl.model.results.ResultBinding;
 
 /**
  * <p>

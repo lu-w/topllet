@@ -2,8 +2,8 @@ package openllet.query.sparqldl.engine.ucq;
 
 import openllet.core.utils.Bool;
 import openllet.core.utils.Pair;
-import openllet.query.sparqldl.model.ResultBinding;
-import openllet.query.sparqldl.model.ResultBindingImpl;
+import openllet.query.sparqldl.model.results.ResultBinding;
+import openllet.query.sparqldl.model.results.ResultBindingImpl;
 import openllet.query.sparqldl.model.ucq.UnionQuery;
 
 import java.util.HashSet;

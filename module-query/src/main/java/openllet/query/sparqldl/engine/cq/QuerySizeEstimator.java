@@ -12,7 +12,7 @@ import java.util.Set;
 import openllet.aterm.ATermAppl;
 import openllet.core.utils.ATermUtils;
 import openllet.core.utils.SizeEstimate;
-import openllet.query.sparqldl.model.cq.Query;
+import openllet.query.sparqldl.model.cq.ConjunctiveQuery;
 import openllet.query.sparqldl.model.cq.QueryAtom;
 
 /**
@@ -31,7 +31,7 @@ import openllet.query.sparqldl.model.cq.QueryAtom;
 public class QuerySizeEstimator
 {
 
-	public static void computeSizeEstimate(final Query query)
+	public static void computeSizeEstimate(final ConjunctiveQuery query)
 	{
 		final SizeEstimate sizeEstimate = query.getKB().getSizeEstimate();
 

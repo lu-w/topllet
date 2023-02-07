@@ -1,8 +1,8 @@
 package openllet.query.sparqldl.engine.ucq;
 
 import openllet.aterm.ATermAppl;
-import openllet.query.sparqldl.model.ResultBinding;
-import openllet.query.sparqldl.model.ResultBindingImpl;
+import openllet.query.sparqldl.model.results.ResultBinding;
+import openllet.query.sparqldl.model.results.ResultBindingImpl;
 import openllet.query.sparqldl.model.ucq.UnionQuery;
 
 import java.util.*;

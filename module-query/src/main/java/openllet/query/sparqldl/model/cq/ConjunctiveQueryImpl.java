@@ -24,7 +24,7 @@ import openllet.core.KnowledgeBase;
 import openllet.core.boxes.rbox.Role;
 import openllet.core.exceptions.InternalReasonerException;
 import openllet.core.utils.ATermUtils;
-import openllet.query.sparqldl.model.ResultBinding;
+import openllet.query.sparqldl.model.results.ResultBinding;
 import openllet.query.sparqldl.model.ucq.UnionQuery;
 import openllet.query.sparqldl.model.ucq.UnionQueryImpl;
 
@@ -33,7 +33,7 @@ import static openllet.query.sparqldl.model.cq.QueryPredicate.*;
 
 /**
  * <p>
- * Title: Default implementation of the {@link Query}
+ * Title: Default implementation of the {@link ConjunctiveQuery}
  * </p>
  * <p>
  * Copyright: Copyright (c) 2007
@@ -44,7 +44,7 @@ import static openllet.query.sparqldl.model.cq.QueryPredicate.*;
  *
  * @author Petr Kremen
  */
-public class QueryImpl extends UnionQueryImpl implements Query
+public class ConjunctiveQueryImpl extends UnionQueryImpl implements ConjunctiveQuery
 {
 	private final Set<QueryPredicate> ternaryQueryPredicates = Set.of(PropertyValue, NegativePropertyValue);
 
@@ -55,7 +55,7 @@ public class QueryImpl extends UnionQueryImpl implements Query
 
 	private final List<QueryAtom> _allAtoms;
 
-	public QueryImpl(final KnowledgeBase kb, final boolean distinct)
+	public ConjunctiveQueryImpl(final KnowledgeBase kb, final boolean distinct)
 	{
 		super(kb, distinct);
 
@@ -63,7 +63,7 @@ public class QueryImpl extends UnionQueryImpl implements Query
 		_allAtoms = new ArrayList<>();
 	}
 
-	public QueryImpl(final Query query)
+	public ConjunctiveQueryImpl(final ConjunctiveQuery query)
 	{
 		this(query.getKB(), query.isDistinct());
 
@@ -72,13 +72,13 @@ public class QueryImpl extends UnionQueryImpl implements Query
 	}
 
 	@Override
-	public void setQueries(List<Query> queries)
+	public void setQueries(List<ConjunctiveQuery> queries)
 	{
 		throw new UnsupportedOperationException("Can not set disjunctions for a conjunctive query.");
 	}
 
 	@Override
-	public void addQuery(Query query)
+	public void addQuery(ConjunctiveQuery query)
 	{
 		throw new UnsupportedOperationException("Can not add disjunctions to a conjunctive query.");
 	}
@@ -120,19 +120,19 @@ public class QueryImpl extends UnionQueryImpl implements Query
 	 * {@inheritDoc}
 	 */
 	@Override
-	public Query apply(final ResultBinding binding)
+	public ConjunctiveQuery apply(final ResultBinding binding)
 	{
 		final List<QueryAtom> atoms = new ArrayList<>();
 
 		for (final QueryAtom atom : getAtoms())
 			atoms.add(atom.apply(binding));
 
-		final QueryImpl query = new QueryImpl(this);
+		final ConjunctiveQueryImpl query = new ConjunctiveQueryImpl(this);
 
 		query._resultVars.addAll(_resultVars);
 		query._resultVars.removeAll(binding.getAllVariables());
 
-		for (final VarType type : UnionQuery.VarType.values())
+		for (final VarType type : VarType.values())
 			for (final ATermAppl atom : getDistVarsForType(type))
 				if (!binding.isBound(atom))
 					query.addDistVar(atom, type);
@@ -149,7 +149,7 @@ public class QueryImpl extends UnionQueryImpl implements Query
 	@Override
 	public ATermAppl rollUpTo(final ATermAppl var, final Collection<ATermAppl> stopList, final boolean stopOnConstants)
 	{
-		if (getDistVarsForType(UnionQuery.VarType.LITERAL).contains(var) && !getDistVarsForType(UnionQuery.VarType.INDIVIDUAL).contains(var) && !_individualsAndLiterals.contains(var))
+		if (getDistVarsForType(VarType.LITERAL).contains(var) && !getDistVarsForType(UnionQuery.VarType.INDIVIDUAL).contains(var) && !_individualsAndLiterals.contains(var))
 			throw new InternalReasonerException("Trying to roll up to the variable '" + var + "' which is not distinguished and _individual.");
 
 		ATermList classParts = ATermUtils.EMPTY_LIST;
@@ -424,11 +424,11 @@ public class QueryImpl extends UnionQueryImpl implements Query
 	 * {@inheritDoc}
 	 */
 	@Override
-	public Query reorder(final int[] ordering)
+	public ConjunctiveQuery reorder(final int[] ordering)
 	{
 		if (ordering.length != _allAtoms.size())
 			throw new InternalReasonerException("Ordering permutation must be of the same size as the query : " + ordering.length);
-		final QueryImpl newQuery = new QueryImpl(this);
+		final ConjunctiveQueryImpl newQuery = new ConjunctiveQueryImpl(this);
 
 		// shallow copies for faster processing
 		for (final int element : ordering)
@@ -472,7 +472,7 @@ public class QueryImpl extends UnionQueryImpl implements Query
 		for (final ATermAppl a : toRemove)
 		{
 			_allVars.remove(a);
-			for (final Entry<UnionQuery.VarType, Set<ATermAppl>> entry : _distVars.entrySet())
+			for (final Entry<VarType, Set<ATermAppl>> entry : _distVars.entrySet())
 				entry.getValue().remove(a);
 			_resultVars.remove(a);
 			_individualsAndLiterals.remove(a);
@@ -571,7 +571,7 @@ public class QueryImpl extends UnionQueryImpl implements Query
 	@Override
 	public UnionQuery copy()
 	{
-		Query copy = new QueryImpl(this);
+		ConjunctiveQuery copy = new ConjunctiveQueryImpl(this);
 		for (QueryAtom atom : _allAtoms)
 			copy.add(atom.copy());
 		return copy;

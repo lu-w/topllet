@@ -6,9 +6,9 @@ import openllet.aterm.ATermAppl;
 import openllet.core.KnowledgeBase;
 import openllet.core.exceptions.UnsupportedQueryException;
 import openllet.core.utils.TermFactory;
-import openllet.query.sparqldl.model.cq.Query;
+import openllet.query.sparqldl.model.cq.ConjunctiveQuery;
 import openllet.query.sparqldl.model.cq.QueryAtom;
-import openllet.query.sparqldl.model.QueryResult;
+import openllet.query.sparqldl.model.results.QueryResult;
 
 /**
  * Implements various methods regarding conjunctive query subsumption based on the ABox freezing method.
@@ -22,7 +22,7 @@ public class QuerySubsumption
 	 * @param q2 sup
 	 * @return Checks whether sub is equivalent to sup
 	 */
-	public static boolean isEquivalentTo(final Query q1, final Query q2)
+	public static boolean isEquivalentTo(final ConjunctiveQuery q1, final ConjunctiveQuery q2)
 	{
 		return isSubsumedBy(q1, q2) && isSubsumedBy(q2, q1);
 	}
@@ -32,7 +32,7 @@ public class QuerySubsumption
 	 * @param sup
 	 * @return Checks whether sub is subsumed by sup
 	 */
-	public static boolean isSubsumedBy(final Query sub, final Query sup)
+	public static boolean isSubsumedBy(final ConjunctiveQuery sub, final ConjunctiveQuery sup)
 	{
 		return !getSubsumptionMappings(sub, sup).isEmpty();
 	}
@@ -42,7 +42,7 @@ public class QuerySubsumption
 	 * @param sup
 	 * @return Computes the subsumption mappings between sub and sup
 	 */
-	public static QueryResult getSubsumptionMappings(final Query sub, final Query sup)
+	public static QueryResult getSubsumptionMappings(final ConjunctiveQuery sub, final ConjunctiveQuery sup)
 	{
 		final KnowledgeBase kb = sup.getKB().copy(true);
 

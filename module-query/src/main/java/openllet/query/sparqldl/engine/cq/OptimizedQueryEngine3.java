@@ -20,9 +20,12 @@ import java.util.logging.Logger;
 
 import openllet.aterm.ATermAppl;
 import openllet.core.KnowledgeBase;
-import openllet.query.sparqldl.model.*;
-import openllet.query.sparqldl.model.ucq.UnionQuery.VarType;
-import openllet.query.sparqldl.model.cq.Query;
+import openllet.query.sparqldl.model.results.QueryResult;
+import openllet.query.sparqldl.model.results.QueryResultImpl;
+import openllet.query.sparqldl.model.results.ResultBinding;
+import openllet.query.sparqldl.model.results.ResultBindingImpl;
+import openllet.query.sparqldl.model.Query.VarType;
+import openllet.query.sparqldl.model.cq.ConjunctiveQuery;
 import openllet.shared.tools.Log;
 
 /**
@@ -44,13 +47,13 @@ public class OptimizedQueryEngine3 extends AbstractABoxEngineWrapper
 	public static final Logger _logger = Log.getLogger(QueryEngine.class);
 
 	@Override
-	public boolean supports(final Query q)
+	public boolean supports(final ConjunctiveQuery q)
 	{
 		return true; // TODO
 	}
 
 	@Override
-	public QueryResult execABoxQuery(final Query q)
+	public QueryResult execABoxQuery(final ConjunctiveQuery q)
 	{
 		final QueryResult results = new QueryResultImpl(q);
 		final KnowledgeBase kb = q.getKB();

@@ -19,6 +19,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import openllet.query.sparqldl.engine.cq.QueryEngine;
+import openllet.query.sparqldl.model.cq.ConjunctiveQuery;
 import org.apache.jena.atlas.json.JsonArray;
 import org.apache.jena.atlas.json.JsonObject;
 import org.apache.jena.atlas.lib.NotImplemented;
@@ -236,7 +237,7 @@ class SparqlDLExecution implements QueryExecution
 			// (i.e. variables) in the _query
 			parser.setInitialBinding(_initialBinding);
 
-			final openllet.query.sparqldl.model.cq.Query q = parser.parse(_query, kb);
+			final ConjunctiveQuery q = parser.parse(_query, kb);
 			// The _query uses the _query parameterization to resolve bindings
 			// (i.e. for instance if the parameter variable is in _query
 			// projection, we need to add the initial binding to the resulting
