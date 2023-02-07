@@ -36,7 +36,7 @@ import openllet.sparqlowl.parser.test.ParserTest;
 		TestMiscSPARQL.class, //
 		SparqlDawgTestSuite.class, //
 		TestQuerySubsumption.class,//
-		TestBooleanUnionQueries.class//
+		UnionQueryTestSuite.class//
 })
 public class QueryTestSuite
 {
