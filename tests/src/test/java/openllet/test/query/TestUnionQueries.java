@@ -1,7 +1,6 @@
 package openllet.test.query;
 
 import openllet.aterm.ATermAppl;
-import openllet.core.KnowledgeBase;
 import openllet.query.sparqldl.model.*;
 import org.junit.Test;
 
@@ -123,5 +122,32 @@ public class TestUnionQueries extends AbstractQueryTest
         testUnionQuery(ucq12, new ATermAppl[][] { { _a, _b } });
     }
 
-    // TODO Lukas: more test cases (Polyneikes could be very interesting)
+    @Test
+    public void testOedipus()
+    {
+        final ATermAppl Patricide = term("Patricide");
+        final ATermAppl oedipus = term("oedipus");
+        final ATermAppl iokaste = term("iokaste");
+        final ATermAppl polyneikes = term("polyneikes");
+        final ATermAppl thersandros = term("thersandros");
+        final ATermAppl hasChild = term("hasChild");
+
+        classes(Patricide);
+        individuals(oedipus, iokaste, polyneikes, thersandros);
+        objectProperties(hasChild);
+
+        _kb.addPropertyValue(hasChild, iokaste, oedipus);
+        _kb.addPropertyValue(hasChild, oedipus, polyneikes);
+        _kb.addPropertyValue(hasChild, iokaste, polyneikes);
+        _kb.addPropertyValue(hasChild, polyneikes, thersandros);
+        _kb.addType(oedipus, Patricide);
+        _kb.addType(thersandros, not(Patricide));
+
+        UnionQuery ucq1 = unionQuery(select(x, y), where(query(TypeAtom(x, Patricide), PropertyValueAtom(iokaste,
+                        hasChild, x), TypeAtom(y, not(Patricide)), PropertyValueAtom(x, hasChild, y))));
+
+        testUnionQuery(ucq1, new ATermAppl[][] { { oedipus, polyneikes }, { polyneikes, thersandros } });
+    }
+
+    // TODO Lukas: more test cases
 }
