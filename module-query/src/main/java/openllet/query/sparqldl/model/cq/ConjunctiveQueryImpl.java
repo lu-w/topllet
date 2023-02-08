@@ -8,13 +8,8 @@
 
 package openllet.query.sparqldl.model.cq;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Set;
 
 import openllet.aterm.ATermAppl;
 import openllet.aterm.ATermList;
@@ -24,7 +19,9 @@ import openllet.core.KnowledgeBase;
 import openllet.core.boxes.rbox.Role;
 import openllet.core.exceptions.InternalReasonerException;
 import openllet.core.utils.ATermUtils;
+import openllet.core.utils.DisjointSet;
 import openllet.query.sparqldl.model.AbstractQuery;
+import openllet.query.sparqldl.model.Query;
 import openllet.query.sparqldl.model.results.ResultBinding;
 
 import static openllet.core.utils.TermFactory.term;
@@ -552,6 +549,87 @@ public class ConjunctiveQueryImpl extends AbstractQuery implements ConjunctiveQu
 		}
 		// Recursive DFS for cycle identification
 		return cycle(nodes, binaryAtomsWithOnlyUndistVars);
+	}
+
+	@Override
+	public List<Query> split()
+	{
+		return split(false);
+	}
+
+	public List<Query> split(boolean splitOnIndividuals)
+	{
+		final Set<ATermAppl> resultVars = new HashSet<>(getResultVars());
+
+		final DisjointSet<ATermAppl> disjointSet = new DisjointSet<>();
+
+		for (final QueryAtom atom : getAtoms())
+		{
+			ATermAppl toMerge = null;
+
+			for (final ATermAppl arg : atom.getArguments())
+			{
+				if (!(ATermUtils.isVar(arg) || (splitOnIndividuals && getKB().isIndividual(arg))))
+					continue;
+
+				disjointSet.add(arg);
+				if (toMerge != null)
+					disjointSet.union(toMerge, arg);
+				toMerge = arg;
+			}
+		}
+
+		final Collection<Set<ATermAppl>> equivalenceSets = disjointSet.getEquivalanceSets();
+		if (equivalenceSets.size() == 1)
+			return Collections.singletonList(this);
+
+		final Map<ATermAppl, ConjunctiveQuery> queries = new HashMap<>();
+		ConjunctiveQuery groundQuery = null;
+		for (final QueryAtom atom : getAtoms())
+		{
+			ATermAppl representative = null;
+			for (final ATermAppl arg : atom.getArguments())
+				if (ATermUtils.isVar(arg) || (splitOnIndividuals && getKB().isIndividual(arg)))
+				{
+					representative = disjointSet.find(arg);
+					break;
+				}
+
+			ConjunctiveQuery newQuery;
+			if (representative == null)
+			{
+				if (groundQuery == null)
+					groundQuery = new ConjunctiveQueryImpl(this);
+				newQuery = groundQuery;
+			}
+			else
+			{
+				newQuery = queries.get(representative);
+				if (newQuery == null)
+				{
+					newQuery = new ConjunctiveQueryImpl(this);
+					queries.put(representative, newQuery);
+				}
+				for (final ATermAppl arg : atom.getArguments())
+				{
+					if (resultVars.contains(arg))
+						newQuery.addResultVar(arg);
+
+					for (final VarType v : VarType.values())
+						if (getDistVarsForType(v).contains(arg))
+							newQuery.addDistVar(arg, v);
+				}
+			}
+
+			newQuery.add(atom);
+		}
+
+		final List<Query> list = new ArrayList<>(queries.values());
+
+		if (groundQuery != null)
+			list.add(0, groundQuery);
+
+		return list;
 	}
 
 	@Override

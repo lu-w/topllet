@@ -191,7 +191,7 @@ public abstract class AbstractQueryTest extends AbstractKBTests
 		}
 
 		BindingIterationUnionQueryEngine engine = new BindingIterationUnionQueryEngine();
-		engine.setBindingTime(BindingIterationUnionQueryEngine.BindingTime.BEFORE_CNF);
+		engine.setBindingTime(BindingIterationUnionQueryEngine.BindingTime.AFTER_CNF);
 		final QueryResult result = engine.exec(query);
 		for (final ResultBinding binding : result)
 		{

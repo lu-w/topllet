@@ -74,4 +74,11 @@ public interface ConjunctiveQuery extends Query
 	 * @return query atoms in the order as they appear in the query
 	 */
 	List<QueryAtom> findAtoms(final QueryPredicate predicate, final ATermAppl... arguments);
+
+	/**
+	 * Extension of the standard split() functionality of queries that can also split on individuals.
+	 * @param splitOnIndividuals whether to split on individuals (i.e. C(a), C(b) become two separate queries)
+	 * @return A list of split queries
+	 */
+	List<Query> split(boolean splitOnIndividuals);
 }

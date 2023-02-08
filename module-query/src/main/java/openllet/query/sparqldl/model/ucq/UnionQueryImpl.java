@@ -4,6 +4,7 @@ import openllet.aterm.ATermAppl;
 import openllet.core.KnowledgeBase;
 import openllet.core.utils.ATermUtils;
 import openllet.query.sparqldl.model.AbstractQuery;
+import openllet.query.sparqldl.model.Query;
 import openllet.query.sparqldl.model.results.ResultBinding;
 import openllet.query.sparqldl.model.cq.*;
 import openllet.shared.tools.Log;
@@ -11,8 +12,6 @@ import openllet.shared.tools.Log;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import static openllet.query.sparqldl.engine.cq.QueryEngine.split;
 
 public class UnionQueryImpl extends AbstractQuery implements UnionQuery
 {
@@ -179,6 +178,9 @@ public class UnionQueryImpl extends AbstractQuery implements UnionQuery
     @Override
     public UnionQuery rollUp()
     {
+        // TODO Lukas: rolling up should be able to stop on distinguished variables
+        // We can not roll up if we have nothing to roll up to.
+        assert(!getDistVars().isEmpty() || !getConstants().isEmpty() || !getUndistVars().isEmpty());
         UnionQuery rolledUpUnionQuery = new UnionQueryImpl(this);
         for (ConjunctiveQuery conjunctiveQuery : _queries)
         {
@@ -186,7 +188,7 @@ public class UnionQueryImpl extends AbstractQuery implements UnionQuery
                 _logger.finer("Rolling up for conjunctive query: " + conjunctiveQuery);
 
             // 1. step: Find disjoint parts of the query
-            List<ConjunctiveQuery> splitQueries = split(conjunctiveQuery, true);
+            List<Query> splitQueries = conjunctiveQuery.split(true);
             if (_logger.isLoggable(Level.FINER))
             {
                 _logger.finer("Split query: " + splitQueries);
@@ -195,19 +197,20 @@ public class UnionQueryImpl extends AbstractQuery implements UnionQuery
 
             // 2. step: Roll each part up
             ConjunctiveQuery rolledUpQuery = new ConjunctiveQueryImpl(this.getKB(), this.isDistinct());
-            for (ConjunctiveQuery connectedQuery : splitQueries)
+            for (Query connectedQuery : splitQueries)
             {
                 final ATermAppl testIndOrVar;
-                if (!connectedQuery.getConstants().isEmpty())
+                if (!connectedQuery.getDistVars().isEmpty())
+                    testIndOrVar = connectedQuery.getDistVars().iterator().next();
+                else if (!connectedQuery.getConstants().isEmpty())
                     testIndOrVar = connectedQuery.getConstants().iterator().next();
                 else if (!connectedQuery.getUndistVars().isEmpty())
                     testIndOrVar = connectedQuery.getUndistVars().iterator().next();
-                else if (!connectedQuery.getDistVars().isEmpty())
-                    testIndOrVar = connectedQuery.getDistVars().iterator().next();
                 else
                     throw new RuntimeException("Rolling up procedure did not find any individual or variable to roll " +
                             "up to.");
-                final ATermAppl testClass = connectedQuery.rollUpTo(testIndOrVar, Collections.emptySet(), false);
+                final ATermAppl testClass = ((ConjunctiveQuery) connectedQuery).rollUpTo( testIndOrVar,
+                        Collections.emptySet(), false);
                 if (_logger.isLoggable(Level.FINER))
                     _logger.finer("Rolled-up Boolean query: " + testIndOrVar + " -> " + testClass);
                 QueryAtom rolledUpAtom = new QueryAtomImpl(QueryPredicate.Type, testIndOrVar, testClass);
@@ -215,7 +218,19 @@ public class UnionQueryImpl extends AbstractQuery implements UnionQuery
             }
             rolledUpUnionQuery.addQuery(rolledUpQuery);
         }
+        for (ATermAppl var : _resultVars)
+            rolledUpUnionQuery.addResultVar(var);
+        for (VarType varType : _distVars.keySet())
+            for (ATermAppl var : _distVars.get(varType))
+                rolledUpUnionQuery.addDistVar(var, varType);
         return rolledUpUnionQuery;
+    }
+
+    @Override
+    public List<Query> split()
+    {
+        // TODO Lukas
+        return List.of(this);
     }
 
     @Override

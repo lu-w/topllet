@@ -37,7 +37,6 @@ public class CNFQueryImpl extends AbstractQuery implements CNFQuery
     @Override
     public CNFQuery copy()
     {
-        // TODO Lukas
         CNFQuery copy = new CNFQueryImpl(getKB(), isDistinct());
         for (DisjunctiveQuery q : _queries)
             copy.addQuery((DisjunctiveQuery) q.copy());
@@ -60,6 +59,13 @@ public class CNFQueryImpl extends AbstractQuery implements CNFQuery
     public List<DisjunctiveQuery> getQueries()
     {
         return _queries;
+    }
+
+    @Override
+    public List<Query> split()
+    {
+        // TODO Lukas
+        return List.of(this);
     }
 
     @Override

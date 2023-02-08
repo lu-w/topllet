@@ -37,6 +37,7 @@ import openllet.core.utils.ATermUtils;
 import openllet.core.utils.Bool;
 import openllet.core.utils.DisjointSet;
 import openllet.core.utils.SetUtils;
+import openllet.query.sparqldl.model.Query;
 import openllet.query.sparqldl.model.results.MultiQueryResults;
 import openllet.query.sparqldl.model.cq.NotKnownQueryAtom;
 import openllet.query.sparqldl.model.cq.ConjunctiveQuery;
@@ -315,109 +316,28 @@ public class QueryEngine
 	}
 
 	/**
-	 * If a query has disconnected components such as C(x), D(y) then it should be answered as two separate queries. The answers to each query should be
-	 * combined at the _end by taking Cartesian product.(we combine results on a tuple basis as results are iterated. This way we avoid generating the full
-	 * Cartesian product. Splitting the query ensures the correctness of the answer, e.g. rolling-up technique becomes applicable.
-	 * This version also considers individuals to split on (if set), so e.g. C(a), D(b) is split into two queries.
-	 *
-	 * @param query Query to be split
-	 * @param splitOnIndividuals Whether to split on individuals.
-	 * @return List of queries (contains the initial query if the initial query is connected)
-	 */
-	public static List<ConjunctiveQuery> split(final ConjunctiveQuery query, boolean splitOnIndividuals)
-	{
-		try
-		{
-			final Set<ATermAppl> resultVars = new HashSet<>(query.getResultVars());
-
-			final DisjointSet<ATermAppl> disjointSet = new DisjointSet<>();
-
-			for (final QueryAtom atom : query.getAtoms())
-			{
-				ATermAppl toMerge = null;
-
-				for (final ATermAppl arg : atom.getArguments())
-				{
-					if (!(ATermUtils.isVar(arg) || (splitOnIndividuals && query.getKB().isIndividual(arg))))
-						continue;
-
-					disjointSet.add(arg);
-					if (toMerge != null)
-						disjointSet.union(toMerge, arg);
-					toMerge = arg;
-				}
-			}
-
-			final Collection<Set<ATermAppl>> equivalenceSets = disjointSet.getEquivalanceSets();
-			if (equivalenceSets.size() == 1)
-				return Collections.singletonList(query);
-
-			final Map<ATermAppl, ConjunctiveQuery> queries = new HashMap<>();
-			ConjunctiveQuery groundQuery = null;
-			for (final QueryAtom atom : query.getAtoms())
-			{
-				ATermAppl representative = null;
-				for (final ATermAppl arg : atom.getArguments())
-					if (ATermUtils.isVar(arg) || (splitOnIndividuals && query.getKB().isIndividual(arg)))
-					{
-						representative = disjointSet.find(arg);
-						break;
-					}
-
-				ConjunctiveQuery newQuery = null;
-				if (representative == null)
-				{
-					if (groundQuery == null)
-						groundQuery = new ConjunctiveQueryImpl(query);
-					newQuery = groundQuery;
-				}
-				else
-				{
-					newQuery = queries.get(representative);
-					if (newQuery == null)
-					{
-						newQuery = new ConjunctiveQueryImpl(query);
-						queries.put(representative, newQuery);
-					}
-					for (final ATermAppl arg : atom.getArguments())
-					{
-						if (resultVars.contains(arg))
-							newQuery.addResultVar(arg);
-
-						for (final VarType v : VarType.values())
-							if (query.getDistVarsForType(v).contains(arg))
-								newQuery.addDistVar(arg, v);
-					}
-				}
-
-				newQuery.add(atom);
-			}
-
-			final List<ConjunctiveQuery> list = new ArrayList<>(queries.values());
-
-			if (groundQuery != null)
-				list.add(0, groundQuery);
-
-			return list;
-		}
-		catch (final RuntimeException e)
-		{
-			_logger.log(Level.WARNING, "Query split failed, continuing with query execution.", e);
-			return Collections.singletonList(query);
-		}
-	}
-
-	/**
-	 * If a query has disconnected components such as C(x), D(y) then it should be answered as two separate queries. The answers to each query should be
-	 * combined at the _end by taking Cartesian product.(we combine results on a tuple basis as results are iterated. This way we avoid generating the full
-	 * Cartesian product. Splitting the query ensures the correctness of the answer, e.g. rolling-up technique becomes applicable.
+	 * If a query has disconnected components such as C(x), D(y) then it should be answered as two separate queries.
+	 * The answers to each query should be combined at the _end by taking Cartesian product. We combine results on a
+	 * tuple basis as results are iterated. This way we avoid generating the full Cartesian product. Splitting the query
+	 * ensures the correctness of the answer, e.g. rolling-up technique becomes applicable.
 	 *
 	 * @param query Query to be split
 	 * @return List of queries (contains the initial query if the initial query is connected)
 	 */
 	public static List<ConjunctiveQuery> split(final ConjunctiveQuery query)
 	{
-		return split(query, false);
+		try
+		{
+			List<ConjunctiveQuery> res = new ArrayList<>();
+			for (Query q : query.split())
+				res.add((ConjunctiveQuery) q);
+			return res;
+		}
+		catch (final RuntimeException e)
+		{
+			_logger.log(Level.WARNING, "Query split failed, continuing with query execution.", e);
+			return Collections.singletonList(query);
+		}
 	}
 
 

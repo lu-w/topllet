@@ -5,6 +5,7 @@ import openllet.core.KnowledgeBase;
 import openllet.query.sparqldl.model.cq.Filter;
 import openllet.query.sparqldl.model.cq.QueryParameters;
 import openllet.query.sparqldl.model.results.ResultBinding;
+import openllet.query.sparqldl.model.ucq.UnionQuery;
 
 import java.util.List;
 import java.util.Set;
@@ -146,4 +147,10 @@ public interface Query
      * @return True iff one of the disjuncts contains a cycle
      */
     boolean hasCycle();
+
+    /**
+     * Splits the query into disjoint pats.
+     * @return A list of disjoint queries
+     */
+    List<Query> split();
 }

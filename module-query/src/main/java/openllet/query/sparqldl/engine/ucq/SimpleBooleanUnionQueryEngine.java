@@ -85,6 +85,7 @@ public class SimpleBooleanUnionQueryEngine extends AbstractBooleanUnionQueryEngi
         {
             if (_logger.isLoggable(Level.FINER))
                 _logger.finer("Checking disjunctive query: " + disjunctiveQuery);
+            // TODO we want to allow for roles here as well
             // Creates a list with the axioms to check (since they are already rolled-up, we only have concepts):
             // - C(a) for individuals a and concepts C -> disjunctionInd
             // - C(x) for undistinguished variables Cx and concepts C -> disjunctionVar

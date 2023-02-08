@@ -33,6 +33,7 @@ public class BindingIterationUnionQueryEngine extends AbstractUnionQueryEngine
     {
         _bindingGenerator = new NaiveUnionQueryCandidateGenerator(q);
         QueryResult result = new QueryResultImpl(q);
+        // TODO SPLIT UNION QUERY INTO DISJOINT PARTS AND MERGE RESULTS LATER
         // APPLY BINDINGS
         for (ResultBinding candidateBinding : _bindingGenerator)
         {
@@ -55,11 +56,15 @@ public class BindingIterationUnionQueryEngine extends AbstractUnionQueryEngine
         UnionQuery rolledUpUnionQuery = q.rollUp();
         if (_logger.isLoggable(Level.FINER))
             _logger.finer("Rolled-up union query: " + rolledUpUnionQuery);
+        System.out.println(rolledUpUnionQuery);
 
         // 2. CONVERT TO CNF
         CNFQuery cnfQuery = rolledUpUnionQuery.toCNF();
         if (_logger.isLoggable(Level.FINER))
             _logger.finer("Rolled-up union query in CNF is: " + cnfQuery);
+        System.out.print(cnfQuery);
+
+        // TODO SPLIT CNF QUERY INTO DISJOINT PARTS AND MERGE RESULTS LATER
 
         // 3. APPLY BINDINGS
         _bindingGenerator = new NaiveUnionQueryCandidateGenerator(q);
@@ -68,7 +73,9 @@ public class BindingIterationUnionQueryEngine extends AbstractUnionQueryEngine
         {
             if (_logger.isLoggable(Level.FINE))
                 _logger.fine("Trying candidate binding: " + candidateBinding);
-            boolean booleanResult = _booleanEngine.execBooleanABoxQuery((CNFQuery) cnfQuery.apply(candidateBinding));
+            CNFQuery boundQuery = (CNFQuery) cnfQuery.apply(candidateBinding);
+            System.out.print(boundQuery);
+            boolean booleanResult = _booleanEngine.execBooleanABoxQuery(boundQuery);
             if (_logger.isLoggable(Level.FINE))
                 _logger.fine("Boolean engine returned: " + booleanResult);
             if (booleanResult)
