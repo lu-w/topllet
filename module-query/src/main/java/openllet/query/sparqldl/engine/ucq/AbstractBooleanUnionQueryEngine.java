@@ -19,7 +19,7 @@ abstract public class AbstractBooleanUnionQueryEngine implements UnionQueryExec
     @Override
     public boolean supports(UnionQuery q)
     {
-        return !q.hasCycle() && q.getUndistVars().isEmpty();
+        return !q.hasCycle() && q.getDistVars().isEmpty();
     }
 
     @Override

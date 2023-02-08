@@ -23,7 +23,7 @@ abstract public class AbstractUnionQueryEngine implements UnionQueryExec
     @Override
     public boolean supports(UnionQuery q)
     {
-        return !q.hasCycle() && _booleanEngine.supports(q);
+        return !q.hasCycle();
     }
 
     @Override

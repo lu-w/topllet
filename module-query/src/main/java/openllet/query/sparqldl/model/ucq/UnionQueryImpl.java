@@ -39,17 +39,18 @@ public class UnionQueryImpl extends AbstractQuery implements UnionQuery
     @Override
     public void setQueries(List<ConjunctiveQuery> queries)
     {
-        _queries = queries;
-        if (_logger.isLoggable(Level.FINE) && disjunctsShareUndistVars())
-            _logger.fine("Union query " + this + " contains disjuncts that share undistinguished variables. Will " +
-                    "treat them as different variables.");
+        boolean warningLogged = false;
+        for (ConjunctiveQuery q : queries)
+            if (!warningLogged)
+                warningLogged = addQuery(q, true);
+            else
+                addQuery(q, false);
     }
 
     @Override
     public UnionQuery apply(final ResultBinding binding)
     {
         final UnionQuery query = copy();
-        query.setQueries(new ArrayList<>());
 
         for (ConjunctiveQuery disjunct : _queries)
         {
@@ -60,8 +61,37 @@ public class UnionQueryImpl extends AbstractQuery implements UnionQuery
         return query;
     }
 
-    public void addQuery(final ConjunctiveQuery query) {
+    public void addQuery(final ConjunctiveQuery query)
+    {
+        addQuery(query, false);
+    }
+
+    /**
+     * Adds some logging features to addQuery for internal use.
+     * @param query the disjunct to add
+     * @param logSharedUndistVarWarning whether to log if the new query has undistinguished variables that are
+     *                                  already present in the existing disjuncts
+     * @return true iff. a warning for sharing undistinguished variables was logged
+     */
+    private boolean addQuery(final ConjunctiveQuery query, boolean logSharedUndistVarWarning)
+    {
         this._queries.add(query);
+        // Propagates variables to the union query
+        _allVars.addAll(query.getVars());
+        for (ATermAppl resVar : query.getResultVars())
+            if (!_resultVars.contains(resVar))
+                _resultVars.add(resVar);
+        for (final VarType type : VarType.values())
+            _distVars.get(type).addAll(query.getDistVarsForType(type));
+        // Updates the ground information (this may have changed due to the new disjunct)
+        _ground &= query.isGround();
+        if (logSharedUndistVarWarning && _logger.isLoggable(Level.FINE) && disjunctsShareUndistVars())
+        {
+            _logger.fine("Union query " + this + " contains disjuncts that share undistinguished variables. Will " +
+                    "treat them as different variables.");
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -129,7 +159,7 @@ public class UnionQueryImpl extends AbstractQuery implements UnionQuery
     public UnionQuery reorder(int[] queries)
     {
         // TODO Lukas: implement query reordering for UCQs.
-        return this;
+        return copy();
     }
 
     @Override
@@ -149,7 +179,6 @@ public class UnionQueryImpl extends AbstractQuery implements UnionQuery
     @Override
     public UnionQuery rollUp()
     {
-        //assert(!getConstants().isEmpty() || !getUndistVars().isEmpty() || !getDistVars().isEmpty());
         UnionQuery rolledUpUnionQuery = new UnionQueryImpl(this);
         for (ConjunctiveQuery conjunctiveQuery : _queries)
         {
