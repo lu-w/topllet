@@ -38,7 +38,8 @@ public class BindingIterationUnionQueryEngine extends AbstractUnionQueryEngine
         {
             if (_logger.isLoggable(Level.FINE))
                 _logger.fine("Trying candidate binding: " + candidateBinding);
-            QueryResult booleanResult = _booleanEngine.exec((UnionQuery) q.apply(candidateBinding));
+            UnionQuery boundQuery = (UnionQuery) q.apply(candidateBinding);
+            QueryResult booleanResult = _booleanEngine.exec(boundQuery);
             if (_logger.isLoggable(Level.FINE))
                 _logger.fine("Boolean engine returned: " + (booleanResult.isEmpty() ? "false" : "true"));
             if (!booleanResult.isEmpty())

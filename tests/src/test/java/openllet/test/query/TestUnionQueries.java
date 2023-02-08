@@ -109,16 +109,16 @@ public class TestUnionQueries extends AbstractQueryTest
                 query(TypeAtom(z, _D), PropertyValueAtom(y, _r, z))));
 
         testUnionQuery(ucq1, new ATermAppl[][] { { _a } });
-        testUnionQuery(ucq2, new ATermAppl[] {  });
+        testUnionQuery(ucq2);
         testUnionQuery(ucq3, allResults(List.of(_a, _b, _c), 2));
         testUnionQuery(ucq4, new ATermAppl[][] { { _a, _a }, { _a, _b }, { _a, _c } });
         testUnionQuery(ucq5, new ATermAppl[][] { { _b } });
-        testUnionQuery(ucq6, new ATermAppl[] {  });
+        testUnionQuery(ucq6);
         testUnionQuery(ucq7, new ATermAppl[][] { { _b, _a }, { _b, _b }, { _b, _c } });
-        testUnionQuery(ucq8, new ATermAppl[] {  });
+        testUnionQuery(ucq8);
         testUnionQuery(ucq9, new ATermAppl[][] { { _a } });
         testUnionQuery(ucq10, new ATermAppl[][] { { _a } });
-        testUnionQuery(ucq11, new ATermAppl[] {  });
+        testUnionQuery(ucq11);
         testUnionQuery(ucq12, new ATermAppl[][] { { _a, _b } });
     }
 
@@ -143,10 +143,19 @@ public class TestUnionQueries extends AbstractQueryTest
         _kb.addType(oedipus, Patricide);
         _kb.addType(thersandros, not(Patricide));
 
-        UnionQuery ucq1 = unionQuery(select(x, y), where(query(TypeAtom(x, Patricide), PropertyValueAtom(iokaste,
+        UnionQuery ucq1 = unionQuery(select(x, y, x1, y1), where(
+                query(TypeAtom(x, Patricide), PropertyValueAtom(iokaste, hasChild, x), TypeAtom(y, not(Patricide)),
+                        PropertyValueAtom(x, hasChild, y)),
+                query(TypeAtom(x1, Patricide), PropertyValueAtom(iokaste, hasChild, x1), TypeAtom(y1, not(Patricide)),
+                        PropertyValueAtom(x1, hasChild, y1))));
+        UnionQuery ucq2 = unionQuery(select(x, y), where(query(TypeAtom(x, Patricide), PropertyValueAtom(iokaste,
                         hasChild, x), TypeAtom(y, not(Patricide)), PropertyValueAtom(x, hasChild, y))));
 
-        testUnionQuery(ucq1, new ATermAppl[][] { { oedipus, polyneikes }, { polyneikes, thersandros } });
+        testUnionQuery(ucq1, new ATermAppl[][] {
+                { oedipus, polyneikes, polyneikes, thersandros },
+                { polyneikes, thersandros, oedipus, polyneikes }
+        });
+        testUnionQuery(ucq2);
     }
 
     // TODO Lukas: more test cases

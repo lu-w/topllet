@@ -40,6 +40,7 @@ public class UnionQueryImpl extends AbstractQuery implements UnionQuery
     public void setQueries(List<ConjunctiveQuery> queries)
     {
         boolean warningLogged = false;
+        _queries = new ArrayList<>();
         for (ConjunctiveQuery q : queries)
             if (!warningLogged)
                 warningLogged = addQuery(q, true);
@@ -51,13 +52,12 @@ public class UnionQueryImpl extends AbstractQuery implements UnionQuery
     public UnionQuery apply(final ResultBinding binding)
     {
         final UnionQuery query = copy();
-
+        query.setQueries(new ArrayList<>());
         for (ConjunctiveQuery disjunct : _queries)
         {
             ConjunctiveQuery boundDisjunct = disjunct.apply(binding);
             query.addQuery(boundDisjunct);
         }
-
         return query;
     }
 
