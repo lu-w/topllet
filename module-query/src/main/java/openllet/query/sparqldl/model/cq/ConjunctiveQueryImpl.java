@@ -554,10 +554,48 @@ public class ConjunctiveQueryImpl extends AbstractQuery implements ConjunctiveQu
 	@Override
 	public List<Query> split()
 	{
-		return split(false);
+		return split(false, false);
 	}
 
-	public List<Query> split(boolean splitOnIndividuals)
+	@Override
+	public String toString(boolean multiLine, boolean onlyQueryBody)
+	{
+		final StringBuilder sb = new StringBuilder();
+		final String indent = multiLine ? "    " : "";
+
+		if (!onlyQueryBody)
+		{
+			sb.append(ATermUtils.toString(_name)).append("(");
+			for (int i = 0; i < _resultVars.size(); i++)
+			{
+				final ATermAppl var = _resultVars.get(i);
+				if (i > 0)
+					sb.append(", ");
+				sb.append(ATermUtils.toString(var));
+			}
+			sb.append(")").append(" :-");
+		}
+
+		if (getAtoms().size() > 0)
+		{
+			if (multiLine)
+				sb.append("\n");
+			for (int j = 0; j < getAtoms().size(); j++) {
+				final QueryAtom a = getAtoms().get(j);
+				if (j > 0) {
+					sb.append(",");
+					if (multiLine)
+						sb.append("\n");
+				}
+
+				sb.append(indent);
+				sb.append(a.toString()); // TODO qNameProvider
+			}
+		}
+		return sb.toString();
+	}
+
+	public List<Query> split(boolean splitOnIndividuals, boolean splitOnDistVars)
 	{
 		final Set<ATermAppl> resultVars = new HashSet<>(getResultVars());
 
@@ -569,7 +607,8 @@ public class ConjunctiveQueryImpl extends AbstractQuery implements ConjunctiveQu
 
 			for (final ATermAppl arg : atom.getArguments())
 			{
-				if (!(ATermUtils.isVar(arg) || (splitOnIndividuals && getKB().isIndividual(arg))))
+				if (!(ATermUtils.isVar(arg) || ((splitOnIndividuals && getKB().isIndividual(arg))) ||
+						(splitOnDistVars && getDistVars().contains(arg))))
 					continue;
 
 				disjointSet.add(arg);
@@ -589,7 +628,8 @@ public class ConjunctiveQueryImpl extends AbstractQuery implements ConjunctiveQu
 		{
 			ATermAppl representative = null;
 			for (final ATermAppl arg : atom.getArguments())
-				if (ATermUtils.isVar(arg) || (splitOnIndividuals && getKB().isIndividual(arg)))
+				if (ATermUtils.isVar(arg) || (splitOnIndividuals && getKB().isIndividual(arg)) ||
+						(splitOnDistVars && getDistVars().contains(arg)))
 				{
 					representative = disjointSet.find(arg);
 					break;
@@ -612,11 +652,11 @@ public class ConjunctiveQueryImpl extends AbstractQuery implements ConjunctiveQu
 				}
 				for (final ATermAppl arg : atom.getArguments())
 				{
-					if (resultVars.contains(arg))
+					if (resultVars.contains(arg) && !newQuery.getResultVars().contains(arg))
 						newQuery.addResultVar(arg);
 
 					for (final VarType v : VarType.values())
-						if (getDistVarsForType(v).contains(arg))
+						if (getDistVarsForType(v).contains(arg) && !newQuery.getDistVarsForType(v).contains(arg))
 							newQuery.addDistVar(arg, v);
 				}
 			}
@@ -672,7 +712,7 @@ public class ConjunctiveQueryImpl extends AbstractQuery implements ConjunctiveQu
 				final QueryAtom a = _allAtoms.get(i);
 				if (i > 0)
 				{
-					sb.append(",");
+					sb.append(", ");
 					if (multiLine)
 						sb.append("\n");
 				}

@@ -7,10 +7,5 @@ import openllet.query.sparqldl.model.cq.ConjunctiveQuery;
  */
 public interface DisjunctiveQuery extends UnionQuery
 {
-    /**
-     * We only allow to add queries that have at most one conjunct (i.e. are atomic).
-     * @param query the query to add
-     */
-    @Override
-    void addQuery(ConjunctiveQuery query);
+
 }

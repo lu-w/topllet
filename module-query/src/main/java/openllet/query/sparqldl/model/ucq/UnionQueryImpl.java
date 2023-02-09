@@ -2,26 +2,30 @@ package openllet.query.sparqldl.model.ucq;
 
 import openllet.aterm.ATermAppl;
 import openllet.core.KnowledgeBase;
-import openllet.core.utils.ATermUtils;
-import openllet.query.sparqldl.model.AbstractQuery;
+import openllet.query.sparqldl.model.AbstractCompositeQuery;
+import openllet.query.sparqldl.model.CompositeQuery;
 import openllet.query.sparqldl.model.Query;
-import openllet.query.sparqldl.model.results.ResultBinding;
 import openllet.query.sparqldl.model.cq.*;
 import openllet.shared.tools.Log;
 
 import java.util.*;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class UnionQueryImpl extends AbstractQuery implements UnionQuery
+public class UnionQueryImpl extends AbstractCompositeQuery implements UnionQuery
 {
     public static final Logger _logger = Log.getLogger(UnionQueryImpl.class);
-
-    protected List<ConjunctiveQuery> _queries = new ArrayList<>();
 
     public UnionQueryImpl(final KnowledgeBase kb, final boolean distinct)
     {
         super(kb, distinct);
+    }
+
+    @Override
+    protected String getCompositeDelimiter()
+    {
+        return "v";
     }
 
     public UnionQueryImpl(final UnionQuery query)
@@ -30,39 +34,18 @@ public class UnionQueryImpl extends AbstractQuery implements UnionQuery
     }
 
     @Override
-    public List<ConjunctiveQuery> getQueries()
-    {
-        return _queries;
-    }
-
-    @Override
-    public void setQueries(List<ConjunctiveQuery> queries)
+    public void setQueries(List<Query> queries)
     {
         boolean warningLogged = false;
         _queries = new ArrayList<>();
-        for (ConjunctiveQuery q : queries)
-            if (!warningLogged)
-                warningLogged = addQuery(q, true);
+        for (Query q : queries)
+            if (q instanceof ConjunctiveQuery)
+                if (!warningLogged)
+                    warningLogged = addQuery((ConjunctiveQuery) q, true);
+                else
+                    addQuery((ConjunctiveQuery) q, false);
             else
-                addQuery(q, false);
-    }
-
-    @Override
-    public UnionQuery apply(final ResultBinding binding)
-    {
-        final UnionQuery query = copy();
-        query.setQueries(new ArrayList<>());
-        for (ConjunctiveQuery disjunct : _queries)
-        {
-            ConjunctiveQuery boundDisjunct = disjunct.apply(binding);
-            query.addQuery(boundDisjunct);
-        }
-        return query;
-    }
-
-    public void addQuery(final ConjunctiveQuery query)
-    {
-        addQuery(query, false);
+                _logger.warning("Added non conjunctive query as a disjunct to a union query");
     }
 
     /**
@@ -74,16 +57,7 @@ public class UnionQueryImpl extends AbstractQuery implements UnionQuery
      */
     private boolean addQuery(final ConjunctiveQuery query, boolean logSharedUndistVarWarning)
     {
-        this._queries.add(query);
-        // Propagates variables to the union query
-        _allVars.addAll(query.getVars());
-        for (ATermAppl resVar : query.getResultVars())
-            if (!_resultVars.contains(resVar))
-                _resultVars.add(resVar);
-        for (final VarType type : VarType.values())
-            _distVars.get(type).addAll(query.getDistVarsForType(type));
-        // Updates the ground information (this may have changed due to the new disjunct)
-        _ground &= query.isGround();
+        super.addQuery(query);
         if (logSharedUndistVarWarning && _logger.isLoggable(Level.FINE) && disjunctsShareUndistVars())
         {
             _logger.fine("Union query " + this + " contains disjuncts that share undistinguished variables. Will " +
@@ -102,20 +76,26 @@ public class UnionQueryImpl extends AbstractQuery implements UnionQuery
      * @return A list of union queries, where each conjunctive query of each union query contains only one atom
      * representing the CNF of the input query
      */
-    private List<DisjunctiveQuery> toCNFRec(UnionQuery query)
+    private List<Query> toCNFRec(UnionQuery query)
     {
-        List<DisjunctiveQuery> newCnf = new ArrayList<>();
+        List<Query> newCnf = new ArrayList<>();
         // Safety check: no queries given
         if (query.getQueries().size() == 0)
             return newCnf;
         // Base case: CNF(a_1 ^ ... ^ a_n) = a_1 ^ ... ^ a_n
         // Return a list of atoms (wrapped in a Query and again in a UnionQuery) to represent this conjunction.
         else if (query.getQueries().size() == 1) {
-            for (QueryAtom a : query.getQueries().get(0).getAtoms())
+            for (QueryAtom a : ((ConjunctiveQuery) query.getQueries().get(0)).getAtoms())
             {
                 DisjunctiveQuery singleUnion = new DisjunctiveQueryImpl(query.getKB(), query.isDistinct());
-                ConjunctiveQuery singleQuery = new ConjunctiveQueryImpl(query.getQueries().get(0));
+                ConjunctiveQuery singleQuery = new ConjunctiveQueryImpl((ConjunctiveQuery) query.getQueries().get(0));
                 singleQuery.add(a);
+                for (ATermAppl var : query.getDistVars())
+                    if (a.getArguments().contains(var))
+                        singleQuery.addDistVar(var, VarType.INDIVIDUAL); // TODO ind. -> any var type
+                for (ATermAppl var : query.getResultVars())
+                    if (a.getArguments().contains(var))
+                        singleQuery.addResultVar(var);
                 singleUnion.addQuery(singleQuery);
                 newCnf.add(singleUnion);
             }
@@ -126,20 +106,33 @@ public class UnionQueryImpl extends AbstractQuery implements UnionQuery
         {
             // Fetch CNF(q)
             UnionQuery subQuery = new UnionQueryImpl(query.getKB(), query.isDistinct());
-            for (ConjunctiveQuery q : query.getQueries().subList(1, query.getQueries().size()))
-                subQuery.addQuery(q);
-            List<DisjunctiveQuery> cnf = toCNFRec(subQuery);
+            subQuery.setQueries(query.getQueries().subList(1, query.getQueries().size()));
+            for (ATermAppl var : query.getResultVars())
+                subQuery.addResultVar(var);
+            for (ATermAppl var : query.getDistVars())
+                subQuery.addDistVar(var, VarType.INDIVIDUAL); // TODO ind. -> any var type
+            List<Query> cnf = toCNFRec(subQuery);
             // Create (x v c) for all atoms x and conjuncts c
-            for (QueryAtom atom : query.getQueries().get(0).getAtoms())
-                for (DisjunctiveQuery conjunct : cnf)
+            for (QueryAtom atom : ((ConjunctiveQuery) query.getQueries().get(0)).getAtoms())
+                for (Query conjunct : cnf)
                 {
-                    DisjunctiveQuery c = new DisjunctiveQueryImpl(query.getKB(), query.isDistinct());
-                    for (ConjunctiveQuery sq : conjunct.getQueries())
-                        c.addQuery(sq);
-                    ConjunctiveQuery q = new ConjunctiveQueryImpl(query.getKB(), query.isDistinct());
-                    q.add(atom);
-                    c.addQuery(q);
-                    newCnf.add(c);
+                    if (conjunct instanceof CompositeQuery)
+                    {
+                        DisjunctiveQuery c = new DisjunctiveQueryImpl(query.getKB(), query.isDistinct());
+                        for (Query sq : ((CompositeQuery) conjunct).getQueries())
+                            c.addQuery(sq);
+                        ConjunctiveQuery q = new ConjunctiveQueryImpl(query.getKB(), query.isDistinct());
+                        q.add(atom);
+                        for (ATermAppl var : query.getDistVars())
+                            if (atom.getArguments().contains(var))
+                                q.addDistVar(var, VarType.INDIVIDUAL); // TODO ind. -> any var type
+                        for (ATermAppl var : query.getResultVars())
+                            if (atom.getArguments().contains(var))
+                                q.addResultVar(var);
+                        c.addQuery(q);
+                        newCnf.add(c);
+
+                    }
                 }
         }
         return newCnf;
@@ -148,16 +141,19 @@ public class UnionQueryImpl extends AbstractQuery implements UnionQuery
     @Override
     public CNFQuery toCNF()
     {
-        List<DisjunctiveQuery> cnf = toCNFRec(this);
+        List<Query> cnf = toCNFRec(this);
         CNFQuery cnfQuery = new CNFQueryImpl(this.getKB(), this.isDistinct());
         cnfQuery.setQueries(cnf);
+        // Order of result/distinguished variables may change during conversion to CNF, therefore just reset them.
+        cnfQuery.setDistVars(getDistVarsWithVarType());
+        cnfQuery.setResultVars(getResultVars());
         return cnfQuery;
     }
 
     @Override
     public UnionQuery reorder(int[] queries)
     {
-        // TODO Lukas: implement query reordering for UCQs.
+        // TODO Lukas: implement query reordering for UCQs (if needed)
         return copy();
     }
 
@@ -168,7 +164,7 @@ public class UnionQueryImpl extends AbstractQuery implements UnionQuery
         if (_queries.size() > 1)
         {
             Set<ATermAppl> undistVars = _queries.get(0).getUndistVars();
-            for (ConjunctiveQuery query : _queries.subList(1, _queries.size()))
+            for (Query query : _queries.subList(1, _queries.size()))
                 undistVars.retainAll(query.getUndistVars());
             shared = !undistVars.isEmpty();
         }
@@ -178,17 +174,22 @@ public class UnionQueryImpl extends AbstractQuery implements UnionQuery
     @Override
     public UnionQuery rollUp()
     {
-        // TODO Lukas: rolling up should be able to stop on distinguished variables
+        return rollUp(false);
+    }
+
+    @Override
+    public UnionQuery rollUp(boolean stopRollingOnDistVars)
+    {
         // We can not roll up if we have nothing to roll up to.
         assert(!getDistVars().isEmpty() || !getConstants().isEmpty() || !getUndistVars().isEmpty());
         UnionQuery rolledUpUnionQuery = new UnionQueryImpl(this);
-        for (ConjunctiveQuery conjunctiveQuery : _queries)
+        for (Query conjunctiveQuery : _queries)
         {
             if (_logger.isLoggable(Level.FINER))
                 _logger.finer("Rolling up for conjunctive query: " + conjunctiveQuery);
 
             // 1. step: Find disjoint parts of the query
-            List<Query> splitQueries = conjunctiveQuery.split(true);
+            List<Query> splitQueries = ((ConjunctiveQuery) conjunctiveQuery).split(true, stopRollingOnDistVars);
             if (_logger.isLoggable(Level.FINER))
             {
                 _logger.finer("Split query: " + splitQueries);
@@ -199,22 +200,31 @@ public class UnionQueryImpl extends AbstractQuery implements UnionQuery
             ConjunctiveQuery rolledUpQuery = new ConjunctiveQueryImpl(this.getKB(), this.isDistinct());
             for (Query connectedQuery : splitQueries)
             {
-                final ATermAppl testIndOrVar;
-                if (!connectedQuery.getDistVars().isEmpty())
-                    testIndOrVar = connectedQuery.getDistVars().iterator().next();
-                else if (!connectedQuery.getConstants().isEmpty())
-                    testIndOrVar = connectedQuery.getConstants().iterator().next();
-                else if (!connectedQuery.getUndistVars().isEmpty())
-                    testIndOrVar = connectedQuery.getUndistVars().iterator().next();
+                if (connectedQuery.getDistVars().size() <= 1)
+                {
+                    final ATermAppl testIndOrVar;
+                    if (!connectedQuery.getDistVars().isEmpty())
+                        testIndOrVar = connectedQuery.getDistVars().iterator().next();
+                    else if (!connectedQuery.getConstants().isEmpty())
+                        testIndOrVar = connectedQuery.getConstants().iterator().next();
+                    else if (!connectedQuery.getUndistVars().isEmpty())
+                        testIndOrVar = connectedQuery.getUndistVars().iterator().next();
+                    else
+                        throw new RuntimeException("Rolling up procedure did not find any individual or variable to roll " +
+                                "up to.");
+                    final ATermAppl testClass = ((ConjunctiveQuery) connectedQuery).rollUpTo(testIndOrVar,
+                            Collections.emptySet(), false);
+                    if (_logger.isLoggable(Level.FINER))
+                        _logger.finer("Rolled-up Boolean query: " + testIndOrVar + " -> " + testClass);
+                    QueryAtom rolledUpAtom = new QueryAtomImpl(QueryPredicate.Type, testIndOrVar, testClass);
+                    rolledUpQuery.add(rolledUpAtom);
+                }
                 else
-                    throw new RuntimeException("Rolling up procedure did not find any individual or variable to roll " +
-                            "up to.");
-                final ATermAppl testClass = ((ConjunctiveQuery) connectedQuery).rollUpTo( testIndOrVar,
-                        Collections.emptySet(), false);
-                if (_logger.isLoggable(Level.FINER))
-                    _logger.finer("Rolled-up Boolean query: " + testIndOrVar + " -> " + testClass);
-                QueryAtom rolledUpAtom = new QueryAtomImpl(QueryPredicate.Type, testIndOrVar, testClass);
-                rolledUpQuery.add(rolledUpAtom);
+                {
+                    // we can not roll-up queries that contain more than one distinguished variables -> just leave it
+                    for (QueryAtom atom : ((ConjunctiveQuery) connectedQuery).getAtoms())
+                        rolledUpQuery.add(atom);
+                }
             }
             rolledUpUnionQuery.addQuery(rolledUpQuery);
         }
@@ -229,7 +239,8 @@ public class UnionQueryImpl extends AbstractQuery implements UnionQuery
     @Override
     public List<Query> split()
     {
-        // TODO Lukas
+        // UCQs can not be split due to their semantics.
+        _logger.fine("Tried to split a union query, but union queries can not be split.");
         return List.of(this);
     }
 
@@ -237,7 +248,7 @@ public class UnionQueryImpl extends AbstractQuery implements UnionQuery
     public boolean hasCycle()
     {
         boolean hasCycle = false;
-        for (ConjunctiveQuery q : _queries)
+        for (Query q : _queries)
             hasCycle |= q.hasCycle();
         return hasCycle;
     }
@@ -246,67 +257,8 @@ public class UnionQueryImpl extends AbstractQuery implements UnionQuery
     public UnionQuery copy()
     {
         UnionQuery copy = new UnionQueryImpl(this);
-        for (ConjunctiveQuery q : _queries)
-            copy.addQuery((ConjunctiveQuery) q.copy());
+        for (Query q : _queries)
+            copy.addQuery(q.copy());
         return copy;
-    }
-
-    @Override
-    public String toString()
-    {
-        return toString(false);
-    }
-
-    public String toString(final boolean multiLine)
-    {
-        final String indent = multiLine ? "     " : " ";
-        final StringBuilder sb = new StringBuilder();
-
-        sb.append(ATermUtils.toString(_name)).append("(");
-        for (int i = 0; i < _resultVars.size(); i++)
-        {
-            final ATermAppl var = _resultVars.get(i);
-            if (i > 0)
-                sb.append(", ");
-            sb.append(ATermUtils.toString(var));
-        }
-        sb.append(")");
-
-        sb.append(" :-");
-
-        List<ConjunctiveQuery> queries = _queries;
-        if (_queries.size() == 0)
-            queries = List.of((ConjunctiveQuery) this);
-        for (int i = 0; i < queries.size(); i++)
-        {
-            final ConjunctiveQuery query = queries.get(i);
-            if (i > 0)
-            {
-                sb.append(" v");
-                if (multiLine)
-                    sb.append("\n");
-            }
-            if (query.getAtoms().size() > 0)
-            {
-                if (multiLine)
-                    sb.append("\n");
-                for (int j = 0; j < query.getAtoms().size(); j++) {
-                    final QueryAtom a = query.getAtoms().get(j);
-                    if (j > 0) {
-                        sb.append(",");
-                        if (multiLine)
-                            sb.append("\n");
-                    }
-
-                    sb.append(indent);
-                    sb.append(a.toString()); // TODO qNameProvider
-                }
-            }
-        }
-
-        sb.append(".");
-        if (multiLine)
-            sb.append("\n");
-        return sb.toString();
     }
 }

@@ -2,17 +2,13 @@ package openllet.query.sparqldl.model.ucq;
 
 import openllet.aterm.ATermAppl;
 import openllet.core.KnowledgeBase;
-import openllet.core.utils.ATermUtils;
-import openllet.query.sparqldl.model.AbstractQuery;
+import openllet.query.sparqldl.model.AbstractCompositeQuery;
 import openllet.query.sparqldl.model.Query;
-import openllet.query.sparqldl.model.cq.ConjunctiveQuery;
-import openllet.query.sparqldl.model.cq.QueryAtom;
 import openllet.query.sparqldl.model.results.ResultBinding;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
-public class CNFQueryImpl extends AbstractQuery implements CNFQuery
+public class CNFQueryImpl extends AbstractCompositeQuery implements CNFQuery
 {
     List<DisjunctiveQuery> _queries = new ArrayList<>();
 
@@ -22,16 +18,9 @@ public class CNFQueryImpl extends AbstractQuery implements CNFQuery
     }
 
     @Override
-    public CNFQuery apply(ResultBinding binding)
+    protected String getCompositeDelimiter()
     {
-        final CNFQuery query = copy();
-        query.setQueries(new ArrayList<>());
-        for (DisjunctiveQuery disjunct : _queries)
-        {
-            DisjunctiveQuery boundDisjunct = (DisjunctiveQuery) disjunct.apply(binding);
-            query.addQuery(boundDisjunct);
-        }
-        return query;
+        return "^";
     }
 
     @Override
@@ -39,32 +28,89 @@ public class CNFQueryImpl extends AbstractQuery implements CNFQuery
     {
         CNFQuery copy = new CNFQueryImpl(getKB(), isDistinct());
         for (DisjunctiveQuery q : _queries)
-            copy.addQuery((DisjunctiveQuery) q.copy());
+            copy.addQuery(q.copy());
         return copy;
-    }
-
-    @Override
-    public void setQueries(List<DisjunctiveQuery> queries)
-    {
-        _queries = queries;
-    }
-
-    @Override
-    public void addQuery(DisjunctiveQuery query)
-    {
-        _queries.add(query);
-    }
-
-    @Override
-    public List<DisjunctiveQuery> getQueries()
-    {
-        return _queries;
     }
 
     @Override
     public List<Query> split()
     {
         // TODO Lukas
+        /**final Set<ATermAppl> resultVars = new HashSet<>(getResultVars());
+
+        final DisjointSet<ATermAppl> disjointSet = new DisjointSet<>();
+
+        for (final DisjunctiveQuery q : getQueries())
+        {
+            for (final QueryAtom atom : q.getQueries().get(0).getAtoms())
+            {
+                ATermAppl toMerge = null;
+
+                for (final ATermAppl arg : atom.getArguments())
+                {
+                    if (!(ATermUtils.isVar(arg)))
+                        continue;
+
+                    disjointSet.add(arg);
+                    if (toMerge != null)
+                        disjointSet.union(toMerge, arg);
+                    toMerge = arg;
+                }
+            }
+        }
+
+        final Collection<Set<ATermAppl>> equivalenceSets = disjointSet.getEquivalanceSets();
+        if (equivalenceSets.size() == 1)
+            return Collections.singletonList(this);
+
+        final Map<ATermAppl, CNFQuery> queries = new HashMap<>();
+        CNFQuery groundQuery = null;
+        for (final QueryAtom atom : getAtoms())
+        {
+            ATermAppl representative = null;
+            for (final ATermAppl arg : atom.getArguments())
+                if (ATermUtils.isVar(arg))
+                {
+                    representative = disjointSet.find(arg);
+                    break;
+                }
+
+            CNFQuery newQuery;
+            if (representative == null)
+            {
+                if (groundQuery == null)
+                    groundQuery = new CNFQueryImpl(this.getKB(), this.isDistinct());
+                newQuery = groundQuery;
+            }
+            else
+            {
+                newQuery = queries.get(representative);
+                if (newQuery == null)
+                {
+                    newQuery = new CNFQueryImpl(this.getKB(), this.isDistinct());
+                    queries.put(representative, newQuery);
+                }
+                for (final ATermAppl arg : atom.getArguments())
+                {
+                    if (resultVars.contains(arg))
+                        newQuery.addResultVar(arg);
+
+                    for (final VarType v : VarType.values())
+                        if (getDistVarsForType(v).contains(arg))
+                            newQuery.addDistVar(arg, v);
+                }
+            }
+
+            newQuery.add(atom);
+        }
+
+        final List<Query> list = new ArrayList<>(queries.values());
+
+        if (groundQuery != null)
+            list.add(0, groundQuery);
+
+        return list;**/
+        _logger.warning("Splitting CNFQuery is not yet implemented.");
         return List.of(this);
     }
 
@@ -75,64 +121,5 @@ public class CNFQueryImpl extends AbstractQuery implements CNFQuery
         for (DisjunctiveQuery q : _queries)
             hasCycle |= q.hasCycle();
         return hasCycle;
-    }
-
-    @Override
-    public String toString()
-    {
-        return toString(false);
-    }
-
-    public String toString(final boolean multiLine)
-    {
-        final String indent = multiLine ? "     " : " ";
-        final StringBuilder sb = new StringBuilder();
-
-        sb.append(ATermUtils.toString(_name)).append("(");
-        for (int i = 0; i < _resultVars.size(); i++)
-        {
-            final ATermAppl var = _resultVars.get(i);
-            if (i > 0)
-                sb.append(", ");
-            sb.append(ATermUtils.toString(var));
-        }
-        sb.append(")");
-
-        sb.append(" :-");
-
-        List<DisjunctiveQuery> queries = _queries;
-        if (_queries.size() == 0)
-            queries = List.of((DisjunctiveQuery) this);
-        for (int i = 0; i < queries.size(); i++)
-        {
-            final DisjunctiveQuery query = queries.get(i);
-            if (i > 0)
-            {
-                sb.append(" v");
-                if (multiLine)
-                    sb.append("\n");
-            }
-            if (query.getQueries().size() == 1 && query.getQueries().get(0).getAtoms().size() > 0)
-            {
-                if (multiLine)
-                    sb.append("\n");
-                for (int j = 0; j < query.getQueries().get(0).getAtoms().size(); j++) {
-                    final QueryAtom a = query.getQueries().get(0).getAtoms().get(j);
-                    if (j > 0) {
-                        sb.append(",");
-                        if (multiLine)
-                            sb.append("\n");
-                    }
-
-                    sb.append(indent);
-                    sb.append(a.toString()); // TODO qNameProvider
-                }
-            }
-        }
-
-        sb.append(".");
-        if (multiLine)
-            sb.append("\n");
-        return sb.toString();
     }
 }

@@ -78,7 +78,8 @@ public interface ConjunctiveQuery extends Query
 	/**
 	 * Extension of the standard split() functionality of queries that can also split on individuals.
 	 * @param splitOnIndividuals whether to split on individuals (i.e. C(a), C(b) become two separate queries)
+	 * @param splitOnDistVars If true, each split query contains at most one distinguished variable
 	 * @return A list of split queries
 	 */
-	List<Query> split(boolean splitOnIndividuals);
+	List<Query> split(boolean splitOnIndividuals, boolean splitOnDistVars);
 }

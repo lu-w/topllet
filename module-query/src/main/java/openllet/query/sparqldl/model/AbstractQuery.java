@@ -49,7 +49,7 @@ public abstract class AbstractQuery implements Query
         _distVars = new EnumMap<>(VarType.class);
 
         for (final VarType type : VarType.values())
-            _distVars.put(type, new HashSet<ATermAppl>());
+            _distVars.put(type, new HashSet<>());
 
         _distinct = distinct;
     }
@@ -80,6 +80,17 @@ public abstract class AbstractQuery implements Query
         _resultVars.add(a);
     }
 
+    @Override
+    public void setResultVars(final List<ATermAppl> resultVars)
+    {
+        _resultVars = resultVars;
+    }
+
+    @Override
+    public void setDistVars(final EnumMap<VarType, Set<ATermAppl>> distVars)
+    {
+        _distVars = distVars;
+    }
 
     @Override
     public Set<ATermAppl> getConstants()
@@ -96,6 +107,12 @@ public abstract class AbstractQuery implements Query
             result.addAll(_distVars.get(t));
 
         return result;
+    }
+
+    @Override
+    public EnumMap<VarType, Set<ATermAppl>> getDistVarsWithVarType()
+    {
+        return _distVars;
     }
 
     @Override

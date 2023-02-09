@@ -1,18 +1,22 @@
 package openllet.query.sparqldl.engine.ucq;
 
 import openllet.core.utils.Bool;
+import openllet.query.sparqldl.model.Query;
+import openllet.query.sparqldl.model.results.MultiQueryResults;
 import openllet.query.sparqldl.model.results.QueryResult;
 import openllet.query.sparqldl.model.results.QueryResultImpl;
 import openllet.query.sparqldl.model.results.ResultBinding;
 import openllet.query.sparqldl.model.ucq.CNFQuery;
 import openllet.query.sparqldl.model.ucq.UnionQuery;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Level;
 
 /**
  * This engine just simply iterates through all possible bindings.
  */
-public class BindingIterationUnionQueryEngine extends AbstractUnionQueryEngine
+public class UnionQueryEngineSimpleBinding extends AbstractUnionQueryEngine
 {
     public enum BindingTime { BEFORE_CNF, AFTER_CNF };
 
@@ -31,10 +35,10 @@ public class BindingIterationUnionQueryEngine extends AbstractUnionQueryEngine
 
     protected QueryResult execABoxQueryBindingBeforeCNF(UnionQuery q)
     {
-        _bindingGenerator = new NaiveUnionQueryCandidateGenerator(q);
+        // Note: we can not split the query here due to semantics. Queries can only be split after conversion to CNF.
         QueryResult result = new QueryResultImpl(q);
-        // TODO SPLIT UNION QUERY INTO DISJOINT PARTS AND MERGE RESULTS LATER
-        // APPLY BINDINGS
+        // FETCH AND APPLY BINDINGS
+        _bindingGenerator = new UnionQueryCandidateGeneratorNaive(q);
         for (ResultBinding candidateBinding : _bindingGenerator)
         {
             if (_logger.isLoggable(Level.FINE))
@@ -53,36 +57,39 @@ public class BindingIterationUnionQueryEngine extends AbstractUnionQueryEngine
     protected QueryResult execABoxQueryBindingAfterCNF(UnionQuery q)
     {
         // 1. ROLL-UP UCQ
-        UnionQuery rolledUpUnionQuery = q.rollUp();
+        UnionQuery rolledUpUnionQuery = q.rollUp(true);
         if (_logger.isLoggable(Level.FINER))
             _logger.finer("Rolled-up union query: " + rolledUpUnionQuery);
-        System.out.println(rolledUpUnionQuery);
 
         // 2. CONVERT TO CNF
         CNFQuery cnfQuery = rolledUpUnionQuery.toCNF();
         if (_logger.isLoggable(Level.FINER))
             _logger.finer("Rolled-up union query in CNF is: " + cnfQuery);
-        System.out.print(cnfQuery);
 
-        // TODO SPLIT CNF QUERY INTO DISJOINT PARTS AND MERGE RESULTS LATER
+        // 3. SPLIT CNF QUERY INTO DISJOINT PARTS
+        List<Query> queries = cnfQuery.split();
+        List<QueryResult> results = new ArrayList<>(queries.size());
 
-        // 3. APPLY BINDINGS
-        _bindingGenerator = new NaiveUnionQueryCandidateGenerator(q);
-        QueryResult result = new QueryResultImpl(q);
-        for (ResultBinding candidateBinding : _bindingGenerator)
+        for (Query cnfQueryPart : queries)
         {
-            if (_logger.isLoggable(Level.FINE))
-                _logger.fine("Trying candidate binding: " + candidateBinding);
-            CNFQuery boundQuery = (CNFQuery) cnfQuery.apply(candidateBinding);
-            System.out.print(boundQuery);
-            boolean booleanResult = _booleanEngine.execBooleanABoxQuery(boundQuery);
-            if (_logger.isLoggable(Level.FINE))
-                _logger.fine("Boolean engine returned: " + booleanResult);
-            if (booleanResult)
-                result.add(candidateBinding);
-            _bindingGenerator.informAboutResultForBinding(booleanResult ? Bool.TRUE : Bool.FALSE);
+            // 4. APPLY BINDINGS
+            QueryResult result = new QueryResultImpl(cnfQueryPart);
+            _bindingGenerator = new UnionQueryCandidateGeneratorNaive(cnfQueryPart);
+            for (ResultBinding candidateBinding : _bindingGenerator)
+            {
+                if (_logger.isLoggable(Level.FINE))
+                    _logger.fine("Trying candidate binding: " + candidateBinding);
+                CNFQuery boundQuery = (CNFQuery) cnfQueryPart.apply(candidateBinding);
+                boolean booleanResult = _booleanEngine.execBooleanABoxQuery(boundQuery);
+                if (_logger.isLoggable(Level.FINE))
+                    _logger.fine("Boolean engine returned: " + booleanResult);
+                if (booleanResult)
+                    result.add(candidateBinding);
+                _bindingGenerator.informAboutResultForBinding(booleanResult ? Bool.TRUE : Bool.FALSE);
+            }
+            results.add(result);
         }
-        return result;
+        return new MultiQueryResults(q.getResultVars(), results);
     }
 
     public void setBindingTime(BindingTime bindingTime)

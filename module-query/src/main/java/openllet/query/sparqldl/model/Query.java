@@ -7,6 +7,7 @@ import openllet.query.sparqldl.model.cq.QueryParameters;
 import openllet.query.sparqldl.model.results.ResultBinding;
 import openllet.query.sparqldl.model.ucq.UnionQuery;
 
+import java.util.EnumMap;
 import java.util.List;
 import java.util.Set;
 
@@ -29,6 +30,19 @@ public interface Query
      * @param a is the distinguished variable to add that appears in the result projection to the query;
      */
     void addResultVar(final ATermAppl a);
+
+    /**
+     * Sets all the variables that will be in the results. For SPARQL, these are the variables in the SELECT clause.
+     * @param resultVars list of variables
+     */
+    void setResultVars(final List<ATermAppl> resultVars);
+
+    /**
+     * Return all the distinguished variables. These are variables that will be bound to individuals (or _data
+     * values) existing in the KB.
+     * @param distVars Set of variables
+     */
+    void setDistVars(final EnumMap<VarType, Set<ATermAppl>> distVars);
 
     /**
      * @return all the variables used in this query.
@@ -55,11 +69,19 @@ public interface Query
     List<ATermAppl> getResultVars();
 
     /**
-     * Return all the distinguished variables. These are variables that will be bound to individuals (or _data values) existing in the KB.
+     * Return all the distinguished variables. These are variables that will be bound to individuals (or _data
+     * values) existing in the KB.
      *
      * @return Set of variables
      */
     Set<ATermAppl> getDistVars();
+
+    /**
+     * Return all the distinguished variables, including their var type.
+     *
+     * @return Map var types to set of variables
+     */
+    EnumMap<VarType, Set<ATermAppl>> getDistVarsWithVarType();
 
     /**
      * @param filter to sets for this query.
@@ -153,4 +175,6 @@ public interface Query
      * @return A list of disjoint queries
      */
     List<Query> split();
+
+    String toString(boolean multiLine, boolean onlyQueryBody);
 }

@@ -8,11 +8,12 @@ import openllet.core.boxes.rbox.Role;
 import openllet.core.utils.ATermUtils;
 import openllet.core.utils.Pair;
 import openllet.query.sparqldl.engine.cq.QueryEngine;
+import openllet.query.sparqldl.model.Query;
 import openllet.query.sparqldl.model.cq.ConjunctiveQuery;
+import openllet.query.sparqldl.model.cq.QueryAtom;
 import openllet.query.sparqldl.model.results.QueryResult;
 import openllet.query.sparqldl.model.results.QueryResultImpl;
 import openllet.query.sparqldl.model.results.ResultBinding;
-import openllet.query.sparqldl.model.ucq.CNFQueryImpl;
 import openllet.query.sparqldl.model.ucq.DisjunctiveQuery;
 import openllet.query.sparqldl.model.ucq.CNFQuery;
 import openllet.query.sparqldl.model.ucq.UnionQuery;
@@ -24,10 +25,11 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import static openllet.core.utils.TermFactory.TOP_OBJECT_PROPERTY;
+import static openllet.query.sparqldl.model.cq.QueryPredicate.*;
 
-public class SimpleBooleanUnionQueryEngine extends AbstractBooleanUnionQueryEngine
+public class BooleanUnionQueryEngineSimple extends AbstractBooleanUnionQueryEngine
 {
-    public static final Logger _logger = Log.getLogger(SimpleBooleanUnionQueryEngine.class);
+    public static final Logger _logger = Log.getLogger(BooleanUnionQueryEngineSimple.class);
     private boolean useUnderapproximatingSemantics = false;
 
     @Override
@@ -81,25 +83,47 @@ public class SimpleBooleanUnionQueryEngine extends AbstractBooleanUnionQueryEngi
     {
         boolean isEntailed = true;
         // Query is entailed iff. all conjuncts are entailed
-        for (DisjunctiveQuery disjunctiveQuery : cnfQuery.getQueries())
+        for (Query disjunctiveQuery : cnfQuery.getQueries())
         {
             if (_logger.isLoggable(Level.FINER))
                 _logger.finer("Checking disjunctive query: " + disjunctiveQuery);
-            // TODO we want to allow for roles here as well
-            // Creates a list with the axioms to check (since they are already rolled-up, we only have concepts):
-            // - C(a) for individuals a and concepts C -> disjunctionInd
-            // - C(x) for undistinguished variables Cx and concepts C -> disjunctionVar
+            // Creates a list with the axioms to check. We have the following cases:
+            // - C(a) for individual a and concept C -> disjunctionInd
+            // - C(x) for undistinguished variable x and concept C -> disjunctionVar
+            // - r(a,b) for individuals a, b and role r -> disjunctionInd (plus rolling up into (∃r.{b})(a))
+            // - r(a,x) for individual a and variable x -> disjunctionInd (plus rolling up into (∃r.T)(a))
+            // - r(x,b) for individual b and variable x -> disjunctionVar (plus rolling up into (∃r.{b}))
+            // - r(x,y) for variables x, y -> disjunctionVar (plus rolling up into (∃r.T))
             List<Pair<ATermAppl, ATermAppl>> disjunctionInd = new ArrayList<>();
             List<ATermAppl> disjunctionVar = new ArrayList<>();
-            for (ConjunctiveQuery atomicQuery : disjunctiveQuery.getQueries())
+            for (Query q : ((DisjunctiveQuery) disjunctiveQuery).getQueries())
+            {
+                ConjunctiveQuery atomicQuery = (ConjunctiveQuery) q;
                 if (atomicQuery.getAtoms().size() == 1)
-                    if (kb.getABox().getIndividual(atomicQuery.getAtoms().get(0).getArguments().get(0)) != null)
-                        disjunctionInd.add(new Pair<>(atomicQuery.getAtoms().get(0).getArguments().get(0),
-                                atomicQuery.getAtoms().get(0).getArguments().get(1)));
+                {
+                    QueryAtom atom = atomicQuery.getAtoms().get(0);
+                    ATermAppl lhs = atom.getArguments().get(0);
+                    if (atom.getPredicate() == Type)
+                    {
+                        if (kb.isIndividual(lhs))
+                            disjunctionInd.add(new Pair<>(lhs, atom.getArguments().get(1)));
+                        else
+                            disjunctionVar.add(atom.getArguments().get(1));
+                    }
+                    else if (atom.getPredicate() == PropertyValue)
+                    {
+                        ATermAppl rolledUpAtom = atomicQuery.rollUpTo(lhs, List.of(), false);
+                        if (kb.isIndividual(lhs))
+                            disjunctionInd.add(new Pair<>(lhs, rolledUpAtom));
+                        else // lhs is undist. var
+                            disjunctionVar.add(rolledUpAtom);
+                    }
                     else
-                        disjunctionVar.add(atomicQuery.getAtoms().get(0).getArguments().get(1));
+                        _logger.warning("Disjunctive entailment check can not yet handle " + atom.getPredicate());
+                }
                 else if (_logger.isLoggable(Level.WARNING))
-                     _logger.warning("Found query atom of size >1, shouldn't happen after rolling-up: " + atomicQuery);
+                    _logger.warning("Found query atom of size >1, shouldn't happen in CNF: " + atomicQuery);
+            }
             // Case 1: No undistinguished variables in disjunction
             if (disjunctionVar.isEmpty())
             {
@@ -179,9 +203,9 @@ public class SimpleBooleanUnionQueryEngine extends AbstractBooleanUnionQueryEngi
     {
         QueryResult result = new QueryResultImpl(q);
         UnionQuery qCopy = (UnionQuery) q.copy();
-        for (ConjunctiveQuery conjunctiveQuery : qCopy.getQueries())
+        for (Query conjunctiveQuery : qCopy.getQueries())
         {
-            QueryResult conjunctiveQueryResult = QueryEngine.exec(conjunctiveQuery);
+            QueryResult conjunctiveQueryResult = QueryEngine.exec((ConjunctiveQuery) conjunctiveQuery);
             for (ResultBinding binding : conjunctiveQueryResult)
                 result.add(binding);
         }

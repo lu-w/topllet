@@ -1,7 +1,7 @@
 package openllet.test.query;
 
 import openllet.aterm.ATermAppl;
-import openllet.query.sparqldl.engine.ucq.SimpleBooleanUnionQueryEngine;
+import openllet.query.sparqldl.engine.ucq.BooleanUnionQueryEngineSimple;
 import openllet.query.sparqldl.model.ucq.UnionQuery;
 import org.junit.Test;
 
@@ -264,7 +264,7 @@ public class TestBooleanUnionQueries extends AbstractQueryTest
                 query(PropertyValueAtom(x, _p, _a), PropertyValueAtom(z, _q, _a), PropertyValueAtom(z, _r, x)),
                 query(PropertyValueAtom(x, _p, y), PropertyValueAtom(z, _q, y), PropertyValueAtom(z, _r, x)));
 
-        SimpleBooleanUnionQueryEngine eng = new SimpleBooleanUnionQueryEngine();
+        BooleanUnionQueryEngineSimple eng = new BooleanUnionQueryEngineSimple();
         assertFalse(eng.supports(ucq1));
         assertTrue(eng.supports(ucq2));
         assertTrue(eng.supports(ucq3));

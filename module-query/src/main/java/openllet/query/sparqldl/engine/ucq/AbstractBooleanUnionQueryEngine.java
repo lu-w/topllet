@@ -14,7 +14,7 @@ import java.util.logging.Logger;
 
 abstract public class AbstractBooleanUnionQueryEngine implements UnionQueryExec
 {
-    public static final Logger _logger = Log.getLogger(SimpleBooleanUnionQueryEngine.class);
+    public static final Logger _logger = Log.getLogger(BooleanUnionQueryEngineSimple.class);
 
     @Override
     public boolean supports(UnionQuery q)

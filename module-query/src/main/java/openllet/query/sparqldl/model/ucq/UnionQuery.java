@@ -1,34 +1,12 @@
 package openllet.query.sparqldl.model.ucq;
 
-import openllet.query.sparqldl.model.Query;
+import openllet.query.sparqldl.model.CompositeQuery;
 import openllet.query.sparqldl.model.cq.ConjunctiveQuery;
-import openllet.query.sparqldl.model.results.ResultBinding;
 
 import java.util.List;
 
-public interface UnionQuery extends Query
+public interface UnionQuery extends CompositeQuery
 {
-
-    /**
-     * @return The list of queries that represents the union.
-     */
-    List<ConjunctiveQuery> getQueries();
-
-    /**
-     * Sets the list of queries that represents the union.
-     *
-     * @param queries The list of queries that represents the union
-     */
-    void setQueries(List<ConjunctiveQuery> queries);
-
-
-    /**
-     * Adds a query to the union query.
-     *
-     * @param query the query to add
-     */
-    void addQuery(final ConjunctiveQuery query);
-
     /**
      * Converts this union query to conjunctive normal form, i.e. of the form (a v ... v b) ^ ... ^ (c v ... v d).
      * Does not change this query.
@@ -55,4 +33,11 @@ public interface UnionQuery extends Query
      * @return A new rolled-up union query.
      */
     UnionQuery rollUp();
+
+    /**
+     * Rolls this query up by applying the rolling-up procedure to each disjunct separately.
+     * @param stopRollingOnDistVars Whether to stop rolling up on distinguished variables
+     * @return A new rolled-up union query.
+     */
+    UnionQuery rollUp(boolean stopRollingOnDistVars);
 }

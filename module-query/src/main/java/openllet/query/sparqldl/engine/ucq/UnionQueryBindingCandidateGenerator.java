@@ -2,9 +2,9 @@ package openllet.query.sparqldl.engine.ucq;
 
 import openllet.core.utils.Bool;
 import openllet.core.utils.Pair;
+import openllet.query.sparqldl.model.Query;
 import openllet.query.sparqldl.model.results.ResultBinding;
 import openllet.query.sparqldl.model.results.ResultBindingImpl;
-import openllet.query.sparqldl.model.ucq.UnionQuery;
 
 import java.util.HashSet;
 import java.util.Iterator;
@@ -12,11 +12,11 @@ import java.util.Set;
 
 public abstract class UnionQueryBindingCandidateGenerator implements Iterable<ResultBinding>
 {
-    protected UnionQuery _query;
+    protected Query _query;
     protected Set<Pair<ResultBinding, Bool>> _triedBindingsWithResultInformation;
     protected ResultBinding prevBinding = new ResultBindingImpl();
 
-    UnionQueryBindingCandidateGenerator(UnionQuery query)
+    UnionQueryBindingCandidateGenerator(Query query)
     {
         _query = query;
         _triedBindingsWithResultInformation = new HashSet<>();

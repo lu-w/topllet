@@ -8,9 +8,10 @@ package openllet.test.query;
 
 import openllet.aterm.ATermAppl;
 import openllet.query.sparqldl.engine.cq.QueryEngine;
-import openllet.query.sparqldl.engine.ucq.SimpleBooleanUnionQueryEngine;
-import openllet.query.sparqldl.engine.ucq.BindingIterationUnionQueryEngine;
+import openllet.query.sparqldl.engine.ucq.BooleanUnionQueryEngineSimple;
+import openllet.query.sparqldl.engine.ucq.UnionQueryEngineSimpleBinding;
 import openllet.query.sparqldl.engine.ucq.UnionQueryExec;
+import openllet.query.sparqldl.model.Query;
 import openllet.query.sparqldl.model.results.QueryResult;
 import openllet.query.sparqldl.model.results.QueryResultImpl;
 import openllet.query.sparqldl.model.results.ResultBinding;
@@ -92,24 +93,31 @@ public abstract class AbstractQueryTest extends AbstractKBTests
 		return q;
 	}
 
-	protected UnionQuery unionQuery(final ConjunctiveQuery... queries)
+	protected UnionQuery unionQuery(final Query... queries)
 	{
 		final UnionQuery q = new UnionQueryImpl(_kb, false);
 		q.setQueries(Arrays.stream(queries).toList());
 		return q;
 	}
 
-	protected UnionQuery unionQuery(final ATermAppl[] vars, final ConjunctiveQuery[] queries)
+	protected UnionQuery unionQuery(final ATermAppl[] vars, final Query[] queries)
 	{
 		final UnionQuery q = new UnionQueryImpl(_kb, false);
 		for (final ATermAppl var : vars)
 		{
 			q.addResultVar(var);
 			q.addDistVar(var, VarType.INDIVIDUAL);
-			for (ConjunctiveQuery query : queries)
+			for (Query conjQuery : queries)
 			{
-				query.addResultVar(var);
-				query.addDistVar(var, VarType.INDIVIDUAL);
+				ConjunctiveQuery query = (ConjunctiveQuery) conjQuery;
+				for (QueryAtom atom : query.getAtoms())
+				{
+					if (atom.getArguments().contains(var) && !query.getResultVars().contains(var))
+					{
+						query.addResultVar(var);
+						query.addDistVar(var, VarType.INDIVIDUAL);
+					}
+				}
 			}
 		}
 		q.setQueries(Arrays.stream(queries).toList());
@@ -161,7 +169,7 @@ public abstract class AbstractQueryTest extends AbstractKBTests
 
 	protected void testUnionQuery(final UnionQuery query, final boolean expected)
 	{
-		UnionQueryExec engine = new SimpleBooleanUnionQueryEngine();
+		UnionQueryExec engine = new BooleanUnionQueryEngineSimple();
 		QueryResult result = new QueryResultImpl(query);
 		if (expected)
 			result.add(new ResultBindingImpl());
@@ -190,8 +198,8 @@ public abstract class AbstractQueryTest extends AbstractKBTests
 				answers.put(answer, count + 1);
 		}
 
-		BindingIterationUnionQueryEngine engine = new BindingIterationUnionQueryEngine();
-		engine.setBindingTime(BindingIterationUnionQueryEngine.BindingTime.AFTER_CNF);
+		UnionQueryEngineSimpleBinding engine = new UnionQueryEngineSimpleBinding();
+		engine.setBindingTime(UnionQueryEngineSimpleBinding.BindingTime.AFTER_CNF);
 		final QueryResult result = engine.exec(query);
 		for (final ResultBinding binding : result)
 		{

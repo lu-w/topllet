@@ -1,6 +1,7 @@
 package openllet.query.sparqldl.model.ucq;
 
 import openllet.core.KnowledgeBase;
+import openllet.query.sparqldl.model.Query;
 import openllet.query.sparqldl.model.cq.ConjunctiveQuery;
 
 public class DisjunctiveQueryImpl extends UnionQueryImpl implements DisjunctiveQuery
@@ -16,10 +17,14 @@ public class DisjunctiveQueryImpl extends UnionQueryImpl implements DisjunctiveQ
         super(q);
     }
 
+    /**
+     * We only allow to add queries that have at most one conjunct (i.e. are atomic).
+     * @param query the (conjunctive) query to add
+     */
     @Override
-    public void addQuery(ConjunctiveQuery query)
+    public void addQuery(Query query)
     {
-        assert(query.getAtoms().size() <= 1);
+        assert(query instanceof ConjunctiveQuery && ((ConjunctiveQuery) query).getAtoms().size() <= 1);
         super.addQuery(query);
     }
 
@@ -27,8 +32,8 @@ public class DisjunctiveQueryImpl extends UnionQueryImpl implements DisjunctiveQ
     public DisjunctiveQuery copy()
     {
         DisjunctiveQuery copy = new DisjunctiveQueryImpl(this);
-        for (ConjunctiveQuery q : _queries)
-            copy.addQuery((ConjunctiveQuery) q.copy());
+        for (Query q : _queries)
+            copy.addQuery(q.copy());
         return copy;
     }
 }

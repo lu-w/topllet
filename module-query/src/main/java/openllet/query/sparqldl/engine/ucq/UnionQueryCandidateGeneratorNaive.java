@@ -1,18 +1,18 @@
 package openllet.query.sparqldl.engine.ucq;
 
 import openllet.aterm.ATermAppl;
+import openllet.query.sparqldl.model.Query;
 import openllet.query.sparqldl.model.results.ResultBinding;
 import openllet.query.sparqldl.model.results.ResultBindingImpl;
-import openllet.query.sparqldl.model.ucq.UnionQuery;
 
 import java.util.*;
 
-public class NaiveUnionQueryCandidateGenerator extends UnionQueryBindingCandidateGenerator
+public class UnionQueryCandidateGeneratorNaive extends UnionQueryBindingCandidateGenerator
 {
     List<ATermAppl> _vars;
     List<ATermAppl> _inds; // we need a fixed order for enumeration
 
-    NaiveUnionQueryCandidateGenerator(UnionQuery query)
+    UnionQueryCandidateGeneratorNaive(Query query)
     {
         super(query);
         _vars = query.getResultVars();

@@ -1,17 +1,13 @@
 package openllet.query.sparqldl.model.ucq;
 
-import openllet.query.sparqldl.model.Query;
+import openllet.query.sparqldl.model.CompositeQuery;
 
 import java.util.List;
 
 /**
  * A CNF query is a conjunction of disjunctive queries.
  */
-public interface CNFQuery extends Query
+public interface CNFQuery extends CompositeQuery
 {
-    void setQueries(List<DisjunctiveQuery> queries);
 
-    void addQuery(DisjunctiveQuery query);
-
-    List<DisjunctiveQuery> getQueries();
 }

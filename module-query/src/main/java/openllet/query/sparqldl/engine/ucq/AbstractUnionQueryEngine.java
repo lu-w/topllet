@@ -12,12 +12,12 @@ import java.util.logging.Logger;
 
 abstract public class AbstractUnionQueryEngine implements UnionQueryExec
 {
-    public static final Logger _logger = Log.getLogger(SimpleBooleanUnionQueryEngine.class);
+    public static final Logger _logger = Log.getLogger(BooleanUnionQueryEngineSimple.class);
     protected AbstractBooleanUnionQueryEngine _booleanEngine;
 
     public AbstractUnionQueryEngine()
     {
-        _booleanEngine = new SimpleBooleanUnionQueryEngine();
+        _booleanEngine = new BooleanUnionQueryEngineSimple();
     }
 
     @Override
