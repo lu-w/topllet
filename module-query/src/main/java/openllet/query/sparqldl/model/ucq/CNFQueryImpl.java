@@ -110,7 +110,7 @@ public class CNFQueryImpl extends AbstractCompositeQuery implements CNFQuery
             list.add(0, groundQuery);
 
         return list;**/
-        _logger.warning("Splitting CNFQuery is not yet implemented.");
+        _logger.info("Splitting CNFQuery is not yet implemented.");
         return List.of(this);
     }
 

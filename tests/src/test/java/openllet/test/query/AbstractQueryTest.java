@@ -219,4 +219,29 @@ public abstract class AbstractQueryTest extends AbstractKBTests
 
 		assertTrue("Unfound bindings: " + answers.keySet(), answers.isEmpty());
 	}
+
+	protected static List<List<ATermAppl>> allResults(List<ATermAppl> individuals, int resultSize)
+	{
+		// https://stackoverflow.com/a/40101377/4145563
+		List<List<ATermAppl>> res = new ArrayList<>();
+		int[] indexes = new int[individuals.size()];
+		ATermAppl[] permutation = new ATermAppl[resultSize];
+		for (int j = (int) Math.pow(individuals.size(), resultSize); j > 0; j--)
+		{
+			for (int i = 0; i < resultSize; i++)
+				permutation[i] = individuals.get(indexes[i]);
+			res.add(Arrays.stream(permutation).toList());
+			for (int i = 0; i < resultSize; i++)
+			{
+				if (indexes[i] >= individuals.size() - 1)
+					indexes[i] = 0;
+				else
+				{
+					indexes[i]++;
+					break;
+				}
+			}
+		}
+		return res;
+	}
 }

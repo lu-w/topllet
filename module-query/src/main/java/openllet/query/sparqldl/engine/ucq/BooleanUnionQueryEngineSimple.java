@@ -38,7 +38,7 @@ public class BooleanUnionQueryEngineSimple extends AbstractBooleanUnionQueryEngi
         // 1. PRELIMINARY CONSISTENCY CHECK
         q.getKB().ensureConsistency();
 
-        // 2. TRY UNDER-APPROXIMATING SEMANTICS (TODO Lukas: check if this actually improves performance)
+        // 2. TRY UNDER-APPROXIMATING SEMANTICS
         if (useUnderapproximatingSemantics)
         {
             boolean someDisjunctEntailed = execUnderapproximatingSemanticsBoolean(q);
