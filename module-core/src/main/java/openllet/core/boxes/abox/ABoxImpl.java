@@ -1492,7 +1492,7 @@ public class ABoxImpl implements ABox
 		final boolean consistent = !abox.isClosed();
 
 		// TODO Lukas: we probably can not use caching for |ics| > 1 since we do not know *which* axiom was satisfied
-		// TODO Lukas: maybe we can do caching for the whole list... but is this actually useful?
+		//  but maybe we can do caching for the whole list... but is this actually useful?
 		if (ics.size() == 1)
 			if (x != null && ics.get(0).second != null && cacheModel)
 				cache(abox.getIndividual(x), ics.get(0).second, consistent);

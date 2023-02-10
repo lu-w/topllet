@@ -678,6 +678,8 @@ public class ConjunctiveQueryImpl extends AbstractQuery implements ConjunctiveQu
 		ConjunctiveQuery copy = new ConjunctiveQueryImpl(this);
 		for (QueryAtom atom : _allAtoms)
 			copy.add(atom.copy());
+		copy.setDistVars(getDistVarsWithVarType());
+		copy.setResultVars(getResultVars());
 		return copy;
 	}
 

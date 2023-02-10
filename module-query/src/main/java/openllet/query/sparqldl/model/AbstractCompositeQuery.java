@@ -3,15 +3,14 @@ package openllet.query.sparqldl.model;
 import openllet.aterm.ATermAppl;
 import openllet.core.KnowledgeBase;
 import openllet.core.utils.ATermUtils;
-import openllet.query.sparqldl.model.cq.ConjunctiveQuery;
-import openllet.query.sparqldl.model.cq.QueryAtom;
 import openllet.query.sparqldl.model.results.ResultBinding;
-import openllet.query.sparqldl.model.ucq.UnionQuery;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
 
+// TODO Lukas: move copy() over here
+// TODO Lukas: it is cumbersome to typecast every result back and forth if we can only return Query here. How can one
+//  solve this?
 abstract public class AbstractCompositeQuery extends AbstractQuery implements CompositeQuery
 {
     protected List<Query> _queries = new ArrayList<>();

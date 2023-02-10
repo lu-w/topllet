@@ -90,9 +90,10 @@ public class UnionQueryImpl extends AbstractCompositeQuery implements UnionQuery
                 DisjunctiveQuery singleUnion = new DisjunctiveQueryImpl(query.getKB(), query.isDistinct());
                 ConjunctiveQuery singleQuery = new ConjunctiveQueryImpl((ConjunctiveQuery) query.getQueries().get(0));
                 singleQuery.add(a);
-                for (ATermAppl var : query.getDistVars())
-                    if (a.getArguments().contains(var))
-                        singleQuery.addDistVar(var, VarType.INDIVIDUAL); // TODO ind. -> any var type
+                for (VarType varType : query.getDistVarsWithVarType().keySet())
+                    for (ATermAppl var : query.getDistVarsForType(varType))
+                        if (a.getArguments().contains(var))
+                            singleQuery.addDistVar(var, varType);
                 for (ATermAppl var : query.getResultVars())
                     if (a.getArguments().contains(var))
                         singleQuery.addResultVar(var);
@@ -109,8 +110,9 @@ public class UnionQueryImpl extends AbstractCompositeQuery implements UnionQuery
             subQuery.setQueries(query.getQueries().subList(1, query.getQueries().size()));
             for (ATermAppl var : query.getResultVars())
                 subQuery.addResultVar(var);
-            for (ATermAppl var : query.getDistVars())
-                subQuery.addDistVar(var, VarType.INDIVIDUAL); // TODO ind. -> any var type
+            for (VarType varType : query.getDistVarsWithVarType().keySet())
+                for (ATermAppl var : query.getDistVarsForType(varType))
+                    subQuery.addDistVar(var, varType);
             List<Query> cnf = toCNFRec(subQuery);
             // Create (x v c) for all atoms x and conjuncts c
             for (QueryAtom atom : ((ConjunctiveQuery) query.getQueries().get(0)).getAtoms())
@@ -123,9 +125,10 @@ public class UnionQueryImpl extends AbstractCompositeQuery implements UnionQuery
                             c.addQuery(sq);
                         ConjunctiveQuery q = new ConjunctiveQueryImpl(query.getKB(), query.isDistinct());
                         q.add(atom);
-                        for (ATermAppl var : query.getDistVars())
-                            if (atom.getArguments().contains(var))
-                                q.addDistVar(var, VarType.INDIVIDUAL); // TODO ind. -> any var type
+                        for (VarType varType : query.getDistVarsWithVarType().keySet())
+                            for (ATermAppl var : query.getDistVarsForType(varType))
+                                if (atom.getArguments().contains(var))
+                                    q.addDistVar(var, varType);
                         for (ATermAppl var : query.getResultVars())
                             if (atom.getArguments().contains(var))
                                 q.addResultVar(var);
@@ -259,6 +262,8 @@ public class UnionQueryImpl extends AbstractCompositeQuery implements UnionQuery
         UnionQuery copy = new UnionQueryImpl(this);
         for (Query q : _queries)
             copy.addQuery(q.copy());
+        copy.setDistVars(getDistVarsWithVarType());
+        copy.setResultVars(getResultVars());
         return copy;
     }
 }

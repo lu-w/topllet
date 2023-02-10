@@ -1,11 +1,13 @@
 package openllet.test.query;
 
 import openllet.aterm.ATermAppl;
-import openllet.query.sparqldl.model.ucq.UnionQuery;
+import openllet.query.sparqldl.model.Query;
+import openllet.query.sparqldl.model.ucq.*;
 import org.junit.Test;
 
 import java.util.*;
 
+import static org.junit.Assert.*;
 import static openllet.core.utils.TermFactory.*;
 import static openllet.query.sparqldl.model.cq.QueryAtomFactory.PropertyValueAtom;
 import static openllet.query.sparqldl.model.cq.QueryAtomFactory.TypeAtom;
@@ -148,7 +150,7 @@ public class TestUnionQueries extends AbstractQueryTest
     {
         setupKB1();
         UnionQuery ucq3 = unionQuery(select(x, y, z), where(
-                query(TypeAtom(x, _B), PropertyValueAtom(x, _r, y), PropertyValueAtom(y, _r, z)),
+                query(TypeAtom(x, _B), PropertyValueAtom(x, _r, y), PropertyValueAtom(x1, _r, z)),
                 query(TypeAtom(_a, _B)))
         );
         testUnionQuery(ucq3, allResults(List.of(_a, _b, _c), 3));
@@ -188,6 +190,64 @@ public class TestUnionQueries extends AbstractQueryTest
                 { polyneikes, thersandros, oedipus, polyneikes }
         });
         testUnionQuery(ucq2);
+    }
+
+    @Test
+    public void splitCNFQueryTest()
+    {
+        ATermAppl x2 = var("x2");
+        CNFQuery q1 = new CNFQueryImpl(_kb, false);
+        DisjunctiveQuery d1 = new DisjunctiveQueryImpl(_kb, false);
+        DisjunctiveQuery d2 = new DisjunctiveQueryImpl(_kb, false);
+        DisjunctiveQuery d3 = new DisjunctiveQueryImpl(_kb, false);
+        DisjunctiveQuery d4 = new DisjunctiveQueryImpl(_kb, false);
+        DisjunctiveQuery d5 = new DisjunctiveQueryImpl(_kb, false);
+        DisjunctiveQuery d6 = new DisjunctiveQueryImpl(_kb, false);
+        DisjunctiveQuery d7 = new DisjunctiveQueryImpl(_kb, false);
+        DisjunctiveQuery d8 = new DisjunctiveQueryImpl(_kb, false);
+        d1.add(TypeAtom(x, _A));
+        d1.add(TypeAtom(y, _B));
+        d1.addDistVar(x, Query.VarType.INDIVIDUAL);
+        d1.addDistVar(y, Query.VarType.INDIVIDUAL);
+        d1.addResultVar(x);
+        d1.addResultVar(y);
+        d2.add(TypeAtom(z, _C));
+        d2.add(PropertyValueAtom(x, _r, z));
+        d2.addDistVar(x, Query.VarType.INDIVIDUAL);
+        d2.addDistVar(z, Query.VarType.INDIVIDUAL);
+        d2.addResultVar(x);
+        d2.addResultVar(z);
+        d3.add(TypeAtom(y, _A));
+        d3.addDistVar(y, Query.VarType.INDIVIDUAL);
+        d3.addResultVar(y);
+        d4.add(TypeAtom(x1, _B));
+        d4.add(PropertyValueAtom(x1, _r, y1));
+        d4.addDistVar(x1, Query.VarType.INDIVIDUAL);
+        d4.addDistVar(y1, Query.VarType.INDIVIDUAL);
+        d4.addResultVar(x1);
+        d4.addResultVar(y1);
+        d5.add(PropertyValueAtom(x1, _r, z1));
+        d5.addDistVar(x1, Query.VarType.INDIVIDUAL);
+        d5.addDistVar(z1, Query.VarType.INDIVIDUAL);
+        d5.addResultVar(x1);
+        d5.addResultVar(z1);
+        d6.add(TypeAtom(x2, _A));
+        d6.addDistVar(x2, Query.VarType.INDIVIDUAL);
+        d6.addResultVar(x2);
+        d7.add(TypeAtom(_a, _A));
+        d8.add(TypeAtom(_b, _B));
+        d8.add(TypeAtom(_c, _C));
+        q1.addQuery(d1);
+        q1.addQuery(d2);
+        q1.addQuery(d3);
+        q1.addQuery(d4);
+        q1.addQuery(d5);
+        q1.addQuery(d6);
+        q1.addQuery(d7);
+        q1.addQuery(d8);
+
+        List<Query> splitQuery = q1.split();
+        assertEquals(4, splitQuery.size());
     }
 
     // TODO Lukas: more test cases

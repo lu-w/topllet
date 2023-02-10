@@ -224,7 +224,7 @@ public abstract class AbstractQueryTest extends AbstractKBTests
 	{
 		// https://stackoverflow.com/a/40101377/4145563
 		List<List<ATermAppl>> res = new ArrayList<>();
-		int[] indexes = new int[individuals.size()];
+		int[] indexes = new int[Math.max(individuals.size(), resultSize)];
 		ATermAppl[] permutation = new ATermAppl[resultSize];
 		for (int j = (int) Math.pow(individuals.size(), resultSize); j > 0; j--)
 		{

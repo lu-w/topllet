@@ -26,7 +26,7 @@ public class UnionQueryCandidateGeneratorNaive extends UnionQueryBindingCandidat
         return new Iterator<>()
         {
             private int curPos = (int) Math.pow(_inds.size(), _vars.size());
-            private int[] indexes = new int[_inds.size()];
+            private int[] indexes = new int[Math.max(_inds.size(), _vars.size())];
 
             @Override
             public boolean hasNext()
