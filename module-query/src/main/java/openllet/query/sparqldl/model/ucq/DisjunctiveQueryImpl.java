@@ -64,13 +64,9 @@ public class DisjunctiveQueryImpl extends AbstractCompositeQuery<ConjunctiveQuer
     public List<QueryAtom> getAtoms()
     {
         List<QueryAtom> unwrappedList = new ArrayList<>();
-        for (Query q : _queries)
-        {
-            List<QueryAtom> atoms = ((ConjunctiveQuery) q).getAtoms();
-            if (atoms.size() == 1)
-                unwrappedList.add(atoms.get(0));
-
-        }
+        for (ConjunctiveQuery q : _queries)
+            if (q.getAtoms().size() == 1)
+                unwrappedList.add(q.getAtoms().get(0));
         return unwrappedList;
     }
 }
