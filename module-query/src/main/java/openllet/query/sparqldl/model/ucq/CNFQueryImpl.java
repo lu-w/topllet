@@ -13,8 +13,6 @@ import java.util.*;
 
 public class CNFQueryImpl extends AbstractCompositeQuery<DisjunctiveQuery, CNFQuery> implements CNFQuery
 {
-    List<DisjunctiveQuery> _queries = new ArrayList<>();
-
     public CNFQueryImpl(KnowledgeBase kb, boolean distinct)
     {
         super(kb, distinct);
