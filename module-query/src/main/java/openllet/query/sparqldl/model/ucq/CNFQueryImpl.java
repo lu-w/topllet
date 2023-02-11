@@ -5,7 +5,6 @@ import openllet.core.KnowledgeBase;
 import openllet.core.utils.ATermUtils;
 import openllet.core.utils.DisjointSet;
 import openllet.query.sparqldl.model.AbstractCompositeQuery;
-import openllet.query.sparqldl.model.Query;
 import openllet.query.sparqldl.model.cq.ConjunctiveQuery;
 import openllet.query.sparqldl.model.cq.QueryAtom;
 

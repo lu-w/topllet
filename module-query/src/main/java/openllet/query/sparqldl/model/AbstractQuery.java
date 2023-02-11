@@ -102,10 +102,8 @@ public abstract class AbstractQuery<QueryType extends Query<QueryType>> implemen
     public Set<ATermAppl> getDistVars()
     {
         final Set<ATermAppl> result = new HashSet<>();
-
         for (final VarType t : VarType.values())
             result.addAll(_distVars.get(t));
-
         return result;
     }
 
@@ -119,9 +117,7 @@ public abstract class AbstractQuery<QueryType extends Query<QueryType>> implemen
     public Set<ATermAppl> getUndistVars()
     {
         final Set<ATermAppl> result = new HashSet<>(_allVars);
-
         result.removeAll(getDistVars());
-
         return result;
     }
 

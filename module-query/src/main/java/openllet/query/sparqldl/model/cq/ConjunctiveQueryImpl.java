@@ -21,7 +21,6 @@ import openllet.core.exceptions.InternalReasonerException;
 import openllet.core.utils.ATermUtils;
 import openllet.core.utils.DisjointSet;
 import openllet.query.sparqldl.model.AbstractQuery;
-import openllet.query.sparqldl.model.Query;
 import openllet.query.sparqldl.model.results.ResultBinding;
 
 import static openllet.core.utils.TermFactory.term;
@@ -75,18 +74,11 @@ public class ConjunctiveQueryImpl extends AbstractQuery<ConjunctiveQuery> implem
 		if (_allAtoms.contains(atom))
 			return;
 		_allAtoms.add(atom);
-
 		for (final ATermAppl a : atom.getArguments())
 			if (ATermUtils.isVar(a))
-			{
-				if (!_allVars.contains(a))
-					_allVars.add(a);
-			}
-			else
-				if (ATermUtils.isLiteral(a) || _kb.isIndividual(a))
-					if (!_individualsAndLiterals.contains(a))
-						_individualsAndLiterals.add(a);
-
+				_allVars.add(a);
+			else if (ATermUtils.isLiteral(a) || _kb.isIndividual(a))
+				_individualsAndLiterals.add(a);
 		_ground = _ground && atom.isGround();
 	}
 
@@ -692,9 +684,9 @@ public class ConjunctiveQueryImpl extends AbstractQuery<ConjunctiveQuery> implem
 	public String toString(final boolean multiLine)
 	{
 		final String indent = multiLine ? "     " : " ";
-		final StringBuffer sb = new StringBuffer();
+		final StringBuilder sb = new StringBuilder();
 
-		sb.append(ATermUtils.toString(_name) + "(");
+		sb.append(ATermUtils.toString(_name)).append("(");
 		for (int i = 0; i < _resultVars.size(); i++)
 		{
 			final ATermAppl var = _resultVars.get(i);

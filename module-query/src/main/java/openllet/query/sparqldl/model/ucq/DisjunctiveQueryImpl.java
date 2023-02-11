@@ -2,7 +2,6 @@ package openllet.query.sparqldl.model.ucq;
 
 import openllet.core.KnowledgeBase;
 import openllet.query.sparqldl.model.AbstractCompositeQuery;
-import openllet.query.sparqldl.model.Query;
 import openllet.query.sparqldl.model.cq.ConjunctiveQuery;
 import openllet.query.sparqldl.model.cq.ConjunctiveQueryImpl;
 import openllet.query.sparqldl.model.cq.QueryAtom;
@@ -47,7 +46,7 @@ public class DisjunctiveQueryImpl extends AbstractCompositeQuery<ConjunctiveQuer
 
     @Override
     public List<DisjunctiveQuery> split() {
-        // UCQs shall not be split due to their semantics.
+        // Disjunctive queries shall not be split due to their semantics.
         _logger.fine("Tried to split a disjunctive query, but disjunctive queries shall not be split.");
         return List.of(this);
     }

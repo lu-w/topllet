@@ -3,8 +3,6 @@ package openllet.query.sparqldl.model.ucq;
 import openllet.query.sparqldl.model.CompositeQuery;
 import openllet.query.sparqldl.model.cq.ConjunctiveQuery;
 
-import java.util.List;
-
 public interface UnionQuery extends CompositeQuery<ConjunctiveQuery, UnionQuery>
 {
     /**

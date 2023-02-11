@@ -1,8 +1,6 @@
 package openllet.query.sparqldl.model.ucq;
 
-import openllet.query.sparqldl.model.AbstractQuery;
 import openllet.query.sparqldl.model.CompositeQuery;
-import openllet.query.sparqldl.model.Query;
 import openllet.query.sparqldl.model.cq.ConjunctiveQuery;
 import openllet.query.sparqldl.model.cq.QueryAtom;
 

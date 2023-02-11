@@ -3,8 +3,6 @@ package openllet.query.sparqldl.model.ucq;
 import openllet.aterm.ATermAppl;
 import openllet.core.KnowledgeBase;
 import openllet.query.sparqldl.model.AbstractCompositeQuery;
-import openllet.query.sparqldl.model.CompositeQuery;
-import openllet.query.sparqldl.model.Query;
 import openllet.query.sparqldl.model.cq.*;
 import openllet.shared.tools.Log;
 
@@ -153,7 +151,7 @@ public class UnionQueryImpl extends AbstractCompositeQuery<ConjunctiveQuery, Uni
         if (_queries.size() > 1)
         {
             Set<ATermAppl> undistVars = _queries.get(0).getUndistVars();
-            for (Query query : _queries.subList(1, _queries.size()))
+            for (ConjunctiveQuery query : _queries.subList(1, _queries.size()))
                 undistVars.retainAll(query.getUndistVars());
             shared = !undistVars.isEmpty();
         }
