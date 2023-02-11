@@ -9,33 +9,36 @@ import java.util.ArrayList;
 import java.util.List;
 
 // TODO Lukas: move copy() over here
-// TODO Lukas: it is cumbersome to typecast every result back and forth if we can only return Query here. How can one
-//  solve this?
-abstract public class AbstractCompositeQuery extends AbstractQuery implements CompositeQuery
+abstract public class AbstractCompositeQuery<SubQueryType extends Query<SubQueryType>, QueryType extends CompositeQuery<SubQueryType, QueryType>> extends AbstractQuery<QueryType> implements CompositeQuery<SubQueryType, QueryType>
 {
-    protected List<Query> _queries = new ArrayList<>();
+    protected List<SubQueryType> _queries = new ArrayList<>();
 
     public AbstractCompositeQuery(KnowledgeBase kb, boolean distinct)
     {
         super(kb, distinct);
     }
 
+    public AbstractCompositeQuery(QueryType q)
+    {
+        super(q.getKB(), q.isDistinct());
+    }
+
     @Override
-    public List<Query> getQueries()
+    public List<SubQueryType> getQueries()
     {
         return _queries;
     }
 
     @Override
-    public void setQueries(List<Query> queries)
+    public void setQueries(List<SubQueryType> queries)
     {
         _queries = new ArrayList<>();
-        for (Query q : queries)
+        for (SubQueryType q : queries)
             addQuery(q);
     }
 
     @Override
-    public void addQuery(final Query query)
+    public void addQuery(final SubQueryType query)
     {
         _queries.add(query);
         // Propagates variables to the union query
@@ -51,15 +54,12 @@ abstract public class AbstractCompositeQuery extends AbstractQuery implements Co
     }
 
     @Override
-    public CompositeQuery apply(final ResultBinding binding)
+    public QueryType apply(final ResultBinding binding)
     {
-        final CompositeQuery query = (CompositeQuery) copy();
+        final QueryType query = copy();
         query.setQueries(new ArrayList<>());
-        for (Query disjunct : _queries)
-        {
-            Query boundDisjunct = disjunct.apply(binding);
-            query.addQuery(boundDisjunct);
-        }
+        for (SubQueryType subQuery : _queries)
+            query.addQuery(subQuery.apply(binding));
         return query;
     }
 
@@ -93,7 +93,7 @@ abstract public class AbstractCompositeQuery extends AbstractQuery implements Co
 
         for (int i = 0; i < _queries.size(); i++)
         {
-            final Query query = _queries.get(i);
+            final SubQueryType query = _queries.get(i);
             if (i > 0)
             {
                 sb.append(" ").append(getCompositeDelimiter()).append(" ");

@@ -246,7 +246,7 @@ public class TestUnionQueries extends AbstractQueryTest
         q1.addQuery(d7);
         q1.addQuery(d8);
 
-        List<Query> splitQuery = q1.split();
+        List<CNFQuery> splitQuery = q1.split();
         assertEquals(4, splitQuery.size());
     }
 

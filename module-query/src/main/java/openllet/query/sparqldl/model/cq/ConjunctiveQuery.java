@@ -26,7 +26,7 @@ import openllet.query.sparqldl.model.results.ResultBinding;
  *
  * @author Petr Kremen
  */
-public interface ConjunctiveQuery extends Query
+public interface ConjunctiveQuery extends Query<ConjunctiveQuery>
 {
 	/**
 	 * Adds a query atom to the query.
@@ -81,5 +81,5 @@ public interface ConjunctiveQuery extends Query
 	 * @param splitOnDistVars If true, each split query contains at most one distinguished variable
 	 * @return A list of split queries
 	 */
-	List<Query> split(boolean splitOnIndividuals, boolean splitOnDistVars);
+	List<ConjunctiveQuery> split(boolean splitOnIndividuals, boolean splitOnDistVars);
 }

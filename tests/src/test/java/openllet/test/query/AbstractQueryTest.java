@@ -93,23 +93,22 @@ public abstract class AbstractQueryTest extends AbstractKBTests
 		return q;
 	}
 
-	protected UnionQuery unionQuery(final Query... queries)
+	protected UnionQuery unionQuery(final ConjunctiveQuery... queries)
 	{
 		final UnionQuery q = new UnionQueryImpl(_kb, false);
 		q.setQueries(Arrays.stream(queries).toList());
 		return q;
 	}
 
-	protected UnionQuery unionQuery(final ATermAppl[] vars, final Query[] queries)
+	protected UnionQuery unionQuery(final ATermAppl[] vars, final ConjunctiveQuery[] queries)
 	{
 		final UnionQuery q = new UnionQueryImpl(_kb, false);
 		for (final ATermAppl var : vars)
 		{
 			q.addResultVar(var);
 			q.addDistVar(var, VarType.INDIVIDUAL);
-			for (Query conjQuery : queries)
+			for (ConjunctiveQuery query : queries)
 			{
-				ConjunctiveQuery query = (ConjunctiveQuery) conjQuery;
 				for (QueryAtom atom : query.getAtoms())
 				{
 					if (atom.getArguments().contains(var) && !query.getResultVars().contains(var))

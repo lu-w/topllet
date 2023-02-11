@@ -1,27 +1,25 @@
 package openllet.query.sparqldl.model;
 
-import openllet.query.sparqldl.model.cq.ConjunctiveQuery;
-
 import java.util.List;
 
-public interface CompositeQuery extends Query
+public interface CompositeQuery<SubQueryType extends Query<SubQueryType>, QueryType extends CompositeQuery<SubQueryType, QueryType>> extends Query<QueryType>
 {
     /**
      * @return The list of queries that represents the composite query.
      */
-    List<Query> getQueries();
+    List<SubQueryType> getQueries();
 
     /**
      * Sets the list of queries that represents the union.
      *
      * @param queries The list of queries that represents the union
      */
-    void setQueries(List<Query> queries);
+    void setQueries(List<SubQueryType> queries);
 
     /**
      * Adds a query to the union query.
      *
      * @param query the query to add
      */
-    void addQuery(final Query query);
+    void addQuery(final SubQueryType query);
 }

@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class UnionQueryImpl extends AbstractCompositeQuery implements UnionQuery
+public class UnionQueryImpl extends AbstractCompositeQuery<ConjunctiveQuery, UnionQuery> implements UnionQuery
 {
     public static final Logger _logger = Log.getLogger(UnionQueryImpl.class);
 
@@ -34,18 +34,15 @@ public class UnionQueryImpl extends AbstractCompositeQuery implements UnionQuery
     }
 
     @Override
-    public void setQueries(List<Query> queries)
+    public void setQueries(List<ConjunctiveQuery> queries)
     {
         boolean warningLogged = false;
         _queries = new ArrayList<>();
-        for (Query q : queries)
-            if (q instanceof ConjunctiveQuery)
-                if (!warningLogged)
-                    warningLogged = addQuery((ConjunctiveQuery) q, true);
-                else
-                    addQuery((ConjunctiveQuery) q, false);
+        for (ConjunctiveQuery q : queries)
+            if (!warningLogged)
+                warningLogged = addQuery(q, true);
             else
-                _logger.warning("Added non conjunctive query as a disjunct to a union query");
+                addQuery(q, false);
     }
 
     /**
@@ -76,19 +73,19 @@ public class UnionQueryImpl extends AbstractCompositeQuery implements UnionQuery
      * @return A list of union queries, where each conjunctive query of each union query contains only one atom
      * representing the CNF of the input query
      */
-    private List<Query> toCNFRec(UnionQuery query)
+    private List<DisjunctiveQuery> toCNFRec(UnionQuery query)
     {
-        List<Query> newCnf = new ArrayList<>();
+        List<DisjunctiveQuery> newCnf = new ArrayList<>();
         // Safety check: no queries given
         if (query.getQueries().size() == 0)
             return newCnf;
         // Base case: CNF(a_1 ^ ... ^ a_n) = a_1 ^ ... ^ a_n
         // Return a list of atoms (wrapped in a Query and again in a UnionQuery) to represent this conjunction.
         else if (query.getQueries().size() == 1) {
-            for (QueryAtom a : ((ConjunctiveQuery) query.getQueries().get(0)).getAtoms())
+            for (QueryAtom a : query.getQueries().get(0).getAtoms())
             {
                 DisjunctiveQuery singleUnion = new DisjunctiveQueryImpl(query.getKB(), query.isDistinct());
-                ConjunctiveQuery singleQuery = new ConjunctiveQueryImpl((ConjunctiveQuery) query.getQueries().get(0));
+                ConjunctiveQuery singleQuery = new ConjunctiveQueryImpl(query.getQueries().get(0));
                 singleQuery.add(a);
                 for (VarType varType : query.getDistVarsWithVarType().keySet())
                     for (ATermAppl var : query.getDistVarsForType(varType))
@@ -113,29 +110,25 @@ public class UnionQueryImpl extends AbstractCompositeQuery implements UnionQuery
             for (VarType varType : query.getDistVarsWithVarType().keySet())
                 for (ATermAppl var : query.getDistVarsForType(varType))
                     subQuery.addDistVar(var, varType);
-            List<Query> cnf = toCNFRec(subQuery);
+            List<DisjunctiveQuery> cnf = toCNFRec(subQuery);
             // Create (x v c) for all atoms x and conjuncts c
-            for (QueryAtom atom : ((ConjunctiveQuery) query.getQueries().get(0)).getAtoms())
-                for (Query conjunct : cnf)
+            for (QueryAtom atom : query.getQueries().get(0).getAtoms())
+                for (DisjunctiveQuery conjunct : cnf)
                 {
-                    if (conjunct instanceof CompositeQuery)
-                    {
-                        DisjunctiveQuery c = new DisjunctiveQueryImpl(query.getKB(), query.isDistinct());
-                        for (Query sq : ((CompositeQuery) conjunct).getQueries())
-                            c.addQuery(sq);
-                        ConjunctiveQuery q = new ConjunctiveQueryImpl(query.getKB(), query.isDistinct());
-                        q.add(atom);
-                        for (VarType varType : query.getDistVarsWithVarType().keySet())
-                            for (ATermAppl var : query.getDistVarsForType(varType))
-                                if (atom.getArguments().contains(var))
-                                    q.addDistVar(var, varType);
-                        for (ATermAppl var : query.getResultVars())
+                    DisjunctiveQuery c = new DisjunctiveQueryImpl(query.getKB(), query.isDistinct());
+                    for (ConjunctiveQuery sq : conjunct.getQueries())
+                        c.addQuery(sq);
+                    ConjunctiveQuery q = new ConjunctiveQueryImpl(query.getKB(), query.isDistinct());
+                    q.add(atom);
+                    for (VarType varType : query.getDistVarsWithVarType().keySet())
+                        for (ATermAppl var : query.getDistVarsForType(varType))
                             if (atom.getArguments().contains(var))
-                                q.addResultVar(var);
-                        c.addQuery(q);
-                        newCnf.add(c);
-
-                    }
+                                q.addDistVar(var, varType);
+                    for (ATermAppl var : query.getResultVars())
+                        if (atom.getArguments().contains(var))
+                            q.addResultVar(var);
+                    c.addQuery(q);
+                    newCnf.add(c);
                 }
         }
         return newCnf;
@@ -144,7 +137,7 @@ public class UnionQueryImpl extends AbstractCompositeQuery implements UnionQuery
     @Override
     public CNFQuery toCNF()
     {
-        List<Query> cnf = toCNFRec(this);
+        List<DisjunctiveQuery> cnf = toCNFRec(this);
         CNFQuery cnfQuery = new CNFQueryImpl(this.getKB(), this.isDistinct());
         cnfQuery.setQueries(cnf);
         // Order of result/distinguished variables may change during conversion to CNF, therefore just reset them.
@@ -186,13 +179,13 @@ public class UnionQueryImpl extends AbstractCompositeQuery implements UnionQuery
         // We can not roll up if we have nothing to roll up to.
         assert(!getDistVars().isEmpty() || !getConstants().isEmpty() || !getUndistVars().isEmpty());
         UnionQuery rolledUpUnionQuery = new UnionQueryImpl(this);
-        for (Query conjunctiveQuery : _queries)
+        for (ConjunctiveQuery conjunctiveQuery : _queries)
         {
             if (_logger.isLoggable(Level.FINER))
                 _logger.finer("Rolling up for conjunctive query: " + conjunctiveQuery);
 
             // 1. step: Find disjoint parts of the query
-            List<Query> splitQueries = ((ConjunctiveQuery) conjunctiveQuery).split(true, stopRollingOnDistVars);
+            List<ConjunctiveQuery> splitQueries = conjunctiveQuery.split(true, stopRollingOnDistVars);
             if (_logger.isLoggable(Level.FINER))
             {
                 _logger.finer("Split query: " + splitQueries);
@@ -201,7 +194,7 @@ public class UnionQueryImpl extends AbstractCompositeQuery implements UnionQuery
 
             // 2. step: Roll each part up
             ConjunctiveQuery rolledUpQuery = new ConjunctiveQueryImpl(this.getKB(), this.isDistinct());
-            for (Query connectedQuery : splitQueries)
+            for (ConjunctiveQuery connectedQuery : splitQueries)
             {
                 if (connectedQuery.getDistVars().size() <= 1)
                 {
@@ -215,7 +208,7 @@ public class UnionQueryImpl extends AbstractCompositeQuery implements UnionQuery
                     else
                         throw new RuntimeException("Rolling up procedure did not find any individual or variable to roll " +
                                 "up to.");
-                    final ATermAppl testClass = ((ConjunctiveQuery) connectedQuery).rollUpTo(testIndOrVar,
+                    final ATermAppl testClass = connectedQuery.rollUpTo(testIndOrVar,
                             Collections.emptySet(), false);
                     if (_logger.isLoggable(Level.FINER))
                         _logger.finer("Rolled-up Boolean query: " + testIndOrVar + " -> " + testClass);
@@ -225,7 +218,7 @@ public class UnionQueryImpl extends AbstractCompositeQuery implements UnionQuery
                 else
                 {
                     // we can not roll-up queries that contain more than one distinguished variables -> just leave it
-                    for (QueryAtom atom : ((ConjunctiveQuery) connectedQuery).getAtoms())
+                    for (QueryAtom atom : connectedQuery.getAtoms())
                         rolledUpQuery.add(atom);
                 }
             }
@@ -240,10 +233,10 @@ public class UnionQueryImpl extends AbstractCompositeQuery implements UnionQuery
     }
 
     @Override
-    public List<Query> split()
+    public List<UnionQuery> split()
     {
-        // UCQs can not be split due to their semantics.
-        _logger.fine("Tried to split a union query, but union queries can not be split.");
+        // UCQs shall not be split due to their semantics.
+        _logger.fine("Tried to split a union query, but union queries shall not be split.");
         return List.of(this);
     }
 
@@ -251,7 +244,7 @@ public class UnionQueryImpl extends AbstractCompositeQuery implements UnionQuery
     public boolean hasCycle()
     {
         boolean hasCycle = false;
-        for (Query q : _queries)
+        for (ConjunctiveQuery q : _queries)
             hasCycle |= q.hasCycle();
         return hasCycle;
     }
@@ -260,7 +253,7 @@ public class UnionQueryImpl extends AbstractCompositeQuery implements UnionQuery
     public UnionQuery copy()
     {
         UnionQuery copy = new UnionQueryImpl(this);
-        for (Query q : _queries)
+        for (ConjunctiveQuery q : _queries)
             copy.addQuery(q.copy());
         copy.setDistVars(getDistVarsWithVarType());
         copy.setResultVars(getResultVars());

@@ -40,7 +40,7 @@ import static openllet.query.sparqldl.model.cq.QueryPredicate.*;
  *
  * @author Petr Kremen
  */
-public class ConjunctiveQueryImpl extends AbstractQuery implements ConjunctiveQuery
+public class ConjunctiveQueryImpl extends AbstractQuery<ConjunctiveQuery> implements ConjunctiveQuery
 {
 	private final Set<QueryPredicate> ternaryQueryPredicates = Set.of(PropertyValue, NegativePropertyValue);
 
@@ -552,7 +552,7 @@ public class ConjunctiveQueryImpl extends AbstractQuery implements ConjunctiveQu
 	}
 
 	@Override
-	public List<Query> split()
+	public List<ConjunctiveQuery> split()
 	{
 		return split(false, false);
 	}
@@ -595,7 +595,7 @@ public class ConjunctiveQueryImpl extends AbstractQuery implements ConjunctiveQu
 		return sb.toString();
 	}
 
-	public List<Query> split(boolean splitOnIndividuals, boolean splitOnDistVars)
+	public List<ConjunctiveQuery> split(boolean splitOnIndividuals, boolean splitOnDistVars)
 	{
 		final Set<ATermAppl> resultVars = new HashSet<>(getResultVars());
 
@@ -664,7 +664,7 @@ public class ConjunctiveQueryImpl extends AbstractQuery implements ConjunctiveQu
 			newQuery.add(atom);
 		}
 
-		final List<Query> list = new ArrayList<>(queries.values());
+		final List<ConjunctiveQuery> list = new ArrayList<>(queries.values());
 
 		if (groundQuery != null)
 			list.add(0, groundQuery);

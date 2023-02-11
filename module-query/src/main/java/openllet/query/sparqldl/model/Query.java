@@ -11,7 +11,7 @@ import java.util.EnumMap;
 import java.util.List;
 import java.util.Set;
 
-public interface Query
+public interface Query<QueryType extends Query<QueryType>>
 {
     enum VarType
     {
@@ -129,7 +129,7 @@ public interface Query
      * @param binding the binding to apply
      * @return the query changed
      */
-    Query apply(ResultBinding binding);
+    QueryType apply(ResultBinding binding);
 
     /**
      * Return the name of this query
@@ -161,7 +161,7 @@ public interface Query
      * Returns a new (deep) copy of this query.
      * @return A copy of this query.
      */
-    Query copy();
+    QueryType copy();
 
     /**
      * Checks if one of the disjuncts contains a cycle in its query graph. Note that this function only looks for
@@ -174,7 +174,7 @@ public interface Query
      * Splits the query into disjoint pats.
      * @return A list of disjoint queries
      */
-    List<Query> split();
+    List<QueryType> split();
 
     String toString(boolean multiLine, boolean onlyQueryBody);
 }

@@ -5,7 +5,7 @@ import openllet.query.sparqldl.model.cq.ConjunctiveQuery;
 
 import java.util.List;
 
-public interface UnionQuery extends CompositeQuery
+public interface UnionQuery extends CompositeQuery<ConjunctiveQuery, UnionQuery>
 {
     /**
      * Converts this union query to conjunctive normal form, i.e. of the form (a v ... v b) ^ ... ^ (c v ... v d).

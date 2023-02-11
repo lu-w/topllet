@@ -7,7 +7,7 @@ import java.util.List;
 /**
  * A CNF query is a conjunction of disjunctive queries.
  */
-public interface CNFQuery extends CompositeQuery
+public interface CNFQuery extends CompositeQuery<DisjunctiveQuery, CNFQuery>
 {
 
 }

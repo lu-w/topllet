@@ -11,7 +11,7 @@ import openllet.query.sparqldl.model.cq.QueryAtom;
 
 import java.util.*;
 
-public class CNFQueryImpl extends AbstractCompositeQuery implements CNFQuery
+public class CNFQueryImpl extends AbstractCompositeQuery<DisjunctiveQuery, CNFQuery> implements CNFQuery
 {
     List<DisjunctiveQuery> _queries = new ArrayList<>();
 
@@ -38,14 +38,14 @@ public class CNFQueryImpl extends AbstractCompositeQuery implements CNFQuery
     }
 
     @Override
-    public List<Query> split()
+    public List<CNFQuery> split()
     {
         final DisjointSet<ATermAppl> disjointSet = new DisjointSet<>();
-        for (final Query conjunct : getQueries())
+        for (final DisjunctiveQuery conjunct : getQueries())
         {
             ATermAppl toMerge = null;
-            for (final Query disjunct : ((DisjunctiveQuery) conjunct).getQueries())
-                for (final QueryAtom atom : ((ConjunctiveQuery) disjunct).getAtoms())
+            for (final ConjunctiveQuery disjunct : conjunct.getQueries())
+                for (final QueryAtom atom : disjunct.getAtoms())
                     for (final ATermAppl arg : atom.getArguments())
                     {
                         if (!(ATermUtils.isVar(arg)))
@@ -62,14 +62,14 @@ public class CNFQueryImpl extends AbstractCompositeQuery implements CNFQuery
         if (equivalenceSets.size() == 1)
             return Collections.singletonList(this);
 
-        List<List<Query>> resultToMerge = new ArrayList<>();
-        List<Query> queriesToAdd = new ArrayList<>(getQueries());
+        List<List<DisjunctiveQuery>> resultToMerge = new ArrayList<>();
+        List<DisjunctiveQuery> queriesToAdd = new ArrayList<>(getQueries());
         for (Set<ATermAppl> jointVars : equivalenceSets)
         {
-            List<Query> queryList = new ArrayList<>();
-            Set<Query> toRemove = new HashSet<>();
-            for (Query q : queriesToAdd)
-                for (QueryAtom atom : ((DisjunctiveQuery) q).getAtoms())
+            List<DisjunctiveQuery> queryList = new ArrayList<>();
+            Set<DisjunctiveQuery> toRemove = new HashSet<>();
+            for (DisjunctiveQuery q : queriesToAdd)
+                for (QueryAtom atom : q.getAtoms())
                     if (!Collections.disjoint(atom.getArguments(), jointVars) && !queryList.contains(q))
                     {
                         queryList.add(q.copy());
@@ -82,8 +82,8 @@ public class CNFQueryImpl extends AbstractCompositeQuery implements CNFQuery
         if (queriesToAdd.size() > 0)
             resultToMerge.add(queriesToAdd);
 
-        List<Query> result = new ArrayList<>();
-        for (List<Query> disjointCNF : resultToMerge)
+        List<CNFQuery> result = new ArrayList<>();
+        for (List<DisjunctiveQuery> disjointCNF : resultToMerge)
         {
             CNFQuery disjointCNFQuery = new CNFQueryImpl(_kb, _distinct);
             disjointCNFQuery.setQueries(disjointCNF);

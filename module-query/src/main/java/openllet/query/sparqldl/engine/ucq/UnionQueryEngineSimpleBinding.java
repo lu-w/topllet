@@ -67,10 +67,10 @@ public class UnionQueryEngineSimpleBinding extends AbstractUnionQueryEngine
             _logger.finer("Rolled-up union query in CNF is: " + cnfQuery);
 
         // 3. SPLIT CNF QUERY INTO DISJOINT PARTS
-        List<Query> queries = cnfQuery.split();
+        List<CNFQuery> queries = cnfQuery.split();
         List<QueryResult> results = new ArrayList<>(queries.size());
 
-        for (Query cnfQueryPart : queries)
+        for (CNFQuery cnfQueryPart : queries)
         {
             // 4. APPLY BINDINGS
             QueryResult result = new QueryResultImpl(cnfQueryPart);
@@ -79,7 +79,7 @@ public class UnionQueryEngineSimpleBinding extends AbstractUnionQueryEngine
             {
                 if (_logger.isLoggable(Level.FINE))
                     _logger.fine("Trying candidate binding: " + candidateBinding);
-                CNFQuery boundQuery = (CNFQuery) cnfQueryPart.apply(candidateBinding);
+                CNFQuery boundQuery = cnfQueryPart.apply(candidateBinding);
                 boolean booleanResult = _booleanEngine.execBooleanABoxQuery(boundQuery);
                 if (_logger.isLoggable(Level.FINE))
                     _logger.fine("Boolean engine returned: " + booleanResult);

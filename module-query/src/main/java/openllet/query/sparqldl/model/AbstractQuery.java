@@ -10,9 +10,8 @@ import openllet.shared.tools.Log;
 import java.util.*;
 import java.util.logging.Logger;
 
-public abstract class AbstractQuery implements Query
+public abstract class AbstractQuery<QueryType extends Query<QueryType>> implements Query<QueryType>
 {
-
     public static final Logger _logger = Log.getLogger(AbstractQuery.class);
 
     protected static final ATermAppl DEFAULT_NAME = TermFactory.term("query");
@@ -54,7 +53,7 @@ public abstract class AbstractQuery implements Query
         _distinct = distinct;
     }
 
-    public AbstractQuery(final Query query)
+    public AbstractQuery(final QueryType query)
     {
         this(query.getKB(), query.isDistinct());
         _name = query.getName();
