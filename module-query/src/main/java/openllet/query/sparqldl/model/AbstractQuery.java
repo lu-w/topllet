@@ -5,6 +5,7 @@ import openllet.core.KnowledgeBase;
 import openllet.core.utils.TermFactory;
 import openllet.query.sparqldl.model.cq.*;
 import openllet.query.sparqldl.model.results.ResultBinding;
+import openllet.query.sparqldl.model.ucq.UnionQuery;
 import openllet.shared.tools.Log;
 
 import java.util.*;
@@ -188,6 +189,13 @@ public abstract class AbstractQuery<QueryType extends Query<QueryType>> implemen
     public void setQueryParameters(final QueryParameters parameters)
     {
         _parameters = parameters;
+    }
+
+    @Override
+    public QueryType reorder(int[] queries)
+    {
+        _logger.warning("Reordering not yet implemented for " + this.getClass());
+        return copy();
     }
 
     @Override

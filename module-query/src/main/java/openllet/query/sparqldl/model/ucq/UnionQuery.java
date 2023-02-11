@@ -15,14 +15,6 @@ public interface UnionQuery extends CompositeQuery<ConjunctiveQuery, UnionQuery>
     CNFQuery toCNF();
 
     /**
-     * Creates a subquery from the given query. Queries are listed according to the 'queries' parameter.
-     *
-     * @param queries selected query indices
-     * @return subquery
-     */
-    UnionQuery reorder(int[] queries);
-
-    /**
      * Checks if there are two disjuncts that share a common undistinguished variable.
      * @return True iff there are two disjuncts that share a common undistinguished variable
      */

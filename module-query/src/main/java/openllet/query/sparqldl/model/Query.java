@@ -164,6 +164,14 @@ public interface Query<QueryType extends Query<QueryType>>
     QueryType copy();
 
     /**
+     * Creates a subquery from the given query. Queries are listed according to the 'queries' parameter.
+     *
+     * @param queries selected query indices
+     * @return subquery
+     */
+    QueryType reorder(int[] queries);
+
+    /**
      * Checks if one of the disjuncts contains a cycle in its query graph. Note that this function only looks for
      * cycles in property atoms. It ignores other kind of atom types (e.g. same as).
      * @return True iff one of the disjuncts contains a cycle

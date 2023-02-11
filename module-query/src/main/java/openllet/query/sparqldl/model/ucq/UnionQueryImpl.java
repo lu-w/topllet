@@ -147,13 +147,6 @@ public class UnionQueryImpl extends AbstractCompositeQuery<ConjunctiveQuery, Uni
     }
 
     @Override
-    public UnionQuery reorder(int[] queries)
-    {
-        // TODO Lukas: implement query reordering for UCQs (if needed)
-        return copy();
-    }
-
-    @Override
     public boolean disjunctsShareUndistVars()
     {
         boolean shared = false;
