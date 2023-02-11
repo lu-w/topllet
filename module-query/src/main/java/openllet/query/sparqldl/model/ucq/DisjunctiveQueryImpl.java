@@ -42,20 +42,7 @@ public class DisjunctiveQueryImpl extends AbstractCompositeQuery<ConjunctiveQuer
     @Override
     public DisjunctiveQuery copy()
     {
-        DisjunctiveQuery copy = new DisjunctiveQueryImpl(this);
-        for (ConjunctiveQuery q : _queries)
-            copy.addQuery(q.copy());
-        copy.setDistVars(getDistVarsWithVarType());
-        copy.setResultVars(getResultVars());
-        return copy;
-    }
-
-    @Override
-    public boolean hasCycle() {
-        boolean hasCycle = false;
-        for (ConjunctiveQuery q : _queries)
-            hasCycle |= q.hasCycle();
-        return hasCycle;
+        return copy(new DisjunctiveQueryImpl(this));
     }
 
     @Override

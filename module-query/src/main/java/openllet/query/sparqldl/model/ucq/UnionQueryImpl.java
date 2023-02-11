@@ -241,22 +241,8 @@ public class UnionQueryImpl extends AbstractCompositeQuery<ConjunctiveQuery, Uni
     }
 
     @Override
-    public boolean hasCycle()
-    {
-        boolean hasCycle = false;
-        for (ConjunctiveQuery q : _queries)
-            hasCycle |= q.hasCycle();
-        return hasCycle;
-    }
-
-    @Override
     public UnionQuery copy()
     {
-        UnionQuery copy = new UnionQueryImpl(this);
-        for (ConjunctiveQuery q : _queries)
-            copy.addQuery(q.copy());
-        copy.setDistVars(getDistVarsWithVarType());
-        copy.setResultVars(getResultVars());
-        return copy;
+        return copy(new UnionQueryImpl(this));
     }
 }

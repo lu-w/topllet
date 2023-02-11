@@ -195,4 +195,11 @@ public abstract class AbstractQuery<QueryType extends Query<QueryType>> implemen
     {
         return _parameters;
     }
+
+    public QueryType copy(QueryType copy)
+    {
+        copy.setDistVars(getDistVarsWithVarType());
+        copy.setResultVars(getResultVars());
+        return copy;
+    }
 }

@@ -4,11 +4,13 @@ import openllet.aterm.ATermAppl;
 import openllet.core.KnowledgeBase;
 import openllet.core.utils.ATermUtils;
 import openllet.query.sparqldl.model.results.ResultBinding;
+import openllet.query.sparqldl.model.ucq.CNFQuery;
+import openllet.query.sparqldl.model.ucq.CNFQueryImpl;
+import openllet.query.sparqldl.model.ucq.DisjunctiveQuery;
 
 import java.util.ArrayList;
 import java.util.List;
 
-// TODO Lukas: move copy() over here
 abstract public class AbstractCompositeQuery<SubQueryType extends Query<SubQueryType>, QueryType extends CompositeQuery<SubQueryType, QueryType>> extends AbstractQuery<QueryType> implements CompositeQuery<SubQueryType, QueryType>
 {
     protected List<SubQueryType> _queries = new ArrayList<>();
@@ -61,6 +63,25 @@ abstract public class AbstractCompositeQuery<SubQueryType extends Query<SubQuery
         for (SubQueryType subQuery : _queries)
             query.addQuery(subQuery.apply(binding));
         return query;
+    }
+
+    @Override
+    public QueryType copy(QueryType copy)
+    {
+        for (SubQueryType q : _queries)
+            copy.addQuery(q.copy());
+        copy.setDistVars(getDistVarsWithVarType());
+        copy.setResultVars(getResultVars());
+        return copy;
+    }
+
+    @Override
+    public boolean hasCycle()
+    {
+        boolean hasCycle = false;
+        for (SubQueryType q : _queries)
+            hasCycle |= q.hasCycle();
+        return hasCycle;
     }
 
     @Override

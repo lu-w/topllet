@@ -20,6 +20,11 @@ public class CNFQueryImpl extends AbstractCompositeQuery<DisjunctiveQuery, CNFQu
         super(kb, distinct);
     }
 
+    public CNFQueryImpl(CNFQuery q)
+    {
+        super(q.getKB(), q.isDistinct());
+    }
+
     @Override
     protected String getCompositeDelimiter()
     {
@@ -29,12 +34,7 @@ public class CNFQueryImpl extends AbstractCompositeQuery<DisjunctiveQuery, CNFQu
     @Override
     public CNFQuery copy()
     {
-        CNFQuery copy = new CNFQueryImpl(getKB(), isDistinct());
-        for (DisjunctiveQuery q : _queries)
-            copy.addQuery(q.copy());
-        copy.setDistVars(getDistVarsWithVarType());
-        copy.setResultVars(getResultVars());
-        return copy;
+        return copy(new CNFQueryImpl(this));
     }
 
     @Override
@@ -91,14 +91,5 @@ public class CNFQueryImpl extends AbstractCompositeQuery<DisjunctiveQuery, CNFQu
         }
 
         return result;
-    }
-
-    @Override
-    public boolean hasCycle()
-    {
-        boolean hasCycle = false;
-        for (DisjunctiveQuery q : _queries)
-            hasCycle |= q.hasCycle();
-        return hasCycle;
     }
 }
