@@ -196,7 +196,7 @@ public class TestUnionQueries extends AbstractQueryTest
     public void splitCNFQueryTest()
     {
         ATermAppl x2 = var("x2");
-        CNFQuery q1 = cnfQuery(select(x, y, x1, y1, x2),
+        CNFQuery q1 = cnfQuery(select(x, y, z, x1, y1, x2),
                 where(
                     disjunctiveQuery(TypeAtom(x, _A), TypeAtom(y, _B)),
                     disjunctiveQuery(TypeAtom(z, _C), PropertyValueAtom(x, _r, z)),
@@ -209,8 +209,42 @@ public class TestUnionQueries extends AbstractQueryTest
                 )
         );
 
-        List<CNFQuery> splitQuery = q1.split();
-        assertEquals(4, splitQuery.size());
+        CNFQuery q2 = cnfQuery(select(x, y, z),
+                where(
+                        disjunctiveQuery(TypeAtom(x, _A), TypeAtom(y, _B)),
+                        disjunctiveQuery(TypeAtom(z, _C), PropertyValueAtom(x, _r, z)),
+                        disjunctiveQuery(TypeAtom(y, _A))
+                )
+        );
+
+        CNFQuery q3 = cnfQuery(select(x, y, z, x1, y1, x2),
+                where(
+                        disjunctiveQuery(TypeAtom(_a, _A), TypeAtom(_b, _B)),
+                        disjunctiveQuery(TypeAtom(z, _C), PropertyValueAtom(x, _r, z)),
+                        disjunctiveQuery(TypeAtom(y, _A))
+                )
+        );
+
+        CNFQuery q4 = cnfQuery(
+                disjunctiveQuery(TypeAtom(_a, _A), TypeAtom(_b, _B)),
+                disjunctiveQuery(TypeAtom(_c, _C)),
+                disjunctiveQuery(PropertyValueAtom(_a, _r, _b))
+        );
+
+        List<CNFQuery> q1Split = q1.split();
+        assertEquals(4, q1Split.size());
+        assertEquals(q1Split.get(0).getResultVars(), List.of(x1));
+        assertEquals(q1Split.get(0).getDistVars(), Set.of(x1));
+        assertEquals(q1Split.get(0).getUndistVars(), Set.of(z1));
+        assertEquals(q1Split.get(1).getResultVars(), List.of(x2));
+        assertEquals(q1Split.get(1).getDistVars(), Set.of(x2));
+        assertEquals(q1Split.get(2).getResultVars(), List.of(x, y, z));
+        assertEquals(q1Split.get(2).getDistVars(), Set.of(x, y, z));
+        assertEquals(q1Split.get(3).getResultVars(), List.of());
+        assertEquals(q1Split.get(3).getDistVars(), Set.of());
+        assertEquals(1, q2.split().size());
+        assertEquals(3, q3.split().size());
+        assertEquals(1, q4.split().size());
     }
 
     // TODO Lukas: more test cases
