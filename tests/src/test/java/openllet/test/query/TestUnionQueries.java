@@ -247,5 +247,5 @@ public class TestUnionQueries extends AbstractQueryTest
         assertEquals(1, q4.split().size());
     }
 
-    // TODO Lukas: more test cases
+    // TODO Lukas: more test cases (also comparing after and before CNF binding engines results)
 }

@@ -10,9 +10,7 @@ import openllet.aterm.ATermAppl;
 import openllet.query.sparqldl.engine.cq.QueryEngine;
 import openllet.query.sparqldl.engine.ucq.BooleanUnionQueryEngineSimple;
 import openllet.query.sparqldl.engine.ucq.UnionQueryEngineSimpleBinding;
-import openllet.query.sparqldl.engine.ucq.UnionQueryExec;
-import openllet.query.sparqldl.model.AbstractQuery;
-import openllet.query.sparqldl.model.Query;
+import openllet.query.sparqldl.engine.QueryExec;
 import openllet.query.sparqldl.model.results.QueryResult;
 import openllet.query.sparqldl.model.results.QueryResultImpl;
 import openllet.query.sparqldl.model.results.ResultBinding;
@@ -215,7 +213,7 @@ public abstract class AbstractQueryTest extends AbstractKBTests
 
 	protected void testUnionQuery(final UnionQuery query, final boolean expected)
 	{
-		UnionQueryExec engine = new BooleanUnionQueryEngineSimple();
+		QueryExec engine = new BooleanUnionQueryEngineSimple();
 		QueryResult result = new QueryResultImpl(query);
 		if (expected)
 			result.add(new ResultBindingImpl());

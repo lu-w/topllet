@@ -9,9 +9,12 @@ import openllet.query.sparqldl.model.ucq.CNFQueryImpl;
 import openllet.query.sparqldl.model.ucq.DisjunctiveQuery;
 
 import java.util.ArrayList;
+import java.util.EnumMap;
+import java.util.HashSet;
 import java.util.List;
 
-abstract public class AbstractCompositeQuery<SubQueryType extends Query<SubQueryType>, QueryType extends CompositeQuery<SubQueryType, QueryType>> extends AbstractQuery<QueryType> implements CompositeQuery<SubQueryType, QueryType>
+abstract public class AbstractCompositeQuery<SubQueryType extends Query<SubQueryType>,
+        QueryType extends CompositeQuery<SubQueryType, QueryType>> extends AbstractQuery<QueryType> implements CompositeQuery<SubQueryType, QueryType>
 {
     protected List<SubQueryType> _queries = new ArrayList<>();
 
@@ -20,7 +23,7 @@ abstract public class AbstractCompositeQuery<SubQueryType extends Query<SubQuery
         super(kb, distinct);
     }
 
-    public AbstractCompositeQuery(QueryType q)
+    public AbstractCompositeQuery(Query<?> q)
     {
         super(q.getKB(), q.isDistinct());
     }
@@ -35,6 +38,13 @@ abstract public class AbstractCompositeQuery<SubQueryType extends Query<SubQuery
     public void setQueries(List<SubQueryType> queries)
     {
         _queries = new ArrayList<>();
+        for (SubQueryType q : queries)
+            addQuery(q);
+    }
+
+    @Override
+    public void addQueries(List<SubQueryType> queries)
+    {
         for (SubQueryType q : queries)
             addQuery(q);
     }
@@ -66,8 +76,9 @@ abstract public class AbstractCompositeQuery<SubQueryType extends Query<SubQuery
     }
 
     @Override
-    public QueryType copy(QueryType copy)
+    public QueryType copy()
     {
+        QueryType copy = super.copy();
         for (SubQueryType q : _queries)
             copy.addQuery(q.copy());
         copy.setDistVars(getDistVarsWithVarType());
@@ -84,17 +95,18 @@ abstract public class AbstractCompositeQuery<SubQueryType extends Query<SubQuery
         return hasCycle;
     }
 
+    /**
+     * @return A delimiter string representing the operator between the composited queries
+     */
+    protected abstract String getCompositeDelimiter();
+
     @Override
     public String toString()
     {
         return toString(false, false);
     }
 
-    /**
-     * @return A delimiter string representing the operator between the composited queries
-     */
-    protected abstract String getCompositeDelimiter();
-
+    @Override
     public String toString(final boolean multiLine, final boolean onlyQueryBody)
     {
         final StringBuilder sb = new StringBuilder();

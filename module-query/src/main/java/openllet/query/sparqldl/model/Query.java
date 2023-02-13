@@ -164,7 +164,7 @@ public interface Query<QueryType extends Query<QueryType>>
     QueryType copy();
 
     /**
-     * Creates a subquery from the given query. Queries are listed according to the 'queries' parameter.
+     * Creates a subquery from the given query (shallow copy). Queries are listed according to the 'queries' parameter.
      *
      * @param queries selected query indices
      * @return subquery

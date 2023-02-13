@@ -37,6 +37,8 @@ import openllet.core.utils.ATermUtils;
 import openllet.core.utils.CandidateSet;
 import openllet.core.utils.DisjointSet;
 import openllet.core.utils.Timer;
+import openllet.query.sparqldl.engine.QueryExec;
+import openllet.query.sparqldl.model.Query;
 import openllet.query.sparqldl.model.results.QueryResult;
 import openllet.query.sparqldl.model.results.QueryResultImpl;
 import openllet.query.sparqldl.model.results.ResultBinding;
@@ -222,18 +224,20 @@ public class CombinedQueryEngine implements QueryExec
 	 * {@inheritDoc}
 	 */
 	@Override
-	public boolean supports(final ConjunctiveQuery q)
+	public boolean supports(final Query<?> q)
 	{
 		// TODO fully undist.vars queries are not supported !!!
-		return q.hasCycle();
+		return q instanceof ConjunctiveQuery && ((ConjunctiveQuery) q).isNegated() && !q.hasCycle();
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
-	public QueryResult exec(final ConjunctiveQuery query)
+	public QueryResult exec(final Query<?> q)
 	{
+		assert(supports(q));
+		ConjunctiveQuery query = (ConjunctiveQuery) q;
 		_logger.fine(() -> "Executing query " + query);
 
 		final Timer timer = new Timer("CombinedQueryEngine");
@@ -265,7 +269,7 @@ public class CombinedQueryEngine implements QueryExec
 				if (_logger.isLoggable(Level.FINE))
 					_logger.fine("Found binding: " + binding);
 
-				if (!_result.getResultVars().containsAll(binding.getAllVariables()))
+				if (!new HashSet<>(_result.getResultVars()).containsAll(binding.getAllVariables()))
 				{
 					final ResultBinding newBinding = new ResultBindingImpl();
 					for (final ATermAppl var : _result.getResultVars())

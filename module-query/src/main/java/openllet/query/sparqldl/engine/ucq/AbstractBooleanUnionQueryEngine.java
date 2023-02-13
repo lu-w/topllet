@@ -2,6 +2,8 @@ package openllet.query.sparqldl.engine.ucq;
 
 import openllet.core.KnowledgeBase;
 import openllet.core.utils.Timer;
+import openllet.query.sparqldl.engine.QueryExec;
+import openllet.query.sparqldl.model.Query;
 import openllet.query.sparqldl.model.results.QueryResult;
 import openllet.query.sparqldl.model.results.QueryResultImpl;
 import openllet.query.sparqldl.model.results.ResultBindingImpl;
@@ -12,33 +14,34 @@ import openllet.shared.tools.Log;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-abstract public class AbstractBooleanUnionQueryEngine implements UnionQueryExec
+abstract public class AbstractBooleanUnionQueryEngine implements QueryExec
 {
     public static final Logger _logger = Log.getLogger(BooleanUnionQueryEngineSimple.class);
 
     @Override
-    public boolean supports(UnionQuery q)
+    public boolean supports(Query<?> q)
     {
-        return !q.hasCycle() && q.getDistVars().isEmpty();
+        return q instanceof UnionQuery && !q.hasCycle() && q.getDistVars().isEmpty();
     }
 
     @Override
-    public QueryResult exec(UnionQuery q)
+    public QueryResult exec(Query<?> q)
     {
         // Implements some organizational features (logging, timing, etc.) around the actual Boolean union query engines
         assert(supports(q));
+        UnionQuery unionQuery = (UnionQuery) q;
 
         if (_logger.isLoggable(Level.FINER))
-            _logger.finer("Exec Boolean ABox query: " + q);
+            _logger.finer("Exec Boolean ABox query: " + unionQuery);
 
-        KnowledgeBase kb = q.getKB();
+        KnowledgeBase kb = unionQuery.getKB();
         final long satCount = kb.getABox().getStats()._satisfiabilityCount;
         final long consCount = kb.getABox().getStats()._consistencyCount;
 
         final Timer timer = new Timer("BooleanUnionQueryEngine");
         timer.start();
-        boolean isEntailed = execBooleanABoxQuery(q);
-        QueryResult results = new QueryResultImpl(q);
+        boolean isEntailed = execBooleanABoxQuery(unionQuery);
+        QueryResult results = new QueryResultImpl(unionQuery);
         if (isEntailed)
             results.add(new ResultBindingImpl());
         timer.stop();

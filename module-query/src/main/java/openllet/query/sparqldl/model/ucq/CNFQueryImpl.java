@@ -5,6 +5,7 @@ import openllet.core.KnowledgeBase;
 import openllet.core.utils.ATermUtils;
 import openllet.core.utils.DisjointSet;
 import openllet.query.sparqldl.model.AbstractCompositeQuery;
+import openllet.query.sparqldl.model.Query;
 import openllet.query.sparqldl.model.cq.ConjunctiveQuery;
 import openllet.query.sparqldl.model.cq.QueryAtom;
 
@@ -17,7 +18,7 @@ public class CNFQueryImpl extends AbstractCompositeQuery<DisjunctiveQuery, CNFQu
         super(kb, distinct);
     }
 
-    public CNFQueryImpl(CNFQuery q)
+    public CNFQueryImpl(Query<?> q)
     {
         super(q.getKB(), q.isDistinct());
     }
@@ -26,12 +27,6 @@ public class CNFQueryImpl extends AbstractCompositeQuery<DisjunctiveQuery, CNFQu
     protected String getCompositeDelimiter()
     {
         return "^";
-    }
-
-    @Override
-    public CNFQuery copy()
-    {
-        return copy(new CNFQueryImpl(this));
     }
 
     @Override
@@ -88,5 +83,11 @@ public class CNFQueryImpl extends AbstractCompositeQuery<DisjunctiveQuery, CNFQu
         }
 
         return result;
+    }
+
+    @Override
+    protected CNFQuery createQuery(Query<?> query)
+    {
+        return new CNFQueryImpl(query);
     }
 }

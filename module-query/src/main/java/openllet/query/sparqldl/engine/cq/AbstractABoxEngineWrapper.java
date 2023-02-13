@@ -17,6 +17,8 @@ import java.util.logging.Logger;
 import openllet.aterm.ATermAppl;
 import openllet.core.KnowledgeBase;
 import openllet.core.utils.ATermUtils;
+import openllet.query.sparqldl.engine.QueryExec;
+import openllet.query.sparqldl.model.Query;
 import openllet.query.sparqldl.model.results.QueryResult;
 import openllet.query.sparqldl.model.results.QueryResultImpl;
 import openllet.query.sparqldl.model.results.ResultBinding;
@@ -55,8 +57,10 @@ public abstract class AbstractABoxEngineWrapper implements QueryExec
 	 * {@inheritDoc}
 	 */
 	@Override
-	public QueryResult exec(final ConjunctiveQuery query)
+	public QueryResult exec(final Query<?> q)
 	{
+		assert(supports(q));
+		ConjunctiveQuery query = (ConjunctiveQuery) q;
 		_logger.fine(() -> "Executing query " + query);
 
 		partitionQuery(query);

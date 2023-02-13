@@ -35,6 +35,7 @@ import openllet.core.exceptions.InternalReasonerException;
 import openllet.core.utils.ATermUtils;
 import openllet.core.utils.Bool;
 import openllet.core.utils.SetUtils;
+import openllet.query.sparqldl.engine.QueryExec;
 import openllet.query.sparqldl.model.Query;
 import openllet.query.sparqldl.model.results.MultiQueryResults;
 import openllet.query.sparqldl.model.cq.NotKnownQueryAtom;

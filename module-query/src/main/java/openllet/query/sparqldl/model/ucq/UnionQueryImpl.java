@@ -3,6 +3,7 @@ package openllet.query.sparqldl.model.ucq;
 import openllet.aterm.ATermAppl;
 import openllet.core.KnowledgeBase;
 import openllet.query.sparqldl.model.AbstractCompositeQuery;
+import openllet.query.sparqldl.model.Query;
 import openllet.query.sparqldl.model.cq.*;
 import openllet.shared.tools.Log;
 
@@ -26,7 +27,7 @@ public class UnionQueryImpl extends AbstractCompositeQuery<ConjunctiveQuery, Uni
         return "v";
     }
 
-    public UnionQueryImpl(final UnionQuery query)
+    public UnionQueryImpl(final Query<?> query)
     {
         this(query.getKB(), query.isDistinct());
     }
@@ -232,8 +233,8 @@ public class UnionQueryImpl extends AbstractCompositeQuery<ConjunctiveQuery, Uni
     }
 
     @Override
-    public UnionQuery copy()
+    protected UnionQuery createQuery(Query<?> query)
     {
-        return copy(new UnionQueryImpl(this));
+        return new UnionQueryImpl(query);
     }
 }

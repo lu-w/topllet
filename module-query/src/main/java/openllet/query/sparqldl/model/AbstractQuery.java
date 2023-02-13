@@ -200,8 +200,16 @@ public abstract class AbstractQuery<QueryType extends Query<QueryType>> implemen
         return _parameters;
     }
 
-    public QueryType copy(QueryType copy)
+    /**
+     * Creates a new query of the given type - to be implemented by any concrete class.
+     * @param query Query containing information on the knowledge base and distinctness to copy over
+     * @return A new query instance
+     */
+    abstract protected QueryType createQuery(Query<?> query);
+
+    public QueryType copy()
     {
+        QueryType copy = createQuery(this);
         copy.setDistVars(getDistVarsWithVarType());
         copy.setResultVars(getResultVars());
         return copy;

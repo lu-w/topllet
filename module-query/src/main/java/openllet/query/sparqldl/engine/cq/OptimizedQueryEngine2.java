@@ -16,6 +16,7 @@ import java.util.logging.Logger;
 import openllet.aterm.ATermAppl;
 import openllet.core.KnowledgeBase;
 import openllet.core.utils.ATermUtils;
+import openllet.query.sparqldl.model.Query;
 import openllet.query.sparqldl.model.cq.ConjunctiveQuery;
 import openllet.query.sparqldl.model.cq.QueryAtom;
 import openllet.query.sparqldl.model.cq.QueryPredicate;
@@ -51,9 +52,10 @@ public class OptimizedQueryEngine2 extends AbstractABoxEngineWrapper
 	 * {@inheritDoc}
 	 */
 	@Override
-	public boolean supports(final ConjunctiveQuery q)
+	public boolean supports(final Query<?> q)
 	{
-		return !q.getDistVars().isEmpty();
+		return q instanceof ConjunctiveQuery && ((ConjunctiveQuery) q).isNegated() && !q.hasCycle() &&
+				!q.getDistVars().isEmpty();
 	}
 
 	private void exec(final ConjunctiveQuery q, final ResultBinding binding, final boolean first)

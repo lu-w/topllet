@@ -21,6 +21,7 @@ import openllet.core.exceptions.InternalReasonerException;
 import openllet.core.utils.ATermUtils;
 import openllet.core.utils.DisjointSet;
 import openllet.query.sparqldl.model.AbstractQuery;
+import openllet.query.sparqldl.model.Query;
 import openllet.query.sparqldl.model.results.ResultBinding;
 
 import static openllet.core.utils.TermFactory.term;
@@ -53,14 +54,12 @@ public class ConjunctiveQueryImpl extends AbstractQuery<ConjunctiveQuery> implem
 	public ConjunctiveQueryImpl(final KnowledgeBase kb, final boolean distinct)
 	{
 		super(kb, distinct);
-
 		_allAtoms = new ArrayList<>();
 	}
 
-	public ConjunctiveQueryImpl(final ConjunctiveQuery query)
+	public ConjunctiveQueryImpl(final Query<?> query)
 	{
 		this(query.getKB(), query.isDistinct());
-
 		_name = query.getName();
 		_parameters = query.getQueryParameters();
 	}
@@ -549,44 +548,6 @@ public class ConjunctiveQueryImpl extends AbstractQuery<ConjunctiveQuery> implem
 		return split(false, false);
 	}
 
-	@Override
-	public String toString(boolean multiLine, boolean onlyQueryBody)
-	{
-		final StringBuilder sb = new StringBuilder();
-		final String indent = multiLine ? "    " : "";
-
-		if (!onlyQueryBody)
-		{
-			sb.append(ATermUtils.toString(_name)).append("(");
-			for (int i = 0; i < _resultVars.size(); i++)
-			{
-				final ATermAppl var = _resultVars.get(i);
-				if (i > 0)
-					sb.append(", ");
-				sb.append(ATermUtils.toString(var));
-			}
-			sb.append(")").append(" :-");
-		}
-
-		if (getAtoms().size() > 0)
-		{
-			if (multiLine)
-				sb.append("\n");
-			for (int j = 0; j < getAtoms().size(); j++) {
-				final QueryAtom a = getAtoms().get(j);
-				if (j > 0) {
-					sb.append(",");
-					if (multiLine)
-						sb.append("\n");
-				}
-
-				sb.append(indent);
-				sb.append(a.toString()); // TODO qNameProvider
-			}
-		}
-		return sb.toString();
-	}
-
 	public List<ConjunctiveQuery> split(boolean splitOnIndividuals, boolean splitOnDistVars)
 	{
 		final Set<ATermAppl> resultVars = new HashSet<>(getResultVars());
@@ -667,46 +628,47 @@ public class ConjunctiveQueryImpl extends AbstractQuery<ConjunctiveQuery> implem
 	@Override
 	public ConjunctiveQuery copy()
 	{
-		ConjunctiveQuery copy = new ConjunctiveQueryImpl(this);
+		ConjunctiveQuery copy = super.copy();
 		for (QueryAtom atom : _allAtoms)
 			copy.add(atom.copy());
-		copy.setDistVars(getDistVarsWithVarType());
-		copy.setResultVars(getResultVars());
 		return copy;
 	}
 
 	@Override
 	public String toString()
 	{
-		return toString(false);
+		return toString(false, false);
 	}
 
-	public String toString(final boolean multiLine)
+	@Override
+	public String toString(boolean multiLine, boolean onlyQueryBody)
 	{
-		final String indent = multiLine ? "     " : " ";
 		final StringBuilder sb = new StringBuilder();
+		final String indent = multiLine ? "    " : "";
 
-		sb.append(ATermUtils.toString(_name)).append("(");
-		for (int i = 0; i < _resultVars.size(); i++)
+		if (!onlyQueryBody)
 		{
-			final ATermAppl var = _resultVars.get(i);
-			if (i > 0)
-				sb.append(", ");
-			sb.append(ATermUtils.toString(var));
+			sb.append(ATermUtils.toString(_name)).append("(");
+			for (int i = 0; i < _resultVars.size(); i++)
+			{
+				final ATermAppl var = _resultVars.get(i);
+				if (i > 0)
+					sb.append(", ");
+				sb.append(ATermUtils.toString(var));
+			}
+			sb.append(")").append(" :-");
 		}
-		sb.append(")");
 
-		if (_allAtoms.size() > 0)
+		if (getAtoms().size() > 0)
 		{
-			sb.append(" :-");
 			if (multiLine)
 				sb.append("\n");
-			for (int i = 0; i < _allAtoms.size(); i++)
-			{
-				final QueryAtom a = _allAtoms.get(i);
-				if (i > 0)
-				{
-					sb.append(", ");
+			if (isNegated())
+				sb.append("!").append("(");
+			for (int j = 0; j < getAtoms().size(); j++) {
+				final QueryAtom a = getAtoms().get(j);
+				if (j > 0) {
+					sb.append(",");
 					if (multiLine)
 						sb.append("\n");
 				}
@@ -714,11 +676,21 @@ public class ConjunctiveQueryImpl extends AbstractQuery<ConjunctiveQuery> implem
 				sb.append(indent);
 				sb.append(a.toString()); // TODO qNameProvider
 			}
+			if (isNegated())
+				sb.append(")");
 		}
-
-		sb.append(".");
-		if (multiLine)
-			sb.append("\n");
 		return sb.toString();
+	}
+
+	@Override
+	public boolean isNegated()
+	{
+		return false;
+	}
+
+	@Override
+	protected ConjunctiveQuery createQuery(Query<?> query)
+	{
+		return new ConjunctiveQueryImpl(query);
 	}
 }

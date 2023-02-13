@@ -20,6 +20,7 @@ import java.util.logging.Logger;
 
 import openllet.aterm.ATermAppl;
 import openllet.core.KnowledgeBase;
+import openllet.query.sparqldl.model.Query;
 import openllet.query.sparqldl.model.results.QueryResult;
 import openllet.query.sparqldl.model.results.QueryResultImpl;
 import openllet.query.sparqldl.model.results.ResultBinding;
@@ -47,9 +48,10 @@ public class OptimizedQueryEngine3 extends AbstractABoxEngineWrapper
 	public static final Logger _logger = Log.getLogger(QueryEngine.class);
 
 	@Override
-	public boolean supports(final ConjunctiveQuery q)
+	public boolean supports(final Query<?> q)
 	{
-		return true; // TODO
+		return q instanceof ConjunctiveQuery && ((ConjunctiveQuery) q).isNegated() && !q.hasCycle() &&
+				!q.getDistVars().isEmpty();
 	}
 
 	@Override

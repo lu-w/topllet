@@ -2,6 +2,7 @@ package openllet.query.sparqldl.model.ucq;
 
 import openllet.core.KnowledgeBase;
 import openllet.query.sparqldl.model.AbstractCompositeQuery;
+import openllet.query.sparqldl.model.Query;
 import openllet.query.sparqldl.model.cq.ConjunctiveQuery;
 import openllet.query.sparqldl.model.cq.ConjunctiveQueryImpl;
 import openllet.query.sparqldl.model.cq.QueryAtom;
@@ -17,7 +18,7 @@ public class DisjunctiveQueryImpl extends AbstractCompositeQuery<ConjunctiveQuer
         super(kb, distinct);
     }
 
-    public DisjunctiveQueryImpl(DisjunctiveQuery q)
+    public DisjunctiveQueryImpl(Query<?> q)
     {
         super(q);
     }
@@ -36,12 +37,6 @@ public class DisjunctiveQueryImpl extends AbstractCompositeQuery<ConjunctiveQuer
     @Override
     protected String getCompositeDelimiter() {
         return "v";
-    }
-
-    @Override
-    public DisjunctiveQuery copy()
-    {
-        return copy(new DisjunctiveQueryImpl(this));
     }
 
     @Override
@@ -67,5 +62,11 @@ public class DisjunctiveQueryImpl extends AbstractCompositeQuery<ConjunctiveQuer
             if (q.getAtoms().size() == 1)
                 unwrappedList.add(q.getAtoms().get(0));
         return unwrappedList;
+    }
+
+    @Override
+    protected DisjunctiveQuery createQuery(Query<?> query)
+    {
+        return new DisjunctiveQueryImpl(query);
     }
 }
