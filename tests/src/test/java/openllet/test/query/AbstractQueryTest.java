@@ -11,17 +11,17 @@ import openllet.query.sparqldl.engine.cq.QueryEngine;
 import openllet.query.sparqldl.engine.ucq.BooleanUnionQueryEngineSimple;
 import openllet.query.sparqldl.engine.ucq.UnionQueryEngineSimpleBinding;
 import openllet.query.sparqldl.engine.ucq.UnionQueryExec;
+import openllet.query.sparqldl.model.AbstractQuery;
 import openllet.query.sparqldl.model.Query;
 import openllet.query.sparqldl.model.results.QueryResult;
 import openllet.query.sparqldl.model.results.QueryResultImpl;
 import openllet.query.sparqldl.model.results.ResultBinding;
 import openllet.query.sparqldl.model.results.ResultBindingImpl;
-import openllet.query.sparqldl.model.ucq.UnionQuery;
+import openllet.query.sparqldl.model.ucq.*;
 import openllet.query.sparqldl.model.Query.VarType;
 import openllet.query.sparqldl.model.cq.ConjunctiveQuery;
 import openllet.query.sparqldl.model.cq.QueryAtom;
 import openllet.query.sparqldl.model.cq.ConjunctiveQueryImpl;
-import openllet.query.sparqldl.model.ucq.UnionQueryImpl;
 import openllet.test.AbstractKBTests;
 import org.junit.Assert;
 
@@ -60,7 +60,8 @@ public abstract class AbstractQueryTest extends AbstractKBTests
 		return atoms;
 	}
 
-	protected ConjunctiveQuery[] where(final ConjunctiveQuery... queries)
+	@SafeVarargs
+	protected final <QueryType> QueryType[] where(final QueryType... queries)
 	{
 		return queries;
 	}
@@ -108,6 +109,52 @@ public abstract class AbstractQueryTest extends AbstractKBTests
 			q.addResultVar(var);
 			q.addDistVar(var, VarType.INDIVIDUAL);
 			for (ConjunctiveQuery query : queries)
+			{
+				for (QueryAtom atom : query.getAtoms())
+				{
+					if (atom.getArguments().contains(var) && !query.getResultVars().contains(var))
+					{
+						query.addResultVar(var);
+						query.addDistVar(var, VarType.INDIVIDUAL);
+					}
+				}
+			}
+		}
+		q.setQueries(Arrays.stream(queries).toList());
+		return q;
+	}
+
+	protected DisjunctiveQuery disjunctiveQuery(final ATermAppl[] vars, final QueryAtom[] atoms)
+	{
+		DisjunctiveQuery q = disjunctiveQuery(atoms);
+		for (final ATermAppl var : vars)
+			q.addResultVar(var);
+		return q;
+	}
+
+	protected DisjunctiveQuery disjunctiveQuery(final QueryAtom... atoms)
+	{
+		final DisjunctiveQuery q = new DisjunctiveQueryImpl(_kb, true);
+		for (final QueryAtom atom : atoms)
+			q.add(atom);
+		return q;
+	}
+
+	protected CNFQuery cnfQuery(final DisjunctiveQuery... queries)
+	{
+		final CNFQuery q = new CNFQueryImpl(_kb, false);
+		q.setQueries(Arrays.stream(queries).toList());
+		return q;
+	}
+
+	protected CNFQuery cnfQuery(final ATermAppl[] vars, final DisjunctiveQuery[] queries)
+	{
+		final CNFQuery q = new CNFQueryImpl(_kb, false);
+		for (final ATermAppl var : vars)
+		{
+			q.addResultVar(var);
+			q.addDistVar(var, VarType.INDIVIDUAL);
+			for (DisjunctiveQuery query : queries)
 			{
 				for (QueryAtom atom : query.getAtoms())
 				{
