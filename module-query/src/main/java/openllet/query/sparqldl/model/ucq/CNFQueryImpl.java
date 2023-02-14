@@ -85,9 +85,8 @@ public class CNFQueryImpl extends AbstractCompositeQuery<DisjunctiveQuery, CNFQu
         return result;
     }
 
-    @Override
-    protected CNFQuery createQuery(Query<?> query)
+    public CNFQuery createQuery(KnowledgeBase kb, boolean isDistinct)
     {
-        return new CNFQueryImpl(query);
+        return new CNFQueryImpl(kb, isDistinct);
     }
 }

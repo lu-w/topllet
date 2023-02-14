@@ -52,10 +52,9 @@ public class OptimizedQueryEngine2 extends AbstractABoxEngineWrapper
 	 * {@inheritDoc}
 	 */
 	@Override
-	public boolean supports(final Query<?> q)
+	public boolean supports(final ConjunctiveQuery q)
 	{
-		return q instanceof ConjunctiveQuery && ((ConjunctiveQuery) q).isNegated() && !q.hasCycle() &&
-				!q.getDistVars().isEmpty();
+		return !q.isNegated() && !q.hasCycle();
 	}
 
 	private void exec(final ConjunctiveQuery q, final ResultBinding binding, final boolean first)

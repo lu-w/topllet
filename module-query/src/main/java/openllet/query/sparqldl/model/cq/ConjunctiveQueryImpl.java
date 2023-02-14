@@ -688,9 +688,8 @@ public class ConjunctiveQueryImpl extends AbstractQuery<ConjunctiveQuery> implem
 		return false;
 	}
 
-	@Override
-	protected ConjunctiveQuery createQuery(Query<?> query)
+	public ConjunctiveQuery createQuery(KnowledgeBase kb, boolean isDistinct)
 	{
-		return new ConjunctiveQueryImpl(query);
+		return new ConjunctiveQueryImpl(kb, isDistinct);
 	}
 }

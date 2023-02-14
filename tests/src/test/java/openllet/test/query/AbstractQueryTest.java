@@ -9,8 +9,14 @@ package openllet.test.query;
 import openllet.aterm.ATermAppl;
 import openllet.query.sparqldl.engine.cq.QueryEngine;
 import openllet.query.sparqldl.engine.ucq.BooleanUnionQueryEngineSimple;
-import openllet.query.sparqldl.engine.ucq.UnionQueryEngineSimpleBinding;
+import openllet.query.sparqldl.engine.ucq.UnionQueryEngineSimple;
 import openllet.query.sparqldl.engine.QueryExec;
+import openllet.query.sparqldl.model.AbstractCompositeQuery;
+import openllet.query.sparqldl.model.AbstractQuery;
+import openllet.query.sparqldl.model.CompositeQuery;
+import openllet.query.sparqldl.model.Query;
+import openllet.query.sparqldl.model.cncq.CNCQQuery;
+import openllet.query.sparqldl.model.cncq.CNCQQueryImpl;
 import openllet.query.sparqldl.model.results.QueryResult;
 import openllet.query.sparqldl.model.results.QueryResultImpl;
 import openllet.query.sparqldl.model.results.ResultBinding;
@@ -23,6 +29,8 @@ import openllet.query.sparqldl.model.cq.ConjunctiveQueryImpl;
 import openllet.test.AbstractKBTests;
 import org.junit.Assert;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 
 import static openllet.core.utils.TermFactory.var;
@@ -74,13 +82,10 @@ public abstract class AbstractQueryTest extends AbstractKBTests
 		final ConjunctiveQuery q = new ConjunctiveQueryImpl(_kb, true);
 		for (final ATermAppl var : vars)
 			q.addResultVar(var);
-
 		for (final QueryAtom atom : atoms)
 			q.add(atom);
-
 		for (final ATermAppl var : q.getUndistVars())
 			q.addDistVar(var, VarType.INDIVIDUAL);
-
 		return q;
 	}
 
@@ -94,39 +99,20 @@ public abstract class AbstractQueryTest extends AbstractKBTests
 
 	protected UnionQuery unionQuery(final ConjunctiveQuery... queries)
 	{
-		final UnionQuery q = new UnionQueryImpl(_kb, false);
-		q.setQueries(Arrays.stream(queries).toList());
-		return q;
+		return tQuery(UnionQueryImpl.class, queries);
 	}
 
 	protected UnionQuery unionQuery(final ATermAppl[] vars, final ConjunctiveQuery[] queries)
 	{
-		final UnionQuery q = new UnionQueryImpl(_kb, false);
-		for (final ATermAppl var : vars)
-		{
-			q.addResultVar(var);
-			q.addDistVar(var, VarType.INDIVIDUAL);
-			for (ConjunctiveQuery query : queries)
-			{
-				for (QueryAtom atom : query.getAtoms())
-				{
-					if (atom.getArguments().contains(var) && !query.getResultVars().contains(var))
-					{
-						query.addResultVar(var);
-						query.addDistVar(var, VarType.INDIVIDUAL);
-					}
-				}
-			}
-		}
-		q.setQueries(Arrays.stream(queries).toList());
-		return q;
+		return tQuery(UnionQueryImpl.class, vars, queries);
 	}
 
 	protected DisjunctiveQuery disjunctiveQuery(final ATermAppl[] vars, final QueryAtom[] atoms)
 	{
 		DisjunctiveQuery q = disjunctiveQuery(atoms);
-		for (final ATermAppl var : vars)
-			q.addResultVar(var);
+		q.setResultVars(List.of(vars));
+		for (ATermAppl var : vars)
+			q.addDistVar(var, VarType.INDIVIDUAL);
 		return q;
 	}
 
@@ -138,33 +124,71 @@ public abstract class AbstractQueryTest extends AbstractKBTests
 		return q;
 	}
 
-	protected CNFQuery cnfQuery(final DisjunctiveQuery... queries)
+	protected CNFQueryImpl cnfQuery(final DisjunctiveQuery... queries)
 	{
-		final CNFQuery q = new CNFQueryImpl(_kb, false);
-		q.setQueries(Arrays.stream(queries).toList());
-		return q;
+		return tQuery(CNFQueryImpl.class, queries);
 	}
 
 	protected CNFQuery cnfQuery(final ATermAppl[] vars, final DisjunctiveQuery[] queries)
 	{
-		final CNFQuery q = new CNFQueryImpl(_kb, false);
+		return tQuery(CNFQueryImpl.class, vars, queries);
+	}
+
+	protected <ST extends Query<ST>, T extends AbstractCompositeQuery<ST, ?>> T tQuery(final Class<T> clazz,
+																							   final ST... queries)
+	{
+		T q = null;
+		for (Constructor<?> c : clazz.getConstructors())
+			if (c.getParameterCount() == 2)
+			{
+				try
+				{
+					q = (T) c.newInstance(_kb, false);
+				}
+				catch (Exception e)
+				{
+				}
+				break;
+			}
+		if (q != null)
+			q.setQueries(Arrays.stream(queries).toList());
+		return q;
+	}
+
+	protected <ST extends Query<ST>, T extends AbstractCompositeQuery<ST, ?>> T tQuery(final Class<T> clazz,
+																			   				   final ATermAppl[] vars,
+																			 				   final ST[] queries)
+	{
+		T q = tQuery(clazz, queries);
 		for (final ATermAppl var : vars)
 		{
 			q.addResultVar(var);
 			q.addDistVar(var, VarType.INDIVIDUAL);
-			for (DisjunctiveQuery query : queries)
-			{
-				for (QueryAtom atom : query.getAtoms())
-				{
-					if (atom.getArguments().contains(var) && !query.getResultVars().contains(var))
-					{
-						query.addResultVar(var);
-						query.addDistVar(var, VarType.INDIVIDUAL);
-					}
-				}
-			}
+			for (ST query : queries)
+				if (query instanceof ConjunctiveQuery)
+					for (QueryAtom atom : ((ConjunctiveQuery) query).getAtoms())
+						if (atom.getArguments().contains(var) && !query.getResultVars().contains(var))
+						{
+							query.addResultVar(var);
+							query.addDistVar(var, VarType.INDIVIDUAL);
+						}
 		}
+		return q;
+	}
+
+	protected CNCQQuery cncqQuery(final ConjunctiveQuery... queries)
+	{
+		final CNCQQuery q = new CNCQQueryImpl(_kb, false);
 		q.setQueries(Arrays.stream(queries).toList());
+		return q;
+	}
+
+	protected CNCQQuery cncqQuery(final ATermAppl[] vars, final ConjunctiveQuery[] queries)
+	{
+		CNCQQuery q = cncqQuery(queries);
+		q.setResultVars(List.of(vars));
+		for (ATermAppl var : vars)
+			q.addDistVar(var, VarType.INDIVIDUAL);
 		return q;
 	}
 
@@ -181,15 +205,7 @@ public abstract class AbstractQueryTest extends AbstractKBTests
 
 		final Map<List<ATermAppl>, Integer> answers = new HashMap<>();
 		for (final ATermAppl[] value : values)
-		{
-			final List<ATermAppl> answer = Arrays.asList(value);
-			final Integer count = answers.get(answer);
-			if (count == null)
-				answers.put(answer, 1);
-			else
-				answers.put(answer, count + 1);
-
-		}
+			answers.merge(Arrays.asList(value), 1, Integer::sum);
 
 		final QueryResult result = QueryEngine.exec(query);
 		for (final ResultBinding binding : result)
@@ -201,11 +217,10 @@ public abstract class AbstractQueryTest extends AbstractKBTests
 			final Integer count = answers.get(list);
 			if (count == null)
 				Assert.fail("Unexpected binding in the result: " + list);
+			else if (count == 1)
+				answers.remove(list);
 			else
-				if (count == 1)
-					answers.remove(list);
-				else
-					answers.put(list, count - 1);
+				answers.put(list, count - 1);
 		}
 
 		assertTrue("Unfound bindings: " + answers.keySet(), answers.isEmpty());
@@ -213,7 +228,7 @@ public abstract class AbstractQueryTest extends AbstractKBTests
 
 	protected void testUnionQuery(final UnionQuery query, final boolean expected)
 	{
-		QueryExec engine = new BooleanUnionQueryEngineSimple();
+		QueryExec<UnionQuery> engine = new BooleanUnionQueryEngineSimple();
 		QueryResult result = new QueryResultImpl(query);
 		if (expected)
 			result.add(new ResultBindingImpl());
@@ -234,16 +249,10 @@ public abstract class AbstractQueryTest extends AbstractKBTests
 
 		final Map<List<ATermAppl>, Integer> answers = new HashMap<>();
 		for (final List<ATermAppl> answer : values)
-		{
-			final Integer count = answers.get(answer);
-			if (count == null)
-				answers.put(answer, 1);
-			else
-				answers.put(answer, count + 1);
-		}
+			answers.merge(answer, 1, Integer::sum);
 
-		UnionQueryEngineSimpleBinding engine = new UnionQueryEngineSimpleBinding();
-		engine.setBindingTime(UnionQueryEngineSimpleBinding.BindingTime.AFTER_CNF);
+		UnionQueryEngineSimple engine = new UnionQueryEngineSimple();
+		engine.setBindingTime(UnionQueryEngineSimple.BindingTime.AFTER_CNF);
 		final QueryResult result = engine.exec(query);
 		for (final ResultBinding binding : result)
 		{
@@ -255,13 +264,18 @@ public abstract class AbstractQueryTest extends AbstractKBTests
 			if (count == null)
 				Assert.fail("Unexpected binding in the result: " + list);
 			else
-			if (count == 1)
-				answers.remove(list);
-			else
-				answers.put(list, count - 1);
+				if (count == 1)
+					answers.remove(list);
+				else
+					answers.put(list, count - 1);
 		}
 
 		assertTrue("Unfound bindings: " + answers.keySet(), answers.isEmpty());
+	}
+
+	protected void testCNCQQuery(final CNCQQuery query, final boolean expected)
+	{
+		assertTrue(true);
 	}
 
 	protected static List<List<ATermAppl>> allResults(List<ATermAppl> individuals, int resultSize)

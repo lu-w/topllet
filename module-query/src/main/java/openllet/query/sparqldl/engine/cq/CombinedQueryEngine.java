@@ -63,7 +63,7 @@ import openllet.shared.tools.Log;
  *
  * @author Petr Kremen
  */
-public class CombinedQueryEngine implements QueryExec
+public class CombinedQueryEngine implements QueryExec<ConjunctiveQuery>
 {
 	public static final Logger _logger = Log.getLogger(CombinedQueryEngine.class);
 
@@ -224,25 +224,24 @@ public class CombinedQueryEngine implements QueryExec
 	 * {@inheritDoc}
 	 */
 	@Override
-	public boolean supports(final Query<?> q)
+	public boolean supports(final ConjunctiveQuery q)
 	{
 		// TODO fully undist.vars queries are not supported !!!
-		return q instanceof ConjunctiveQuery && ((ConjunctiveQuery) q).isNegated() && !q.hasCycle();
+		return !q.isNegated() && !q.hasCycle();
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
-	public QueryResult exec(final Query<?> q)
+	public QueryResult exec(final ConjunctiveQuery q)
 	{
 		assert(supports(q));
-		ConjunctiveQuery query = (ConjunctiveQuery) q;
-		_logger.fine(() -> "Executing query " + query);
+		_logger.fine(() -> "Executing query " + q);
 
 		final Timer timer = new Timer("CombinedQueryEngine");
 		timer.start();
-		prepare(query);
+		prepare(q);
 		branches = 0;
 		exec(new ResultBindingImpl());
 		timer.stop();

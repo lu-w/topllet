@@ -233,8 +233,8 @@ public class UnionQueryImpl extends AbstractCompositeQuery<ConjunctiveQuery, Uni
     }
 
     @Override
-    protected UnionQuery createQuery(Query<?> query)
+    public UnionQuery createQuery(KnowledgeBase kb, boolean isDistinct)
     {
-        return new UnionQueryImpl(query);
+        return new UnionQueryImpl(kb, isDistinct);
     }
 }

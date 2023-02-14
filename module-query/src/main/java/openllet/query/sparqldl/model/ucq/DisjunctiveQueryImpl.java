@@ -64,9 +64,8 @@ public class DisjunctiveQueryImpl extends AbstractCompositeQuery<ConjunctiveQuer
         return unwrappedList;
     }
 
-    @Override
-    protected DisjunctiveQuery createQuery(Query<?> query)
+    public DisjunctiveQuery createQuery(KnowledgeBase kb, boolean isDistinct)
     {
-        return new DisjunctiveQueryImpl(query);
+        return new DisjunctiveQueryImpl(kb, isDistinct);
     }
 }

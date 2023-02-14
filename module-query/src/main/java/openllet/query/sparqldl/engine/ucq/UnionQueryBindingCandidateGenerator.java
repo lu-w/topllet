@@ -12,11 +12,11 @@ import java.util.Set;
 
 public abstract class UnionQueryBindingCandidateGenerator implements Iterable<ResultBinding>
 {
-    protected Query _query;
+    protected Query<?> _query;
     protected Set<Pair<ResultBinding, Bool>> _triedBindingsWithResultInformation;
     protected ResultBinding prevBinding = new ResultBindingImpl();
 
-    UnionQueryBindingCandidateGenerator(Query query)
+    UnionQueryBindingCandidateGenerator(Query<?> query)
     {
         _query = query;
         _triedBindingsWithResultInformation = new HashSet<>();

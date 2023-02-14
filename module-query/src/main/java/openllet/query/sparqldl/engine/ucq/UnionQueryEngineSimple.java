@@ -1,7 +1,7 @@
 package openllet.query.sparqldl.engine.ucq;
 
 import openllet.core.utils.Bool;
-import openllet.query.sparqldl.model.Query;
+import openllet.query.sparqldl.engine.AbstractQueryEngine;
 import openllet.query.sparqldl.model.results.MultiQueryResults;
 import openllet.query.sparqldl.model.results.QueryResult;
 import openllet.query.sparqldl.model.results.QueryResultImpl;
@@ -16,12 +16,13 @@ import java.util.logging.Level;
 /**
  * This engine just simply iterates through all possible bindings.
  */
-public class UnionQueryEngineSimpleBinding extends AbstractUnionQueryEngine
+public class UnionQueryEngineSimple extends AbstractQueryEngine<UnionQuery>
 {
     public enum BindingTime { BEFORE_CNF, AFTER_CNF };
 
     protected BindingTime _bindingTime = BindingTime.BEFORE_CNF;
     protected UnionQueryBindingCandidateGenerator _bindingGenerator;
+    protected AbstractBooleanUnionQueryEngine _booleanEngine = new BooleanUnionQueryEngineSimple();
 
     @Override
     protected QueryResult execABoxQuery(UnionQuery q)

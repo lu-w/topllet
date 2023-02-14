@@ -7,6 +7,7 @@ import openllet.core.boxes.abox.ABox;
 import openllet.core.boxes.rbox.Role;
 import openllet.core.utils.ATermUtils;
 import openllet.core.utils.Pair;
+import openllet.query.sparqldl.engine.AbstractBooleanQueryEngine;
 import openllet.query.sparqldl.engine.cq.QueryEngine;
 import openllet.query.sparqldl.model.Query;
 import openllet.query.sparqldl.model.cq.ConjunctiveQuery;
@@ -31,6 +32,16 @@ public class BooleanUnionQueryEngineSimple extends AbstractBooleanUnionQueryEngi
 {
     public static final Logger _logger = Log.getLogger(BooleanUnionQueryEngineSimple.class);
     private boolean useUnderapproximatingSemantics = false;
+
+    @Override
+    protected boolean execBooleanABoxQuery(CNFQuery q)
+    {
+        // 1. PRELIMINARY CONSISTENCY CHECK
+        q.getKB().ensureConsistency();
+
+        // 2. CHECK ENTAILMENT FOR EACH CONJUNCT
+        return isEntailed(q, q.getKB());
+    }
 
     @Override
     protected boolean execBooleanABoxQuery(UnionQuery q)
@@ -62,16 +73,6 @@ public class BooleanUnionQueryEngineSimple extends AbstractBooleanUnionQueryEngi
 
         // 5. CHECK ENTAILMENT FOR EACH CONJUNCT
         return isEntailed(cnfQuery, q.getKB());
-    }
-
-    @Override
-    protected boolean execBooleanABoxQuery(CNFQuery q)
-    {
-        // 1. PRELIMINARY CONSISTENCY CHECK
-        q.getKB().ensureConsistency();
-
-        // 2. CHECK ENTAILMENT FOR EACH CONJUNCT
-        return isEntailed(q, q.getKB());
     }
 
     /**
@@ -202,10 +203,10 @@ public class BooleanUnionQueryEngineSimple extends AbstractBooleanUnionQueryEngi
     private QueryResult execUnderapproximatingSemantics(UnionQuery q)
     {
         QueryResult result = new QueryResultImpl(q);
-        UnionQuery qCopy = (UnionQuery) q.copy();
-        for (Query conjunctiveQuery : qCopy.getQueries())
+        UnionQuery qCopy = q.copy();
+        for (ConjunctiveQuery conjunctiveQuery : qCopy.getQueries())
         {
-            QueryResult conjunctiveQueryResult = QueryEngine.exec((ConjunctiveQuery) conjunctiveQuery);
+            QueryResult conjunctiveQueryResult = QueryEngine.exec(conjunctiveQuery);
             for (ResultBinding binding : conjunctiveQueryResult)
                 result.add(binding);
         }

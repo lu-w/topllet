@@ -76,9 +76,8 @@ public class CNCQQueryImpl extends AbstractCompositeQuery<ConjunctiveQuery, CNCQ
         _negativeQueries = negativeQueries;
     }
 
-    @Override
-    protected CNCQQuery createQuery(Query<?> query)
+    public CNCQQuery createQuery(KnowledgeBase kb, boolean isDistinct)
     {
-        return new CNCQQueryImpl(query);
+        return new CNCQQueryImpl(kb, isDistinct);
     }
 }

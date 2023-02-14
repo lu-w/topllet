@@ -45,10 +45,9 @@ public class SimpleQueryEngine extends AbstractABoxEngineWrapper
 	public static final Logger _logger = Log.getLogger(QueryEngine.class);
 
 	@Override
-	public boolean supports(final Query<?> q)
+	public boolean supports(final ConjunctiveQuery q)
 	{
-		return q instanceof ConjunctiveQuery && ((ConjunctiveQuery) q).isNegated() && !q.hasCycle() &&
-				!q.getDistVars().isEmpty();
+		return !q.isNegated() && !q.hasCycle();
 	}
 
 	@Override

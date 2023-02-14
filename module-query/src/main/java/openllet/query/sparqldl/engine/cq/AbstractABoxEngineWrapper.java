@@ -43,11 +43,11 @@ import openllet.shared.tools.Log;
  *
  * @author Petr Kremen
  */
-public abstract class AbstractABoxEngineWrapper implements QueryExec
+public abstract class AbstractABoxEngineWrapper implements QueryExec<ConjunctiveQuery>
 {
 	public static final Logger _logger = Log.getLogger(QueryEngine.class);
 
-	public static final QueryExec distCombinedQueryExec = new CombinedQueryEngine();
+	public static final QueryExec<ConjunctiveQuery> distCombinedQueryExec = new CombinedQueryEngine();
 
 	protected ConjunctiveQuery schemaQuery;
 
@@ -57,10 +57,9 @@ public abstract class AbstractABoxEngineWrapper implements QueryExec
 	 * {@inheritDoc}
 	 */
 	@Override
-	public QueryResult exec(final Query<?> q)
+	public QueryResult exec(final ConjunctiveQuery query)
 	{
-		assert(supports(q));
-		ConjunctiveQuery query = (ConjunctiveQuery) q;
+		assert(supports(query));
 		_logger.fine(() -> "Executing query " + query);
 
 		partitionQuery(query);

@@ -184,5 +184,21 @@ public interface Query<QueryType extends Query<QueryType>>
      */
     List<QueryType> split();
 
+
+    /**
+     * Creates a new query of the given type - to be implemented by any concrete class.
+     * @param kb Knowledge base
+     * @param isDistinct whether the variable are distinct
+     * @return A new query instance
+     */
+    QueryType createQuery(KnowledgeBase kb, boolean isDistinct);
+
+    /**
+     * Creates a new query of the given type - to be implemented by any concrete class.
+     * @param query Query containing information on the knowledge base and distinctness to copy over
+     * @return A new query instance
+     */
+    QueryType createQuery(Query<?> query);
+
     String toString(boolean multiLine, boolean onlyQueryBody);
 }

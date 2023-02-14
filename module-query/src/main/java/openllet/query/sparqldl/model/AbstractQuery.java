@@ -4,8 +4,6 @@ import openllet.aterm.ATermAppl;
 import openllet.core.KnowledgeBase;
 import openllet.core.utils.TermFactory;
 import openllet.query.sparqldl.model.cq.*;
-import openllet.query.sparqldl.model.results.ResultBinding;
-import openllet.query.sparqldl.model.ucq.UnionQuery;
 import openllet.shared.tools.Log;
 
 import java.util.*;
@@ -205,11 +203,14 @@ public abstract class AbstractQuery<QueryType extends Query<QueryType>> implemen
      * @param query Query containing information on the knowledge base and distinctness to copy over
      * @return A new query instance
      */
-    abstract protected QueryType createQuery(Query<?> query);
+    public QueryType createQuery(Query<?> query)
+    {
+        return createQuery(query.getKB(), query.isDistinct());
+    }
 
     public QueryType copy()
     {
-        QueryType copy = createQuery(this);
+        QueryType copy = this.createQuery(this);
         copy.setDistVars(getDistVarsWithVarType());
         copy.setResultVars(getResultVars());
         return copy;
