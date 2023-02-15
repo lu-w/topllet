@@ -202,6 +202,8 @@ public abstract class AbstractQueryTest extends AbstractKBTests
 	 * Testing functionality
 	 */
 
+	// TODO: generify
+
 	protected void testQuery(final ConjunctiveQuery query, final boolean expected)
 	{
 		final QueryResult result = QueryEngine.exec(query);

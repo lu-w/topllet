@@ -36,7 +36,6 @@ import openllet.core.utils.ATermUtils;
 import openllet.core.utils.Bool;
 import openllet.core.utils.SetUtils;
 import openllet.query.sparqldl.engine.QueryExec;
-import openllet.query.sparqldl.model.Query;
 import openllet.query.sparqldl.model.results.MultiQueryResults;
 import openllet.query.sparqldl.model.cq.NotKnownQueryAtom;
 import openllet.query.sparqldl.model.cq.ConjunctiveQuery;
@@ -69,7 +68,7 @@ public class QueryEngine
 
 	public static CoreStrategy STRATEGY = CoreStrategy.ALLFAST;
 
-	public static QueryExec getQueryExec()
+	public static QueryExec<ConjunctiveQuery> getQueryExec()
 	{
 		return new CombinedQueryEngine();
 	}
@@ -217,76 +216,73 @@ public class QueryEngine
 		// TODO in various parts object/data property checks should be strengthened
 		switch (atom.getPredicate())
 		{
-			case Type:
-			case DirectType:
+			case Type, DirectType ->
+			{
 				return isIndividual(args.get(0), kb) && isClass(args.get(1), kb);
-
-			case PropertyValue:
-			case NegativePropertyValue:
+			}
+			case PropertyValue, NegativePropertyValue ->
+			{
 				final ATermAppl s = args.get(0);
 				final ATermAppl p = args.get(1);
 				final ATermAppl o = args.get(2);
 				return isIndividual(s, kb) && (ATermUtils.isVar(o) ? isProperty(p, kb) : ATermUtils.isLiteral(o) ? isDatatypeProperty(p, kb) : isObjectProperty(p, kb) && isIndividual(o, kb));
-
-			case SameAs:
-			case DifferentFrom:
+			}
+			case SameAs, DifferentFrom ->
+			{
 				return isIndividual(args.get(0), kb) && isIndividual(args.get(1), kb);
-
-			case DatatypeProperty:
+			}
+			case DatatypeProperty ->
+			{
 				return isDatatypeProperty(args.get(0), kb);
-
-			case ObjectProperty:
-			case Transitive:
-			case InverseFunctional:
-			case Symmetric:
-			case Asymmetric:
-			case Reflexive:
-			case Irreflexive:
+			}
+			case ObjectProperty, Transitive, InverseFunctional, Symmetric, Asymmetric, Reflexive, Irreflexive ->
+			{
 				return isObjectProperty(args.get(0), kb);
-
-			case Functional:
+			}
+			case Functional ->
+			{
 				return isProperty(args.get(0), kb);
-
-			case InverseOf:
+			}
+			case InverseOf ->
+			{
 				return isObjectProperty(args.get(0), kb) && isObjectProperty(args.get(1), kb);
-
-			case Domain:
+			}
+			case Domain ->
+			{
 				return isProperty(args.get(0), kb) && isClass(args.get(1), kb);
-			case Range:
+			}
+			case Range ->
+			{
 				return isObjectProperty(args.get(0), kb) && isClass(args.get(1), kb) || isDatatypeProperty(args.get(0), kb) && isDatatype(args.get(1), kb);
-
-			case SubPropertyOf:
-			case EquivalentProperty:
-			case StrictSubPropertyOf:
-			case DirectSubPropertyOf:
-			case propertyDisjointWith:
+			}
+			case SubPropertyOf, EquivalentProperty, StrictSubPropertyOf, DirectSubPropertyOf, propertyDisjointWith ->
+			{
 				return isProperty(args.get(0), kb) && isProperty(args.get(1), kb);
-
-			case SubClassOf:
-			case EquivalentClass:
-			case DisjointWith:
-			case ComplementOf:
-			case StrictSubClassOf:
-			case DirectSubClassOf:
+			}
+			case SubClassOf, EquivalentClass, DisjointWith, ComplementOf, StrictSubClassOf, DirectSubClassOf ->
+			{
 				return isClass(args.get(0), kb) && isClass(args.get(1), kb);
-
-			case NotKnown:
+			}
+			case NotKnown ->
+			{
 				return !hasUndefinedTerm(((NotKnownQueryAtom) atom).getAtoms(), kb);
-
-			case Union:
+			}
+			case Union ->
+			{
 				for (final List<QueryAtom> atoms : ((UnionQueryAtom) atom).getUnion())
 					if (hasUndefinedTerm(atoms, kb))
 						return false;
 				return true;
-
-			case Datatype:
+			}
+			case Datatype ->
+			{
 				return kb.isDatatype(args.get(1));
-
-			case Annotation:
+			}
+			case Annotation ->
+			{
 				return isAnnotationProperty(args.get(1), kb);
-
-			default:
-				throw new AssertionError();
+			}
+			default -> throw new AssertionError();
 		}
 	}
 
@@ -325,10 +321,7 @@ public class QueryEngine
 	{
 		try
 		{
-			List<ConjunctiveQuery> res = new ArrayList<>();
-			for (Query q : query.split())
-				res.add((ConjunctiveQuery) q);
-			return res;
+			return new ArrayList<>(query.split());
 		}
 		catch (final RuntimeException e)
 		{
@@ -341,7 +334,7 @@ public class QueryEngine
 	/**
 	 * Simplifies the query.
 	 *
-	 * @param query
+	 * @param query the query to simplify
 	 */
 	private static void simplify(final ConjunctiveQuery query)
 	{
@@ -424,21 +417,21 @@ public class QueryEngine
 		for (final QueryAtom a : new HashSet<>(q.getAtoms()))
 			switch (a.getPredicate())
 			{
-				case Type:
-				case DirectType:
+				case Type, DirectType ->
+				{
 					final ATermAppl clazz = a.getArguments().get(1);
-
 					if (undistVars.contains(clazz) && undistVars.contains(a.getArguments().get(0)))
 						q.add(QueryAtomFactory.SubClassOfAtom(clazz, clazz));
-					break;
-				case PropertyValue:
+				}
+				case PropertyValue ->
+				{
 					final ATermAppl property = a.getArguments().get(1);
-
 					if (undistVars.contains(a.getArguments().get(0)) || undistVars.contains(a.getArguments().get(2)) && q.getDistVars().contains(property))
 						q.add(QueryAtomFactory.SubPropertyOfAtom(property, property));
-					break;
-				default:
-					break;
+				}
+				default ->
+				{
+				}
 			}
 
 		return q;
@@ -500,7 +493,7 @@ public class QueryEngine
 	/**
 	 * Executes all boolean ABox atoms
 	 *
-	 * @param query
+	 * @param query the query to check entailment for
 	 * @return true if query is satisfied
 	 */
 	public static boolean execBooleanABoxQuery(final ConjunctiveQuery query)
@@ -527,18 +520,13 @@ public class QueryEngine
 			{
 				final List<ATermAppl> arguments = atom.getArguments();
 
-				switch (atom.getPredicate())
-				{
-					case Type:
-						tripleSatisfied = kb.isKnownType(arguments.get(0), arguments.get(1));
-						break;
-					case Annotation:
-					case PropertyValue:
-						tripleSatisfied = kb.hasKnownPropertyValue(arguments.get(0), arguments.get(1), arguments.get(2));
-						break;
-					default:
-						tripleSatisfied = Bool.UNKNOWN;
-				}
+				tripleSatisfied = switch (atom.getPredicate())
+						{
+							case Type -> kb.isKnownType(arguments.get(0), arguments.get(1));
+							case Annotation, PropertyValue ->
+									kb.hasKnownPropertyValue(arguments.get(0), arguments.get(1), arguments.get(2));
+							default -> Bool.UNKNOWN;
+						};
 			}
 
 			// if we cannot decide the truth value of this triple (without a
@@ -606,76 +594,138 @@ public class QueryEngine
 
 		switch (atom.getPredicate())
 		{
-			case Type:
+			case Type ->
+			{
 				return kb.isType(arguments.get(0), arguments.get(1));
-			case DirectType:
+			}
+			case DirectType ->
+			{
 				return kb.getInstances(arguments.get(1), true).contains(arguments.get(0));
-			case Annotation:
+			}
+			case Annotation ->
+			{
 				return kb.getAnnotations(arguments.get(0), arguments.get(1)).contains(arguments.get(2));
-			case PropertyValue:
+			}
+			case PropertyValue ->
+			{
 				return kb.hasPropertyValue(arguments.get(0), arguments.get(1), arguments.get(2));
-			case SameAs:
+			}
+			case SameAs ->
+			{
 				return kb.isSameAs(arguments.get(0), arguments.get(1));
-			case DifferentFrom:
+			}
+			case DifferentFrom ->
+			{
 				return kb.isDifferentFrom(arguments.get(0), arguments.get(1));
-			case EquivalentClass:
+			}
+			case EquivalentClass ->
+			{
 				return kb.isEquivalentClass(arguments.get(0), arguments.get(1));
-			case SubClassOf:
+			}
+			case SubClassOf ->
+			{
 				return kb.isSubClassOf(arguments.get(0), arguments.get(1));
-			case DirectSubClassOf:
+			}
+			case DirectSubClassOf ->
+			{
 				for (final Set<ATermAppl> a : kb.getSubClasses(arguments.get(1), true))
 					if (a.contains(arguments.get(0)))
 						return true;
 				return false;
-			case StrictSubClassOf:
+			}
+			case StrictSubClassOf ->
+			{
 				return kb.isSubClassOf(arguments.get(0), arguments.get(1)) && !kb.getEquivalentClasses(arguments.get(1)).contains(arguments.get(0));
-			case DisjointWith:
+			}
+			case DisjointWith ->
+			{
 				return kb.isDisjoint(arguments.get(0), arguments.get(1));
-			case ComplementOf:
+			}
+			case ComplementOf ->
+			{
 				return kb.isComplement(arguments.get(0), arguments.get(1));
-			case EquivalentProperty:
+			}
+			case EquivalentProperty ->
+			{
 				return kb.isEquivalentProperty(arguments.get(0), arguments.get(1));
-			case SubPropertyOf:
+			}
+			case SubPropertyOf ->
+			{
 				return kb.isSubPropertyOf(arguments.get(0), arguments.get(1));
-			case DirectSubPropertyOf:
+			}
+			case DirectSubPropertyOf ->
+			{
 				for (final Set<ATermAppl> a : kb.getSubProperties(arguments.get(1), true))
 					if (a.contains(arguments.get(0)))
 						return true;
 				return false;
-			case StrictSubPropertyOf:
-				return kb.isSubPropertyOf(arguments.get(0), arguments.get(1)) && !kb.getEquivalentProperties(arguments.get(1)).contains(arguments.get(0));
-			case Domain:
+			}
+			case StrictSubPropertyOf ->
+			{
+				return kb.isSubPropertyOf(arguments.get(0), arguments.get(1)) &&
+						!kb.getEquivalentProperties(arguments.get(1)).contains(arguments.get(0));
+			}
+			case Domain ->
+			{
 				return kb.hasDomain(arguments.get(0), arguments.get(1));
-			case Range:
+			}
+			case Range ->
+			{
 				return kb.hasRange(arguments.get(0), arguments.get(1));
-			case InverseOf:
+			}
+			case InverseOf ->
+			{
 				return kb.isInverse(arguments.get(0), arguments.get(1));
-			case ObjectProperty:
+			}
+			case ObjectProperty ->
+			{
 				return kb.isObjectProperty(arguments.get(0));
-			case DatatypeProperty:
+			}
+			case DatatypeProperty ->
+			{
 				return kb.isDatatypeProperty(arguments.get(0));
-			case Functional:
+			}
+			case Functional ->
+			{
 				return kb.isFunctionalProperty(arguments.get(0));
-			case InverseFunctional:
+			}
+			case InverseFunctional ->
+			{
 				return kb.isInverseFunctionalProperty(arguments.get(0));
-			case Symmetric:
+			}
+			case Symmetric ->
+			{
 				return kb.isSymmetricProperty(arguments.get(0));
-			case Asymmetric:
+			}
+			case Asymmetric ->
+			{
 				return kb.isAsymmetricProperty(arguments.get(0));
-			case Reflexive:
+			}
+			case Reflexive ->
+			{
 				return kb.isReflexiveProperty(arguments.get(0));
-			case Irreflexive:
+			}
+			case Irreflexive ->
+			{
 				return kb.isIrreflexiveProperty(arguments.get(0));
-			case Transitive:
+			}
+			case Transitive ->
+			{
 				return kb.isTransitiveProperty(arguments.get(0));
-			case NotKnown:
+			}
+			case NotKnown ->
+			{
 				for (final QueryAtom notAtom : ((NotKnownQueryAtom) atom).getAtoms())
 					if (!checkGround(notAtom, kb))
 						return true;
 				return false;
-			case NegativePropertyValue:
+			}
+			case NegativePropertyValue ->
+			{
 				return kb.isType(arguments.get(0), not(hasValue(arguments.get(1), arguments.get(2))));
-			case Union:
+			}
+			case Union ->
+			{
 				for (final List<QueryAtom> atoms : ((UnionQueryAtom) atom).getUnion())
 				{
 					for (final QueryAtom unionAtom : atoms)
@@ -684,28 +734,26 @@ public class QueryEngine
 					return true;
 				}
 				return false;
-			case Datatype:
+			}
+			case Datatype ->
+			{
 				final ATermAppl l = arguments.get(0);
 				final ATermAppl d = arguments.get(1);
-
 				if (!ATermUtils.isLiteral(l))
 					return false;
-
 				final DatatypeReasoner dtReasoner = kb.getDatatypeReasoner();
 				try
 				{
 					final Object value = dtReasoner.getValue(l);
 					return dtReasoner.isSatisfiable(Collections.singleton(d), value);
-				}
-				catch (final DatatypeReasonerException e)
+				} catch (final DatatypeReasonerException e)
 				{
 					final String msg = format("Unexpected datatype reasoner exception while checking if literal (%s) is in datarange (%s): %s ", l, d, e.getMessage());
 					_logger.severe(msg);
 					throw new InternalReasonerException(msg, e);
 				}
-
-			default:
-				throw new IllegalArgumentException("Unknown atom type : " + atom.getPredicate());
+			}
+			default -> throw new IllegalArgumentException("Unknown atom type : " + atom.getPredicate());
 		}
 	}
 
