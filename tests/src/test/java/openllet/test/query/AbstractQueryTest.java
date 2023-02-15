@@ -147,8 +147,9 @@ public abstract class AbstractQueryTest extends AbstractKBTests
 	protected ConjunctiveQuery query(final ATermAppl[] vars, final QueryAtom[] atoms)
 	{
 		final ConjunctiveQuery q = aQuery(ConjunctiveQueryImpl.class, vars, atoms);
-		for (final ATermAppl var : q.getUndistVars())
-			q.addDistVar(var, VarType.INDIVIDUAL);
+		if (q != null)
+			for (final ATermAppl var : q.getUndistVars())
+				q.addDistVar(var, VarType.INDIVIDUAL);
 		return q;
 	}
 
