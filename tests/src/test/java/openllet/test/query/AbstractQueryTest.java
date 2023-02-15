@@ -7,17 +7,14 @@
 package openllet.test.query;
 
 import openllet.aterm.ATermAppl;
+import openllet.query.sparqldl.engine.cncq.CNCQQueryEngineSimple;
 import openllet.query.sparqldl.engine.cq.QueryEngine;
-import openllet.query.sparqldl.engine.ucq.BooleanUnionQueryEngineSimple;
 import openllet.query.sparqldl.engine.ucq.UnionQueryEngineSimple;
-import openllet.query.sparqldl.engine.QueryExec;
 import openllet.query.sparqldl.model.*;
 import openllet.query.sparqldl.model.cncq.CNCQQuery;
 import openllet.query.sparqldl.model.cncq.CNCQQueryImpl;
 import openllet.query.sparqldl.model.results.QueryResult;
-import openllet.query.sparqldl.model.results.QueryResultImpl;
 import openllet.query.sparqldl.model.results.ResultBinding;
-import openllet.query.sparqldl.model.results.ResultBindingImpl;
 import openllet.query.sparqldl.model.ucq.*;
 import openllet.query.sparqldl.model.Query.VarType;
 import openllet.query.sparqldl.model.cq.ConjunctiveQuery;
@@ -30,8 +27,7 @@ import java.lang.reflect.Constructor;
 import java.util.*;
 
 import static openllet.core.utils.TermFactory.var;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 /**
  * <p>
@@ -71,7 +67,7 @@ public abstract class AbstractQueryTest extends AbstractKBTests
 	}
 
 	@SafeVarargs
-	protected final <QueryType> QueryType[] where(final QueryType... queries)
+	protected final <T> T[] where(final T... queries)
 	{
 		return queries;
 	}
@@ -204,21 +200,36 @@ public abstract class AbstractQueryTest extends AbstractKBTests
 
 	// TODO: generify
 
-	protected void testQuery(final ConjunctiveQuery query, final boolean expected)
+	private QueryResult execQuery(Query<?> query)
 	{
-		final QueryResult result = QueryEngine.execQuery(query);
-		assertEquals(expected, !result.isEmpty());
+		QueryResult result = null;
+		if (query instanceof ConjunctiveQuery)
+			result = new QueryEngine().exec((ConjunctiveQuery) query);
+		else if (query instanceof UnionQuery)
+			result = new UnionQueryEngineSimple(UnionQueryEngineSimple.BindingTime.AFTER_CNF).exec((UnionQuery) query);
+		else if (query instanceof CNCQQuery)
+			result = new CNCQQueryEngineSimple().exec((CNCQQuery) query);
+		else
+			fail("Unknown query type " + query.getClass());
+		if (result == null)
+			fail("No result returned for query " + query);
+		return result;
 	}
 
-	protected void testQuery(final ConjunctiveQuery query, final ATermAppl[]... values)
+	protected void testQuery(final Query<?> query, final boolean expected)
+	{
+		assertEquals(expected, !execQuery(query).isEmpty());
+	}
+
+	protected void testQuery(final Query<?> query, List<List<ATermAppl>> values)
 	{
 		final List<ATermAppl> resultVars = query.getResultVars();
 
 		final Map<List<ATermAppl>, Integer> answers = new HashMap<>();
-		for (final ATermAppl[] value : values)
-			answers.merge(Arrays.asList(value), 1, Integer::sum);
+		for (final List<ATermAppl> answer : values)
+			answers.merge(answer, 1, Integer::sum);
 
-		final QueryResult result = QueryEngine.execQuery(query);
+		final QueryResult result = execQuery(query);
 		for (final ResultBinding binding : result)
 		{
 			final List<ATermAppl> list = new ArrayList<>(resultVars.size());
@@ -237,56 +248,12 @@ public abstract class AbstractQueryTest extends AbstractKBTests
 		assertTrue("Unfound bindings: " + answers.keySet(), answers.isEmpty());
 	}
 
-	protected void testUnionQuery(final UnionQuery query, final boolean expected)
-	{
-		QueryExec<UnionQuery> engine = new BooleanUnionQueryEngineSimple();
-		QueryResult result = new QueryResultImpl(query);
-		if (expected)
-			result.add(new ResultBindingImpl());
-		assertEquals(result, engine.exec(query));
-	}
-
-	protected void testUnionQuery(final UnionQuery query, final ATermAppl[]... values)
+	protected void testQuery(final Query<?> query, final ATermAppl[]... values)
 	{
 		List<List<ATermAppl>> valuesList = new ArrayList<>();
 		for (ATermAppl[] answer : values)
 			valuesList.add(Arrays.stream(answer).toList());
-		testUnionQuery(query, valuesList);
-	}
-
-	protected void testUnionQuery(final UnionQuery query, final List<List<ATermAppl>> values)
-	{
-		final List<ATermAppl> resultVars = query.getResultVars();
-
-		final Map<List<ATermAppl>, Integer> answers = new HashMap<>();
-		for (final List<ATermAppl> answer : values)
-			answers.merge(answer, 1, Integer::sum);
-
-		UnionQueryEngineSimple engine = new UnionQueryEngineSimple();
-		engine.setBindingTime(UnionQueryEngineSimple.BindingTime.AFTER_CNF);
-		final QueryResult result = engine.exec(query);
-		for (final ResultBinding binding : result)
-		{
-			final List<ATermAppl> list = new ArrayList<>(resultVars.size());
-			for (final ATermAppl var : resultVars)
-				list.add(binding.getValue(var));
-
-			final Integer count = answers.get(list);
-			if (count == null)
-				Assert.fail("Unexpected binding in the result: " + list);
-			else
-				if (count == 1)
-					answers.remove(list);
-				else
-					answers.put(list, count - 1);
-		}
-
-		assertTrue("Unfound bindings: " + answers.keySet(), answers.isEmpty());
-	}
-
-	protected void testCNCQQuery(final CNCQQuery query, final boolean expected)
-	{
-		assertTrue(true); // TODO
+		testQuery(query, valuesList);
 	}
 
 	/**

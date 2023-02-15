@@ -77,17 +77,17 @@ public class TestBooleanUnionQueries extends AbstractQueryTest
         // UCQ 11: p(x,y) -> not entailed
         UnionQuery ucq11 = unionQuery(query(PropertyValueAtom(x, _q, y)));
 
-        testUnionQuery(ucq1, true);
-        testUnionQuery(ucq2, false);
-        testUnionQuery(ucq3, true);
-        testUnionQuery(ucq4, true);
-        testUnionQuery(ucq5, true);
-        testUnionQuery(ucq6, true);
-        testUnionQuery(ucq7, false);
-        testUnionQuery(ucq8, false);
-        testUnionQuery(ucq9, true);
-        testUnionQuery(ucq10, true);
-        testUnionQuery(ucq11, false);
+        testQuery(ucq1, true);
+        testQuery(ucq2, false);
+        testQuery(ucq3, true);
+        testQuery(ucq4, true);
+        testQuery(ucq5, true);
+        testQuery(ucq6, true);
+        testQuery(ucq7, false);
+        testQuery(ucq8, false);
+        testQuery(ucq9, true);
+        testQuery(ucq10, true);
+        testQuery(ucq11, false);
     }
 
     @Test
@@ -107,9 +107,9 @@ public class TestBooleanUnionQueries extends AbstractQueryTest
                                      query(TypeAtom(_a, not(_C))),
                                      query(TypeAtom(_b, _A)));
 
-        testUnionQuery(ucq1, false);
-        testUnionQuery(ucq2, true);
-        testUnionQuery(ucq3, true);
+        testQuery(ucq1, false);
+        testQuery(ucq2, true);
+        testQuery(ucq3, true);
     }
 
     @Test
@@ -151,11 +151,11 @@ public class TestBooleanUnionQueries extends AbstractQueryTest
         UnionQuery ucq5 = unionQuery(query(TypeAtom(x, Patricide), PropertyValueAtom(z, hasChild, x),
                 TypeAtom(y, not(Patricide)), PropertyValueAtom(x, hasChild, y)));
 
-        testUnionQuery(ucq1, true);
-        testUnionQuery(ucq2, false);
-        testUnionQuery(ucq3, false);
-        testUnionQuery(ucq4, true);
-        testUnionQuery(ucq5, true);
+        testQuery(ucq1, true);
+        testQuery(ucq2, false);
+        testQuery(ucq3, false);
+        testQuery(ucq4, true);
+        testQuery(ucq5, true);
     }
 
     @Test
@@ -180,11 +180,11 @@ public class TestBooleanUnionQueries extends AbstractQueryTest
         UnionQuery ucq5 = unionQuery(query(TypeAtom(_b, _A)),
                                      query(TypeAtom(_a, _B)));
 
-        testUnionQuery(ucq1, true);
-        testUnionQuery(ucq2, true);
-        testUnionQuery(ucq3, true);
-        testUnionQuery(ucq4, true);
-        testUnionQuery(ucq5, false);
+        testQuery(ucq1, true);
+        testQuery(ucq2, true);
+        testQuery(ucq3, true);
+        testQuery(ucq4, true);
+        testQuery(ucq5, false);
     }
 
     @Test
@@ -205,8 +205,8 @@ public class TestBooleanUnionQueries extends AbstractQueryTest
         UnionQuery ucq2 = unionQuery(query(TypeAtom(_a, _C)),
                                      query(TypeAtom(_b, _D)));
 
-        testUnionQuery(ucq1, true);
-        testUnionQuery(ucq2, true);
+        testQuery(ucq1, true);
+        testQuery(ucq2, true);
     }
 
     @Test
@@ -229,11 +229,11 @@ public class TestBooleanUnionQueries extends AbstractQueryTest
         UnionQuery ucq5 = unionQuery(query(TypeAtom(_a, _B), PropertyValueAtom(_a, _q, literal(10))),
                                      query(TypeAtom(_a, _C)));
 
-        testUnionQuery(ucq1, true);
-        testUnionQuery(ucq2, true);
-        try { testUnionQuery(ucq3, true); } catch (UnsupportedOperationException ignored) {}
-        testUnionQuery(ucq4, false);
-        testUnionQuery(ucq5, true);
+        testQuery(ucq1, true);
+        testQuery(ucq2, true);
+        try { testQuery(ucq3, true); } catch (UnsupportedOperationException ignored) {}
+        testQuery(ucq4, false);
+        testQuery(ucq5, true);
     }
 
     @Test

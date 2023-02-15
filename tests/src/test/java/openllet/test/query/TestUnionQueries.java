@@ -36,7 +36,7 @@ public class TestUnionQueries extends AbstractQueryTest
         UnionQuery ucq1 = unionQuery(select(x), where(
                 query(TypeAtom(x, _B), PropertyValueAtom(x, _r, _b), TypeAtom(y, _D)),
                 query(TypeAtom(y, _C), PropertyValueAtom(y, _r, _b))));
-        testUnionQuery(ucq1, new ATermAppl[][]{{_a}});
+        testQuery(ucq1, new ATermAppl[][]{{_a}});
     }
 
     @Test
@@ -46,7 +46,7 @@ public class TestUnionQueries extends AbstractQueryTest
         UnionQuery ucq2 = unionQuery(select(x, y), where(
                 query(TypeAtom(x, _B), PropertyValueAtom(x, _p, _b)),
                 query(TypeAtom(y, _C), PropertyValueAtom(y, _r, _b))));
-        testUnionQuery(ucq2);
+        testQuery(ucq2);
     }
 
     @Test
@@ -56,7 +56,7 @@ public class TestUnionQueries extends AbstractQueryTest
         UnionQuery ucq3 = unionQuery(select(y, z), where(
                 query(TypeAtom(_a, _B), PropertyValueAtom(_a, _p, x)),
                 query(TypeAtom(z, _D), PropertyValueAtom(y, _r, z))));
-        testUnionQuery(ucq3, allResults(List.of(_a, _b, _c), 2));
+        testQuery(ucq3, allResults(List.of(_a, _b, _c), 2));
     }
 
     @Test
@@ -66,7 +66,7 @@ public class TestUnionQueries extends AbstractQueryTest
         UnionQuery ucq4 = unionQuery(select(x, y), where(
                 query(TypeAtom(x, _B), PropertyValueAtom(x, _p, z)),
                 query(TypeAtom(z, _E), PropertyValueAtom(y, _r, z))));
-        testUnionQuery(ucq4, new ATermAppl[][]{{_a, _a}, {_a, _b}, {_a, _c}});
+        testQuery(ucq4, new ATermAppl[][]{{_a, _a}, {_a, _b}, {_a, _c}});
     }
 
     @Test
@@ -78,7 +78,7 @@ public class TestUnionQueries extends AbstractQueryTest
                 query(TypeAtom(_a, _C)),
                 query(TypeAtom(_a, _B), PropertyValueAtom(_a, _p, x1), PropertyValueAtom(_a, _r, y1), TypeAtom(_b, _D)))
         );
-        testUnionQuery(ucq5, new ATermAppl[][]{{_b}});
+        testQuery(ucq5, new ATermAppl[][]{{_b}});
     }
 
     @Test
@@ -89,7 +89,7 @@ public class TestUnionQueries extends AbstractQueryTest
                 query(TypeAtom(_a, _B), PropertyValueAtom(_a, _r, x), PropertyValueAtom(y, _p, z), TypeAtom(y, _D)),
                 query(TypeAtom(_a, _B), PropertyValueAtom(_a, _p, x1), PropertyValueAtom(_a, _r, y1), TypeAtom(_b, _D)))
         );
-        testUnionQuery(ucq6);
+        testQuery(ucq6);
     }
 
     @Test
@@ -100,7 +100,7 @@ public class TestUnionQueries extends AbstractQueryTest
                 query(TypeAtom(_a, _B), PropertyValueAtom(_a, _r, x), PropertyValueAtom(y, _p, z)),
                 query(TypeAtom(x, _D)))
         );
-        testUnionQuery(ucq7, new ATermAppl[][]{{_b, _a}, {_b, _b}, {_b, _c}});
+        testQuery(ucq7, new ATermAppl[][]{{_b, _a}, {_b, _b}, {_b, _c}});
     }
 
     @Test
@@ -108,7 +108,7 @@ public class TestUnionQueries extends AbstractQueryTest
     {
         setupKB1();
         UnionQuery ucq8 = unionQuery(select(x), where(query(TypeAtom(x, _C))));
-        testUnionQuery(ucq8);
+        testQuery(ucq8);
     }
 
     @Test
@@ -116,7 +116,7 @@ public class TestUnionQueries extends AbstractQueryTest
     {
         setupKB1();
         UnionQuery ucq9 = unionQuery(select(x), where(query(TypeAtom(x, _A)), query(TypeAtom(x, _B))));
-        testUnionQuery(ucq9, new ATermAppl[][]{{_a}});
+        testQuery(ucq9, new ATermAppl[][]{{_a}});
     }
 
     @Test
@@ -124,7 +124,7 @@ public class TestUnionQueries extends AbstractQueryTest
     {
         setupKB1();
         UnionQuery ucq10 = unionQuery(select(x), where(query(PropertyValueAtom(x, _p, y))));
-        testUnionQuery(ucq10, new ATermAppl[][]{{_a}});
+        testQuery(ucq10, new ATermAppl[][]{{_a}});
     }
 
     @Test
@@ -132,7 +132,7 @@ public class TestUnionQueries extends AbstractQueryTest
     {
         setupKB1();
         UnionQuery ucq11 = unionQuery(select(x, y), where(query(PropertyValueAtom(x, _p, y))));
-        testUnionQuery(ucq11);
+        testQuery(ucq11);
     }
 
     @Test
@@ -142,7 +142,7 @@ public class TestUnionQueries extends AbstractQueryTest
         UnionQuery ucq12 = unionQuery(select(y, z), where(
                 query(TypeAtom(_a, _B), PropertyValueAtom(_a, _p, y)),
                 query(TypeAtom(z, _D), PropertyValueAtom(y, _r, z))));
-        testUnionQuery(ucq12, new ATermAppl[][] { { _a, _b } });
+        testQuery(ucq12, new ATermAppl[][] { { _a, _b } });
     }
 
     @Test
@@ -153,7 +153,7 @@ public class TestUnionQueries extends AbstractQueryTest
                 query(TypeAtom(x, _B), PropertyValueAtom(x, _r, y), PropertyValueAtom(x1, _r, z)),
                 query(TypeAtom(_a, _B)))
         );
-        testUnionQuery(ucq3, allResults(List.of(_a, _b, _c), 3));
+        testQuery(ucq3, allResults(List.of(_a, _b, _c), 3));
     }
 
     @Test
@@ -185,11 +185,11 @@ public class TestUnionQueries extends AbstractQueryTest
         UnionQuery ucq2 = unionQuery(select(x, y), where(query(TypeAtom(x, Patricide), PropertyValueAtom(iokaste,
                         hasChild, x), TypeAtom(y, not(Patricide)), PropertyValueAtom(x, hasChild, y))));
 
-        testUnionQuery(ucq1, new ATermAppl[][] {
+        testQuery(ucq1, new ATermAppl[][] {
                 { oedipus, polyneikes, polyneikes, thersandros },
                 { polyneikes, thersandros, oedipus, polyneikes }
         });
-        testUnionQuery(ucq2);
+        testQuery(ucq2);
     }
 
     @Test

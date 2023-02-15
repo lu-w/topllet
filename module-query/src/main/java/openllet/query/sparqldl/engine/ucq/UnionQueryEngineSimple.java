@@ -24,6 +24,13 @@ public class UnionQueryEngineSimple extends AbstractQueryEngine<UnionQuery>
     protected UnionQueryBindingCandidateGenerator _bindingGenerator;
     protected AbstractBooleanUnionQueryEngine _booleanEngine = new BooleanUnionQueryEngineSimple();
 
+    public UnionQueryEngineSimple() {}
+
+    public UnionQueryEngineSimple(BindingTime bindingTime)
+    {
+        setBindingTime(bindingTime);
+    }
+
     @Override
     protected QueryResult execABoxQuery(UnionQuery q)
     {

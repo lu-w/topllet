@@ -29,6 +29,6 @@ public class TestBooleanCNCQueries extends AbstractQueryTest
         CNCQQuery cncqq1 = cncqQuery(query(TypeAtom(x, _B), PropertyValueAtom(x, _r, _b)),
                 query(TypeAtom(y, _C), PropertyValueAtom(y, _r, _b)));
 
-        testCNCQQuery(cncqq1, true);
+        testQuery(cncqq1, true);
     }
 }
