@@ -42,12 +42,20 @@ public interface ConjunctiveQuery extends AtomQuery<ConjunctiveQuery>
 
 	/**
 	 * Rolls up the query to the given variable
-	 * @param distVar the set of variables to not roll up (as they are dist. variables)
+	 * @param distVar the variable to roll up to
 	 * @param avoidList a collection of terms to avoid
 	 * @param stopOnConstants whether to stop rolling up on constants
 	 * @return A new copy of the rolled up query.
 	 */
 	ATermAppl rollUpTo(final ATermAppl distVar, final Collection<ATermAppl> avoidList, final boolean stopOnConstants);
+
+	/**
+	 * Splits the query and subsequently rolls each subquery into some available variable (starting with
+	 * distinguished, if available, otherwise individuals, and finally undistinguished variables).
+	 * @param splitOnDistVars whether to split the query also on distinguished variables
+	 * @return A new copy of the rolled up query.
+	 */
+	ConjunctiveQuery splitAndRollUp(boolean splitOnDistVars);
 
 	/**
 	 * Extension of the standard split() functionality of queries that can also split on individuals.

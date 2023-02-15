@@ -10,6 +10,7 @@ package openllet.query.sparqldl.model.cq;
 
 import java.util.*;
 import java.util.Map.Entry;
+import java.util.logging.Level;
 
 import openllet.aterm.ATermAppl;
 import openllet.aterm.ATermList;
@@ -82,6 +83,52 @@ public class ConjunctiveQueryImpl extends AbstractAtomQuery<ConjunctiveQuery> im
 		classParts = classParts.concat(getClasses(var));
 
 		return ATermUtils.makeAnd(classParts);
+	}
+
+	@Override
+	public ConjunctiveQuery splitAndRollUp(boolean splitOnDistVars)
+	{
+		if (_logger.isLoggable(Level.FINER))
+			_logger.finer("Rolling up for conjunctive query: " + this);
+		// 1. step: Find disjoint parts of the query
+		List<ConjunctiveQuery> splitQueries = split(true, splitOnDistVars);
+		if (_logger.isLoggable(Level.FINER))
+		{
+			_logger.finer("Split query: " + splitQueries);
+			_logger.finer("Now rolling up each separate element.");
+		}
+
+		// 2. step: Roll each part up
+		ConjunctiveQuery rolledUpQuery = new ConjunctiveQueryImpl(this.getKB(), this.isDistinct());
+		for (ConjunctiveQuery connectedQuery : splitQueries)
+		{
+			if (connectedQuery.getDistVars().size() <= 1)
+			{
+				final ATermAppl testIndOrVar;
+				if (!connectedQuery.getDistVars().isEmpty())
+					testIndOrVar = connectedQuery.getDistVars().iterator().next();
+				else if (!connectedQuery.getConstants().isEmpty())
+					testIndOrVar = connectedQuery.getConstants().iterator().next();
+				else if (!connectedQuery.getUndistVars().isEmpty())
+					testIndOrVar = connectedQuery.getUndistVars().iterator().next();
+				else
+					throw new RuntimeException("Rolling up procedure did not find any individual or variable to roll " +
+							"up to.");
+				final ATermAppl testClass = connectedQuery.rollUpTo(testIndOrVar,
+						Collections.emptySet(), false);
+				if (_logger.isLoggable(Level.FINER))
+					_logger.finer("Rolled-up Boolean query: " + testIndOrVar + " -> " + testClass);
+				QueryAtom rolledUpAtom = new QueryAtomImpl(QueryPredicate.Type, testIndOrVar, testClass);
+				rolledUpQuery.add(rolledUpAtom);
+			}
+			else
+			{
+				// we can not roll-up queries that contain more than one distinguished variables -> just leave it
+				for (QueryAtom atom : connectedQuery.getAtoms())
+					rolledUpQuery.add(atom);
+			}
+		}
+		return rolledUpQuery;
 	}
 
 	// TODO optimize - _cache

@@ -168,50 +168,7 @@ public class UnionQueryImpl extends AbstractCompositeQuery<ConjunctiveQuery, Uni
         assert(!getDistVars().isEmpty() || !getConstants().isEmpty() || !getUndistVars().isEmpty());
         UnionQuery rolledUpUnionQuery = new UnionQueryImpl(this);
         for (ConjunctiveQuery conjunctiveQuery : _queries)
-        {
-            if (_logger.isLoggable(Level.FINER))
-                _logger.finer("Rolling up for conjunctive query: " + conjunctiveQuery);
-
-            // 1. step: Find disjoint parts of the query
-            List<ConjunctiveQuery> splitQueries = conjunctiveQuery.split(true, stopRollingOnDistVars);
-            if (_logger.isLoggable(Level.FINER))
-            {
-                _logger.finer("Split query: " + splitQueries);
-                _logger.finer("Now rolling up each separate element.");
-            }
-
-            // 2. step: Roll each part up
-            ConjunctiveQuery rolledUpQuery = new ConjunctiveQueryImpl(this.getKB(), this.isDistinct());
-            for (ConjunctiveQuery connectedQuery : splitQueries)
-            {
-                if (connectedQuery.getDistVars().size() <= 1)
-                {
-                    final ATermAppl testIndOrVar;
-                    if (!connectedQuery.getDistVars().isEmpty())
-                        testIndOrVar = connectedQuery.getDistVars().iterator().next();
-                    else if (!connectedQuery.getConstants().isEmpty())
-                        testIndOrVar = connectedQuery.getConstants().iterator().next();
-                    else if (!connectedQuery.getUndistVars().isEmpty())
-                        testIndOrVar = connectedQuery.getUndistVars().iterator().next();
-                    else
-                        throw new RuntimeException("Rolling up procedure did not find any individual or variable to roll " +
-                                "up to.");
-                    final ATermAppl testClass = connectedQuery.rollUpTo(testIndOrVar,
-                            Collections.emptySet(), false);
-                    if (_logger.isLoggable(Level.FINER))
-                        _logger.finer("Rolled-up Boolean query: " + testIndOrVar + " -> " + testClass);
-                    QueryAtom rolledUpAtom = new QueryAtomImpl(QueryPredicate.Type, testIndOrVar, testClass);
-                    rolledUpQuery.add(rolledUpAtom);
-                }
-                else
-                {
-                    // we can not roll-up queries that contain more than one distinguished variables -> just leave it
-                    for (QueryAtom atom : connectedQuery.getAtoms())
-                        rolledUpQuery.add(atom);
-                }
-            }
-            rolledUpUnionQuery.addQuery(rolledUpQuery);
-        }
+            rolledUpUnionQuery.addQuery(conjunctiveQuery.splitAndRollUp(stopRollingOnDistVars));
         for (ATermAppl var : _resultVars)
             rolledUpUnionQuery.addResultVar(var);
         for (VarType varType : _distVars.keySet())

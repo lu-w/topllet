@@ -1,11 +1,15 @@
 package openllet.query.sparqldl.model.cncq;
 
+import openllet.aterm.ATermAppl;
 import openllet.core.KnowledgeBase;
 import openllet.query.sparqldl.model.AbstractCompositeQuery;
 import openllet.query.sparqldl.model.Query;
 import openllet.query.sparqldl.model.cq.ConjunctiveQuery;
+import openllet.query.sparqldl.model.cq.ConjunctiveQueryImpl;
+import openllet.query.sparqldl.model.cq.QueryAtom;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class CNCQQueryImpl extends AbstractCompositeQuery<ConjunctiveQuery, CNCQQuery> implements CNCQQuery
@@ -37,21 +41,31 @@ public class CNCQQueryImpl extends AbstractCompositeQuery<ConjunctiveQuery, CNCQ
     }
 
     @Override
+    public void addQuery(ConjunctiveQuery q)
+    {
+        if (q.isNegated())
+            addNegativeQuery(q);
+        else
+            addPositiveQuery(q);
+    }
+
+    @Override
     public List<ConjunctiveQuery> getPositiveQueries()
     {
-        return _positiveQueries;
+        return Collections.unmodifiableList(_positiveQueries);
     }
 
     @Override
     public List<ConjunctiveQuery> getNegativeQueries()
     {
-        return _negativeQueries;
+        return Collections.unmodifiableList(_negativeQueries);
     }
 
     @Override
     public void addPositiveQuery(ConjunctiveQuery q)
     {
         super.addQuery(q);
+        q.setNegation(false);
         _positiveQueries.add(q);
     }
 
@@ -59,6 +73,7 @@ public class CNCQQueryImpl extends AbstractCompositeQuery<ConjunctiveQuery, CNCQ
     public void addNegativeQuery(ConjunctiveQuery q)
     {
         super.addQuery(q);
+        q.setNegation(true);
         _negativeQueries.add(q);
     }
 
@@ -74,6 +89,29 @@ public class CNCQQueryImpl extends AbstractCompositeQuery<ConjunctiveQuery, CNCQ
     {
         super.addQueries(negativeQueries);
         _negativeQueries = negativeQueries;
+    }
+
+    @Override
+    public ConjunctiveQuery mergePositiveQueries()
+    {
+        ConjunctiveQuery newQuery = new ConjunctiveQueryImpl(this);
+        for (ConjunctiveQuery q : _positiveQueries)
+        {
+            // Copies atoms
+            for (QueryAtom a : q.getAtoms())
+                if (!newQuery.getAtoms().contains(a))
+                    newQuery.add(a.copy());
+            // Adds result variables
+            for (ATermAppl var : q.getResultVars())
+                if (!newQuery.getResultVars().contains(var))
+                    q.addResultVar(var);
+            // Adds distinguished variables and their types
+            for (VarType varType : VarType.values())
+                for (ATermAppl var : q.getDistVarsForType(varType))
+                    if (!newQuery.getDistVarsForType(varType).contains(var))
+                        q.addResultVar(var);
+        }
+        return newQuery;
     }
 
     public CNCQQuery createQuery(KnowledgeBase kb, boolean isDistinct)
