@@ -8,13 +8,11 @@ import openllet.query.sparqldl.model.ucq.CNFQuery;
 import openllet.query.sparqldl.model.ucq.CNFQueryImpl;
 import openllet.query.sparqldl.model.ucq.DisjunctiveQuery;
 
-import java.util.ArrayList;
-import java.util.EnumMap;
-import java.util.HashSet;
-import java.util.List;
+import java.util.*;
 
 abstract public class AbstractCompositeQuery<SubQueryType extends Query<SubQueryType>,
-        QueryType extends CompositeQuery<SubQueryType, QueryType>> extends AbstractQuery<QueryType> implements CompositeQuery<SubQueryType, QueryType>
+        QueryType extends CompositeQuery<SubQueryType, QueryType>> extends AbstractQuery<QueryType>
+        implements CompositeQuery<SubQueryType, QueryType>
 {
     protected List<SubQueryType> _queries = new ArrayList<>();
 
@@ -81,7 +79,7 @@ abstract public class AbstractCompositeQuery<SubQueryType extends Query<SubQuery
         QueryType copy = super.copy();
         for (SubQueryType q : _queries)
             copy.addQuery(q.copy());
-        copy.setDistVars(getDistVarsWithVarType());
+        copy.setDistVars(new EnumMap<>(getDistVarsWithVarType()));
         copy.setResultVars(getResultVars());
         return copy;
     }

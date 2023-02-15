@@ -36,18 +36,17 @@ public class CNFQueryImpl extends AbstractCompositeQuery<DisjunctiveQuery, CNFQu
         for (final DisjunctiveQuery conjunct : getQueries())
         {
             ATermAppl toMerge = null;
-            for (final ConjunctiveQuery disjunct : conjunct.getQueries())
-                for (final QueryAtom atom : disjunct.getAtoms())
-                    for (final ATermAppl arg : atom.getArguments())
-                    {
-                        if (!(ATermUtils.isVar(arg)))
-                            continue;
+            for (final QueryAtom atom : conjunct.getAtoms())
+                for (final ATermAppl arg : atom.getArguments())
+                {
+                    if (!(ATermUtils.isVar(arg)))
+                        continue;
 
-                        disjointSet.add(arg);
-                        if (toMerge != null) // after 1st iteration, add by union to previously added
-                            disjointSet.union(toMerge, arg);
-                        toMerge = arg;
-                    }
+                    disjointSet.add(arg);
+                    if (toMerge != null) // after 1st iteration, add by union to previously added
+                        disjointSet.union(toMerge, arg);
+                    toMerge = arg;
+                }
         }
         final Collection<Set<ATermAppl>> equivalenceSets = disjointSet.getEquivalanceSets();
 

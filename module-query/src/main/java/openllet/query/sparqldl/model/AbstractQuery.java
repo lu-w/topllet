@@ -79,6 +79,12 @@ public abstract class AbstractQuery<QueryType extends Query<QueryType>> implemen
     }
 
     @Override
+    public void removeResultVar(final ATermAppl a)
+    {
+        _resultVars.remove(a);
+    }
+
+    @Override
     public void setResultVars(final List<ATermAppl> resultVars)
     {
         _resultVars = resultVars;
@@ -106,9 +112,9 @@ public abstract class AbstractQuery<QueryType extends Query<QueryType>> implemen
     }
 
     @Override
-    public EnumMap<VarType, Set<ATermAppl>> getDistVarsWithVarType()
+    public Map<VarType, Set<ATermAppl>> getDistVarsWithVarType()
     {
-        return _distVars;
+        return Collections.unmodifiableMap(_distVars);
     }
 
     @Override
@@ -198,21 +204,11 @@ public abstract class AbstractQuery<QueryType extends Query<QueryType>> implemen
         return _parameters;
     }
 
-    /**
-     * Creates a new query of the given type - to be implemented by any concrete class.
-     * @param query Query containing information on the knowledge base and distinctness to copy over
-     * @return A new query instance
-     */
-    public QueryType createQuery(Query<?> query)
-    {
-        return createQuery(query.getKB(), query.isDistinct());
-    }
-
     public QueryType copy()
     {
-        QueryType copy = this.createQuery(this);
-        copy.setDistVars(getDistVarsWithVarType());
-        copy.setResultVars(getResultVars());
+        QueryType copy = this.createQuery(getKB(), isDistinct());
+        copy.setDistVars(new EnumMap<>(getDistVarsWithVarType()));
+        copy.setResultVars(new ArrayList<>(getResultVars()));
         return copy;
     }
 }

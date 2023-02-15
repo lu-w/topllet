@@ -3,48 +3,16 @@ package openllet.query.sparqldl.model;
 import openllet.aterm.ATermAppl;
 import openllet.core.KnowledgeBase;
 import openllet.query.sparqldl.model.cq.Filter;
-import openllet.query.sparqldl.model.cq.QueryAtom;
 import openllet.query.sparqldl.model.cq.QueryParameters;
-import openllet.query.sparqldl.model.cq.QueryPredicate;
 import openllet.query.sparqldl.model.results.ResultBinding;
-import openllet.query.sparqldl.model.ucq.UnionQuery;
 
 import java.util.EnumMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 public interface Query<QueryType extends Query<QueryType>>
 {
-    interface AtomQuery {
-        /**
-         * Adds a query atom to the query.
-         *
-         * @param atom the atom to add
-         */
-        void add(final QueryAtom atom);
-
-        /**
-         * Removes a query atom from the query.
-         * @param atom the atom to remove
-         */
-        void remove(final QueryAtom atom);
-
-        /**
-         * @return all the atoms in the query.
-         */
-        List<QueryAtom> getAtoms();
-
-        /**
-         * Searches for given atom pattern. This also might be used for different types of rolling-up, involving various
-         * sets of allowed atom types.
-         *
-         * @param predicate the predicate to search for
-         * @param arguments arguments to search for
-         * @return query atoms in the order as they appear in the query
-         */
-        List<QueryAtom> findAtoms(final QueryPredicate predicate, final ATermAppl... arguments);
-    }
-
     enum VarType
     {
         CLASS, PROPERTY, INDIVIDUAL, LITERAL
@@ -59,9 +27,14 @@ public interface Query<QueryType extends Query<QueryType>>
     void addDistVar(final ATermAppl a, final VarType type);
 
     /**
-     * @param a is the distinguished variable to add that appears in the result projection to the query;
+     * @param a is the distinguished variable to add that appears in the result projection to the query.
      */
     void addResultVar(final ATermAppl a);
+
+    /**
+     * @param a is the distinguished variable to remove.
+     */
+    void removeResultVar(final ATermAppl a);
 
     /**
      * Sets all the variables that will be in the results. For SPARQL, these are the variables in the SELECT clause.
@@ -77,31 +50,32 @@ public interface Query<QueryType extends Query<QueryType>>
     void setDistVars(final EnumMap<VarType, Set<ATermAppl>> distVars);
 
     /**
-     * @return all the variables used in this query.
+     * @return an unmodifiable view on all the variables used in this query.
      */
     Set<ATermAppl> getVars();
 
     /**
-     * Return all undistinguished variables used in this query.
+     * Return a copy of all undistinguished variables used in this query.
      *
      * @return Set of variables
      */
     Set<ATermAppl> getUndistVars();
 
     /**
-     * @return individuals and literals used in this query.
+     * @return an unmodifiable view on all individuals and literals used in this query.
      */
     Set<ATermAppl> getConstants();
 
     /**
-     * Return all the variables that will be in the results. For SPARQL, these are the variables in the SELECT clause.
+     * Return an unmodifiable view on all the variables that will be in the results. For SPARQL, these are the variables
+     * in the SELECT clause.
      *
      * @return list of variables
      */
     List<ATermAppl> getResultVars();
 
     /**
-     * Return all the distinguished variables. These are variables that will be bound to individuals (or _data
+     * Return a copy of all the distinguished variables. These are variables that will be bound to individuals (or _data
      * values) existing in the KB.
      *
      * @return Set of variables
@@ -109,11 +83,11 @@ public interface Query<QueryType extends Query<QueryType>>
     Set<ATermAppl> getDistVars();
 
     /**
-     * Return all the distinguished variables, including their var type.
+     * Return  an unmodifiable view on all the distinguished variables, including their var type.
      *
      * @return Map var types to set of variables
      */
-    EnumMap<VarType, Set<ATermAppl>> getDistVarsWithVarType();
+    Map<VarType, Set<ATermAppl>> getDistVarsWithVarType();
 
     /**
      * @param filter to sets for this query.
@@ -224,13 +198,6 @@ public interface Query<QueryType extends Query<QueryType>>
      * @return A new query instance
      */
     QueryType createQuery(KnowledgeBase kb, boolean isDistinct);
-
-    /**
-     * Creates a new query of the given type - to be implemented by any concrete class.
-     * @param query Query containing information on the knowledge base and distinctness to copy over
-     * @return A new query instance
-     */
-    QueryType createQuery(Query<?> query);
 
     String toString(boolean multiLine, boolean onlyQueryBody);
 }

@@ -11,10 +11,7 @@ import openllet.query.sparqldl.engine.cq.QueryEngine;
 import openllet.query.sparqldl.engine.ucq.BooleanUnionQueryEngineSimple;
 import openllet.query.sparqldl.engine.ucq.UnionQueryEngineSimple;
 import openllet.query.sparqldl.engine.QueryExec;
-import openllet.query.sparqldl.model.AbstractCompositeQuery;
-import openllet.query.sparqldl.model.AbstractQuery;
-import openllet.query.sparqldl.model.CompositeQuery;
-import openllet.query.sparqldl.model.Query;
+import openllet.query.sparqldl.model.*;
 import openllet.query.sparqldl.model.cncq.CNCQQuery;
 import openllet.query.sparqldl.model.cncq.CNCQQueryImpl;
 import openllet.query.sparqldl.model.results.QueryResult;
@@ -30,7 +27,6 @@ import openllet.test.AbstractKBTests;
 import org.junit.Assert;
 
 import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 
 import static openllet.core.utils.TermFactory.var;
@@ -49,12 +45,20 @@ import static org.junit.Assert.assertTrue;
  */
 public abstract class AbstractQueryTest extends AbstractKBTests
 {
+	/**
+	 * Shared variables for tests
+	 */
+
 	protected static final ATermAppl x = var("x");
 	protected static final ATermAppl y = var("y");
 	protected static final ATermAppl z = var("z");
 	protected static final ATermAppl x1 = var("x1");
 	protected static final ATermAppl y1 = var("y1");
 	protected static final ATermAppl z1 = var("z1");
+
+	/**
+	 * Constructors for testing environment
+	 */
 
 	protected ATermAppl[] select(final ATermAppl... vars)
 	{
@@ -77,13 +81,65 @@ public abstract class AbstractQueryTest extends AbstractKBTests
 		return query(new ATermAppl[0], atoms);
 	}
 
+	private <T extends AbstractQuery<?>> T newQuery(final Class<T> clazz)
+	{
+		T q = null;
+		for (Constructor<?> c : clazz.getConstructors())
+			if (c.getParameterCount() == 2)
+			{
+				try { q = (T) c.newInstance(_kb, false); } catch (Exception ignored) {}
+				break;
+			}
+		return q;
+	}
+
+	@SafeVarargs
+	private final <ST extends Query<ST>, T extends AbstractCompositeQuery<ST, ?>> T cQuery(final Class<T> clazz,
+																							 final ST... queries)
+	{
+		T q = newQuery(clazz);
+		if (q != null) q.setQueries(Arrays.stream(queries).toList());
+		return q;
+	}
+
+	private <ST extends Query<ST>, T extends AbstractCompositeQuery<ST, ?>> T cQuery(final Class<T> clazz,
+																					   final ATermAppl[] vars,
+																					   final ST[] queries)
+	{
+		T q = cQuery(clazz, queries);
+		if (q != null)
+			for (final ATermAppl var : vars)
+			{
+				q.addResultVar(var);
+				q.addDistVar(var, VarType.INDIVIDUAL);
+				for (ST query : queries)
+					if (query instanceof AtomQuery<?>)
+						for (QueryAtom atom : ((AtomQuery<?>) query).getAtoms())
+							if (atom.getArguments().contains(var) && !query.getResultVars().contains(var))
+							{
+								query.addResultVar(var);
+								query.addDistVar(var, VarType.INDIVIDUAL);
+							}
+			}
+		return q;
+	}
+
+	private final <T extends AbstractQuery<?>> T aQuery(final Class<T> clazz, final ATermAppl[] vars)
+	{
+		T q = newQuery(clazz);
+		if (q != null)
+			for (final ATermAppl var : vars)
+			{
+				q.addResultVar(var);
+				q.addDistVar(var, VarType.INDIVIDUAL);
+			}
+		return q;
+	}
+
 	protected ConjunctiveQuery query(final ATermAppl[] vars, final QueryAtom[] atoms)
 	{
-		final ConjunctiveQuery q = new ConjunctiveQueryImpl(_kb, true);
-		for (final ATermAppl var : vars)
-			q.addResultVar(var);
-		for (final QueryAtom atom : atoms)
-			q.add(atom);
+		final ConjunctiveQuery q = aQuery(ConjunctiveQueryImpl.class, vars);
+		q.addAtoms(Arrays.stream(atoms).toList());
 		for (final ATermAppl var : q.getUndistVars())
 			q.addDistVar(var, VarType.INDIVIDUAL);
 		return q;
@@ -91,111 +147,62 @@ public abstract class AbstractQueryTest extends AbstractKBTests
 
 	protected ConjunctiveQuery query(final QueryAtom... atoms)
 	{
-		final ConjunctiveQuery q = new ConjunctiveQueryImpl(_kb, true);
-		for (final QueryAtom atom : atoms)
-			q.add(atom);
+		final ConjunctiveQuery q = newQuery(ConjunctiveQueryImpl.class);
+		q.addAtoms(Arrays.stream(atoms).toList());
 		return q;
-	}
-
-	protected UnionQuery unionQuery(final ConjunctiveQuery... queries)
-	{
-		return tQuery(UnionQueryImpl.class, queries);
-	}
-
-	protected UnionQuery unionQuery(final ATermAppl[] vars, final ConjunctiveQuery[] queries)
-	{
-		return tQuery(UnionQueryImpl.class, vars, queries);
 	}
 
 	protected DisjunctiveQuery disjunctiveQuery(final ATermAppl[] vars, final QueryAtom[] atoms)
 	{
-		DisjunctiveQuery q = disjunctiveQuery(atoms);
-		q.setResultVars(List.of(vars));
-		for (ATermAppl var : vars)
-			q.addDistVar(var, VarType.INDIVIDUAL);
+		DisjunctiveQuery q = aQuery(DisjunctiveQueryImpl.class, vars);
+		q.addAtoms(Arrays.stream(atoms).toList());
 		return q;
 	}
 
 	protected DisjunctiveQuery disjunctiveQuery(final QueryAtom... atoms)
 	{
-		final DisjunctiveQuery q = new DisjunctiveQueryImpl(_kb, true);
-		for (final QueryAtom atom : atoms)
-			q.add(atom);
+		DisjunctiveQuery q = newQuery(DisjunctiveQueryImpl.class);
+		q.addAtoms(Arrays.stream(atoms).toList());
 		return q;
+	}
+
+	protected UnionQuery unionQuery(final ConjunctiveQuery... queries)
+	{
+		return cQuery(UnionQueryImpl.class, queries);
+	}
+
+	protected UnionQuery unionQuery(final ATermAppl[] vars, final ConjunctiveQuery[] queries)
+	{
+		return cQuery(UnionQueryImpl.class, vars, queries);
 	}
 
 	protected CNFQueryImpl cnfQuery(final DisjunctiveQuery... queries)
 	{
-		return tQuery(CNFQueryImpl.class, queries);
+		return cQuery(CNFQueryImpl.class, queries);
 	}
 
 	protected CNFQuery cnfQuery(final ATermAppl[] vars, final DisjunctiveQuery[] queries)
 	{
-		return tQuery(CNFQueryImpl.class, vars, queries);
-	}
-
-	protected <ST extends Query<ST>, T extends AbstractCompositeQuery<ST, ?>> T tQuery(final Class<T> clazz,
-																					   final ST... queries)
-	{
-		T q = null;
-		for (Constructor<?> c : clazz.getConstructors())
-			if (c.getParameterCount() == 2)
-			{
-				try
-				{
-					q = (T) c.newInstance(_kb, false);
-				}
-				catch (Exception e)
-				{
-				}
-				break;
-			}
-		if (q != null)
-			q.setQueries(Arrays.stream(queries).toList());
-		return q;
-	}
-
-	protected <ST extends Query<ST>, T extends AbstractCompositeQuery<ST, ?>> T tQuery(final Class<T> clazz,
-																					   final ATermAppl[] vars,
-																					   final ST[] queries)
-	{
-		T q = tQuery(clazz, queries);
-		for (final ATermAppl var : vars)
-		{
-			q.addResultVar(var);
-			q.addDistVar(var, VarType.INDIVIDUAL);
-			for (ST query : queries)
-				if (query instanceof Query.AtomQuery)
-					for (QueryAtom atom : ((Query.AtomQuery) query).getAtoms())
-						if (atom.getArguments().contains(var) && !query.getResultVars().contains(var))
-						{
-							query.addResultVar(var);
-							query.addDistVar(var, VarType.INDIVIDUAL);
-						}
-		}
-		return q;
+		return cQuery(CNFQueryImpl.class, vars, queries);
 	}
 
 	protected CNCQQuery cncqQuery(final ConjunctiveQuery... queries)
 	{
-		final CNCQQuery q = new CNCQQueryImpl(_kb, false);
-		q.setQueries(Arrays.stream(queries).toList());
-		return q;
+		return cQuery(CNCQQueryImpl.class, queries);
 	}
 
 	protected CNCQQuery cncqQuery(final ATermAppl[] vars, final ConjunctiveQuery[] queries)
 	{
-		CNCQQuery q = cncqQuery(queries);
-		q.setResultVars(List.of(vars));
-		for (ATermAppl var : vars)
-			q.addDistVar(var, VarType.INDIVIDUAL);
-		return q;
+		return cQuery(CNCQQueryImpl.class, vars, queries);
 	}
+
+	/**
+	 * Testing functionality
+	 */
 
 	protected void testQuery(final ConjunctiveQuery query, final boolean expected)
 	{
 		final QueryResult result = QueryEngine.exec(query);
-
 		assertEquals(expected, !result.isEmpty());
 	}
 
@@ -275,8 +282,12 @@ public abstract class AbstractQueryTest extends AbstractKBTests
 
 	protected void testCNCQQuery(final CNCQQuery query, final boolean expected)
 	{
-		assertTrue(true);
+		assertTrue(true); // TODO
 	}
+
+	/**
+	 * Shared helper methods
+	 */
 
 	protected static List<List<ATermAppl>> allResults(List<ATermAppl> individuals, int resultSize)
 	{

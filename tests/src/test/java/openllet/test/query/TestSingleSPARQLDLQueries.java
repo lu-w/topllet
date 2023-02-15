@@ -196,6 +196,7 @@ public class TestSingleSPARQLDLQueries
 		model.read("file:test/data/sparql-dawg-tests/data-r2/graph/data-g1.ttl", "N3");
 
 		final Query query = QueryFactory.read("file:test/data/sparql-dawg-tests/data-r2/graph/graph-01.rq");
+		System.out.println(query);
 
 		try (final QueryExecution qe = SparqlDLExecutionFactory.create(query, DatasetFactory.create(model), null, QueryEngineType.MIXED, false))
 		{

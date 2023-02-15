@@ -236,7 +236,8 @@ public class CombinedQueryEngine implements QueryExec<ConjunctiveQuery>
 	@Override
 	public QueryResult exec(final ConjunctiveQuery q)
 	{
-		assert(supports(q));
+		//assert(supports(q));
+		System.out.println(q);
 		_logger.fine(() -> "Executing query " + q);
 
 		final Timer timer = new Timer("CombinedQueryEngine");

@@ -11,6 +11,7 @@ import openllet.query.sparqldl.engine.AbstractBooleanQueryEngine;
 import openllet.query.sparqldl.engine.cq.QueryEngine;
 import openllet.query.sparqldl.model.Query;
 import openllet.query.sparqldl.model.cq.ConjunctiveQuery;
+import openllet.query.sparqldl.model.cq.ConjunctiveQueryImpl;
 import openllet.query.sparqldl.model.cq.QueryAtom;
 import openllet.query.sparqldl.model.results.QueryResult;
 import openllet.query.sparqldl.model.results.QueryResultImpl;
@@ -21,7 +22,9 @@ import openllet.query.sparqldl.model.ucq.UnionQuery;
 import openllet.shared.tools.Log;
 
 import java.util.ArrayList;
+import java.util.EnumMap;
 import java.util.List;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -84,7 +87,7 @@ public class BooleanUnionQueryEngineSimple extends AbstractBooleanUnionQueryEngi
     {
         boolean isEntailed = true;
         // Query is entailed iff. all conjuncts are entailed
-        for (Query disjunctiveQuery : cnfQuery.getQueries())
+        for (DisjunctiveQuery disjunctiveQuery : cnfQuery.getQueries())
         {
             if (_logger.isLoggable(Level.FINER))
                 _logger.finer("Checking disjunctive query: " + disjunctiveQuery);
@@ -97,33 +100,31 @@ public class BooleanUnionQueryEngineSimple extends AbstractBooleanUnionQueryEngi
             // - r(x,y) for variables x, y -> disjunctionVar (plus rolling up into (∃r.T))
             List<Pair<ATermAppl, ATermAppl>> disjunctionInd = new ArrayList<>();
             List<ATermAppl> disjunctionVar = new ArrayList<>();
-            for (Query q : ((DisjunctiveQuery) disjunctiveQuery).getQueries())
+            for (QueryAtom atom : disjunctiveQuery.getAtoms())
             {
-                ConjunctiveQuery atomicQuery = (ConjunctiveQuery) q;
-                if (atomicQuery.getAtoms().size() == 1)
+                ATermAppl lhs = atom.getArguments().get(0);
+                if (atom.getPredicate() == Type)
                 {
-                    QueryAtom atom = atomicQuery.getAtoms().get(0);
-                    ATermAppl lhs = atom.getArguments().get(0);
-                    if (atom.getPredicate() == Type)
-                    {
-                        if (kb.isIndividual(lhs))
-                            disjunctionInd.add(new Pair<>(lhs, atom.getArguments().get(1)));
-                        else
-                            disjunctionVar.add(atom.getArguments().get(1));
-                    }
-                    else if (atom.getPredicate() == PropertyValue)
-                    {
-                        ATermAppl rolledUpAtom = atomicQuery.rollUpTo(lhs, List.of(), false);
-                        if (kb.isIndividual(lhs))
-                            disjunctionInd.add(new Pair<>(lhs, rolledUpAtom));
-                        else // lhs is undist. var
-                            disjunctionVar.add(rolledUpAtom);
-                    }
+                    if (kb.isIndividual(lhs))
+                        disjunctionInd.add(new Pair<>(lhs, atom.getArguments().get(1)));
                     else
-                        _logger.warning("Disjunctive entailment check can not yet handle " + atom.getPredicate());
+                        disjunctionVar.add(atom.getArguments().get(1));
                 }
-                else if (_logger.isLoggable(Level.WARNING))
-                    _logger.warning("Found query atom of size >1, shouldn't happen in CNF: " + atomicQuery);
+                else if (atom.getPredicate() == PropertyValue)
+                {
+                    ConjunctiveQuery tmpQuery = new ConjunctiveQueryImpl(disjunctiveQuery);
+                    tmpQuery.add(atom);
+                    for (ATermAppl var : disjunctiveQuery.getResultVars())
+                        tmpQuery.addResultVar(var);
+                    tmpQuery.setDistVars(new EnumMap<>(disjunctiveQuery.getDistVarsWithVarType()));
+                    ATermAppl rolledUpAtom = tmpQuery.rollUpTo(lhs, List.of(), false);
+                    if (kb.isIndividual(lhs))
+                        disjunctionInd.add(new Pair<>(lhs, rolledUpAtom));
+                    else // lhs is undist. var
+                        disjunctionVar.add(rolledUpAtom);
+                }
+                else
+                    _logger.warning("Disjunctive entailment check can not yet handle " + atom.getPredicate());
             }
             // Case 1: No undistinguished variables in disjunction
             if (disjunctionVar.isEmpty())
