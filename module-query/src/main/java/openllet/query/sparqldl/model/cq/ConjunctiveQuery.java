@@ -35,6 +35,12 @@ public interface ConjunctiveQuery extends AtomQuery<ConjunctiveQuery>
 	boolean isNegated();
 
 	/**
+	 * Sets the negation of the query.
+	 * @param isNegated false iff. the whole query shall be interpreted as negated
+	 */
+	void setNegation(boolean isNegated);
+
+	/**
 	 * Rolls up the query to the given variable
 	 * @param distVar the set of variables to not roll up (as they are dist. variables)
 	 * @param avoidList a collection of terms to avoid

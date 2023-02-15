@@ -154,6 +154,20 @@ public abstract class AbstractQueryTest extends AbstractKBTests
 		return aQuery(ConjunctiveQueryImpl.class, atoms);
 	}
 
+	protected ConjunctiveQuery negatedQuery(final QueryAtom... atoms)
+	{
+		ConjunctiveQuery q = aQuery(ConjunctiveQueryImpl.class, atoms);
+		q.setNegation(true);
+		return q;
+	}
+
+	protected ConjunctiveQuery negatedQuery(final ATermAppl[] vars, final QueryAtom[] atoms)
+	{
+		ConjunctiveQuery q = aQuery(ConjunctiveQueryImpl.class, vars, atoms);
+		q.setNegation(true);
+		return q;
+	}
+
 	protected DisjunctiveQuery disjunctiveQuery(final ATermAppl[] vars, final QueryAtom[] atoms)
 	{
 		return aQuery(DisjunctiveQueryImpl.class, vars, atoms);
@@ -197,8 +211,6 @@ public abstract class AbstractQueryTest extends AbstractKBTests
 	/**
 	 * Testing functionality
 	 */
-
-	// TODO: generify
 
 	private QueryResult execQuery(Query<?> query)
 	{

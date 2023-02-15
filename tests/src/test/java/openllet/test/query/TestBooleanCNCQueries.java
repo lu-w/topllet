@@ -7,7 +7,6 @@ import static openllet.core.utils.TermFactory.*;
 import static openllet.core.utils.TermFactory.TOP;
 import static openllet.query.sparqldl.model.cq.QueryAtomFactory.PropertyValueAtom;
 import static openllet.query.sparqldl.model.cq.QueryAtomFactory.TypeAtom;
-import static org.junit.Assert.*;
 
 public class TestBooleanCNCQueries extends AbstractQueryTest
 {
@@ -26,9 +25,16 @@ public class TestBooleanCNCQueries extends AbstractQueryTest
         _kb.addType(_b, _D);
         _kb.addPropertyValue(_r, _a, _b);
 
-        CNCQQuery cncqq1 = cncqQuery(query(TypeAtom(x, _B), PropertyValueAtom(x, _r, _b)),
-                query(TypeAtom(y, _C), PropertyValueAtom(y, _r, _b)));
+        CNCQQuery cncqq1 = cncqQuery(
+                query(TypeAtom(_a, _B), PropertyValueAtom(_a, _r, _b)),
+                negatedQuery(TypeAtom(_a, _C), PropertyValueAtom(_a, _r, _b))
+        );
+        CNCQQuery cncqq2 = cncqQuery(
+                query(TypeAtom(_a, _B)),
+                negatedQuery(PropertyValueAtom(_a, _p, x))
+        );
 
         testQuery(cncqq1, true);
+        testQuery(cncqq2, false);
     }
 }

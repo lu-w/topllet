@@ -40,7 +40,10 @@ public abstract class AbstractQueryEngine<QueryType extends Query<QueryType>> im
         timer.start();
         QueryResult results = new QueryResultImpl(q);
         if (q.getResultVars().isEmpty())
-            results = _booleanEngine.exec(q);
+            if (_booleanEngine != null)
+                results = _booleanEngine.exec(q);
+            else
+                throw new RuntimeException("Encountered uninitialized Boolean query engine");
         else if (q.getKB().getIndividualsCount() > 0)
             results = execABoxQuery(q);
         else

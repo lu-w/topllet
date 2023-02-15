@@ -43,6 +43,8 @@ import static openllet.query.sparqldl.model.cq.QueryPredicate.*;
  */
 public class ConjunctiveQueryImpl extends AbstractAtomQuery<ConjunctiveQuery> implements ConjunctiveQuery
 {
+	private boolean _isNegated = false;
+
 	public ConjunctiveQueryImpl(final KnowledgeBase kb, final boolean distinct)
 	{
 		super(kb, distinct);
@@ -383,7 +385,13 @@ public class ConjunctiveQueryImpl extends AbstractAtomQuery<ConjunctiveQuery> im
 	@Override
 	public boolean isNegated()
 	{
-		return false;
+		return _isNegated;
+	}
+
+	@Override
+	public void setNegation(boolean isNegated)
+	{
+		_isNegated = isNegated;
 	}
 
 	public ConjunctiveQuery createQuery(KnowledgeBase kb, boolean isDistinct)

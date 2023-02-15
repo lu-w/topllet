@@ -22,12 +22,16 @@ public class UnionQueryEngineSimple extends AbstractQueryEngine<UnionQuery>
 
     protected BindingTime _bindingTime = BindingTime.BEFORE_CNF;
     protected UnionQueryBindingCandidateGenerator _bindingGenerator;
-    protected AbstractBooleanUnionQueryEngine _booleanEngine = new BooleanUnionQueryEngineSimple();
+    protected AbstractBooleanUnionQueryEngine _booleanEngine;
 
-    public UnionQueryEngineSimple() {}
+    public UnionQueryEngineSimple() {
+        this._booleanEngine = new BooleanUnionQueryEngineSimple();
+        super._booleanEngine = this._booleanEngine;
+    }
 
     public UnionQueryEngineSimple(BindingTime bindingTime)
     {
+        this();
         setBindingTime(bindingTime);
     }
 
