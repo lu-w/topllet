@@ -196,7 +196,6 @@ public class TestSingleSPARQLDLQueries
 		model.read("file:test/data/sparql-dawg-tests/data-r2/graph/data-g1.ttl", "N3");
 
 		final Query query = QueryFactory.read("file:test/data/sparql-dawg-tests/data-r2/graph/graph-01.rq");
-		System.out.println(query);
 
 		try (final QueryExecution qe = SparqlDLExecutionFactory.create(query, DatasetFactory.create(model), null, QueryEngineType.MIXED, false))
 		{
@@ -210,7 +209,6 @@ public class TestSingleSPARQLDLQueries
 	public void testDAWG4()
 	{
 		final Model model = ModelFactory.createOntologyModel(PelletReasonerFactory.THE_SPEC);
-		System.out.println(System.getProperty("user.dir"));
 		model.read("file:test/data/sparql-dawg-tests/data-r2/optional-filter/data-1.ttl", "N3");
 
 		final Query query = QueryFactory.read("file:test/data/sparql-dawg-tests/data-r2/optional-filter/expr-5.rq");

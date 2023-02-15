@@ -130,10 +130,7 @@ public class TestBooleanQueries extends AbstractKBTests
 
 		final List<ATermAppl> results = new ArrayList<>();
 		for (final ResultBinding result : qr)
-		{
-			System.out.println(result);
 			results.add(result.getValue(x));
-		}
 
 		assertIteratorValues(results.iterator(), _A, _C);
 	}

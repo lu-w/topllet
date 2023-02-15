@@ -9,6 +9,7 @@ package openllet.core.el;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Logger;
 
 import openllet.aterm.ATermAppl;
 import openllet.aterm.ATermList;
@@ -17,6 +18,7 @@ import openllet.core.boxes.rbox.Role;
 import openllet.core.utils.ATermUtils;
 import openllet.core.utils.CollectionUtils;
 import openllet.core.utils.MultiValueMap;
+import openllet.shared.tools.Log;
 
 /**
  * <p>
@@ -30,6 +32,8 @@ import openllet.core.utils.MultiValueMap;
  */
 public class RoleChainCache
 {
+	public static final Logger _logger = Log.getLogger(RoleChainCache.class);
+
 	private static final String ANON_ROLE = "anonRole";
 
 	private int _anonRoleCount;
@@ -134,7 +138,7 @@ public class RoleChainCache
 
 	public void print()
 	{
-		System.out.println("Role Chains:");
-		System.out.println(_binaryRoleInclusions);
+		_logger.finer("Role Chains:");
+		_logger.finer(_binaryRoleInclusions.toString());
 	}
 }
