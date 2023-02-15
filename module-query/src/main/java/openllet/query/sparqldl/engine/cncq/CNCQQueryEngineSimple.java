@@ -7,6 +7,11 @@ import openllet.query.sparqldl.model.results.QueryResultImpl;
 
 public class CNCQQueryEngineSimple extends AbstractQueryEngine<CNCQQuery>
 {
+    public CNCQQueryEngineSimple()
+    {
+        _booleanEngine = new BooleanCNCQQueryEngineSimple();
+    }
+
     @Override
     protected QueryResult execABoxQuery(CNCQQuery q)
     {
