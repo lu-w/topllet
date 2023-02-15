@@ -70,11 +70,13 @@ public abstract class AbstractAtomQuery<QueryType extends AtomQuery<QueryType>> 
             atoms.add(atom.apply(binding));
 
         final QueryType query = copy();
+
         for (QueryAtom atom : _allAtoms)
             query.remove(atom);
 
         for (ATermAppl var : _resultVars)
             query.addResultVar(var);
+
         for (ATermAppl var : binding.getAllVariables())
             query.removeResultVar(var);
 

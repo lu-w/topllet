@@ -83,7 +83,7 @@ public interface Query<QueryType extends Query<QueryType>>
     Set<ATermAppl> getDistVars();
 
     /**
-     * Return  an unmodifiable view on all the distinguished variables, including their var type.
+     * Return a copy of all the distinguished variables, including their var type.
      *
      * @return Map var types to set of variables
      */

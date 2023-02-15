@@ -38,7 +38,7 @@ public interface AtomQuery<QueryType extends AtomQuery<QueryType>> extends Query
     void remove(final QueryAtom atom);
 
     /**
-     * @return all the atoms in the query.
+     * @return an unmodifiable view on all the atoms in the query.
      */
     List<QueryAtom> getAtoms();
 

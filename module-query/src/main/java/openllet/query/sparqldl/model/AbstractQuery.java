@@ -114,7 +114,13 @@ public abstract class AbstractQuery<QueryType extends Query<QueryType>> implemen
     @Override
     public Map<VarType, Set<ATermAppl>> getDistVarsWithVarType()
     {
-        return Collections.unmodifiableMap(_distVars);
+        final Map<VarType, Set<ATermAppl>> result = new EnumMap<>(VarType.class);
+        for (final VarType t : VarType.values())
+        {
+            Set<ATermAppl> s = new HashSet<>(_distVars.get(t));
+            result.put(t, s);
+        }
+        return result;
     }
 
     @Override
