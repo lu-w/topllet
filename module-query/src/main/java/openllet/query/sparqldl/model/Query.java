@@ -3,7 +3,9 @@ package openllet.query.sparqldl.model;
 import openllet.aterm.ATermAppl;
 import openllet.core.KnowledgeBase;
 import openllet.query.sparqldl.model.cq.Filter;
+import openllet.query.sparqldl.model.cq.QueryAtom;
 import openllet.query.sparqldl.model.cq.QueryParameters;
+import openllet.query.sparqldl.model.cq.QueryPredicate;
 import openllet.query.sparqldl.model.results.ResultBinding;
 import openllet.query.sparqldl.model.ucq.UnionQuery;
 
@@ -13,6 +15,36 @@ import java.util.Set;
 
 public interface Query<QueryType extends Query<QueryType>>
 {
+    interface AtomQuery {
+        /**
+         * Adds a query atom to the query.
+         *
+         * @param atom the atom to add
+         */
+        void add(final QueryAtom atom);
+
+        /**
+         * Removes a query atom from the query.
+         * @param atom the atom to remove
+         */
+        void remove(final QueryAtom atom);
+
+        /**
+         * @return all the atoms in the query.
+         */
+        List<QueryAtom> getAtoms();
+
+        /**
+         * Searches for given atom pattern. This also might be used for different types of rolling-up, involving various
+         * sets of allowed atom types.
+         *
+         * @param predicate the predicate to search for
+         * @param arguments arguments to search for
+         * @return query atoms in the order as they appear in the query
+         */
+        List<QueryAtom> findAtoms(final QueryPredicate predicate, final ATermAppl... arguments);
+    }
+
     enum VarType
     {
         CLASS, PROPERTY, INDIVIDUAL, LITERAL

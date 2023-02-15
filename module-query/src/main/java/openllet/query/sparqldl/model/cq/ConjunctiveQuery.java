@@ -26,31 +26,13 @@ import openllet.query.sparqldl.model.results.ResultBinding;
  *
  * @author Petr Kremen
  */
-public interface ConjunctiveQuery extends Query<ConjunctiveQuery>
+public interface ConjunctiveQuery extends Query<ConjunctiveQuery>, Query.AtomQuery
 {
 	/**
 	 * Whether the query is negated.
 	 * @return true iff. the query is negated
 	 */
 	boolean isNegated();
-
-	/**
-	 * Adds a query atom to the query.
-	 *
-	 * @param atom the atom to add
-	 */
-	void add(final QueryAtom atom);
-
-	/**
-	 * Removes a query atom from the query.
-	 * @param atom the atom to remove
-	 */
-	void remove(final QueryAtom atom);
-
-	/**
-	 * @return all the atoms in the query.
-	 */
-	List<QueryAtom> getAtoms();
 
 	/**
 	 * Rolls up the query to the given variable
@@ -60,16 +42,6 @@ public interface ConjunctiveQuery extends Query<ConjunctiveQuery>
 	 * @return A new copy of the rolled up query.
 	 */
 	ATermAppl rollUpTo(final ATermAppl distVar, final Collection<ATermAppl> avoidList, final boolean stopOnConstants);
-
-
-	/**
-	 * Searches for given atom pattern. This also might be used for different types of rolling-up, involving various sets of allowed atom types.
-	 *
-	 * @param predicate the predicate
-	 * @param arguments arguments
-	 * @return query atoms in the order as they appear in the query
-	 */
-	List<QueryAtom> findAtoms(final QueryPredicate predicate, final ATermAppl... arguments);
 
 	/**
 	 * Extension of the standard split() functionality of queries that can also split on individuals.

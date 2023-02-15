@@ -1,11 +1,13 @@
 package openllet.query.sparqldl.model.ucq;
 
+import openllet.aterm.ATermAppl;
 import openllet.core.KnowledgeBase;
 import openllet.query.sparqldl.model.AbstractCompositeQuery;
 import openllet.query.sparqldl.model.Query;
 import openllet.query.sparqldl.model.cq.ConjunctiveQuery;
 import openllet.query.sparqldl.model.cq.ConjunctiveQueryImpl;
 import openllet.query.sparqldl.model.cq.QueryAtom;
+import openllet.query.sparqldl.model.cq.QueryPredicate;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -55,6 +57,13 @@ public class DisjunctiveQueryImpl extends AbstractCompositeQuery<ConjunctiveQuer
     }
 
     @Override
+    public void remove(QueryAtom atom)
+    {
+        for (ConjunctiveQuery q : _queries)
+            q.remove(atom);
+    }
+
+    @Override
     public List<QueryAtom> getAtoms()
     {
         List<QueryAtom> unwrappedList = new ArrayList<>();
@@ -62,6 +71,15 @@ public class DisjunctiveQueryImpl extends AbstractCompositeQuery<ConjunctiveQuer
             if (q.getAtoms().size() == 1)
                 unwrappedList.add(q.getAtoms().get(0));
         return unwrappedList;
+    }
+
+    @Override
+    public List<QueryAtom> findAtoms(QueryPredicate predicate, ATermAppl... arguments)
+    {
+        List<QueryAtom> resultList = new ArrayList<>();
+        for (ConjunctiveQuery q : _queries)
+            resultList.addAll(q.findAtoms(predicate, arguments));
+        return resultList;
     }
 
     public DisjunctiveQuery createQuery(KnowledgeBase kb, boolean isDistinct)

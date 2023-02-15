@@ -135,7 +135,7 @@ public abstract class AbstractQueryTest extends AbstractKBTests
 	}
 
 	protected <ST extends Query<ST>, T extends AbstractCompositeQuery<ST, ?>> T tQuery(final Class<T> clazz,
-																							   final ST... queries)
+																					   final ST... queries)
 	{
 		T q = null;
 		for (Constructor<?> c : clazz.getConstructors())
@@ -156,8 +156,8 @@ public abstract class AbstractQueryTest extends AbstractKBTests
 	}
 
 	protected <ST extends Query<ST>, T extends AbstractCompositeQuery<ST, ?>> T tQuery(final Class<T> clazz,
-																			   				   final ATermAppl[] vars,
-																			 				   final ST[] queries)
+																					   final ATermAppl[] vars,
+																					   final ST[] queries)
 	{
 		T q = tQuery(clazz, queries);
 		for (final ATermAppl var : vars)
@@ -165,8 +165,8 @@ public abstract class AbstractQueryTest extends AbstractKBTests
 			q.addResultVar(var);
 			q.addDistVar(var, VarType.INDIVIDUAL);
 			for (ST query : queries)
-				if (query instanceof ConjunctiveQuery)
-					for (QueryAtom atom : ((ConjunctiveQuery) query).getAtoms())
+				if (query instanceof ConjunctiveQuery || query instanceof DisjunctiveQuery)
+					for (QueryAtom atom : ((ConjunctiveQuery) query).getAtoms()) // TODO cast to AtomQueryInterface
 						if (atom.getArguments().contains(var) && !query.getResultVars().contains(var))
 						{
 							query.addResultVar(var);
