@@ -165,8 +165,8 @@ public abstract class AbstractQueryTest extends AbstractKBTests
 			q.addResultVar(var);
 			q.addDistVar(var, VarType.INDIVIDUAL);
 			for (ST query : queries)
-				if (query instanceof ConjunctiveQuery || query instanceof DisjunctiveQuery)
-					for (QueryAtom atom : ((ConjunctiveQuery) query).getAtoms()) // TODO cast to AtomQueryInterface
+				if (query instanceof Query.AtomQuery)
+					for (QueryAtom atom : ((Query.AtomQuery) query).getAtoms())
 						if (atom.getArguments().contains(var) && !query.getResultVars().contains(var))
 						{
 							query.addResultVar(var);
