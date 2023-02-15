@@ -165,7 +165,7 @@ class SparqlDLStage
 		{
 			final ConjunctiveQuery newQuery = _query.apply(convertBinding(binding));
 
-			final QueryResult results = QueryEngine.exec(newQuery);
+			final QueryResult results = QueryEngine.execQuery(newQuery);
 
 			final SparqlDLResultSet resultSet = new SparqlDLResultSet(results, null, binding);
 

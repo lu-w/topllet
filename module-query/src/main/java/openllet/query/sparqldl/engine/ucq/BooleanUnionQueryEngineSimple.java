@@ -207,7 +207,7 @@ public class BooleanUnionQueryEngineSimple extends AbstractBooleanUnionQueryEngi
         UnionQuery qCopy = q.copy();
         for (ConjunctiveQuery conjunctiveQuery : qCopy.getQueries())
         {
-            QueryResult conjunctiveQueryResult = QueryEngine.exec(conjunctiveQuery);
+            QueryResult conjunctiveQueryResult = QueryEngine.execQuery(conjunctiveQuery);
             for (ResultBinding binding : conjunctiveQueryResult)
                 result.add(binding);
         }

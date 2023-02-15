@@ -244,7 +244,7 @@ class SparqlDLExecution implements QueryExecution
 			// bindings manually)
 			q.setQueryParameters(queryParameters);
 
-			ResultSet results = new SparqlDLResultSet(QueryEngine.exec(q), _source.getDefaultModel(), queryParameters);
+			ResultSet results = new SparqlDLResultSet(QueryEngine.execQuery(q), _source.getDefaultModel(), queryParameters);
 
 			final List<SortCondition> sortConditions = _query.getOrderBy();
 			if (sortConditions != null && !sortConditions.isEmpty())

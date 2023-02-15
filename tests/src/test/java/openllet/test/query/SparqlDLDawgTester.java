@@ -217,7 +217,7 @@ public class SparqlDLDawgTester implements SparqlDawgTester
 		final Timer t = new Timer("Single _query execution");
 
 		t.start();
-		final QueryResult bindings = QueryEngine.exec(query);
+		final QueryResult bindings = QueryEngine.execQuery(query);
 		_logger.info("Execution time=" + t.getElapsed());
 		t.stop();
 		_logger.info("Result size = " + bindings.size());

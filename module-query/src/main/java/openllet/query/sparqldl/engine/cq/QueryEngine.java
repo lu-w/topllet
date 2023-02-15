@@ -62,7 +62,7 @@ import openllet.shared.tools.Log;
  *
  * @author Petr Kremen
  */
-public class QueryEngine
+public class QueryEngine implements QueryExec<ConjunctiveQuery>
 {
 	public static Logger _logger = Log.getLogger(QueryEngine.class);
 
@@ -78,16 +78,26 @@ public class QueryEngine
 		return getQueryExec().supports(query);
 	}
 
-	public static QueryResult exec(final ConjunctiveQuery query, final KnowledgeBase kb)
+	public boolean supports(final ConjunctiveQuery query)
+	{
+		return getQueryExec().supports(query);
+	}
+
+	public QueryResult exec(final ConjunctiveQuery query)
+	{
+		return execQuery(query);
+	}
+
+	public static QueryResult execQuery(final ConjunctiveQuery query, final KnowledgeBase kb)
 	{
 		final KnowledgeBase queryKB = query.getKB();
 		query.setKB(kb);
-		final QueryResult result = exec(query);
+		final QueryResult result = execQuery(query);
 		query.setKB(queryKB);
 		return result;
 	}
 
-	public static QueryResult exec(final ConjunctiveQuery query)
+	public static QueryResult execQuery(final ConjunctiveQuery query)
 	{
 		if (query.getAtoms().isEmpty())
 		{

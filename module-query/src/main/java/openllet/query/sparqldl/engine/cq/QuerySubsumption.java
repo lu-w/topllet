@@ -95,7 +95,7 @@ public class QuerySubsumption
 		kb.isConsistent();
 
 		sup.setKB(kb);
-		final QueryResult results = QueryEngine.exec(sup);
+		final QueryResult results = QueryEngine.execQuery(sup);
 		sup.setKB(sup.getKB());
 
 		return results;

@@ -206,7 +206,7 @@ public abstract class AbstractQueryTest extends AbstractKBTests
 
 	protected void testQuery(final ConjunctiveQuery query, final boolean expected)
 	{
-		final QueryResult result = QueryEngine.exec(query);
+		final QueryResult result = QueryEngine.execQuery(query);
 		assertEquals(expected, !result.isEmpty());
 	}
 
@@ -218,7 +218,7 @@ public abstract class AbstractQueryTest extends AbstractKBTests
 		for (final ATermAppl[] value : values)
 			answers.merge(Arrays.asList(value), 1, Integer::sum);
 
-		final QueryResult result = QueryEngine.exec(query);
+		final QueryResult result = QueryEngine.execQuery(query);
 		for (final ResultBinding binding : result)
 		{
 			final List<ATermAppl> list = new ArrayList<>(resultVars.size());

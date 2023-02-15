@@ -58,7 +58,7 @@ public class TestBooleanQueries extends AbstractKBTests
 
 	private static void testQuery(final boolean expected, final ConjunctiveQuery query)
 	{
-		assertEquals(expected, !QueryEngine.exec(query).isEmpty());
+		assertEquals(expected, !QueryEngine.execQuery(query).isEmpty());
 	}
 
 	private static void testABoxQuery(final boolean expected, final ConjunctiveQuery query)
@@ -126,7 +126,7 @@ public class TestBooleanQueries extends AbstractKBTests
 		q1.addDistVar(x, VarType.CLASS);
 		q1.addResultVar(x);
 
-		final QueryResult qr = QueryEngine.exec(q1);
+		final QueryResult qr = QueryEngine.execQuery(q1);
 
 		final List<ATermAppl> results = new ArrayList<>();
 		for (final ResultBinding result : qr)
