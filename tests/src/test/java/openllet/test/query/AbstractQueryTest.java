@@ -94,8 +94,8 @@ public abstract class AbstractQueryTest extends AbstractKBTests
 	}
 
 	@SafeVarargs
-	private final <ST extends Query<ST>, T extends AbstractCompositeQuery<ST, ?>> T cQuery(final Class<T> clazz,
-																							 final ST... queries)
+	private <ST extends Query<ST>, T extends AbstractCompositeQuery<ST, ?>> T cQuery(final Class<T> clazz,
+																					 final ST... queries)
 	{
 		T q = newQuery(clazz);
 		if (q != null) q.setQueries(Arrays.stream(queries).toList());
@@ -103,8 +103,8 @@ public abstract class AbstractQueryTest extends AbstractKBTests
 	}
 
 	private <ST extends Query<ST>, T extends AbstractCompositeQuery<ST, ?>> T cQuery(final Class<T> clazz,
-																					   final ATermAppl[] vars,
-																					   final ST[] queries)
+																					 final ATermAppl[] vars,
+																					 final ST[] queries)
 	{
 		T q = cQuery(clazz, queries);
 		if (q != null)
@@ -124,9 +124,17 @@ public abstract class AbstractQueryTest extends AbstractKBTests
 		return q;
 	}
 
-	private final <T extends AbstractQuery<?>> T aQuery(final Class<T> clazz, final ATermAppl[] vars)
+	private <T extends AbstractAtomQuery<?>> T aQuery(final Class<T> clazz, final QueryAtom... atoms)
 	{
 		T q = newQuery(clazz);
+		if (q != null) q.addAtoms(Arrays.stream(atoms).toList());
+		return q;
+	}
+
+	private <T extends AbstractAtomQuery<?>> T aQuery(final Class<T> clazz, final ATermAppl[] vars,
+													  final QueryAtom... atoms)
+	{
+		T q = aQuery(clazz, atoms);
 		if (q != null)
 			for (final ATermAppl var : vars)
 			{
@@ -138,8 +146,7 @@ public abstract class AbstractQueryTest extends AbstractKBTests
 
 	protected ConjunctiveQuery query(final ATermAppl[] vars, final QueryAtom[] atoms)
 	{
-		final ConjunctiveQuery q = aQuery(ConjunctiveQueryImpl.class, vars);
-		q.addAtoms(Arrays.stream(atoms).toList());
+		final ConjunctiveQuery q = aQuery(ConjunctiveQueryImpl.class, vars, atoms);
 		for (final ATermAppl var : q.getUndistVars())
 			q.addDistVar(var, VarType.INDIVIDUAL);
 		return q;
@@ -147,23 +154,17 @@ public abstract class AbstractQueryTest extends AbstractKBTests
 
 	protected ConjunctiveQuery query(final QueryAtom... atoms)
 	{
-		final ConjunctiveQuery q = newQuery(ConjunctiveQueryImpl.class);
-		q.addAtoms(Arrays.stream(atoms).toList());
-		return q;
+		return aQuery(ConjunctiveQueryImpl.class, atoms);
 	}
 
 	protected DisjunctiveQuery disjunctiveQuery(final ATermAppl[] vars, final QueryAtom[] atoms)
 	{
-		DisjunctiveQuery q = aQuery(DisjunctiveQueryImpl.class, vars);
-		q.addAtoms(Arrays.stream(atoms).toList());
-		return q;
+		return aQuery(DisjunctiveQueryImpl.class, vars, atoms);
 	}
 
 	protected DisjunctiveQuery disjunctiveQuery(final QueryAtom... atoms)
 	{
-		DisjunctiveQuery q = newQuery(DisjunctiveQueryImpl.class);
-		q.addAtoms(Arrays.stream(atoms).toList());
-		return q;
+		return aQuery(DisjunctiveQueryImpl.class, atoms);
 	}
 
 	protected UnionQuery unionQuery(final ConjunctiveQuery... queries)
