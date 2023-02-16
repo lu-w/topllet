@@ -93,6 +93,19 @@ abstract public class AbstractCompositeQuery<SubQueryType extends Query<SubQuery
         return hasCycle;
     }
 
+    @Override
+    public boolean isEmpty()
+    {
+        boolean isEmpty = true;
+        for (Query<?> q : _queries)
+            if (!q.isEmpty())
+            {
+                isEmpty = false;
+                break;
+            }
+        return isEmpty;
+    }
+
     /**
      * @return A delimiter string representing the operator between the composited queries
      */

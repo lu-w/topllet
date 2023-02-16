@@ -3,18 +3,13 @@ package openllet.query.sparqldl.engine.cncq;
 import openllet.aterm.ATermAppl;
 import openllet.core.DependencySet;
 import openllet.core.KnowledgeBase;
-import openllet.core.KnowledgeBaseImpl;
 import openllet.core.boxes.abox.ABox;
-import openllet.core.boxes.abox.Individual;
 import openllet.query.sparqldl.engine.AbstractBooleanQueryEngine;
 import openllet.query.sparqldl.engine.ucq.UnionQueryEngineSimple;
 import openllet.query.sparqldl.model.AtomQuery;
 import openllet.query.sparqldl.model.cncq.CNCQQuery;
 import openllet.query.sparqldl.model.cq.ConjunctiveQuery;
 import openllet.query.sparqldl.model.cq.QueryAtom;
-import openllet.query.sparqldl.model.results.QueryResult;
-import openllet.query.sparqldl.model.ucq.DisjunctiveQuery;
-import openllet.query.sparqldl.model.ucq.DisjunctiveQueryImpl;
 import openllet.query.sparqldl.model.ucq.UnionQuery;
 import openllet.query.sparqldl.model.ucq.UnionQueryImpl;
 

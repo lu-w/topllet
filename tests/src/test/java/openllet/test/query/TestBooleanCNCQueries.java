@@ -33,8 +33,24 @@ public class TestBooleanCNCQueries extends AbstractQueryTest
                 query(TypeAtom(_a, _B)),
                 negatedQuery(PropertyValueAtom(_a, _p, x))
         );
+        CNCQQuery cncqq3 = cncqQuery(
+                query(TypeAtom(_a, _C)),
+                negatedQuery(TypeAtom(_a, _B), PropertyValueAtom(_a, _r, _b))
+        );
+        CNCQQuery cncqq4 = cncqQuery(
+                query(TypeAtom(_a, _E)),
+                negatedQuery(TypeAtom(_b, _E), PropertyValueAtom(_b, _r, _c))
+        );
+        CNCQQuery cncqq5 = cncqQuery(
+                query(TypeAtom(_a, _E))
+        );
 
         testQuery(cncqq1, true);
         testQuery(cncqq2, false);
+        testQuery(cncqq3, false);
+        testQuery(cncqq4, true);
+        testQuery(cncqq5, true);
     }
+
+    // TODO Lukas: test undist. var
 }

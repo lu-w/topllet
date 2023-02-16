@@ -39,15 +39,18 @@ public abstract class AbstractQueryEngine<QueryType extends Query<QueryType>> im
         final Timer timer = new Timer("CNCQueryEngine");
         timer.start();
         QueryResult results = new QueryResultImpl(q);
-        if (q.getResultVars().isEmpty())
-            if (_booleanEngine != null)
-                results = _booleanEngine.exec(q);
+        if (!q.isEmpty())
+        {
+            if (q.getResultVars().isEmpty())
+                if (_booleanEngine != null)
+                    results = _booleanEngine.exec(q);
+                else
+                    throw new RuntimeException("Encountered uninitialized Boolean query engine");
+            else if (q.getKB().getIndividualsCount() > 0)
+                results = execABoxQuery(q);
             else
-                throw new RuntimeException("Encountered uninitialized Boolean query engine");
-        else if (q.getKB().getIndividualsCount() > 0)
-            results = execABoxQuery(q);
-        else
-            _logger.warning("Got non-Boolean union query on a knowledge base with no individuals. Nothing to do here.");
+                _logger.warning("Got non-Boolean query on a knowledge base with no individuals. Nothing to do here.");
+        }
         timer.stop();
 
         if (_logger.isLoggable(Level.FINE))

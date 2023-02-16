@@ -261,6 +261,19 @@ public abstract class AbstractAtomQuery<QueryType extends AtomQuery<QueryType>> 
     }
 
     @Override
+    public boolean isEmpty()
+    {
+        boolean isEmpty = true;
+        for (QueryAtom a : _allAtoms)
+            if (!(a.getArguments().isEmpty()))
+            {
+                isEmpty = false;
+                break;
+            }
+        return isEmpty;
+    }
+
+    @Override
     public QueryType copy()
     {
         QueryType copy = super.copy();

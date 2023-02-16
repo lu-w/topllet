@@ -124,6 +124,12 @@ public interface Query<QueryType extends Query<QueryType>>
     boolean isGround();
 
     /**
+     * Checks whether the query contains no checkable components at all.
+     * @return true iff. the query is equivalent to the empty query
+     */
+    boolean isEmpty();
+
+    /**
      * @param queryType #VarType
      * @return variables that occur in the subquery specified by the given type.
      */
