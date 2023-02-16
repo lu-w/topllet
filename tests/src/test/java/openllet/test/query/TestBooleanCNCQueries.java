@@ -4,7 +4,6 @@ import openllet.query.sparqldl.model.cncq.CNCQQuery;
 import org.junit.Test;
 
 import static openllet.core.utils.TermFactory.*;
-import static openllet.core.utils.TermFactory.TOP;
 import static openllet.query.sparqldl.model.cq.QueryAtomFactory.PropertyValueAtom;
 import static openllet.query.sparqldl.model.cq.QueryAtomFactory.TypeAtom;
 
@@ -99,5 +98,35 @@ public class TestBooleanCNCQueries extends AbstractQueryTest
         testQuery(cncqq, false);
     }
 
-    // TODO Lukas: test undist. var
+    @Test
+    public void testUndistVarQueries1()
+    {
+        setupKB1();
+        CNCQQuery cncqq1 = cncqQuery(
+                query(TypeAtom(x, _B), PropertyValueAtom(x, _r, y)),
+                negatedQuery(TypeAtom(x1, _C), PropertyValueAtom(x1, _r, y1))
+        );
+        testQuery(cncqq1, true);
+    }
+
+    @Test
+    public void testUndistVarQueries2()
+    {
+        setupKB1();
+        CNCQQuery cncqq1 = cncqQuery(
+                query(TypeAtom(x, _C), PropertyValueAtom(x, _r, y)),
+                negatedQuery(TypeAtom(x1, _C), PropertyValueAtom(x1, _r, y1))
+        );
+        testQuery(cncqq1, false);
+    }
+    @Test
+    public void testUndistVarQueries3()
+    {
+        setupKB1();
+        CNCQQuery cncqq1 = cncqQuery(
+                query(TypeAtom(x, _B), PropertyValueAtom(x, _r, y)),
+                negatedQuery(TypeAtom(x1, _C), PropertyValueAtom(x1, _r, y1))
+        );
+        testQuery(cncqq1, true);
+    }
 }

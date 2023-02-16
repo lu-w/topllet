@@ -10,11 +10,12 @@ import openllet.query.sparqldl.model.AtomQuery;
 import openllet.query.sparqldl.model.cncq.CNCQQuery;
 import openllet.query.sparqldl.model.cq.ConjunctiveQuery;
 import openllet.query.sparqldl.model.cq.QueryAtom;
-import openllet.query.sparqldl.model.results.QueryResult;
 import openllet.query.sparqldl.model.ucq.UnionQuery;
 import openllet.query.sparqldl.model.ucq.UnionQueryImpl;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * This engine checks for the *satisfiability* of conjunctions of possibly negated conjunctive queries.
@@ -23,6 +24,7 @@ public class BooleanCNCQQueryEngineSimple extends AbstractBooleanQueryEngine<CNC
 {
     private UnionQueryEngineSimple _ucqEngine = new UnionQueryEngineSimple();
     private boolean _rollUpBeforeChecking = false;
+    private Map<ATermAppl, ATermAppl> _queryVarsToFreshInds = new HashMap<>();
 
     @Override
     protected boolean execBooleanABoxQuery(CNCQQuery q)
@@ -42,7 +44,12 @@ public class BooleanCNCQQueryEngineSimple extends AbstractBooleanQueryEngine<CNC
         KnowledgeBase modifiedKB = putQueryAtomsInABox(positiveQuery, q.getKB());
 
         // 4. CHECK FOR SATISFIABILITY
-        return isSatisfied(negativeQueries, modifiedKB, q.isDistinct());
+        boolean isSat = isSatisfied(negativeQueries, modifiedKB, q.isDistinct());
+
+        // 5. CLEAN-UP
+        cleanUp();
+
+        return isSat;
     }
 
     private KnowledgeBase putQueryAtomsInABox(AtomQuery<?> query, KnowledgeBase kb)
@@ -54,27 +61,35 @@ public class BooleanCNCQQueryEngineSimple extends AbstractBooleanQueryEngine<CNC
             {
                 case Type ->
                 {
-                    ATermAppl var = atom.getArguments().get(0);
+                    ATermAppl var = getIndividual(atom.getArguments().get(0), copy);
                     ATermAppl type = atom.getArguments().get(1);
-                    if (!kb.isIndividual(var))
-                        var = copy.addFreshIndividual(null, DependencySet.INDEPENDENT).getTerm();
+                    System.out.println("Putting " + var + " : " + type);
                     copy.addType(var, type);
                 }
                 case PropertyValue ->
                 {
-                    ATermAppl subj = atom.getArguments().get(0);
+                    ATermAppl subj = getIndividual(atom.getArguments().get(0), copy);
                     ATermAppl pred = atom.getArguments().get(1);
-                    ATermAppl obj = atom.getArguments().get(2);
-                    if (!kb.isIndividual(subj))
-                        subj = copy.addFreshIndividual(null, DependencySet.INDEPENDENT).getTerm();
-                    if (!kb.isIndividual(obj))
-                        obj = copy.addFreshIndividual(null, DependencySet.INDEPENDENT).getTerm();
+                    ATermAppl obj = getIndividual(atom.getArguments().get(2), copy);
+                    System.out.println("Putting " + subj + " - " + pred + " - " + obj);
                     copy.addEdge(pred, subj, obj, DependencySet.INDEPENDENT);
                 }
                 default -> _logger.warning("Encountered query predicate that is not supported: " + atom.getPredicate());
             }
         }
         return copy.getKB();
+    }
+
+    private ATermAppl getIndividual(ATermAppl var, ABox abox)
+    {
+        ATermAppl res = var;
+        if (!abox.getKB().isIndividual(var))
+        {
+            if (!_queryVarsToFreshInds.containsKey(var))
+                _queryVarsToFreshInds.put(var, abox.addFreshIndividual(null, DependencySet.INDEPENDENT).getTerm());
+            res = _queryVarsToFreshInds.get(var);
+        }
+        return res;
     }
 
     private boolean isSatisfied(List<ConjunctiveQuery> negativeQueries, KnowledgeBase kb, boolean isDistinct)
@@ -86,7 +101,13 @@ public class BooleanCNCQQueryEngineSimple extends AbstractBooleanQueryEngine<CNC
             positiveQuery.setNegation(false);
             ucq.addQuery(positiveQuery);
         }
+        System.out.println(ucq);
         // No need to set result / dist. variables for the UCQ in Boolean engine
         return _ucqEngine.exec(ucq).isEmpty();
+    }
+
+    private void cleanUp()
+    {
+        _queryVarsToFreshInds = new HashMap<>();
     }
 }
