@@ -18,6 +18,16 @@ public abstract class AbstractQueryEngine<QueryType extends Query<QueryType>> im
 
     protected AbstractBooleanQueryEngine<QueryType> _booleanEngine;
 
+    /**
+     * Sets the Boolean engine to be internally used for checking Boolean queries after binding.
+     * @param booleanEngine the boolean query engine to use
+     */
+    public void setBooleanEngine(AbstractBooleanQueryEngine<QueryType> booleanEngine)
+    {
+        assert(booleanEngine != null);
+        _booleanEngine = booleanEngine;
+    }
+
     @Override
     public boolean supports(QueryType q)
     {
@@ -27,7 +37,7 @@ public abstract class AbstractQueryEngine<QueryType extends Query<QueryType>> im
     @Override
     public QueryResult exec(QueryType q)
     {
-        // Implements some organizational features (logging, timing, etc.) around the actual Boolean CNC query engines
+        // Implements some organizational features (logging, timing, etc.) around the actual Boolean query engines
         assert(supports(q));
 
         if (_logger.isLoggable(Level.FINER))
@@ -51,10 +61,6 @@ public abstract class AbstractQueryEngine<QueryType extends Query<QueryType>> im
                 results = execABoxQuery(q);
             else
                 _logger.warning("Got non-Boolean query on a knowledge base with no individuals. Nothing to do here.");
-        }
-        else
-        {
-            results.add(new ResultBindingImpl());
         }
         timer.stop();
 

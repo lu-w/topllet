@@ -10,6 +10,7 @@ import openllet.query.sparqldl.model.AtomQuery;
 import openllet.query.sparqldl.model.cncq.CNCQQuery;
 import openllet.query.sparqldl.model.cq.ConjunctiveQuery;
 import openllet.query.sparqldl.model.cq.QueryAtom;
+import openllet.query.sparqldl.model.results.QueryResult;
 import openllet.query.sparqldl.model.ucq.UnionQuery;
 import openllet.query.sparqldl.model.ucq.UnionQueryImpl;
 
@@ -85,7 +86,7 @@ public class BooleanCNCQQueryEngineSimple extends AbstractBooleanQueryEngine<CNC
             positiveQuery.setNegation(false);
             ucq.addQuery(positiveQuery);
         }
-        // no need to set result / dist. variables for the UCQ in Boolean engine
+        // No need to set result / dist. variables for the UCQ in Boolean engine
         return _ucqEngine.exec(ucq).isEmpty();
     }
 }

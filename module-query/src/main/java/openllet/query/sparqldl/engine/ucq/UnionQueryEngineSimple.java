@@ -1,6 +1,7 @@
 package openllet.query.sparqldl.engine.ucq;
 
 import openllet.core.utils.Bool;
+import openllet.query.sparqldl.engine.AbstractBooleanQueryEngine;
 import openllet.query.sparqldl.engine.AbstractQueryEngine;
 import openllet.query.sparqldl.model.results.MultiQueryResults;
 import openllet.query.sparqldl.model.results.QueryResult;
@@ -33,6 +34,13 @@ public class UnionQueryEngineSimple extends AbstractQueryEngine<UnionQuery>
     {
         this();
         setBindingTime(bindingTime);
+    }
+
+    public void setBooleanEngine(AbstractBooleanUnionQueryEngine booleanEngine)
+    {
+        this._booleanEngine = booleanEngine;
+        super._booleanEngine = this._booleanEngine;
+
     }
 
     @Override
