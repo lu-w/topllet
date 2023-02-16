@@ -6,6 +6,7 @@ import openllet.query.sparqldl.model.Query;
 import openllet.query.sparqldl.model.cncq.CNCQQuery;
 import openllet.query.sparqldl.model.results.QueryResult;
 import openllet.query.sparqldl.model.results.QueryResultImpl;
+import openllet.query.sparqldl.model.results.ResultBindingImpl;
 import openllet.shared.tools.Log;
 
 import java.util.logging.Level;
@@ -50,6 +51,10 @@ public abstract class AbstractQueryEngine<QueryType extends Query<QueryType>> im
                 results = execABoxQuery(q);
             else
                 _logger.warning("Got non-Boolean query on a knowledge base with no individuals. Nothing to do here.");
+        }
+        else
+        {
+            results.add(new ResultBindingImpl());
         }
         timer.stop();
 

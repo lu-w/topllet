@@ -37,7 +37,9 @@ public abstract class AbstractBooleanQueryEngine<QueryType extends Query<QueryTy
 
         final Timer timer = new Timer("BooleanCNCQueryEngine");
         timer.start();
-        boolean isEntailed = execBooleanABoxQuery(q);
+        boolean isEntailed = true;
+        if (!q.isEmpty()) // No need to check empty queries - they are trivially entailed
+            isEntailed = execBooleanABoxQuery(q);
         QueryResult results = new QueryResultImpl(q);
         if (isEntailed)
             results.add(new ResultBindingImpl());
