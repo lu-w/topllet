@@ -138,7 +138,6 @@ public class BooleanCNCQQueryEngineSimple extends AbstractBooleanQueryEngine<CNC
             return false;
 
         // 5. CHECK FOR SATISFIABILITY
-        // TODO Lukas: modifiedABox.getKB() is wrong - we need to set the ABox here - otherwise original ABox is used...
         boolean isSat = isSatisfied(negativeQueries, q.getKB(), q.isDistinct());
 
         // 6. CLEAN-UP
@@ -206,6 +205,7 @@ public class BooleanCNCQQueryEngineSimple extends AbstractBooleanQueryEngine<CNC
 
     private void cleanUp()
     {
+        // Sorting because we want to delete individuals at the very latest
         _changes.sort((c1, c2) -> c1 instanceof FreshIndChange && !(c2 instanceof FreshIndChange) ? 1 :
                 !(c1 instanceof FreshIndChange) && c2 instanceof FreshIndChange ? -1 : 0);
         for (Change change : _changes)
