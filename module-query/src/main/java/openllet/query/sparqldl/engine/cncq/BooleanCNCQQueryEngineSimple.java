@@ -140,7 +140,7 @@ public class BooleanCNCQQueryEngineSimple extends AbstractBooleanQueryEngine<CNC
         // 5. CHECK FOR SATISFIABILITY
         boolean isSat = isSatisfied(negativeQueries, q.getKB(), q.isDistinct());
 
-        // 6. CLEAN-UP
+        // 6. CLEAN-UP & ROLLING-BACK CHANGES
         cleanUp();
 
         return isSat;

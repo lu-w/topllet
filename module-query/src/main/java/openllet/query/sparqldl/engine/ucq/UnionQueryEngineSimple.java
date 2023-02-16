@@ -1,8 +1,9 @@
 package openllet.query.sparqldl.engine.ucq;
 
 import openllet.core.utils.Bool;
-import openllet.query.sparqldl.engine.AbstractBooleanQueryEngine;
 import openllet.query.sparqldl.engine.AbstractQueryEngine;
+import openllet.query.sparqldl.engine.QueryBindingCandidateGenerator;
+import openllet.query.sparqldl.engine.QueryCandidateGeneratorNaive;
 import openllet.query.sparqldl.model.results.MultiQueryResults;
 import openllet.query.sparqldl.model.results.QueryResult;
 import openllet.query.sparqldl.model.results.QueryResultImpl;
@@ -22,7 +23,7 @@ public class UnionQueryEngineSimple extends AbstractQueryEngine<UnionQuery>
     public enum BindingTime { BEFORE_CNF, AFTER_CNF };
 
     protected BindingTime _bindingTime = BindingTime.BEFORE_CNF;
-    protected UnionQueryBindingCandidateGenerator _bindingGenerator;
+    protected QueryBindingCandidateGenerator _bindingGenerator;
     protected AbstractBooleanUnionQueryEngine _booleanEngine;
 
     public UnionQueryEngineSimple() {
@@ -58,7 +59,7 @@ public class UnionQueryEngineSimple extends AbstractQueryEngine<UnionQuery>
         // Note: we can not split the query here due to semantics. Queries can only be split after conversion to CNF.
         QueryResult result = new QueryResultImpl(q);
         // FETCH AND APPLY BINDINGS
-        _bindingGenerator = new UnionQueryCandidateGeneratorNaive(q);
+        _bindingGenerator = new QueryCandidateGeneratorNaive(q);
         for (ResultBinding candidateBinding : _bindingGenerator)
         {
             if (_logger.isLoggable(Level.FINE))
@@ -94,7 +95,7 @@ public class UnionQueryEngineSimple extends AbstractQueryEngine<UnionQuery>
         {
             // 4. APPLY BINDINGS
             QueryResult result = new QueryResultImpl(cnfQueryPart);
-            _bindingGenerator = new UnionQueryCandidateGeneratorNaive(cnfQueryPart);
+            _bindingGenerator = new QueryCandidateGeneratorNaive(cnfQueryPart);
             for (ResultBinding candidateBinding : _bindingGenerator)
             {
                 if (_logger.isLoggable(Level.FINE))

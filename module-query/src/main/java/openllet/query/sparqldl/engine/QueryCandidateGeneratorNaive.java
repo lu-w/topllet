@@ -1,4 +1,4 @@
-package openllet.query.sparqldl.engine.ucq;
+package openllet.query.sparqldl.engine;
 
 import openllet.aterm.ATermAppl;
 import openllet.query.sparqldl.model.Query;
@@ -7,12 +7,12 @@ import openllet.query.sparqldl.model.results.ResultBindingImpl;
 
 import java.util.*;
 
-public class UnionQueryCandidateGeneratorNaive extends UnionQueryBindingCandidateGenerator
+public class QueryCandidateGeneratorNaive extends QueryBindingCandidateGenerator
 {
     List<ATermAppl> _vars;
     List<ATermAppl> _inds; // we need a fixed order for enumeration
 
-    UnionQueryCandidateGeneratorNaive(Query query)
+    public QueryCandidateGeneratorNaive(Query<?> query)
     {
         super(query);
         _vars = query.getResultVars();
@@ -26,7 +26,7 @@ public class UnionQueryCandidateGeneratorNaive extends UnionQueryBindingCandidat
         return new Iterator<>()
         {
             private int curPos = (int) Math.pow(_inds.size(), _vars.size());
-            private int[] indexes = new int[Math.max(_inds.size(), _vars.size())];
+            private final int[] indexes = new int[Math.max(_inds.size(), _vars.size())];
 
             @Override
             public boolean hasNext()
