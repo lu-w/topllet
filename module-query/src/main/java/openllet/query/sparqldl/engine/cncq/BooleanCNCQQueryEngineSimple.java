@@ -25,10 +25,10 @@ import java.util.Map;
  */
 public class BooleanCNCQQueryEngineSimple extends AbstractBooleanQueryEngine<CNCQQuery>
 {
-    private abstract class Change
+    private abstract static class Change
     {
     }
-    private class TypeChange extends Change
+    private static class TypeChange extends Change
     {
         private final ATermAppl _ind;
         private final ATermAppl _type;
@@ -39,12 +39,12 @@ public class BooleanCNCQQueryEngineSimple extends AbstractBooleanQueryEngine<CNC
             _type = type;
         }
 
-        protected ATermAppl getInd()
+        private ATermAppl getInd()
         {
             return _ind;
         }
 
-        protected ATermAppl getType()
+        private ATermAppl getType()
         {
             return _type;
         }
@@ -67,17 +67,17 @@ public class BooleanCNCQQueryEngineSimple extends AbstractBooleanQueryEngine<CNC
             _obj = obj;
         }
 
-        protected ATermAppl getSubj()
+        private ATermAppl getSubj()
         {
             return _subj;
         }
 
-        protected ATermAppl getPred()
+        private ATermAppl getPred()
         {
             return _pred;
         }
 
-        protected ATermAppl getObj()
+        private ATermAppl getObj()
         {
             return _obj;
         }
@@ -88,7 +88,7 @@ public class BooleanCNCQQueryEngineSimple extends AbstractBooleanQueryEngine<CNC
         }
     }
 
-    private class FreshIndChange extends Change
+    private static class FreshIndChange extends Change
     {
         private final ATermAppl _ind;
 
@@ -97,7 +97,7 @@ public class BooleanCNCQQueryEngineSimple extends AbstractBooleanQueryEngine<CNC
             _ind = ind;
         }
 
-        protected ATermAppl getInd()
+        private ATermAppl getInd()
         {
             return _ind;
         }
@@ -179,6 +179,7 @@ public class BooleanCNCQQueryEngineSimple extends AbstractBooleanQueryEngine<CNC
         {
             if (!_queryVarsToFreshInds.containsKey(var))
             {
+                // TODO Lukas: create some method that safely fetches a fresh individual name given a prefix
                 Individual ind = abox.getKB().addIndividual(ATermUtils.makeTermAppl("__NEW_CNCQ_IND_" + _freshIndCounter));
                 ATermAppl freshInd = ind.getTerm();
                 _freshIndCounter++;
