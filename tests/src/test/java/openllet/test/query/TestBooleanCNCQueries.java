@@ -10,8 +10,7 @@ import static openllet.query.sparqldl.model.cq.QueryAtomFactory.TypeAtom;
 
 public class TestBooleanCNCQueries extends AbstractQueryTest
 {
-    @Test
-    public void testBooleanQueries1()
+    private void setupKB1()
     {
         classes(_A, _B, _C, _D, _E);
         individuals(_a, _b, _c);
@@ -24,32 +23,80 @@ public class TestBooleanCNCQueries extends AbstractQueryTest
         _kb.addType(_a, _A);
         _kb.addType(_b, _D);
         _kb.addPropertyValue(_r, _a, _b);
+    }
 
+    @Test
+    public void testSimpleBooleanQueries1()
+    {
+        setupKB1();
         CNCQQuery cncqq1 = cncqQuery(
                 query(TypeAtom(_a, _B), PropertyValueAtom(_a, _r, _b)),
                 negatedQuery(TypeAtom(_a, _C), PropertyValueAtom(_a, _r, _b))
         );
-        CNCQQuery cncqq2 = cncqQuery(
+        testQuery(cncqq1, true);
+    }
+
+    @Test
+    public void testSimpleBooleanQueries2()
+    {
+        setupKB1();
+        CNCQQuery cncqq = cncqQuery(
                 query(TypeAtom(_a, _B)),
                 negatedQuery(PropertyValueAtom(_a, _p, x))
         );
-        CNCQQuery cncqq3 = cncqQuery(
+        testQuery(cncqq, false);
+    }
+
+    @Test
+    public void testSimpleBooleanQueries3()
+    {
+        setupKB1();
+        CNCQQuery cncqq = cncqQuery(
                 query(TypeAtom(_a, _C)),
                 negatedQuery(TypeAtom(_a, _B), PropertyValueAtom(_a, _r, _b))
         );
-        CNCQQuery cncqq4 = cncqQuery(
+        testQuery(cncqq, false);
+    }
+
+    @Test
+    public void testSimpleBooleanQueries4()
+    {
+        setupKB1();
+        CNCQQuery cncqq = cncqQuery(
                 query(TypeAtom(_a, _E)),
                 negatedQuery(TypeAtom(_b, _E), PropertyValueAtom(_b, _r, _c))
         );
-        CNCQQuery cncqq5 = cncqQuery(
+        testQuery(cncqq, true);
+    }
+
+    @Test
+    public void testSimpleBooleanQueries5()
+    {
+        setupKB1();
+        CNCQQuery cncqq = cncqQuery(
                 query(TypeAtom(_a, _E))
         );
+        testQuery(cncqq, true);
+    }
 
-        testQuery(cncqq1, true);
-        testQuery(cncqq2, false);
-        testQuery(cncqq3, false);
-        testQuery(cncqq4, true);
-        testQuery(cncqq5, true);
+    @Test
+    public void testSimpleBooleanQueries6()
+    {
+        setupKB1();
+        CNCQQuery cncqq = cncqQuery(
+                negatedQuery(TypeAtom(_a, _E))
+        );
+        testQuery(cncqq, true);
+    }
+
+    @Test
+    public void testSimpleBooleanQueries7()
+    {
+        setupKB1();
+        CNCQQuery cncqq = cncqQuery(
+                negatedQuery(TypeAtom(_a, _B))
+        );
+        testQuery(cncqq, false);
     }
 
     // TODO Lukas: test undist. var
