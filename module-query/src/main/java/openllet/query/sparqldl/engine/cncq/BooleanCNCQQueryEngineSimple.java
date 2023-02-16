@@ -4,6 +4,7 @@ import openllet.aterm.ATermAppl;
 import openllet.core.DependencySet;
 import openllet.core.KnowledgeBase;
 import openllet.core.boxes.abox.ABox;
+import openllet.core.boxes.abox.Individual;
 import openllet.query.sparqldl.engine.AbstractBooleanQueryEngine;
 import openllet.query.sparqldl.engine.ucq.UnionQueryEngineSimple;
 import openllet.query.sparqldl.model.AtomQuery;
@@ -41,18 +42,22 @@ public class BooleanCNCQQueryEngineSimple extends AbstractBooleanQueryEngine<CNC
             positiveQuery = positiveQuery.splitAndRollUp(false);
 
         // 3. PUT POSITIVE ATOMS IN A-BOX
-        KnowledgeBase modifiedKB = putQueryAtomsInABox(positiveQuery, q.getKB());
+        ABox modifiedABox = putQueryAtomsInABox(positiveQuery, q.getKB());
 
-        // 4. CHECK FOR SATISFIABILITY
-        boolean isSat = isSatisfied(negativeQueries, modifiedKB, q.isDistinct());
+        // 4. QUERY IS NOT SATISFIABLE IF KB IS INCONSISTENT
+        if (!modifiedABox.isConsistent())
+            return false;
 
-        // 5. CLEAN-UP
+        // 5. CHECK FOR SATISFIABILITY
+        boolean isSat = isSatisfied(negativeQueries, modifiedABox.getKB(), q.isDistinct());
+
+        // 6. CLEAN-UP
         cleanUp();
 
         return isSat;
     }
 
-    private KnowledgeBase putQueryAtomsInABox(AtomQuery<?> query, KnowledgeBase kb)
+    private ABox putQueryAtomsInABox(AtomQuery<?> query, KnowledgeBase kb)
     {
         final ABox copy = kb.getABox().copy();
         for (QueryAtom atom : query.getAtoms())
@@ -63,7 +68,6 @@ public class BooleanCNCQQueryEngineSimple extends AbstractBooleanQueryEngine<CNC
                 {
                     ATermAppl var = getIndividual(atom.getArguments().get(0), copy);
                     ATermAppl type = atom.getArguments().get(1);
-                    System.out.println("Putting " + var + " : " + type);
                     copy.addType(var, type);
                 }
                 case PropertyValue ->
@@ -71,13 +75,12 @@ public class BooleanCNCQQueryEngineSimple extends AbstractBooleanQueryEngine<CNC
                     ATermAppl subj = getIndividual(atom.getArguments().get(0), copy);
                     ATermAppl pred = atom.getArguments().get(1);
                     ATermAppl obj = getIndividual(atom.getArguments().get(2), copy);
-                    System.out.println("Putting " + subj + " - " + pred + " - " + obj);
                     copy.addEdge(pred, subj, obj, DependencySet.INDEPENDENT);
                 }
                 default -> _logger.warning("Encountered query predicate that is not supported: " + atom.getPredicate());
             }
         }
-        return copy.getKB();
+        return copy;
     }
 
     private ATermAppl getIndividual(ATermAppl var, ABox abox)
@@ -86,7 +89,8 @@ public class BooleanCNCQQueryEngineSimple extends AbstractBooleanQueryEngine<CNC
         if (!abox.getKB().isIndividual(var))
         {
             if (!_queryVarsToFreshInds.containsKey(var))
-                _queryVarsToFreshInds.put(var, abox.addFreshIndividual(null, DependencySet.INDEPENDENT).getTerm());
+                _queryVarsToFreshInds.put(var, // TODO Lukas: null here?
+                        abox.addFreshIndividual(null, DependencySet.INDEPENDENT).getTerm());
             res = _queryVarsToFreshInds.get(var);
         }
         return res;
