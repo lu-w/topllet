@@ -1,6 +1,8 @@
 package openllet.test.query;
 
+import openllet.aterm.ATermAppl;
 import openllet.query.sparqldl.model.cncq.CNCQQuery;
+import openllet.query.sparqldl.model.ucq.UnionQuery;
 import org.junit.Test;
 
 import static openllet.core.utils.TermFactory.*;
@@ -102,31 +104,81 @@ public class TestBooleanCNCQueries extends AbstractQueryTest
     public void testUndistVarQueries1()
     {
         setupKB1();
-        CNCQQuery cncqq1 = cncqQuery(
+        CNCQQuery cncqq = cncqQuery(
                 query(TypeAtom(x, _B), PropertyValueAtom(x, _r, y)),
                 negatedQuery(TypeAtom(x1, _C), PropertyValueAtom(x1, _r, y1))
         );
-        testQuery(cncqq1, true);
+        testQuery(cncqq, true);
     }
 
     @Test
     public void testUndistVarQueries2()
     {
         setupKB1();
-        CNCQQuery cncqq1 = cncqQuery(
+        CNCQQuery cncqq = cncqQuery(
                 query(TypeAtom(x, _C), PropertyValueAtom(x, _r, y)),
                 negatedQuery(TypeAtom(x1, _C), PropertyValueAtom(x1, _r, y1))
         );
-        testQuery(cncqq1, false);
+        testQuery(cncqq, false);
     }
     @Test
     public void testUndistVarQueries3()
     {
         setupKB1();
-        CNCQQuery cncqq1 = cncqQuery(
+        CNCQQuery cncqq = cncqQuery(
                 query(TypeAtom(x, _B), PropertyValueAtom(x, _r, y)),
                 negatedQuery(TypeAtom(x1, _C), PropertyValueAtom(x1, _r, y1))
         );
-        testQuery(cncqq1, true);
+        testQuery(cncqq, true);
+    }
+
+    @Test
+    public void testOedipus()
+    {
+        final ATermAppl Patricide = term("Patricide");
+        final ATermAppl oedipus = term("oedipus");
+        final ATermAppl iokaste = term("iokaste");
+        final ATermAppl polyneikes = term("polyneikes");
+        final ATermAppl thersandros = term("thersandros");
+        final ATermAppl hasChild = term("hasChild");
+
+        classes(Patricide);
+        individuals(oedipus, iokaste, polyneikes, thersandros);
+        objectProperties(hasChild);
+
+        _kb.addPropertyValue(hasChild, iokaste, oedipus);
+        _kb.addPropertyValue(hasChild, oedipus, polyneikes);
+        _kb.addPropertyValue(hasChild, iokaste, polyneikes);
+        _kb.addPropertyValue(hasChild, polyneikes, thersandros);
+        _kb.addType(oedipus, Patricide);
+        _kb.addType(thersandros, not(Patricide));
+
+        CNCQQuery cncqq1 = cncqQuery(
+                negatedQuery(TypeAtom(oedipus, Patricide), PropertyValueAtom(iokaste, hasChild, oedipus),
+                        TypeAtom(polyneikes, not(Patricide)), PropertyValueAtom(oedipus, hasChild, polyneikes)),
+                negatedQuery(TypeAtom(polyneikes, Patricide), PropertyValueAtom(iokaste, hasChild, polyneikes),
+                        TypeAtom(thersandros, not(Patricide)), PropertyValueAtom(polyneikes, hasChild,
+                                thersandros))
+        );
+        CNCQQuery cncqq2 = cncqQuery(
+                query(TypeAtom(oedipus, Patricide), PropertyValueAtom(iokaste, hasChild, oedipus),
+                        TypeAtom(polyneikes, not(Patricide)), PropertyValueAtom(oedipus, hasChild, polyneikes)),
+                negatedQuery(TypeAtom(polyneikes, Patricide), PropertyValueAtom(iokaste, hasChild, polyneikes),
+                        TypeAtom(thersandros, not(Patricide)), PropertyValueAtom(polyneikes, hasChild,
+                                thersandros))
+        );
+        CNCQQuery cncqq3 = cncqQuery(
+                query(TypeAtom(oedipus, Patricide), PropertyValueAtom(iokaste, hasChild, oedipus),
+                        TypeAtom(polyneikes, not(Patricide)), PropertyValueAtom(oedipus, hasChild, polyneikes))
+        );
+        CNCQQuery cncqq4 = cncqQuery(
+                query(TypeAtom(oedipus, Patricide), PropertyValueAtom(iokaste, hasChild, oedipus),
+                        TypeAtom(polyneikes, not(Patricide)), PropertyValueAtom(oedipus, hasChild, polyneikes)),
+                negatedQuery(PropertyValueAtom(iokaste, hasChild, polyneikes))
+        );
+        testQuery(cncqq1, false);
+        testQuery(cncqq2, true);
+        testQuery(cncqq3, true);
+        testQuery(cncqq4, false);
     }
 }
