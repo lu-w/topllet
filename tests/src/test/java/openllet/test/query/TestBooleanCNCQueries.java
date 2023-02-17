@@ -157,15 +157,13 @@ public class TestBooleanCNCQueries extends AbstractQueryTest
                 negatedQuery(TypeAtom(oedipus, Patricide), PropertyValueAtom(iokaste, hasChild, oedipus),
                         TypeAtom(polyneikes, not(Patricide)), PropertyValueAtom(oedipus, hasChild, polyneikes)),
                 negatedQuery(TypeAtom(polyneikes, Patricide), PropertyValueAtom(iokaste, hasChild, polyneikes),
-                        TypeAtom(thersandros, not(Patricide)), PropertyValueAtom(polyneikes, hasChild,
-                                thersandros))
+                        TypeAtom(thersandros, not(Patricide)), PropertyValueAtom(polyneikes, hasChild, thersandros))
         );
         CNCQQuery cncqq2 = cncqQuery(
                 query(TypeAtom(oedipus, Patricide), PropertyValueAtom(iokaste, hasChild, oedipus),
                         TypeAtom(polyneikes, not(Patricide)), PropertyValueAtom(oedipus, hasChild, polyneikes)),
                 negatedQuery(TypeAtom(polyneikes, Patricide), PropertyValueAtom(iokaste, hasChild, polyneikes),
-                        TypeAtom(thersandros, not(Patricide)), PropertyValueAtom(polyneikes, hasChild,
-                                thersandros))
+                        TypeAtom(thersandros, not(Patricide)), PropertyValueAtom(polyneikes, hasChild, thersandros))
         );
         CNCQQuery cncqq3 = cncqQuery(
                 query(TypeAtom(oedipus, Patricide), PropertyValueAtom(iokaste, hasChild, oedipus),
@@ -176,9 +174,36 @@ public class TestBooleanCNCQueries extends AbstractQueryTest
                         TypeAtom(polyneikes, not(Patricide)), PropertyValueAtom(oedipus, hasChild, polyneikes)),
                 negatedQuery(PropertyValueAtom(iokaste, hasChild, polyneikes))
         );
+        // Interesting case: both sub-queries of cncqq1 are satisfiable, but cncqq1 itself is not satisfiable.
+        CNCQQuery cncqq5 = cncqQuery(
+                negatedQuery(TypeAtom(oedipus, Patricide), PropertyValueAtom(iokaste, hasChild, oedipus),
+                        TypeAtom(polyneikes, not(Patricide)), PropertyValueAtom(oedipus, hasChild, polyneikes))
+        );
+        CNCQQuery cncqq6 = cncqQuery(
+                negatedQuery(TypeAtom(polyneikes, Patricide), PropertyValueAtom(iokaste, hasChild, polyneikes),
+                        TypeAtom(thersandros, not(Patricide)), PropertyValueAtom(polyneikes, hasChild, thersandros))
+        );
         testQuery(cncqq1, false);
         testQuery(cncqq2, true);
         testQuery(cncqq3, true);
         testQuery(cncqq4, false);
+        testQuery(cncqq5, true);
+        testQuery(cncqq6, true);
+    }
+
+    @Test
+    public void testIncosistentKB()
+    {
+        individuals(_a, _b);
+        classes(_A, _B);
+        _kb.addType(_b, not(_B));
+
+        CNCQQuery cncqq = cncqQuery(query(TypeAtom(_b, _B)));
+
+        testQuery(cncqq, false);
+
+        _kb.addType(_a, or(_A, not(_A)));
+
+        testQuery(cncqq, true);
     }
 }
