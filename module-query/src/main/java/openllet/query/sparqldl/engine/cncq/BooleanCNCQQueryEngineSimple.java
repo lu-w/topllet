@@ -161,8 +161,13 @@ public class BooleanCNCQQueryEngineSimple extends AbstractBooleanQueryEngine<CNC
         @Override
         protected void apply()
         {
-            // TODO Lukas: write function that safely (collision-free) generates new individuals
-            _ind = _abox.getKB().addIndividual(ATermUtils.makeTermAppl("__NEW_IND_" + _freshIndCounter));
+            ATermAppl newName;
+            StringBuilder prefix = new StringBuilder();
+            // Safely creates new individuals by prepending "_" until no collision is found
+            do
+                newName = ATermUtils.makeTermAppl(prefix.append("_") + "NEW_IND_" + _freshIndCounter);
+            while (_abox.getKB().getIndividuals().contains(newName));
+            _ind = _abox.getKB().addIndividual(newName);
             _freshIndCounter++;
         }
     }
