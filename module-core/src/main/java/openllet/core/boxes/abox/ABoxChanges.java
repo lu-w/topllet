@@ -7,26 +7,37 @@ import openllet.core.utils.ATermUtils;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * A central interface to ABox changes that enables applying and rolling back such changes (in an orderly fashion).
+ */
 public class ABoxChanges
 {
+    /**
+     * A change of the ABox.
+     */
     public abstract static class ABoxChange
     {
         protected ABox _abox;
 
+        /**
+         * Sets the ABox to which the change applies - only for internal use, but has to be set before calling apply()
+         * @param abox ABox on which the change is applied
+         */
         protected void setABox(ABox abox)
         {
             _abox = abox;
         }
 
-        protected ABox getABox()
-        {
-            return _abox;
-        }
-
+        /**
+         * Reverts the change in its ABox
+         */
         protected abstract void revert();
         protected abstract void apply();
     }
 
+    /**
+     * Represents adding a type to some existing individual in the ABox.
+     */
     public static class TypeChange extends ABoxChange
     {
         private final ATermAppl _ind;
@@ -131,11 +142,19 @@ public class ABoxChanges
 
     private final ABox _abox;
 
+    /**
+     * Collects all changes to be applied and potentially (orderly) reverted.
+     * @param abox The ABox on which changes are to be applied and reverted
+     */
     public ABoxChanges(ABox abox)
     {
         _abox = abox;
     }
 
+    /**
+     * Applies a given change. Changes the state of the ABox set in the constructor.
+     * @param change the change to apply
+     */
     public void apply(ABoxChange change)
     {
         change.setABox(_abox);
@@ -143,6 +162,10 @@ public class ABoxChanges
         change.apply();
     }
 
+    /**
+     * Reverts all the changes that were applied previously in an ordered fashion (thus, without causing conflicts).
+     * Changes the state of the ABox set in the constructor.
+     */
     public void revertAll()
     {
         // Sorting because we want to delete individuals at the very latest (otherwise, to-be-reverted changes may

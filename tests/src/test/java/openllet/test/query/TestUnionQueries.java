@@ -1,7 +1,6 @@
 package openllet.test.query;
 
 import openllet.aterm.ATermAppl;
-import openllet.query.sparqldl.model.Query;
 import openllet.query.sparqldl.model.ucq.*;
 import org.junit.Test;
 
