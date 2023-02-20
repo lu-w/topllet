@@ -25,9 +25,52 @@ import java.util.Map;
  */
 public class BooleanCNCQQueryEngineSimple extends AbstractBooleanQueryEngine<CNCQQuery>
 {
-    // TODO Lukas: Change classes should have apply() and revert() functions and a pointer to their KB
+
+    private static class Changes
+    {
+        private List<Change> _changes = new ArrayList<>();
+
+        private final ABox _abox;
+
+        Changes(ABox abox)
+        {
+            _abox = abox;
+        }
+
+        private void apply(Change change)
+        {
+            change.setABox(_abox);
+            _changes.add(change);
+            change.apply();
+        }
+
+        private void revertAll()
+        {
+            // Sorting because we want to delete individuals at the very latest
+            _changes.sort((c1, c2) -> c1 instanceof FreshIndChange && !(c2 instanceof FreshIndChange) ? 1 :
+                    !(c1 instanceof FreshIndChange) && c2 instanceof FreshIndChange ? -1 : 0);
+            for (Change change : _changes)
+                change.revert();
+            _changes = new ArrayList<>();
+        }
+    }
+
     private abstract static class Change
     {
+        protected ABox _abox;
+
+        protected void setABox(ABox abox)
+        {
+            _abox = abox;
+        }
+
+        protected ABox getABox()
+        {
+            return _abox;
+        }
+
+        protected abstract void revert();
+        protected abstract void apply();
     }
     private static class TypeChange extends Change
     {
@@ -40,22 +83,25 @@ public class BooleanCNCQQueryEngineSimple extends AbstractBooleanQueryEngine<CNC
             _type = type;
         }
 
-        private ATermAppl getInd()
-        {
-            return _ind;
-        }
-
-        private ATermAppl getType()
-        {
-            return _type;
-        }
-
         @Override
         public String toString() {
             return _type + "(" + _type + ")";
         }
+
+        @Override
+        protected void revert()
+        {
+            _abox.getKB().removeType(_ind, _type);
+        }
+
+        @Override
+        protected void apply()
+        {
+            _abox.addType(_ind, _type);
+        }
     }
-    private class PropertyChange extends Change
+
+    private static class PropertyChange extends Change
     {
         private final ATermAppl _subj;
         private final ATermAppl _pred;
@@ -68,60 +114,96 @@ public class BooleanCNCQQueryEngineSimple extends AbstractBooleanQueryEngine<CNC
             _obj = obj;
         }
 
-        private ATermAppl getSubj()
-        {
-            return _subj;
-        }
-
-        private ATermAppl getPred()
-        {
-            return _pred;
-        }
-
-        private ATermAppl getObj()
-        {
-            return _obj;
-        }
-
         @Override
         public String toString() {
             return _pred + "(" + _subj + ", " + _obj + ")";
+        }
+
+        @Override
+        protected void revert()
+        {
+            _abox.getKB().removePropertyValue(_pred, _subj, _obj);
+        }
+
+        @Override
+        protected void apply()
+        {
+            _abox.addEdge(_pred, _subj, _obj, DependencySet.INDEPENDENT);
         }
     }
 
     private static class FreshIndChange extends Change
     {
-        private final ATermAppl _ind;
+        private Individual _ind = null;
+        private static int _freshIndCounter = 0;
 
-        FreshIndChange(ATermAppl ind)
-        {
-            _ind = ind;
+        FreshIndChange() { }
+
+        @Override
+        public String toString() {
+            return "FreshInd(" + _ind.toString() + ")";
         }
 
-        private ATermAppl getInd()
+        /**
+         * @return the fresh individual if the change is applied and null otherwise.
+         */
+        private Individual getInd()
         {
             return _ind;
         }
 
         @Override
-        public String toString() {
-            return _ind.toString();
+        protected void revert()
+        {
+            _abox.removeNode(_ind.getTerm());
         }
+
+        @Override
+        protected void apply()
+        {
+            // TODO Lukas: write function that safely (collision-free) generates new individuals
+            _ind = _abox.getKB().addIndividual(ATermUtils.makeTermAppl("__NEW_IND_" + _freshIndCounter));
+            _freshIndCounter++;
+        }
+    }
+
+    BooleanCNCQQueryEngineSimple()
+    {
+        super();
+    }
+
+    BooleanCNCQQueryEngineSimple(boolean rollUpBeforeChecking)
+    {
+        this();
+        _rollUpBeforeChecking = rollUpBeforeChecking;
+    }
+
+    BooleanCNCQQueryEngineSimple(UnionQueryEngineSimple ucqEngine)
+    {
+        this();
+        _ucqEngine = ucqEngine;
+    }
+
+    BooleanCNCQQueryEngineSimple(UnionQueryEngineSimple ucqEngine, boolean rollUpBeforeChecking)
+    {
+        this();
+        _ucqEngine = ucqEngine;
+        _rollUpBeforeChecking = rollUpBeforeChecking;
     }
 
     private UnionQueryEngineSimple _ucqEngine = new UnionQueryEngineSimple();
     private boolean _rollUpBeforeChecking = false;
     private Map<ATermAppl, ATermAppl> _queryVarsToFreshInds = new HashMap<>();
-    private List<Change> _changes = new ArrayList<>();
+    private Changes _changes;
     private ABox _abox = null;
-    private int _freshIndCounter = 0;
 
     @Override
     protected boolean execBooleanABoxQuery(CNCQQuery q)
     {
-        // 1. PRELIMINARY CONSISTENCY CHECK
+        // 1. PRELIMINARY CONSISTENCY CHECK & INITIALIZING VARIABLES
         q.getKB().ensureConsistency();
         _abox = q.getKB().getABox();
+        _changes = new Changes(_abox);
 
         // 2. SEPARATE POSITIVE AND NEGATIVE PART & MERGE POSITIVE PART
         ConjunctiveQuery positiveQuery = q.mergePositiveQueries();
@@ -155,37 +237,32 @@ public class BooleanCNCQQueryEngineSimple extends AbstractBooleanQueryEngine<CNC
             {
                 case Type ->
                 {
-                    ATermAppl var = getIndividual(atom.getArguments().get(0), _abox);
+                    ATermAppl var = getIndividual(atom.getArguments().get(0));
                     ATermAppl type = atom.getArguments().get(1);
-                    _abox.addType(var, type);
-                    _changes.add(new TypeChange(var, type));
+                    _changes.apply(new TypeChange(var, type));
                 }
                 case PropertyValue ->
                 {
-                    ATermAppl subj = getIndividual(atom.getArguments().get(0), _abox);
+                    ATermAppl subj = getIndividual(atom.getArguments().get(0));
                     ATermAppl pred = atom.getArguments().get(1);
-                    ATermAppl obj = getIndividual(atom.getArguments().get(2), _abox);
-                    _abox.addEdge(pred, subj, obj, DependencySet.INDEPENDENT);
-                    _changes.add(new PropertyChange(subj, pred, obj));
+                    ATermAppl obj = getIndividual(atom.getArguments().get(2));
+                    _changes.apply(new PropertyChange(subj, pred, obj));
                 }
                 default -> _logger.warning("Encountered query predicate that is not supported: " + atom.getPredicate());
             }
         }
     }
 
-    private ATermAppl getIndividual(ATermAppl var, ABox abox)
+    private ATermAppl getIndividual(ATermAppl var)
     {
         ATermAppl res = var;
-        if (!abox.getKB().isIndividual(var))
+        if (!_abox.getKB().isIndividual(var))
         {
             if (!_queryVarsToFreshInds.containsKey(var))
             {
-                // TODO Lukas: create some method that safely fetches a fresh individual name given a prefix
-                Individual ind = abox.getKB().addIndividual(ATermUtils.makeTermAppl("__NEW_CNCQ_IND_" + _freshIndCounter));
-                ATermAppl freshInd = ind.getTerm();
-                _freshIndCounter++;
-                _queryVarsToFreshInds.put(var, freshInd);
-                _changes.add(new FreshIndChange(freshInd));
+                FreshIndChange change = new FreshIndChange();
+                _changes.apply(change);
+                _queryVarsToFreshInds.put(var, change.getInd().getTerm());
             }
             res = _queryVarsToFreshInds.get(var);
         }
@@ -212,17 +289,7 @@ public class BooleanCNCQQueryEngineSimple extends AbstractBooleanQueryEngine<CNC
 
     private void cleanUp()
     {
-        // Sorting because we want to delete individuals at the very latest
-        _changes.sort((c1, c2) -> c1 instanceof FreshIndChange && !(c2 instanceof FreshIndChange) ? 1 :
-                !(c1 instanceof FreshIndChange) && c2 instanceof FreshIndChange ? -1 : 0);
-        for (Change change : _changes)
-            if (change instanceof TypeChange c)
-                _abox.getKB().removeType(c.getInd(), c.getType());
-            else if (change instanceof PropertyChange c)
-                _abox.getKB().removePropertyValue(c.getPred(), c.getSubj(), c.getObj());
-            else if (change instanceof FreshIndChange c)
-                _abox.removeNode(c.getInd());
+        _changes.revertAll();
         _queryVarsToFreshInds = new HashMap<>();
-        _changes = new ArrayList<>();
     }
 }
