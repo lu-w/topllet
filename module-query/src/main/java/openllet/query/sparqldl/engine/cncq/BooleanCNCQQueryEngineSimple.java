@@ -1,11 +1,9 @@
 package openllet.query.sparqldl.engine.cncq;
 
 import openllet.aterm.ATermAppl;
-import openllet.core.DependencySet;
-import openllet.core.KnowledgeBase;
 import openllet.core.boxes.abox.ABox;
-import openllet.core.boxes.abox.Individual;
-import openllet.core.utils.ATermUtils;
+import openllet.core.boxes.abox.ABoxChanges;
+import openllet.core.boxes.abox.ABoxChanges.*;
 import openllet.query.sparqldl.engine.AbstractBooleanQueryEngine;
 import openllet.query.sparqldl.engine.ucq.UnionQueryEngineSimple;
 import openllet.query.sparqldl.model.AtomQuery;
@@ -15,7 +13,6 @@ import openllet.query.sparqldl.model.cq.QueryAtom;
 import openllet.query.sparqldl.model.ucq.UnionQuery;
 import openllet.query.sparqldl.model.ucq.UnionQueryImpl;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -25,182 +22,35 @@ import java.util.Map;
  */
 public class BooleanCNCQQueryEngineSimple extends AbstractBooleanQueryEngine<CNCQQuery>
 {
+    private UnionQueryEngineSimple _ucqEngine = new UnionQueryEngineSimple();
+    private boolean _rollUpBeforeChecking = false;
+    private Map<ATermAppl, ATermAppl> _queryVarsToFreshInds = new HashMap<>();
+    private ABoxChanges _changes;
+    private ABox _abox = null;
 
-    private static class Changes
-    {
-        private List<Change> _changes = new ArrayList<>();
-
-        private final ABox _abox;
-
-        Changes(ABox abox)
-        {
-            _abox = abox;
-        }
-
-        private void apply(Change change)
-        {
-            change.setABox(_abox);
-            _changes.add(change);
-            change.apply();
-        }
-
-        private void revertAll()
-        {
-            // Sorting because we want to delete individuals at the very latest
-            _changes.sort((c1, c2) -> c1 instanceof FreshIndChange && !(c2 instanceof FreshIndChange) ? 1 :
-                    !(c1 instanceof FreshIndChange) && c2 instanceof FreshIndChange ? -1 : 0);
-            for (Change change : _changes)
-                change.revert();
-            _changes = new ArrayList<>();
-        }
-    }
-
-    private abstract static class Change
-    {
-        protected ABox _abox;
-
-        protected void setABox(ABox abox)
-        {
-            _abox = abox;
-        }
-
-        protected ABox getABox()
-        {
-            return _abox;
-        }
-
-        protected abstract void revert();
-        protected abstract void apply();
-    }
-    private static class TypeChange extends Change
-    {
-        private final ATermAppl _ind;
-        private final ATermAppl _type;
-
-        TypeChange(ATermAppl ind, ATermAppl type)
-        {
-            _ind = ind;
-            _type = type;
-        }
-
-        @Override
-        public String toString() {
-            return _type + "(" + _type + ")";
-        }
-
-        @Override
-        protected void revert()
-        {
-            _abox.getKB().removeType(_ind, _type);
-        }
-
-        @Override
-        protected void apply()
-        {
-            _abox.addType(_ind, _type);
-        }
-    }
-
-    private static class PropertyChange extends Change
-    {
-        private final ATermAppl _subj;
-        private final ATermAppl _pred;
-        private final ATermAppl _obj;
-
-        PropertyChange(ATermAppl subj, ATermAppl pred, ATermAppl obj)
-        {
-            _subj = subj;
-            _pred = pred;
-            _obj = obj;
-        }
-
-        @Override
-        public String toString() {
-            return _pred + "(" + _subj + ", " + _obj + ")";
-        }
-
-        @Override
-        protected void revert()
-        {
-            _abox.getKB().removePropertyValue(_pred, _subj, _obj);
-        }
-
-        @Override
-        protected void apply()
-        {
-            _abox.addEdge(_pred, _subj, _obj, DependencySet.INDEPENDENT);
-        }
-    }
-
-    private static class FreshIndChange extends Change
-    {
-        private Individual _ind = null;
-        private static int _freshIndCounter = 0;
-
-        FreshIndChange() { }
-
-        @Override
-        public String toString() {
-            return "FreshInd(" + _ind.toString() + ")";
-        }
-
-        /**
-         * @return the fresh individual if the change is applied and null otherwise.
-         */
-        private Individual getInd()
-        {
-            return _ind;
-        }
-
-        @Override
-        protected void revert()
-        {
-            _abox.removeNode(_ind.getTerm());
-        }
-
-        @Override
-        protected void apply()
-        {
-            ATermAppl newName;
-            StringBuilder prefix = new StringBuilder();
-            // Safely creates new individuals by prepending "_" until no collision is found
-            do
-                newName = ATermUtils.makeTermAppl(prefix.append("_") + "NEW_IND_" + _freshIndCounter);
-            while (_abox.getKB().getIndividuals().contains(newName));
-            _ind = _abox.getKB().addIndividual(newName);
-            _freshIndCounter++;
-        }
-    }
-
-    BooleanCNCQQueryEngineSimple()
+    public BooleanCNCQQueryEngineSimple()
     {
         super();
     }
 
-    BooleanCNCQQueryEngineSimple(boolean rollUpBeforeChecking)
+    public BooleanCNCQQueryEngineSimple(boolean rollUpBeforeChecking)
     {
         this();
         _rollUpBeforeChecking = rollUpBeforeChecking;
     }
 
-    BooleanCNCQQueryEngineSimple(UnionQueryEngineSimple ucqEngine)
+    public BooleanCNCQQueryEngineSimple(UnionQueryEngineSimple ucqEngine)
     {
         this();
         _ucqEngine = ucqEngine;
     }
 
-    BooleanCNCQQueryEngineSimple(UnionQueryEngineSimple ucqEngine, boolean rollUpBeforeChecking)
+    public BooleanCNCQQueryEngineSimple(UnionQueryEngineSimple ucqEngine, boolean rollUpBeforeChecking)
     {
         this();
         _ucqEngine = ucqEngine;
         _rollUpBeforeChecking = rollUpBeforeChecking;
     }
-
-    private UnionQueryEngineSimple _ucqEngine = new UnionQueryEngineSimple();
-    private boolean _rollUpBeforeChecking = false;
-    private Map<ATermAppl, ATermAppl> _queryVarsToFreshInds = new HashMap<>();
-    private Changes _changes;
-    private ABox _abox = null;
 
     @Override
     protected boolean execBooleanABoxQuery(CNCQQuery q)
@@ -208,7 +58,7 @@ public class BooleanCNCQQueryEngineSimple extends AbstractBooleanQueryEngine<CNC
         // 1. PRELIMINARY CONSISTENCY CHECK & INITIALIZING VARIABLES
         q.getKB().ensureConsistency();
         _abox = q.getKB().getABox();
-        _changes = new Changes(_abox);
+        _changes = new ABoxChanges(_abox);
 
         // 2. SEPARATE POSITIVE AND NEGATIVE PART & MERGE POSITIVE PART
         ConjunctiveQuery positiveQuery = q.mergePositiveQueries();

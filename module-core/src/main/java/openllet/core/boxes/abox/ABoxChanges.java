@@ -1,0 +1,156 @@
+package openllet.core.boxes.abox;
+
+import openllet.aterm.ATermAppl;
+import openllet.core.DependencySet;
+import openllet.core.utils.ATermUtils;
+
+import java.util.ArrayList;
+import java.util.List;
+
+public class ABoxChanges
+{
+    public abstract static class ABoxChange
+    {
+        protected ABox _abox;
+
+        protected void setABox(ABox abox)
+        {
+            _abox = abox;
+        }
+
+        protected ABox getABox()
+        {
+            return _abox;
+        }
+
+        protected abstract void revert();
+        protected abstract void apply();
+    }
+
+    public static class TypeChange extends ABoxChange
+    {
+        private final ATermAppl _ind;
+        private final ATermAppl _type;
+
+        public TypeChange(ATermAppl ind, ATermAppl type)
+        {
+            _ind = ind;
+            _type = type;
+        }
+
+        @Override
+        public String toString() {
+            return _type + "(" + _type + ")";
+        }
+
+        @Override
+        protected void revert()
+        {
+            _abox.getKB().removeType(_ind, _type);
+        }
+
+        @Override
+        protected void apply()
+        {
+            _abox.addType(_ind, _type);
+        }
+    }
+
+    public static class PropertyChange extends ABoxChange
+    {
+        private final ATermAppl _subj;
+        private final ATermAppl _pred;
+        private final ATermAppl _obj;
+
+        public PropertyChange(ATermAppl subj, ATermAppl pred, ATermAppl obj)
+        {
+            _subj = subj;
+            _pred = pred;
+            _obj = obj;
+        }
+
+        @Override
+        public String toString() {
+            return _pred + "(" + _subj + ", " + _obj + ")";
+        }
+
+        @Override
+        protected void revert()
+        {
+            _abox.getKB().removePropertyValue(_pred, _subj, _obj);
+        }
+
+        @Override
+        protected void apply()
+        {
+            _abox.addEdge(_pred, _subj, _obj, DependencySet.INDEPENDENT);
+        }
+    }
+
+    public static class FreshIndChange extends ABoxChange
+    {
+        private Individual _ind = null;
+        private static int _freshIndCounter = 0;
+
+        public FreshIndChange() { }
+
+        @Override
+        public String toString() {
+            return "FreshInd(" + _ind.toString() + ")";
+        }
+
+        /**
+         * @return the fresh individual if the change is applied and null otherwise.
+         */
+        public Individual getInd()
+        {
+            return _ind;
+        }
+
+        @Override
+        protected void revert()
+        {
+            _abox.removeNode(_ind.getTerm());
+        }
+
+        @Override
+        protected void apply()
+        {
+            ATermAppl newName;
+            StringBuilder prefix = new StringBuilder();
+            // Safely creates new individuals by prepending "_" until no collision is found
+            do
+                newName = ATermUtils.makeTermAppl(prefix.append("_") + "NEW_IND_" + _freshIndCounter);
+            while (_abox.getKB().getIndividuals().contains(newName));
+            _ind = _abox.getKB().addIndividual(newName);
+            _freshIndCounter++;
+        }
+    }
+
+    private List<ABoxChange> _changes = new ArrayList<>();
+
+    private final ABox _abox;
+
+    public ABoxChanges(ABox abox)
+    {
+        _abox = abox;
+    }
+
+    public void apply(ABoxChange change)
+    {
+        change.setABox(_abox);
+        _changes.add(change);
+        change.apply();
+    }
+
+    public void revertAll()
+    {
+        // Sorting because we want to delete individuals at the very latest (otherwise, to-be-reverted changes may
+        // refer to deleted individuals)
+        _changes.sort((c1, c2) -> c1 instanceof FreshIndChange && !(c2 instanceof FreshIndChange) ? 1 :
+                !(c1 instanceof FreshIndChange) && c2 instanceof FreshIndChange ? -1 : 0);
+        for (ABoxChange change : _changes)
+            change.revert();
+        _changes = new ArrayList<>();
+    }
+}
