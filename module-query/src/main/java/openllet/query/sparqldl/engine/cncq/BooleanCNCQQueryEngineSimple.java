@@ -25,6 +25,7 @@ import java.util.Map;
  */
 public class BooleanCNCQQueryEngineSimple extends AbstractBooleanQueryEngine<CNCQQuery>
 {
+    // TODO Lukas: Change classes should have apply() and revert() functions and a pointer to their KB
     private abstract static class Change
     {
     }
@@ -138,7 +139,7 @@ public class BooleanCNCQQueryEngineSimple extends AbstractBooleanQueryEngine<CNC
             return false;
 
         // 5. CHECK FOR SATISFIABILITY
-        boolean isSat = isSatisfied(negativeQueries, q.getKB(), q.isDistinct());
+        boolean isSat = isSatisfied(negativeQueries, q.isDistinct());
 
         // 6. CLEAN-UP & ROLLING-BACK CHANGES
         cleanUp();
@@ -191,17 +192,22 @@ public class BooleanCNCQQueryEngineSimple extends AbstractBooleanQueryEngine<CNC
         return res;
     }
 
-    private boolean isSatisfied(List<ConjunctiveQuery> negativeQueries, KnowledgeBase kb, boolean isDistinct)
+    private boolean isSatisfied(List<ConjunctiveQuery> negativeQueries, boolean isDistinct)
     {
-        UnionQuery ucq = new UnionQueryImpl(kb, isDistinct);
-        for (ConjunctiveQuery query : negativeQueries)
+        boolean res = false;
+        if (_abox.isConsistent())
         {
-            ConjunctiveQuery positiveQuery = query.copy();
-            positiveQuery.setNegation(false);
-            ucq.addQuery(positiveQuery);
+            UnionQuery ucq = new UnionQueryImpl(_abox.getKB(), isDistinct);
+            for (ConjunctiveQuery query : negativeQueries)
+            {
+                ConjunctiveQuery positiveQuery = query.copy();
+                positiveQuery.setNegation(false);
+                ucq.addQuery(positiveQuery);
+            }
+            // No need to set result / dist. variables for the UCQ in Boolean engine
+            res = _ucqEngine.exec(ucq).isEmpty();
         }
-        // No need to set result / dist. variables for the UCQ in Boolean engine
-        return _ucqEngine.exec(ucq).isEmpty();
+        return res;
     }
 
     private void cleanUp()

@@ -2,7 +2,6 @@ package openllet.test.query;
 
 import openllet.aterm.ATermAppl;
 import openllet.query.sparqldl.model.cncq.CNCQQuery;
-import openllet.query.sparqldl.model.ucq.UnionQuery;
 import org.junit.Test;
 
 import static openllet.core.utils.TermFactory.*;
@@ -192,18 +191,18 @@ public class TestBooleanCNCQueries extends AbstractQueryTest
     }
 
     @Test
-    public void testIncosistentKB()
+    public void testInconsistentKB()
     {
         individuals(_a, _b);
         classes(_A, _B);
-        _kb.addType(_b, not(_B));
+        _kb.addType(_a, or(_A, not(_A)));
 
         CNCQQuery cncqq = cncqQuery(query(TypeAtom(_b, _B)));
 
-        testQuery(cncqq, false);
-
-        _kb.addType(_a, or(_A, not(_A)));
-
         testQuery(cncqq, true);
+
+        _kb.addType(_b, not(_B));
+
+        testQuery(cncqq, false);
     }
 }
