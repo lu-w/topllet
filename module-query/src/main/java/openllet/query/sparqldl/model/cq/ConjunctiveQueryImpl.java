@@ -430,6 +430,14 @@ public class ConjunctiveQueryImpl extends AbstractAtomQuery<ConjunctiveQuery> im
 	}
 
 	@Override
+	public ConjunctiveQuery copy()
+	{
+		ConjunctiveQuery copy = super.copy();
+		copy.setNegation(isNegated());
+		return copy;
+	}
+
+	@Override
 	public boolean isNegated()
 	{
 		return _isNegated;

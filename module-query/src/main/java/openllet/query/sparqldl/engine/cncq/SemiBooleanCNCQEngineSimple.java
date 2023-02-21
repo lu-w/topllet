@@ -10,7 +10,7 @@ import openllet.query.sparqldl.model.cq.ConjunctiveQuery;
 import openllet.query.sparqldl.model.cq.QueryAtom;
 import openllet.query.sparqldl.model.results.QueryResult;
 import openllet.query.sparqldl.model.results.QueryResultImpl;
-import openllet.query.sparqldl.model.results.ResultBinding;
+import openllet.query.sparqldl.model.results.ResultBindingImpl;
 import openllet.query.sparqldl.model.ucq.UnionQuery;
 import openllet.query.sparqldl.model.ucq.UnionQueryImpl;
 
@@ -60,7 +60,6 @@ public class SemiBooleanCNCQEngineSimple extends AbstractSemiBooleanCNCQEngine
 
         // 2. SEPARATE POSITIVE AND NEGATIVE PART & MERGE POSITIVE PART
         ConjunctiveQuery positiveQuery = q.mergePositiveQueries();
-        List<ConjunctiveQuery> negativeQueries = q.getNegativeQueries();
 
         // 2. SPLIT & ROLL-UP POSITIVE QUERIES (OPTIONAL)
         if (_rollUpBeforeChecking)
@@ -136,6 +135,9 @@ public class SemiBooleanCNCQEngineSimple extends AbstractSemiBooleanCNCQEngine
             }
             res = _ucqEngine.exec(ucq);
         }
+        // If A-Box is inconsistent, the query is not satisfiable (thus the UCQ is trivially entailed)
+        else
+            res.add(new ResultBindingImpl());
         return res.invert();
     }
 

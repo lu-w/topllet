@@ -11,7 +11,7 @@ public abstract class AbstractSemiBooleanCNCQEngine extends AbstractCNCQQueryEng
     {
         boolean booleanPosPart = true;
         for (ConjunctiveQuery sq : q.getPositiveQueries())
-            booleanPosPart &= sq.isGround();
+            booleanPosPart &= sq.getDistVars().size() == 0;
         return super.supports(q) && booleanPosPart;
     }
 }

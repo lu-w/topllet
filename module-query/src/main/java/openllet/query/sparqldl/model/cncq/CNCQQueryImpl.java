@@ -11,6 +11,7 @@ import openllet.query.sparqldl.model.results.ResultBinding;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.EnumMap;
 import java.util.List;
 
 public class CNCQQueryImpl extends AbstractCompositeQuery<ConjunctiveQuery, CNCQQuery> implements CNCQQuery
@@ -93,6 +94,19 @@ public class CNCQQueryImpl extends AbstractCompositeQuery<ConjunctiveQuery, CNCQ
     }
 
     @Override
+    public CNCQQuery copy()
+    {
+        CNCQQuery copy = new CNCQQueryImpl(this);
+        for (ConjunctiveQuery q : getPositiveQueries())
+            copy.addPositiveQuery(q.copy());
+        for (ConjunctiveQuery q : getNegativeQueries())
+            copy.addNegativeQuery(q.copy());
+        copy.setDistVars(new EnumMap<>(getDistVarsWithVarType()));
+        copy.setResultVars(getResultVars());
+        return copy;
+    }
+
+    @Override
     public ConjunctiveQuery mergePositiveQueries()
     {
         ConjunctiveQuery newQuery = new ConjunctiveQueryImpl(this);
@@ -118,10 +132,13 @@ public class CNCQQueryImpl extends AbstractCompositeQuery<ConjunctiveQuery, CNCQ
     @Override
     public CNCQQuery applyToPositivePart(ResultBinding binding)
     {
-        CNCQQuery copy = copy();
-        copy.setPositiveQueries(new ArrayList<>());
+        CNCQQuery copy = new CNCQQueryImpl(this);
+        for (ConjunctiveQuery q : getNegativeQueries())
+            copy.addNegativeQuery(q.copy());
         for (ConjunctiveQuery q : getPositiveQueries())
             copy.addPositiveQuery(q.apply(binding));
+        copy.setDistVars(new EnumMap<>(getDistVarsWithVarType()));
+        copy.setResultVars(getResultVars());
         return copy;
     }
 

@@ -19,7 +19,6 @@ public class CNCQQueryEngineSimple extends AbstractCNCQQueryEngine
     {
         super();
         this._semiBooleanEngine = new SemiBooleanCNCQEngineSimple();
-        super._booleanEngine = new BooleanCNCQQueryEngineSimple();
     }
 
     public void setBooleanEngine(AbstractSemiBooleanCNCQEngine booleanEngine)

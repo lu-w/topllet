@@ -131,10 +131,18 @@ public class QueryResultImpl implements QueryResult
 	@Override
 	public QueryResult invert()
 	{
-		QueryResult inv = QueryResult.allBindings(_query, getResultVars(),
-				_query.getKB().getIndividuals().stream().toList());
-		for (ResultBinding binding : _bindings)
-			inv.remove(binding);
+		QueryResult inv = new QueryResultImpl(_query);
+		List<ATermAppl> inds = _query.getKB().getIndividuals().stream().toList();
+		// If we have a Boolean result, and no binding in the result (i.e., the result is False), we just return True
+		if (getResultVars().size() == 0 && _bindings.size() == 0)
+			inv.add(new ResultBindingImpl());
+		// If this result contains all possible bindings anyhow, we skip this and just return the empty result
+		else if (size() < Math.pow(getResultVars().size(), inds.size()))
+		{
+			inv = QueryResult.allBindings(_query, getResultVars(), inds);
+			for (ResultBinding binding : _bindings)
+				inv.remove(binding);
+		}
 		return inv;
 	}
 

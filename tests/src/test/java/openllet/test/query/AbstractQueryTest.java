@@ -7,7 +7,6 @@
 package openllet.test.query;
 
 import openllet.aterm.ATermAppl;
-import openllet.core.rules.VariableBinding;
 import openllet.core.utils.ATermUtils;
 import openllet.query.sparqldl.engine.cncq.CNCQQueryEngineSimple;
 import openllet.query.sparqldl.engine.cq.QueryEngine;
