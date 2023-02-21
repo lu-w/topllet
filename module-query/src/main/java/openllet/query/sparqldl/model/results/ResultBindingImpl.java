@@ -100,6 +100,17 @@ public class ResultBindingImpl implements ResultBinding
 		return new ResultBindingImpl(_bindings);
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void merge(ResultBinding binding)
+	{
+		for (ATermAppl var : binding.getAllVariables())
+			if (!getAllVariables().contains(var))
+				setValue(var, binding.getValue(var));
+	}
+
 	@Override
 	public String toString()
 	{
@@ -120,7 +131,7 @@ public class ResultBindingImpl implements ResultBinding
 	{
 		final int PRIME = 31;
 		int result = 1;
-		result = PRIME * result + (_bindings == null ? 0 : _bindings.hashCode());
+		result = PRIME * result + _bindings.hashCode();
 		return result;
 	}
 

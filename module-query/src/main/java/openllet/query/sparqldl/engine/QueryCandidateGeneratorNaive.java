@@ -1,6 +1,7 @@
 package openllet.query.sparqldl.engine;
 
 import openllet.aterm.ATermAppl;
+import openllet.core.KnowledgeBase;
 import openllet.query.sparqldl.model.Query;
 import openllet.query.sparqldl.model.results.ResultBinding;
 import openllet.query.sparqldl.model.results.ResultBindingImpl;
@@ -18,6 +19,13 @@ public class QueryCandidateGeneratorNaive extends QueryBindingCandidateGenerator
         _vars = query.getResultVars();
         _inds = query.getKB().getIndividuals().stream().toList();
         assert(_inds.size() > 0);
+    }
+
+    public QueryCandidateGeneratorNaive(List<ATermAppl> individuals, List<ATermAppl> resultVars)
+    {
+        super();
+        _vars = resultVars;
+        _inds = individuals;
     }
 
     @Override

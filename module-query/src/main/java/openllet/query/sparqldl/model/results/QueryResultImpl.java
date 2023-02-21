@@ -6,14 +6,8 @@
 
 package openllet.query.sparqldl.model.results;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Set;
 
 import openllet.aterm.ATermAppl;
 import openllet.query.sparqldl.model.Query;
@@ -34,13 +28,13 @@ import openllet.query.sparqldl.model.cq.QueryParameters;
  */
 public class QueryResultImpl implements QueryResult
 {
-	private Collection<ResultBinding> _bindings;
+	private final Collection<ResultBinding> _bindings;
 
 	private final List<ATermAppl> _resultVars;
-	private final Query _query;
+	private final Query<?> _query;
 	private final QueryParameters _parameters;
 
-	public QueryResultImpl(final Query query)
+	public QueryResultImpl(final Query<?> query)
 	{
 		_query = query;
 		_parameters = query.getQueryParameters();
@@ -59,6 +53,12 @@ public class QueryResultImpl implements QueryResult
 	public void add(final ResultBinding binding)
 	{
 		_bindings.add(process(binding));
+	}
+
+	@Override
+	public void remove(ResultBinding binding)
+	{
+		_bindings.remove(process(binding));
 	}
 
 	@Override
@@ -110,31 +110,32 @@ public class QueryResultImpl implements QueryResult
 		return _bindings instanceof Set;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public boolean isEmpty()
 	{
 		return size() == 0;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public Iterator<ResultBinding> iterator()
 	{
 		return _bindings.iterator();
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public int size()
 	{
 		return _bindings.size();
+	}
+
+	@Override
+	public QueryResult invert()
+	{
+		QueryResult inv = QueryResult.allBindings(_query, getResultVars(),
+				_query.getKB().getIndividuals().stream().toList());
+		for (ResultBinding binding : _bindings)
+			inv.remove(binding);
+		return inv;
 	}
 
 	@Override

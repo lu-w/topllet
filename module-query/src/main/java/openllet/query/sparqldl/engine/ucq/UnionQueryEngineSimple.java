@@ -18,7 +18,7 @@ import java.util.logging.Level;
 /**
  * This engine just simply iterates through all possible bindings.
  */
-public class UnionQueryEngineSimple extends AbstractQueryEngine<UnionQuery>
+public class UnionQueryEngineSimple extends AbstractUnionQueryEngine
 {
     public enum BindingTime { BEFORE_CNF, AFTER_CNF };
 
@@ -41,7 +41,6 @@ public class UnionQueryEngineSimple extends AbstractQueryEngine<UnionQuery>
     {
         this._booleanEngine = booleanEngine;
         super._booleanEngine = this._booleanEngine;
-
     }
 
     @Override
@@ -64,7 +63,7 @@ public class UnionQueryEngineSimple extends AbstractQueryEngine<UnionQuery>
         {
             if (_logger.isLoggable(Level.FINE))
                 _logger.fine("Trying candidate binding: " + candidateBinding);
-            UnionQuery boundQuery = (UnionQuery) q.apply(candidateBinding);
+            UnionQuery boundQuery = q.apply(candidateBinding);
             QueryResult booleanResult = _booleanEngine.exec(boundQuery);
             if (_logger.isLoggable(Level.FINE))
                 _logger.fine("Boolean engine returned: " + (booleanResult.isEmpty() ? "false" : "true"));

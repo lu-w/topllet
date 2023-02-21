@@ -7,6 +7,7 @@ import openllet.query.sparqldl.model.Query;
 import openllet.query.sparqldl.model.cq.ConjunctiveQuery;
 import openllet.query.sparqldl.model.cq.ConjunctiveQueryImpl;
 import openllet.query.sparqldl.model.cq.QueryAtom;
+import openllet.query.sparqldl.model.results.ResultBinding;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -112,6 +113,25 @@ public class CNCQQueryImpl extends AbstractCompositeQuery<ConjunctiveQuery, CNCQ
                         q.addResultVar(var);
         }
         return newQuery;
+    }
+
+    @Override
+    public CNCQQuery applyToPositivePart(ResultBinding binding)
+    {
+        CNCQQuery copy = copy();
+        copy.setPositiveQueries(new ArrayList<>());
+        for (ConjunctiveQuery q : getPositiveQueries())
+            copy.addPositiveQuery(q.apply(binding));
+        return copy;
+    }
+
+    @Override
+    public List<ATermAppl> getPositiveResultVars()
+    {
+        List<ATermAppl> posVars = new ArrayList<>();
+        for (ConjunctiveQuery q : getPositiveQueries())
+            posVars.addAll(q.getResultVars());
+        return posVars;
     }
 
     public CNCQQuery createQuery(KnowledgeBase kb, boolean isDistinct)

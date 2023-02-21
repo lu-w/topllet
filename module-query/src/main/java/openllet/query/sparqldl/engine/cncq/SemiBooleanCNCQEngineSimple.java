@@ -3,12 +3,14 @@ package openllet.query.sparqldl.engine.cncq;
 import openllet.aterm.ATermAppl;
 import openllet.core.boxes.abox.ABox;
 import openllet.core.boxes.abox.ABoxChanges;
-import openllet.core.boxes.abox.ABoxChanges.*;
 import openllet.query.sparqldl.engine.ucq.UnionQueryEngineSimple;
 import openllet.query.sparqldl.model.AtomQuery;
 import openllet.query.sparqldl.model.cncq.CNCQQuery;
 import openllet.query.sparqldl.model.cq.ConjunctiveQuery;
 import openllet.query.sparqldl.model.cq.QueryAtom;
+import openllet.query.sparqldl.model.results.QueryResult;
+import openllet.query.sparqldl.model.results.QueryResultImpl;
+import openllet.query.sparqldl.model.results.ResultBinding;
 import openllet.query.sparqldl.model.ucq.UnionQuery;
 import openllet.query.sparqldl.model.ucq.UnionQueryImpl;
 
@@ -16,11 +18,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/**
- * This engine checks for the *satisfiability* of conjunctions of possibly negated conjunctive queries.
- */
-// TODO Lukas: refer to SemiBooleanCNCQEngine to compute Boolean result -> remove functions here, they are duplicates
-public class BooleanCNCQQueryEngineSimple extends AbstractBooleanCNCQQueryEngine
+public class SemiBooleanCNCQEngineSimple extends AbstractSemiBooleanCNCQEngine
 {
     private UnionQueryEngineSimple _ucqEngine = new UnionQueryEngineSimple();
     private boolean _rollUpBeforeChecking = false;
@@ -28,24 +26,24 @@ public class BooleanCNCQQueryEngineSimple extends AbstractBooleanCNCQQueryEngine
     private ABoxChanges _changes;
     private ABox _abox = null;
 
-    public BooleanCNCQQueryEngineSimple()
+    public SemiBooleanCNCQEngineSimple()
     {
         super();
     }
 
-    public BooleanCNCQQueryEngineSimple(boolean rollUpBeforeChecking)
+    public SemiBooleanCNCQEngineSimple(boolean rollUpBeforeChecking)
     {
         this();
         _rollUpBeforeChecking = rollUpBeforeChecking;
     }
 
-    public BooleanCNCQQueryEngineSimple(UnionQueryEngineSimple ucqEngine)
+    public SemiBooleanCNCQEngineSimple(UnionQueryEngineSimple ucqEngine)
     {
         this();
         _ucqEngine = ucqEngine;
     }
 
-    public BooleanCNCQQueryEngineSimple(UnionQueryEngineSimple ucqEngine, boolean rollUpBeforeChecking)
+    public SemiBooleanCNCQEngineSimple(UnionQueryEngineSimple ucqEngine, boolean rollUpBeforeChecking)
     {
         this();
         _ucqEngine = ucqEngine;
@@ -53,7 +51,7 @@ public class BooleanCNCQQueryEngineSimple extends AbstractBooleanCNCQQueryEngine
     }
 
     @Override
-    protected boolean execBooleanABoxQuery(CNCQQuery q)
+    protected QueryResult execABoxQuery(CNCQQuery q)
     {
         // 1. PRELIMINARY CONSISTENCY CHECK & INITIALIZING VARIABLES
         q.getKB().ensureConsistency();
@@ -73,15 +71,15 @@ public class BooleanCNCQQueryEngineSimple extends AbstractBooleanCNCQQueryEngine
 
         // 4. QUERY IS NOT SATISFIABLE IF KB IS INCONSISTENT
         if (!q.getKB().isConsistent())
-            return false;
+            return new QueryResultImpl(q);
 
         // 5. CHECK FOR SATISFIABILITY
-        boolean isSat = isSatisfied(negativeQueries, q.isDistinct());
+        QueryResult satResult = computeSatisfiableBindings(q);
 
         // 6. CLEAN-UP & ROLLING-BACK CHANGES
         cleanUp();
 
-        return isSat;
+        return satResult;
     }
 
     private void putQueryAtomsInABox(AtomQuery<?> query)
@@ -94,14 +92,14 @@ public class BooleanCNCQQueryEngineSimple extends AbstractBooleanCNCQQueryEngine
                 {
                     ATermAppl var = getIndividual(atom.getArguments().get(0));
                     ATermAppl type = atom.getArguments().get(1);
-                    _changes.apply(new TypeChange(var, type));
+                    _changes.apply(new ABoxChanges.TypeChange(var, type));
                 }
                 case PropertyValue ->
                 {
                     ATermAppl subj = getIndividual(atom.getArguments().get(0));
                     ATermAppl pred = atom.getArguments().get(1);
                     ATermAppl obj = getIndividual(atom.getArguments().get(2));
-                    _changes.apply(new PropertyChange(subj, pred, obj));
+                    _changes.apply(new ABoxChanges.PropertyChange(subj, pred, obj));
                 }
                 default -> _logger.warning("Encountered query predicate that is not supported: " + atom.getPredicate());
             }
@@ -115,7 +113,7 @@ public class BooleanCNCQQueryEngineSimple extends AbstractBooleanCNCQQueryEngine
         {
             if (!_queryVarsToFreshInds.containsKey(var))
             {
-                FreshIndChange change = new FreshIndChange();
+                ABoxChanges.FreshIndChange change = new ABoxChanges.FreshIndChange();
                 _changes.apply(change);
                 _queryVarsToFreshInds.put(var, change.getInd().getTerm());
             }
@@ -124,22 +122,21 @@ public class BooleanCNCQQueryEngineSimple extends AbstractBooleanCNCQQueryEngine
         return res;
     }
 
-    private boolean isSatisfied(List<ConjunctiveQuery> negativeQueries, boolean isDistinct)
+    private QueryResult computeSatisfiableBindings(CNCQQuery query)
     {
-        boolean res = false;
+        QueryResult res = new QueryResultImpl(query);
         if (_abox.isConsistent())
         {
-            UnionQuery ucq = new UnionQueryImpl(_abox.getKB(), isDistinct);
-            for (ConjunctiveQuery query : negativeQueries)
+            UnionQuery ucq = new UnionQueryImpl(_abox.getKB(), query.isDistinct());
+            for (ConjunctiveQuery negQuery : query.getNegativeQueries())
             {
-                ConjunctiveQuery positiveQuery = query.copy();
+                ConjunctiveQuery positiveQuery = negQuery.copy();
                 positiveQuery.setNegation(false);
                 ucq.addQuery(positiveQuery);
             }
-            // No need to set result / dist. variables for the UCQ in Boolean engine
-            res = _ucqEngine.exec(ucq).isEmpty();
+            res = _ucqEngine.exec(ucq);
         }
-        return res;
+        return res.invert();
     }
 
     private void cleanUp()

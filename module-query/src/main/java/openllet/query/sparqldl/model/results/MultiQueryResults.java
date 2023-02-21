@@ -58,6 +58,12 @@ public class MultiQueryResults implements QueryResult
 		throw new UnsupportedOperationException("MultiQueryResults do not support addition!");
 	}
 
+	@Override
+	public void remove(ResultBinding binding)
+	{
+		throw new UnsupportedOperationException("MultiQueryResults do not support removal!");
+	}
+
 	/**
 	 * {@inheritDoc}
 	 */
@@ -182,5 +188,14 @@ public class MultiQueryResults implements QueryResult
 	public int size()
 	{
 		return _size;
+	}
+
+	@Override
+	public QueryResult invert()
+	{
+		List<QueryResult> results = new ArrayList<>();
+		for (QueryResult res : _queryResults)
+			results.add(res.invert());
+		return new MultiQueryResults(getResultVars(), results);
 	}
 }

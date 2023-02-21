@@ -136,7 +136,8 @@ public interface Query<QueryType extends Query<QueryType>>
     Set<ATermAppl> getDistVarsForType(final VarType queryType);
 
     /**
-     * Replace the variables in the query with the values specified in the binding and return a new query instance (without modifying this query).
+     * Replace the variables in the query with the values specified in the binding and return a new query instance
+     * (without modifying this query).
      *
      * @param binding the binding to apply
      * @return the query changed

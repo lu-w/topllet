@@ -76,4 +76,11 @@ public interface ResultBinding
 	 * @return new copy of the binding.
 	 */
 	ResultBinding duplicate();
+
+	/**
+	 * Merges the given result binding into this binding. Conflicting entries are resolved s.t. the original entry (i
+	 * .e. from this binding) are retained.
+	 * @param binding the binding to merge into this binding
+	 */
+	void merge(ResultBinding binding);
 }

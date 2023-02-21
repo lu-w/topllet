@@ -7,6 +7,8 @@
 package openllet.test.query;
 
 import openllet.aterm.ATermAppl;
+import openllet.core.rules.VariableBinding;
+import openllet.core.utils.ATermUtils;
 import openllet.query.sparqldl.engine.cncq.CNCQQueryEngineSimple;
 import openllet.query.sparqldl.engine.cq.QueryEngine;
 import openllet.query.sparqldl.engine.ucq.UnionQueryEngineSimple;
@@ -272,27 +274,19 @@ public abstract class AbstractQueryTest extends AbstractKBTests
 	 * Shared helper methods
 	 */
 
-	protected static List<List<ATermAppl>> allResults(List<ATermAppl> individuals, int resultSize)
+	protected static List<List<ATermAppl>> allResults(Query<?> query, List<ATermAppl> individuals, int resultSize)
 	{
-		// https://stackoverflow.com/a/40101377/4145563
+		List<ATermAppl> resVars = new ArrayList<>();
+		for (int i = 0; i < resultSize; i++)
+			resVars.add(ATermUtils.makeVar(Integer.toString(i)));
+		QueryResult allBindings = QueryResult.allBindings(query, resVars, individuals);
 		List<List<ATermAppl>> res = new ArrayList<>();
-		int[] indexes = new int[Math.max(individuals.size(), resultSize)];
-		ATermAppl[] permutation = new ATermAppl[resultSize];
-		for (int j = (int) Math.pow(individuals.size(), resultSize); j > 0; j--)
+		for (ResultBinding binding : allBindings)
 		{
-			for (int i = 0; i < resultSize; i++)
-				permutation[i] = individuals.get(indexes[i]);
-			res.add(Arrays.stream(permutation).toList());
-			for (int i = 0; i < resultSize; i++)
-			{
-				if (indexes[i] >= individuals.size() - 1)
-					indexes[i] = 0;
-				else
-				{
-					indexes[i]++;
-					break;
-				}
-			}
+			List<ATermAppl> bindingList = new ArrayList<>();
+			for (ATermAppl resVar : resVars)
+				bindingList.add(binding.getValue(resVar));
+			res.add(bindingList);
 		}
 		return res;
 	}

@@ -1,7 +1,9 @@
 package openllet.query.sparqldl.model.cncq;
 
+import openllet.aterm.ATermAppl;
 import openllet.query.sparqldl.model.CompositeQuery;
 import openllet.query.sparqldl.model.cq.ConjunctiveQuery;
+import openllet.query.sparqldl.model.results.ResultBinding;
 
 import java.util.List;
 
@@ -48,4 +50,16 @@ public interface CNCQQuery extends CompositeQuery<ConjunctiveQuery, CNCQQuery>
      * @return a copy representing a single query of the positive subqueries of this query
      */
     ConjunctiveQuery mergePositiveQueries();
+
+    /**
+     * Applies a binding only to the positive sub-queries of this query.
+     * @param binding The binding to apply
+     * @return A copy of this query where the positive parts have the binding applied
+     */
+    CNCQQuery applyToPositivePart(ResultBinding binding);
+
+    /**
+     * @return a list of the result vars of the positive sub-queries.
+     */
+    List<ATermAppl> getPositiveResultVars();
 }
