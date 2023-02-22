@@ -79,6 +79,14 @@ public abstract class AbstractQuery<QueryType extends Query<QueryType>> implemen
     }
 
     @Override
+    public void removeDistVar(final ATermAppl a)
+    {
+        for (VarType key : _distVars.keySet())
+            _distVars.get(key).remove(a);
+        removeResultVar(a);
+    }
+
+    @Override
     public void removeResultVar(final ATermAppl a)
     {
         _resultVars.remove(a);
@@ -94,6 +102,13 @@ public abstract class AbstractQuery<QueryType extends Query<QueryType>> implemen
     public void setDistVars(final EnumMap<VarType, Set<ATermAppl>> distVars)
     {
         _distVars = distVars;
+        // Ensures result vars is always a subset of dist vars
+        Set<ATermAppl> toRemove = new HashSet<>();
+        for (ATermAppl var : _resultVars)
+            for (VarType key : _distVars.keySet())
+                if (!_distVars.get(key).contains(var))
+                    toRemove.add(var);
+        _resultVars.removeAll(toRemove);
     }
 
     @Override

@@ -15,7 +15,6 @@ import openllet.query.sparqldl.model.ucq.UnionQuery;
 import openllet.query.sparqldl.model.ucq.UnionQueryImpl;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public class SemiBooleanCNCQEngineSimple extends AbstractSemiBooleanCNCQEngine
@@ -53,30 +52,30 @@ public class SemiBooleanCNCQEngineSimple extends AbstractSemiBooleanCNCQEngine
     @Override
     protected QueryResult execABoxQuery(CNCQQuery q)
     {
-        // 1. PRELIMINARY CONSISTENCY CHECK & INITIALIZING VARIABLES
-        q.getKB().ensureConsistency();
-        _abox = q.getKB().getABox();
-        _changes = new ABoxChanges(_abox);
+        QueryResult satResult = new QueryResultImpl(q);
 
-        // 2. SEPARATE POSITIVE AND NEGATIVE PART & MERGE POSITIVE PART
-        ConjunctiveQuery positiveQuery = q.mergePositiveQueries();
+        // 1. PRELIMINARY CONSISTENCY CHECK
+        if (q.getKB().isConsistent())
+        {
+            _abox = q.getKB().getABox();
+            _changes = new ABoxChanges(_abox);
 
-        // 2. SPLIT & ROLL-UP POSITIVE QUERIES (OPTIONAL)
-        if (_rollUpBeforeChecking)
-            positiveQuery = positiveQuery.splitAndRollUp(false);
+            // 2. SEPARATE POSITIVE AND NEGATIVE PART & MERGE POSITIVE PART
+            ConjunctiveQuery positiveQuery = q.mergePositiveQueries();
 
-        // 3. PUT POSITIVE ATOMS IN A-BOX
-        putQueryAtomsInABox(positiveQuery);
+            // 2. SPLIT & ROLL-UP POSITIVE QUERIES (OPTIONAL)
+            if (_rollUpBeforeChecking)
+                positiveQuery = positiveQuery.splitAndRollUp(false);
 
-        // 4. QUERY IS NOT SATISFIABLE IF KB IS INCONSISTENT
-        if (!q.getKB().isConsistent())
-            return new QueryResultImpl(q);
+            // 3. PUT POSITIVE ATOMS IN A-BOX
+            putQueryAtomsInABox(positiveQuery);
 
-        // 5. CHECK FOR SATISFIABILITY
-        QueryResult satResult = computeSatisfiableBindings(q);
+            // 4. CHECK FOR SATISFIABILITY
+            satResult = computeSatisfiableBindings(q);
 
-        // 6. CLEAN-UP & ROLLING-BACK CHANGES
-        cleanUp();
+            // 5. CLEAN-UP & ROLLING-BACK CHANGES
+            cleanUp();
+        }
 
         return satResult;
     }
@@ -124,7 +123,7 @@ public class SemiBooleanCNCQEngineSimple extends AbstractSemiBooleanCNCQEngine
     private QueryResult computeSatisfiableBindings(CNCQQuery query)
     {
         QueryResult res = new QueryResultImpl(query);
-        if (_abox.isConsistent())
+        if (_abox.getKB().isConsistent())
         {
             UnionQuery ucq = new UnionQueryImpl(_abox.getKB(), query.isDistinct());
             for (ConjunctiveQuery negQuery : query.getNegativeQueries())
@@ -135,7 +134,7 @@ public class SemiBooleanCNCQEngineSimple extends AbstractSemiBooleanCNCQEngine
             }
             res = _ucqEngine.exec(ucq);
         }
-        // If A-Box is inconsistent, the query is not satisfiable (thus the UCQ is trivially entailed)
+        // If ABox is inconsistent, the query is not satisfiable (thus the UCQ is trivially entailed)
         else
             res.add(new ResultBindingImpl());
         return res.invert();

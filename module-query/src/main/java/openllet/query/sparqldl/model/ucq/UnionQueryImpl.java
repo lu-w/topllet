@@ -137,7 +137,7 @@ public class UnionQueryImpl extends AbstractCompositeQuery<ConjunctiveQuery, Uni
         cnfQuery.setQueries(cnf);
         // Order of result/distinguished variables may change during conversion to CNF, therefore just reset them.
         cnfQuery.setDistVars(new EnumMap<>(getDistVarsWithVarType()));
-        cnfQuery.setResultVars(getResultVars());
+        cnfQuery.setResultVars(new ArrayList<>(getResultVars()));
         return cnfQuery;
     }
 

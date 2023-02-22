@@ -94,6 +94,22 @@ public class CNCQQueryImpl extends AbstractCompositeQuery<ConjunctiveQuery, CNCQ
     }
 
     @Override
+    public CNCQQuery apply(final ResultBinding binding)
+    {
+        final CNCQQuery query = copy();
+        for (ATermAppl var : binding.getAllVariables())
+            query.removeDistVar(var);
+        query.setNegativeQueries(new ArrayList<>());
+        query.setPositiveQueries(new ArrayList<>());
+        query.setQueries(new ArrayList<>());
+        for (ConjunctiveQuery q : getPositiveQueries())
+            query.addPositiveQuery(q.apply(binding));
+        for (ConjunctiveQuery q : getNegativeQueries())
+            query.addNegativeQuery(q.apply(binding));
+        return query;
+    }
+
+    @Override
     public CNCQQuery copy()
     {
         CNCQQuery copy = new CNCQQueryImpl(this);
@@ -102,7 +118,7 @@ public class CNCQQueryImpl extends AbstractCompositeQuery<ConjunctiveQuery, CNCQ
         for (ConjunctiveQuery q : getNegativeQueries())
             copy.addNegativeQuery(q.copy());
         copy.setDistVars(new EnumMap<>(getDistVarsWithVarType()));
-        copy.setResultVars(getResultVars());
+        copy.setResultVars(new ArrayList<>(getResultVars()));
         return copy;
     }
 
@@ -127,19 +143,6 @@ public class CNCQQueryImpl extends AbstractCompositeQuery<ConjunctiveQuery, CNCQ
                         q.addResultVar(var);
         }
         return newQuery;
-    }
-
-    @Override
-    public CNCQQuery applyToPositivePart(ResultBinding binding)
-    {
-        CNCQQuery copy = new CNCQQueryImpl(this);
-        for (ConjunctiveQuery q : getNegativeQueries())
-            copy.addNegativeQuery(q.copy());
-        for (ConjunctiveQuery q : getPositiveQueries())
-            copy.addPositiveQuery(q.apply(binding));
-        copy.setDistVars(new EnumMap<>(getDistVarsWithVarType()));
-        copy.setResultVars(getResultVars());
-        return copy;
     }
 
     @Override

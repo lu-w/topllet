@@ -37,7 +37,7 @@ public class CNCQQueryEngineSimple extends AbstractCNCQQueryEngine
         {
             if (_logger.isLoggable(Level.FINE))
                 _logger.fine("Trying candidate binding for positive part: " + candidateBinding);
-            CNCQQuery partiallyBoundQuery = q.applyToPositivePart(candidateBinding);
+            CNCQQuery partiallyBoundQuery = q.apply(candidateBinding);
             QueryResult partialResult = _semiBooleanEngine.exec(partiallyBoundQuery);
             if (_logger.isLoggable(Level.FINE))
                 _logger.fine("Boolean CNCQ engine returned: " + (partialResult.isEmpty() ? "false" : "true"));

@@ -52,13 +52,6 @@ public interface CNCQQuery extends CompositeQuery<ConjunctiveQuery, CNCQQuery>
     ConjunctiveQuery mergePositiveQueries();
 
     /**
-     * Applies a binding only to the positive sub-queries of this query.
-     * @param binding The binding to apply
-     * @return A copy of this query where the positive parts have the binding applied
-     */
-    CNCQQuery applyToPositivePart(ResultBinding binding);
-
-    /**
      * @return a list of the result vars of the positive sub-queries.
      */
     List<ATermAppl> getPositiveResultVars();

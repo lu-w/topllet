@@ -32,7 +32,13 @@ public interface Query<QueryType extends Query<QueryType>>
     void addResultVar(final ATermAppl a);
 
     /**
+     * Removes the distinguished variable from the query, and also from the result variables, if present.
      * @param a is the distinguished variable to remove.
+     */
+    void removeDistVar(final ATermAppl a);
+
+    /**
+     * @param a is the result variable to remove.
      */
     void removeResultVar(final ATermAppl a);
 

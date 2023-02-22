@@ -67,6 +67,8 @@ abstract public class AbstractCompositeQuery<SubQueryType extends Query<SubQuery
     public QueryType apply(final ResultBinding binding)
     {
         final QueryType query = copy();
+        for (ATermAppl var : binding.getAllVariables())
+            query.removeDistVar(var);
         query.setQueries(new ArrayList<>());
         for (SubQueryType subQuery : _queries)
             query.addQuery(subQuery.apply(binding));
@@ -80,7 +82,7 @@ abstract public class AbstractCompositeQuery<SubQueryType extends Query<SubQuery
         for (SubQueryType q : _queries)
             copy.addQuery(q.copy());
         copy.setDistVars(new EnumMap<>(getDistVarsWithVarType()));
-        copy.setResultVars(getResultVars());
+        copy.setResultVars(new ArrayList<>(getResultVars()));
         return copy;
     }
 

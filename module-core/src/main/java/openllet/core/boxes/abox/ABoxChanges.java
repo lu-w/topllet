@@ -51,7 +51,7 @@ public class ABoxChanges
 
         @Override
         public String toString() {
-            return _type + "(" + _type + ")";
+            return _type + "(" + _ind + ")";
         }
 
         @Override
@@ -63,7 +63,7 @@ public class ABoxChanges
         @Override
         protected void apply()
         {
-            _abox.addType(_ind, _type);
+            _abox.getKB().addType(_ind, _type);
         }
     }
 
@@ -94,7 +94,7 @@ public class ABoxChanges
         @Override
         protected void apply()
         {
-            _abox.addEdge(_pred, _subj, _obj, DependencySet.INDEPENDENT);
+            _abox.getKB().addPropertyValue(_pred, _subj, _obj);
         }
     }
 

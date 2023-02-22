@@ -100,6 +100,19 @@ public class TestBooleanCNCQueries extends AbstractQueryTest
     }
 
     @Test
+    public void testSimpleQueries8()
+    {
+        setupKB1();
+        CNCQQuery cncqq = cncqQuery(
+                select(),
+                where(
+                        query(TypeAtom(_a, _C))
+                )
+        );
+        testQuery(cncqq, false);
+    }
+
+    @Test
     public void testUndistVarQueries1()
     {
         setupKB1();

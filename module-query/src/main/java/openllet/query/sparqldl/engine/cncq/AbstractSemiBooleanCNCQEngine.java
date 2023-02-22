@@ -1,6 +1,5 @@
 package openllet.query.sparqldl.engine.cncq;
 
-import openllet.query.sparqldl.engine.AbstractQueryEngine;
 import openllet.query.sparqldl.model.cncq.CNCQQuery;
 import openllet.query.sparqldl.model.cq.ConjunctiveQuery;
 
