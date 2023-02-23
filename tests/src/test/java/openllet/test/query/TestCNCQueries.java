@@ -97,20 +97,173 @@ public class TestCNCQueries extends AbstractQueryTest
     }
 
     @Test
+    public void testVarOnlyInNegativePart()
+    {
+        setupKB1();
+        CNCQQuery cncqq = cncqQuery(
+                select(x, y),
+                where(
+                        query(TypeAtom(x, _A)),
+                        negatedQuery(TypeAtom(y, _C), PropertyValueAtom(y, _r, _b))
+                )
+        );
+        testQuery(cncqq, new ATermAppl[][] { {_a, _a}, {_a, _b}, {_a, _c}, {_c, _a}, {_c, _b}, {_c, _c} });
+    }
+
+    @Test
     public void testMultipleNegations1()
     {
         setupKB1();
         CNCQQuery cncqq = cncqQuery(
-                select(x),
-                where(
-                        query(TypeAtom(x, _A)),
-                        query(TypeAtom(x, _B)),
-                        negatedQuery(TypeAtom(x, _C), PropertyValueAtom(x, _r, _b)),
-                        negatedQuery(TypeAtom(x, not(_D)), PropertyValueAtom(x, _r, _b))
-                )
+            select(x),
+            where(
+                query(TypeAtom(x, _A)),
+                query(TypeAtom(x, _B)),
+                negatedQuery(TypeAtom(x, _C), PropertyValueAtom(x, _r, _b)),
+                negatedQuery(TypeAtom(x, not(_D)), PropertyValueAtom(x, _r, _b))
+            )
         );
         testQuery(cncqq, new ATermAppl[][] { {_c} });
     }
 
-    // TODO Lukas: more tests, esp. some Oedipus-like example
+    @Test
+    public void testMultipleNegations2()
+    {
+        setupKB1();
+        CNCQQuery cncqq = cncqQuery(
+            select(x, y),
+            where(
+                query(TypeAtom(x, _A)),
+                query(TypeAtom(x, _B)),
+                query(TypeAtom(y, _A), PropertyValueAtom(y, _p, x)),
+                negatedQuery(TypeAtom(x, _C), PropertyValueAtom(x, _r, _b)),
+                negatedQuery(TypeAtom(x, not(_D)), PropertyValueAtom(x, _r, _b)),
+                negatedQuery(TypeAtom(y, _D))
+            )
+        );
+        testQuery(cncqq, new ATermAppl[][] { {_c, _a}, {_c, _c} });
+    }
+
+    @Test
+    public void testMultipleNegations3()
+    {
+        setupKB1();
+        CNCQQuery cncqq = cncqQuery(
+                select(x, y, z),
+                where(
+                        query(TypeAtom(z, _E)),
+                        query(TypeAtom(x, _A)),
+                        query(TypeAtom(x, _B)),
+                        query(TypeAtom(y, _A), PropertyValueAtom(y, _p, x)),
+                        negatedQuery(TypeAtom(x, _C), PropertyValueAtom(x, _r, _b)),
+                        negatedQuery(TypeAtom(x, not(_D)), PropertyValueAtom(x, _r, _b)),
+                        negatedQuery(TypeAtom(y, _D))
+                )
+        );
+        testQuery(cncqq, new ATermAppl[][] { {_c, _a, _a}, {_c, _c, _a}, {_c, _a, _b}, {_c, _c, _b}, {_c, _a, _c},
+                {_c, _c, _c} });
+    }
+
+    @Test
+    public void testUnconstrainedResultVar()
+    {
+        setupKB1();
+        CNCQQuery cncqq = cncqQuery(
+                select(x, y, z),
+                where(
+                        query(TypeAtom(x, _A)),
+                        query(TypeAtom(x, _B)),
+                        query(TypeAtom(y, _A), PropertyValueAtom(y, _p, x)),
+                        negatedQuery(TypeAtom(x, _C), PropertyValueAtom(x, _r, _b)),
+                        negatedQuery(TypeAtom(x, not(_D)), PropertyValueAtom(x, _r, _b)),
+                        negatedQuery(TypeAtom(y, _D))
+                )
+        );
+        testQuery(cncqq, new ATermAppl[][] { {_c, _a, _a}, {_c, _c, _a}, {_c, _a, _b}, {_c, _c, _b}, {_c, _a, _c},
+                {_c, _c, _c} });
+    }
+
+    @Test
+    public void testUndistVars1()
+    {
+        setupKB1();
+        CNCQQuery cncqq = cncqQuery(
+            select(x),
+            where(
+                query(TypeAtom(x, _A)),
+                negatedQuery(TypeAtom(x, _C), PropertyValueAtom(x, _r, y))
+            )
+        );
+        testQuery(cncqq, new ATermAppl[][] { {_a}, {_c} });
+    }
+
+    @Test
+    public void testUndistVars2()
+    {
+        setupKB1();
+        CNCQQuery cncqq = cncqQuery(
+            select(x, y),
+            where(
+                query(TypeAtom(x, _A)),
+                query(TypeAtom(x, _B)),
+                query(TypeAtom(y, _A), PropertyValueAtom(y, _p, z)),
+                negatedQuery(TypeAtom(x, _C), PropertyValueAtom(x, _r, _b)),
+                negatedQuery(TypeAtom(x, not(_D)), PropertyValueAtom(x, _r, _b)),
+                negatedQuery(TypeAtom(y, _D))
+            )
+        );
+        testQuery(cncqq, new ATermAppl[][] { {_c, _a}, {_c, _c} });
+    }
+
+    @Test
+    public void testNonUNA()
+    {
+        classes(_A, _B);
+        individuals(_a, _b, _c);
+        objectProperties(_r);
+
+        _kb.addType(_b, not(_A));
+        _kb.addType(_c, not(_A));
+        _kb.addEquivalentClass(_A, value(_a));
+
+        CNCQQuery cncqq = cncqQuery(
+            select(x),
+            where(
+                query(TypeAtom(x, _A)),
+                query(TypeAtom(y, _A))
+            )
+        );
+        testQuery(cncqq, new ATermAppl[][] { {_a} });
+    }
+
+    @Test
+    public void testInconsistentKB1()
+    {
+        individuals(_a, _b);
+        classes(_A, _B);
+        _kb.addType(_a, or(_A, not(_A)));
+
+        CNCQQuery cncqq = cncqQuery(select(x), where(query(TypeAtom(x, _B))));
+
+        testQuery(cncqq, new ATermAppl[][] { {_a}, {_b} });
+
+        _kb.addType(_b, not(_B));
+
+        testQuery(cncqq, new ATermAppl[][] { {_a} });
+    }
+
+
+    @Test
+    public void testInconsistentKB2()
+    {
+        individuals(_a, _b);
+        classes(_A, _B);
+        _kb.addType(_a, and(_A, not(_A)));
+
+        CNCQQuery cncqq = cncqQuery(select(x), where(query(TypeAtom(x, _B))));
+
+        testQuery(cncqq);
+    }
+
+    // TODO Lukas: Oedipus-like test
 }

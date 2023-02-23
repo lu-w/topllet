@@ -148,6 +148,17 @@ public class CNCQQueryImpl extends AbstractCompositeQuery<ConjunctiveQuery, CNCQ
         Set<ATermAppl> posVars = new HashSet<>();
         for (ConjunctiveQuery q : getPositiveQueries())
             posVars.addAll(q.getResultVars());
+        List<ATermAppl> remainingVars = new ArrayList<>(getResultVars());
+        remainingVars.removeAll(posVars);
+        for (ATermAppl remainingVar : remainingVars)
+        {
+            boolean notContained = true;
+            for (ConjunctiveQuery q : getNegativeQueries())
+                if (q.getResultVars().contains(remainingVar))
+                    notContained = false;
+            if (notContained)
+                posVars.add(remainingVar);
+        }
         return posVars.stream().toList();
     }
 

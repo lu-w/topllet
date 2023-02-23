@@ -182,18 +182,27 @@ public interface ABox extends Logging
 	Edge addEdge(final ATermAppl p, final ATermAppl s, final ATermAppl o, DependencySet ds);
 
 	/**
-	 * Remove the given node from the node map which maps names to nodes. Does not remove the node from the node list or other nodes' edge lists.
+	 * Remove the given node from the node map which maps names to nodes. Does not remove the node from the node list or
+	 * other nodes' edge lists.
 	 *
-	 * @param x
-	 * @return true if the removal occur
+	 * @param x is a node.
+	 * @return true if the removal occurred
 	 */
 	boolean removeNode(final ATermAppl x);
+
+	/**
+	 * Remove the given node from the node map which maps names to nodes. Also removes the node from the node list.
+	 * Does not remove the node from other nodes' edge list. TODO Lukas: check if this holds up
+	 *
+	 * @param x is a node.
+	 */
+	void removeNodeEntirely(final ATermAppl x);
 
 	void removeType(final ATermAppl x, ATermAppl c);
 
 	/**
-	 * Add a new literal to the ABox. This function is used only when the literal value does not have a known value, e.g. applyMinRule would create such a
-	 * literal.
+	 * Add a new literal to the ABox. This function is used only when the literal value does not have a known value,
+	 * e.g. applyMinRule would create such a literal.
 	 *
 	 * @param ds
 	 * @return the literal added.

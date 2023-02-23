@@ -98,6 +98,7 @@ public class ABoxChanges
         }
     }
 
+    // TODO Lukas: may want to think about using C subseteq TOP instead of creating fresh individuals. But works for now
     public static class FreshIndChange extends ABoxChange
     {
         private Individual _ind = null;
@@ -121,7 +122,7 @@ public class ABoxChanges
         @Override
         protected void revert()
         {
-            _abox.removeNode(_ind.getTerm());
+            _abox.removeNodeEntirely(_ind.getTerm());
         }
 
         @Override

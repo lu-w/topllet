@@ -1,5 +1,7 @@
 package openllet.query.sparqldl.engine.cncq;
 
+import openllet.aterm.ATerm;
+import openllet.aterm.ATermAppl;
 import openllet.core.utils.Bool;
 import openllet.query.sparqldl.engine.QueryBindingCandidateGenerator;
 import openllet.query.sparqldl.engine.QueryCandidateGeneratorNaive;
@@ -8,6 +10,7 @@ import openllet.query.sparqldl.model.results.QueryResult;
 import openllet.query.sparqldl.model.results.QueryResultImpl;
 import openllet.query.sparqldl.model.results.ResultBinding;
 
+import java.util.List;
 import java.util.logging.Level;
 
 public class CNCQQueryEngineSimple extends AbstractCNCQQueryEngine

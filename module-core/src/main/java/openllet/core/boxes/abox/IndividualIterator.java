@@ -61,7 +61,7 @@ public class IndividualIterator implements Iterator<Individual>
 		for (; _index < _stop; _index++)
 		{
 			final Node node = _abox.getNode(_nodeList.get(_index));
-			if (!node.isPruned() && node.isIndividual())
+			if (node != null && !node.isPruned() && node.isIndividual())
 				break;
 		}
 	}

@@ -1750,16 +1750,17 @@ public class ABoxImpl implements ABox
 		return edge;
 	}
 
-	/**
-	 * Remove the given node from the node map which maps names to nodes. Does not remove the node from the node list or other nodes' edge lists.
-	 *
-	 * @param x is a node.
-	 * @return true if something have been remove. false if there was nothing to remove.
-	 */
 	@Override
 	public boolean removeNode(final ATermAppl x)
 	{
 		return _nodes.remove(x) != null;
+	}
+
+	@Override
+	public void removeNodeEntirely(final ATermAppl x)
+	{
+		_nodes.remove(x);
+		_nodeList.remove(x);
 	}
 
 	@Override
