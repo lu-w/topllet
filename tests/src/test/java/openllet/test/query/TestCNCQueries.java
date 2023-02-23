@@ -2,6 +2,7 @@ package openllet.test.query;
 
 import openllet.aterm.ATermAppl;
 import openllet.query.sparqldl.model.cncq.CNCQQuery;
+import openllet.query.sparqldl.model.results.QueryResult;
 import org.junit.Test;
 
 import java.util.List;
@@ -265,5 +266,68 @@ public class TestCNCQueries extends AbstractQueryTest
         testQuery(cncqq);
     }
 
-    // TODO Lukas: Oedipus-like test
+    @Test
+    public void testOedipus()
+    {
+        final ATermAppl Patricide = term("Patricide");
+        final ATermAppl oedipus = term("oedipus");
+        final ATermAppl iokaste = term("iokaste");
+        final ATermAppl polyneikes = term("polyneikes");
+        final ATermAppl thersandros = term("thersandros");
+        final ATermAppl hasChild = term("hasChild");
+
+        classes(Patricide);
+        individuals(oedipus, iokaste, polyneikes, thersandros);
+        objectProperties(hasChild);
+
+        _kb.addPropertyValue(hasChild, iokaste, oedipus);
+        _kb.addPropertyValue(hasChild, oedipus, polyneikes);
+        _kb.addPropertyValue(hasChild, iokaste, polyneikes);
+        _kb.addPropertyValue(hasChild, polyneikes, thersandros);
+        _kb.addType(oedipus, Patricide);
+        _kb.addType(thersandros, not(Patricide));
+
+        CNCQQuery cncqq1 = cncqQuery(
+            select(x, y, x1, y1),
+            where(
+                negatedQuery(TypeAtom(x, Patricide), PropertyValueAtom(iokaste, hasChild, x),
+                    TypeAtom(y, not(Patricide)), PropertyValueAtom(x, hasChild, y)),
+                negatedQuery(TypeAtom(x1, Patricide), PropertyValueAtom(iokaste, hasChild, x1),
+                    TypeAtom(y1, not(Patricide)), PropertyValueAtom(x1, hasChild, y1))
+            )
+        );
+        CNCQQuery cncqq2 = cncqQuery(
+            select(x, y),
+            where(
+                negatedQuery(TypeAtom(x, Patricide), PropertyValueAtom(iokaste, hasChild, x),
+                    TypeAtom(y, not(Patricide)), PropertyValueAtom(x, hasChild, y))
+            )
+        );
+        CNCQQuery cncqq3 = cncqQuery(
+            select(x, y),
+            where(
+                query(TypeAtom(x, Patricide), PropertyValueAtom(iokaste, hasChild, x),
+                    TypeAtom(y, not(Patricide)), PropertyValueAtom(x, hasChild, y)),
+                negatedQuery(PropertyValueAtom(y, hasChild, z))
+            )
+        );
+
+        List<List<ATermAppl>> res1 = allResults(cncqq2, List.of(oedipus, iokaste, polyneikes, thersandros), 4);
+        res1.removeAll(
+            List.of(
+                List.of(oedipus, polyneikes, polyneikes, thersandros),
+                List.of(polyneikes, thersandros, oedipus, polyneikes)
+            )
+        );
+
+        testQuery(cncqq1, res1);
+        testQuery(cncqq2, allResults(cncqq2, List.of(oedipus, iokaste, polyneikes, thersandros), 2));
+        testQuery(cncqq3, new ATermAppl[][]
+            {
+                {oedipus, thersandros},
+                {iokaste, thersandros},
+                {polyneikes, thersandros}
+            }
+        );
+    }
 }
