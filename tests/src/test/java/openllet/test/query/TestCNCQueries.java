@@ -95,4 +95,22 @@ public class TestCNCQueries extends AbstractQueryTest
         );
         testQuery(cncqq, new ATermAppl[][] { {_a}, {_c} });
     }
+
+    @Test
+    public void testMultipleNegations1()
+    {
+        setupKB1();
+        CNCQQuery cncqq = cncqQuery(
+                select(x),
+                where(
+                        query(TypeAtom(x, _A)),
+                        query(TypeAtom(x, _B)),
+                        negatedQuery(TypeAtom(x, _C), PropertyValueAtom(x, _r, _b)),
+                        negatedQuery(TypeAtom(x, not(_D)), PropertyValueAtom(x, _r, _b))
+                )
+        );
+        testQuery(cncqq, new ATermAppl[][] { {_c} });
+    }
+
+    // TODO Lukas: more tests, esp. some Oedipus-like example
 }

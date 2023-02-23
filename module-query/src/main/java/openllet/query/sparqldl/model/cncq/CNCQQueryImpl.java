@@ -9,10 +9,7 @@ import openllet.query.sparqldl.model.cq.ConjunctiveQueryImpl;
 import openllet.query.sparqldl.model.cq.QueryAtom;
 import openllet.query.sparqldl.model.results.ResultBinding;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.EnumMap;
-import java.util.List;
+import java.util.*;
 
 public class CNCQQueryImpl extends AbstractCompositeQuery<ConjunctiveQuery, CNCQQuery> implements CNCQQuery
 {
@@ -148,10 +145,10 @@ public class CNCQQueryImpl extends AbstractCompositeQuery<ConjunctiveQuery, CNCQ
     @Override
     public List<ATermAppl> getPositiveResultVars()
     {
-        List<ATermAppl> posVars = new ArrayList<>();
+        Set<ATermAppl> posVars = new HashSet<>();
         for (ConjunctiveQuery q : getPositiveQueries())
             posVars.addAll(q.getResultVars());
-        return posVars;
+        return posVars.stream().toList();
     }
 
     public CNCQQuery createQuery(KnowledgeBase kb, boolean isDistinct)

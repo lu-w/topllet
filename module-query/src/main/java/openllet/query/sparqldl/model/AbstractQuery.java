@@ -3,6 +3,7 @@ package openllet.query.sparqldl.model;
 import openllet.aterm.ATermAppl;
 import openllet.core.KnowledgeBase;
 import openllet.core.utils.TermFactory;
+import openllet.query.sparqldl.model.cncq.CNCQQuery;
 import openllet.query.sparqldl.model.cq.*;
 import openllet.shared.tools.Log;
 
