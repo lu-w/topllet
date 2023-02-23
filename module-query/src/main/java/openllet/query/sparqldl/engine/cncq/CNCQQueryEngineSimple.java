@@ -2,15 +2,17 @@ package openllet.query.sparqldl.engine.cncq;
 
 import openllet.aterm.ATerm;
 import openllet.aterm.ATermAppl;
+import openllet.core.boxes.abox.Individual;
 import openllet.core.utils.Bool;
 import openllet.query.sparqldl.engine.QueryBindingCandidateGenerator;
 import openllet.query.sparqldl.engine.QueryCandidateGeneratorNaive;
 import openllet.query.sparqldl.model.cncq.CNCQQuery;
-import openllet.query.sparqldl.model.results.QueryResult;
-import openllet.query.sparqldl.model.results.QueryResultImpl;
-import openllet.query.sparqldl.model.results.ResultBinding;
+import openllet.query.sparqldl.model.results.*;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 
 public class CNCQQueryEngineSimple extends AbstractCNCQQueryEngine
@@ -34,8 +36,9 @@ public class CNCQQueryEngineSimple extends AbstractCNCQQueryEngine
     {
         QueryResult result = new QueryResultImpl(q);
         // FETCH AND APPLY BINDINGS TO POSITIVE PARTS
-        _bindingGenerator = new QueryCandidateGeneratorNaive(q.getKB().getIndividuals().stream().toList(),
-                q.getPositiveResultVars());
+        List<ATermAppl> vars = new ArrayList<>(q.getPositiveResultVars());
+        List<ATermAppl> inds = q.getKB().getIndividuals().stream().toList();
+        _bindingGenerator = new QueryCandidateGeneratorNaive(inds, vars);
         for (ResultBinding candidateBinding : _bindingGenerator)
         {
             if (_logger.isLoggable(Level.FINE))
@@ -52,6 +55,26 @@ public class CNCQQueryEngineSimple extends AbstractCNCQQueryEngine
                 result.add(copyBinding);
             }
             _bindingGenerator.informAboutResultForBinding(partialResult.isEmpty() ? Bool.FALSE : Bool.TRUE);
+        }
+        // Special case: we have result variables that are constrained neither in the negative nor in the positive parts
+        List<ATermAppl> unconstrainedVars = q.getUnconstrainedResultVars();
+        if (unconstrainedVars.size() > 0)
+        {
+            List<QueryResult> results = new ArrayList<>();
+            results.add(result);
+            for (ATermAppl var : unconstrainedVars)
+            {
+                QueryResult varRes = new QueryResultImpl(q);
+                for (ATermAppl ind : inds)
+                {
+                    ResultBinding newBinding = new ResultBindingImpl();
+                    newBinding.setValue(var, ind);
+                    varRes.add(newBinding);
+                }
+                results.add(varRes);
+            }
+            vars.addAll(unconstrainedVars);
+            result = new MultiQueryResults(vars, results);
         }
         return result;
     }

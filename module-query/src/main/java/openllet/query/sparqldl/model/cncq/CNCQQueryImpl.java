@@ -148,18 +148,23 @@ public class CNCQQueryImpl extends AbstractCompositeQuery<ConjunctiveQuery, CNCQ
         Set<ATermAppl> posVars = new HashSet<>();
         for (ConjunctiveQuery q : getPositiveQueries())
             posVars.addAll(q.getResultVars());
-        List<ATermAppl> remainingVars = new ArrayList<>(getResultVars());
-        remainingVars.removeAll(posVars);
-        for (ATermAppl remainingVar : remainingVars)
+        return posVars.stream().toList();
+    }
+
+    @Override
+    public List<ATermAppl> getUnconstrainedResultVars()
+    {
+        List<ATermAppl> unconstrainedVars = new ArrayList<>();
+        for (ATermAppl remainingVar : getResultVars())
         {
             boolean notContained = true;
-            for (ConjunctiveQuery q : getNegativeQueries())
+            for (ConjunctiveQuery q : getQueries())
                 if (q.getResultVars().contains(remainingVar))
                     notContained = false;
             if (notContained)
-                posVars.add(remainingVar);
+                unconstrainedVars.add(remainingVar);
         }
-        return posVars.stream().toList();
+        return unconstrainedVars;
     }
 
     public CNCQQuery createQuery(KnowledgeBase kb, boolean isDistinct)

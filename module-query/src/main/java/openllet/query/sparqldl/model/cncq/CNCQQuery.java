@@ -52,8 +52,12 @@ public interface CNCQQuery extends CompositeQuery<ConjunctiveQuery, CNCQQuery>
     ConjunctiveQuery mergePositiveQueries();
 
     /**
-     * @return a list of the result vars of the positive sub-queries, including those that are not present in both of
-     * the query parts.
+     * @return a list of the result vars of the positive sub-queries
      */
     List<ATermAppl> getPositiveResultVars();
+
+    /**
+     * @return a list of the result vars  that are not present in both of the query parts.
+     */
+    List<ATermAppl> getUnconstrainedResultVars();
 }
