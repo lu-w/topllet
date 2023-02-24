@@ -59,10 +59,10 @@ public class ProfileCNCQQuery
         List<ATermAppl> inds = new ArrayList<>(_kb.getIndividuals());
         List<ATermAppl> classes = new ArrayList<>(_kb.getClasses());
         List<ATermAppl> roles = new ArrayList<>(_kb.getProperties());
-        roles.remove(ATermUtils.BOTTOM_DATA_PROPERTY);
-        roles.remove(ATermUtils.TOP_DATA_PROPERTY);
-        classes.remove(ATermUtils.BOTTOM);
+        roles.remove(ATermUtils.TOP_OBJECT_PROPERTY);
+        roles.remove(ATermUtils.BOTTOM_OBJECT_PROPERTY);
         classes.remove(ATermUtils.TOP);
+        classes.remove(ATermUtils.BOTTOM);
         QueryAtom atom;
         if (_random.nextInt(2) == 0)
         {
