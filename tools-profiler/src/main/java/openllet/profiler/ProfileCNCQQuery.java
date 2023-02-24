@@ -27,64 +27,66 @@ public class ProfileCNCQQuery
 
     private static final String _PREFIX_DIST_VAR = "x";
     private static final String _PREFIX_UNDIST_VAR = "y";
+    private Random _random;
 
     public ProfileCNCQQuery(KnowledgeBase kb)
     {
         _kb = kb;
     }
 
-    private ATermAppl getRandomVarOrInt(int distVars, int undistVars, int seed)
+    private ATermAppl getRandomVarOrInt(int distVars, int undistVars)
     {
         List<ATermAppl> inds = _kb.getIndividuals().stream().toList();
-        Random random = new Random(seed);
-        int varCase = random.nextInt(3);
+        int varCase = _random.nextInt(3);
         ATermAppl var;
         switch (varCase)
         {
             case 0:
-                var = inds.get(random.ints(1, 0, inds.size()).findFirst().getAsInt());
+                var = inds.get(_random.ints(1, 0, inds.size()).findFirst().getAsInt());
                 break;
             case 1:
-                var = ATermUtils.makeVar(_PREFIX_DIST_VAR + random.ints(1, 0, distVars + 1).findFirst().getAsInt());
+                var = ATermUtils.makeVar(_PREFIX_DIST_VAR + _random.ints(1, 0, distVars + 1).findFirst().getAsInt());
                 break;
             default:
-                var = ATermUtils.makeVar(_PREFIX_UNDIST_VAR + random.ints(1, 0, distVars + 1).findFirst().getAsInt());
+                var = ATermUtils.makeVar(_PREFIX_UNDIST_VAR + _random.ints(1, 0, undistVars + 1).findFirst().getAsInt());
                 break;
         }
         return var;
     }
 
-    private QueryAtom createRandomQueryAtom(int distVars, int undistVars, int seed)
+    private QueryAtom createRandomQueryAtom(int distVars, int undistVars)
     {
-        List<ATermAppl> inds = _kb.getIndividuals().stream().toList();
-        List<ATermAppl> classes = _kb.getClasses().stream().toList();
-        List<ATermAppl> roles = _kb.getProperties().stream().toList();
-        Random random = new Random(seed);
+        List<ATermAppl> inds = new ArrayList<>(_kb.getIndividuals());
+        List<ATermAppl> classes = new ArrayList<>(_kb.getClasses());
+        List<ATermAppl> roles = new ArrayList<>(_kb.getProperties());
+        roles.remove(ATermUtils.BOTTOM_DATA_PROPERTY);
+        roles.remove(ATermUtils.TOP_DATA_PROPERTY);
+        classes.remove(ATermUtils.BOTTOM);
+        classes.remove(ATermUtils.TOP);
         QueryAtom atom;
-        if (random.nextInt(2) == 0)
+        if (_random.nextInt(2) == 0)
         {
-            ATermAppl clazz = classes.get(random.ints(1, 0, classes.size()).findFirst().getAsInt());
-            ATermAppl ind = inds.get(random.ints(1, 0, inds.size()).findFirst().getAsInt());
-            atom = new QueryAtomImpl(QueryPredicate.Type, clazz, ind);
+            ATermAppl clazz = classes.get(_random.ints(1, 0, classes.size()).findFirst().getAsInt());
+            ATermAppl ind = inds.get(_random.ints(1, 0, inds.size()).findFirst().getAsInt());
+            atom = new QueryAtomImpl(QueryPredicate.Type, ind, clazz);
         }
         else
         {
-            ATermAppl role = roles.get(random.ints(1, 0, roles.size()).findFirst().getAsInt());
-            ATermAppl var1 = getRandomVarOrInt(distVars, undistVars, seed);
-            ATermAppl var2 = getRandomVarOrInt(distVars, undistVars, seed);
-            atom = new QueryAtomImpl(QueryPredicate.PropertyValue, role, var1, var2);
+            ATermAppl role = roles.get(_random.ints(1, 0, roles.size()).findFirst().getAsInt());
+            ATermAppl var1 = getRandomVarOrInt(distVars, undistVars);
+            ATermAppl var2 = getRandomVarOrInt(distVars, undistVars);
+            atom = new QueryAtomImpl(QueryPredicate.PropertyValue, var1, role, var2);
         }
         return atom;
     }
 
-    public CNCQQuery createRandomCNCQQuery(int atoms, int distVars, int undistVars, int seed)
+    public CNCQQuery createRandomCNCQQuery(int atoms, int distVars, int undistVars)
     {
         CNCQQuery q = new CNCQQueryImpl(_kb, false);
-        Random r = new Random(seed);
-        int numNegativeAtoms = r.ints(1, 0, atoms).findFirst().getAsInt();
+        int numNegativeAtoms = _random.ints(1, 0, atoms).findFirst().getAsInt();
         int numNegatedSubQueries = numNegativeAtoms;
         if (numNegativeAtoms > 1)
-            numNegatedSubQueries = r.ints(1, 1, numNegativeAtoms).findFirst().getAsInt();
+            numNegatedSubQueries = _random.ints(1, 1, numNegativeAtoms).findFirst().getAsInt();
         int numRemainingNegativeAtoms = numNegativeAtoms;
         for (int i = 0; i < numNegatedSubQueries; i++)
         {
@@ -92,9 +94,9 @@ public class ProfileCNCQQuery
             negQuery.setNegation(true);
             int numNegativeAtomsInSubQuery = 1;
             if (numRemainingNegativeAtoms > 1)
-                numNegativeAtomsInSubQuery  = r.ints(1, 1, numRemainingNegativeAtoms + 1).findFirst().getAsInt();
+                numNegativeAtomsInSubQuery  = _random.ints(1, 1, numRemainingNegativeAtoms + 1).findFirst().getAsInt();
             for (int j = 0; j < numNegativeAtomsInSubQuery; j++)
-                negQuery.add(createRandomQueryAtom(distVars, undistVars, seed));
+                negQuery.add(createRandomQueryAtom(distVars, undistVars));
             numRemainingNegativeAtoms -= numNegativeAtomsInSubQuery;
             q.addNegativeQuery(negQuery);
             if (numRemainingNegativeAtoms == 0)
@@ -103,11 +105,12 @@ public class ProfileCNCQQuery
         // pos query
         ConjunctiveQuery posQuery = new ConjunctiveQueryImpl(_kb, false);
         for (int i = 0; i < atoms - numNegativeAtoms; i++)
-            posQuery.add(createRandomQueryAtom(distVars, undistVars, seed));
+            posQuery.add(createRandomQueryAtom(distVars, undistVars));
         q.addPositiveQuery(posQuery);
         // set dist vars
+        // TODO Lukaks: take only dist vars actually selected for the query, also do this for sub-queries
         for (int i = 0; i < distVars; i++)
-            q.addResultVar(ATermUtils.makeVar(_PREFIX_DIST_VAR + i));
+            q.addResultVar(ATermUtils.makeVar(_PREFIX_DIST_VAR + (i + 1)));
         return q;
     }
 
@@ -118,11 +121,11 @@ public class ProfileCNCQQuery
         List<CNCQQuery> queries = new ArrayList<>();
         for (int i = 0; i < numQueries; i++)
         {
-            Random r = new Random(seed + i);
-            int atoms = r.ints(1, minNumAtoms, maxNumAtoms + 1).findFirst().getAsInt();
-            int distVars = r.ints(1, minDistVars, maxDistVars + 1).findFirst().getAsInt();
-            int undistVars = r.ints(1, minUndistVars, maxUndistVars + 1).findFirst().getAsInt();
-            queries.add(createRandomCNCQQuery(atoms, distVars, undistVars, seed + i));
+            _random = new Random(seed + i);
+            int atoms = _random.ints(1, minNumAtoms, maxNumAtoms + 1).findFirst().getAsInt();
+            int distVars = _random.ints(1, minDistVars, maxDistVars + 1).findFirst().getAsInt();
+            int undistVars = _random.ints(1, minUndistVars, maxUndistVars + 1).findFirst().getAsInt();
+            queries.add(createRandomCNCQQuery(atoms, distVars, undistVars));
         }
         return queries;
     }
