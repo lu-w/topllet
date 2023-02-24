@@ -2,7 +2,6 @@ package openllet.test.query;
 
 import openllet.aterm.ATermAppl;
 import openllet.query.sparqldl.model.cncq.CNCQQuery;
-import openllet.query.sparqldl.model.results.QueryResult;
 import org.junit.Test;
 
 import java.util.List;
