@@ -1759,7 +1759,7 @@ public class ABoxImpl implements ABox
 	@Override
 	public void removeNodeEntirely(final ATermAppl x)
 	{
-		_nodes.remove(x);
+		removeNode(x);
 		_nodeList.remove(x);
 	}
 

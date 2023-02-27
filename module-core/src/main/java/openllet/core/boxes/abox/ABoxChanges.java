@@ -2,16 +2,21 @@ package openllet.core.boxes.abox;
 
 import openllet.aterm.ATermAppl;
 import openllet.core.DependencySet;
+import openllet.core.exceptions.UnsupportedFeatureException;
 import openllet.core.utils.ATermUtils;
+import openllet.shared.tools.Log;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 
 /**
  * A central interface to ABox changes that enables applying and rolling back such changes (in an orderly fashion).
  */
 public class ABoxChanges
 {
+    private static final Logger _logger = Log.getLogger(ABoxChanges.class);
+
     /**
      * A change of the ABox.
      */
@@ -88,7 +93,16 @@ public class ABoxChanges
         @Override
         protected void revert()
         {
-            _abox.getKB().removePropertyValue(_pred, _subj, _obj);
+            try
+            {
+                _abox.getKB().removePropertyValue(_pred, _subj, _obj);
+            }
+            catch (UnsupportedFeatureException e)
+            {
+                // TODO Lukas: fix this bug
+                _logger.warning("Can not deleted property value " + this + ", probably because " + _subj + " was " +
+                        "removed earlier from the ABox.");
+            }
         }
 
         @Override
@@ -98,7 +112,8 @@ public class ABoxChanges
         }
     }
 
-    // TODO Lukas: may want to think about using C subseteq TOP instead of creating fresh individuals. But works for now
+    // TODO Lukas: may want to think about using C subseteq TOP instead of creating fresh individuals. However, this
+    //  requires rolling up the positive part of the CNCQ.
     public static class FreshIndChange extends ABoxChange
     {
         private Individual _ind = null;
