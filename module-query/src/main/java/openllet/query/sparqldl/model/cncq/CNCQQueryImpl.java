@@ -132,12 +132,12 @@ public class CNCQQueryImpl extends AbstractCompositeQuery<ConjunctiveQuery, CNCQ
             // Adds result variables
             for (ATermAppl var : q.getResultVars())
                 if (!newQuery.getResultVars().contains(var))
-                    q.addResultVar(var);
+                    newQuery.addResultVar(var);
             // Adds distinguished variables and their types
             for (VarType varType : VarType.values())
                 for (ATermAppl var : q.getDistVarsForType(varType))
                     if (!newQuery.getDistVarsForType(varType).contains(var))
-                        q.addResultVar(var);
+                        newQuery.addResultVar(var);
         }
         return newQuery;
     }

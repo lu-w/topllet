@@ -10,9 +10,7 @@ import openllet.query.sparqldl.model.cncq.CNCQQuery;
 import openllet.query.sparqldl.model.results.*;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.logging.Level;
 
 public class CNCQQueryEngineSimple extends AbstractCNCQQueryEngine
@@ -57,6 +55,7 @@ public class CNCQQueryEngineSimple extends AbstractCNCQQueryEngine
             _bindingGenerator.informAboutResultForBinding(partialResult.isEmpty() ? Bool.FALSE : Bool.TRUE);
         }
         // Special case: we have result variables that are constrained neither in the negative nor in the positive parts
+        // We just add all possible bindings for those.
         List<ATermAppl> unconstrainedVars = q.getUnconstrainedResultVars();
         if (unconstrainedVars.size() > 0)
         {

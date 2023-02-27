@@ -102,7 +102,6 @@ public class ABoxChanges
     public static class FreshIndChange extends ABoxChange
     {
         private Individual _ind = null;
-        private static int _freshIndCounter = 0;
 
         public FreshIndChange() { }
 
@@ -128,14 +127,7 @@ public class ABoxChanges
         @Override
         protected void apply()
         {
-            ATermAppl newName;
-            StringBuilder prefix = new StringBuilder();
-            // Safely creates new individuals by prepending "_" until no collision is found
-            do
-                newName = ATermUtils.makeTermAppl(prefix.append("_") + "NEW_IND_" + _freshIndCounter);
-            while (_abox.getKB().getIndividuals().contains(newName));
-            _ind = _abox.getKB().addIndividual(newName);
-            _freshIndCounter++;
+            _ind = _abox.addFreshIndividual(null, DependencySet.INDEPENDENT);
         }
     }
 
