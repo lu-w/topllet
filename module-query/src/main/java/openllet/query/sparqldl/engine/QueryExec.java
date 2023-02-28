@@ -15,7 +15,9 @@ public interface QueryExec<QueryType extends Query<QueryType>>
     /**
      * Executes the query by checking its entailment w.r.t. to its knowledge base.
      * @param query The query to execute
-     * @return a QueryResult if the query entailed or null if it is not entailed.
+     * @return a non-empty QueryResult (i.e. of size > 0) if the query entailed or an empty query result (i.e. of
+     * size 0) if it is not entailed. In case an entailed Boolean query is given, it returns a QueryResult of size 1
+     * containing a single, empty ResultBinding.
      */
     QueryResult exec(QueryType query);
 }
