@@ -1,6 +1,7 @@
 package openllet.query.sparqldl.engine;
 
 import openllet.core.KnowledgeBase;
+import openllet.core.boxes.abox.ABox;
 import openllet.core.utils.Timer;
 import openllet.query.sparqldl.model.Query;
 import openllet.query.sparqldl.model.cncq.CNCQQuery;
@@ -17,6 +18,8 @@ public abstract class AbstractQueryEngine<QueryType extends Query<QueryType>> im
     public static final Logger _logger = Log.getLogger(AbstractQueryEngine.class);
 
     protected AbstractBooleanQueryEngine<QueryType> _booleanEngine;
+
+    protected ABox _abox = null;
 
     /**
      * Sets the Boolean engine to be internally used for checking Boolean queries after binding.
@@ -35,8 +38,18 @@ public abstract class AbstractQueryEngine<QueryType extends Query<QueryType>> im
     }
 
     @Override
+    public QueryResult exec(QueryType q, ABox abox)
+    {
+        _abox = abox;
+        return exec(q);
+    }
+
+    @Override
     public QueryResult exec(QueryType q)
     {
+        if (_abox == null)
+            _abox = q.getKB().getABox();
+
         // Implements some organizational features (logging, timing, etc.) around the actual Boolean query engines
         assert(supports(q));
 
@@ -44,8 +57,8 @@ public abstract class AbstractQueryEngine<QueryType extends Query<QueryType>> im
             _logger.finer("Exec Boolean ABox query: " + q);
 
         KnowledgeBase kb = q.getKB();
-        final long satCount = kb.getABox().getStats()._satisfiabilityCount;
-        final long consCount = kb.getABox().getStats()._consistencyCount;
+        final long satCount = _abox.getStats()._satisfiabilityCount;
+        final long consCount = _abox.getStats()._consistencyCount;
 
         final Timer timer = new Timer("CNCQueryEngine");
         timer.start();
@@ -54,7 +67,7 @@ public abstract class AbstractQueryEngine<QueryType extends Query<QueryType>> im
         {
             // Use the Boolean engine if we can
             if (q.getResultVars().isEmpty() && _booleanEngine != null)
-                results = _booleanEngine.exec(q);
+                results = _booleanEngine.exec(q, _abox);
             else if (q.getKB().getIndividualsCount() > 0)
                 results = execABoxQuery(q);
             else
@@ -65,8 +78,8 @@ public abstract class AbstractQueryEngine<QueryType extends Query<QueryType>> im
         if (_logger.isLoggable(Level.FINE))
         {
             _logger.fine("Total time: " + timer.getLast() + " ms.");
-            _logger.fine("Total satisfiability operations: " + (kb.getABox().getStats()._satisfiabilityCount - satCount));
-            _logger.fine("Total consistency operations: " + (kb.getABox().getStats()._consistencyCount - consCount));
+            _logger.fine("Total satisfiability operations: " + (_abox.getStats()._satisfiabilityCount - satCount));
+            _logger.fine("Total consistency operations: " + (_abox.getStats()._consistencyCount - consCount));
             _logger.fine("Result of Boolean union query : " + results);
         }
 

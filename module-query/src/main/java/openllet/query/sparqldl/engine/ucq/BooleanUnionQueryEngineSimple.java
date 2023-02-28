@@ -37,8 +37,10 @@ public class BooleanUnionQueryEngineSimple extends AbstractBooleanUnionQueryEngi
     private boolean useUnderapproximatingSemantics = false;
 
     @Override
-    protected boolean execBooleanABoxQuery(CNFQuery q)
+    protected boolean execBooleanABoxQuery(CNFQuery q, ABox abox)
     {
+        _abox = abox;
+
         // 1. PRELIMINARY CONSISTENCY CHECK
         q.getKB().ensureConsistency();
 
@@ -137,7 +139,7 @@ public class BooleanUnionQueryEngineSimple extends AbstractBooleanUnionQueryEngi
             {
                 if (_logger.isLoggable(Level.FINER))
                     _logger.finer("Variables in disjunctive query found");
-                final ABox copy = kb.getABox().copy();
+                final ABox copy = _abox.copy();
                 final Role topObjectRole = kb.getRole(TOP_OBJECT_PROPERTY);
                 List<ATermAppl> newUCs = new ArrayList<>();
                 for (ATermAppl testClass : disjunctionVar)

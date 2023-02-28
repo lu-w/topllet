@@ -9,6 +9,7 @@ import openllet.aterm.ATerm;
 import openllet.aterm.ATermAppl;
 import openllet.aterm.ATermList;
 import openllet.core.boxes.abox.ABox;
+import openllet.core.boxes.abox.ABoxChanges;
 import openllet.core.boxes.abox.Individual;
 import openllet.core.expressivity.Expressivity;
 import openllet.core.expressivity.ExpressivityChecker;
@@ -30,6 +31,10 @@ import openllet.core.utils.progress.ProgressMonitor;
  */
 public interface KnowledgeBase extends InstancesBase, PropertiesBase, ClassesBase
 {
+	enum AssertionType
+	{
+		TYPE, OBJ_ROLE, DATA_ROLE
+	}
 
 	void clear();
 
@@ -53,11 +58,24 @@ public interface KnowledgeBase extends InstancesBase, PropertiesBase, ClassesBas
 	int getIndividualsCount();
 
 	/**
+	 * @return true iff. incremental consistency checking can be used within kb.
+	 */
+	boolean canUseIncrementalConsistency();
+
+	/**
 	 * @return all individuals.
 	 */
 	Stream<ATermAppl> individuals();
 
 	boolean isConsistent();
+
+	/**
+	 * Informs the kb about a change that has happened. Shall only be called when manipulating its abox.
+	 * @param type the type of change
+	 */
+	void addChange(ChangeType type);
+
+	void removeABoxAssertion(AssertionType type, ATermAppl assertion);
 
 	/**
 	 * @return true if the consistency check has been done and nothing in the KB has changed after that.

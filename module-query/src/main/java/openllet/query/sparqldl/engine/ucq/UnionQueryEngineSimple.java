@@ -64,7 +64,7 @@ public class UnionQueryEngineSimple extends AbstractUnionQueryEngine
             if (_logger.isLoggable(Level.FINE))
                 _logger.fine("Trying candidate binding: " + candidateBinding);
             UnionQuery boundQuery = q.apply(candidateBinding);
-            QueryResult booleanResult = _booleanEngine.exec(boundQuery);
+            QueryResult booleanResult = _booleanEngine.exec(boundQuery, _abox);
             if (_logger.isLoggable(Level.FINE))
                 _logger.fine("Boolean engine returned: " + (booleanResult.isEmpty() ? "false" : "true"));
             if (!booleanResult.isEmpty())
@@ -100,7 +100,7 @@ public class UnionQueryEngineSimple extends AbstractUnionQueryEngine
                 if (_logger.isLoggable(Level.FINE))
                     _logger.fine("Trying candidate binding: " + candidateBinding);
                 CNFQuery boundQuery = cnfQueryPart.apply(candidateBinding);
-                boolean booleanResult = _booleanEngine.execBooleanABoxQuery(boundQuery);
+                boolean booleanResult = _booleanEngine.execBooleanABoxQuery(boundQuery, _abox);
                 if (_logger.isLoggable(Level.FINE))
                     _logger.fine("Boolean engine returned: " + booleanResult);
                 if (booleanResult)

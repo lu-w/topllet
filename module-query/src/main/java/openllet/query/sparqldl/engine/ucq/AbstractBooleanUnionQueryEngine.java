@@ -1,5 +1,6 @@
 package openllet.query.sparqldl.engine.ucq;
 
+import openllet.core.boxes.abox.ABox;
 import openllet.query.sparqldl.engine.AbstractBooleanQueryEngine;
 import openllet.query.sparqldl.model.ucq.UnionQuery;
 import openllet.query.sparqldl.model.ucq.CNFQuery;
@@ -17,5 +18,5 @@ abstract public class AbstractBooleanUnionQueryEngine extends AbstractBooleanQue
      * @param q The CNF query to execute
      * @return True iff. the Boolean CNF query is entailed in its knowledge base
      */
-    abstract protected boolean execBooleanABoxQuery(CNFQuery q);
+    abstract protected boolean execBooleanABoxQuery(CNFQuery q, ABox abox);
 }

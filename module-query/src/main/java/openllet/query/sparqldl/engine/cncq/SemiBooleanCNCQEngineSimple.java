@@ -23,7 +23,6 @@ public class SemiBooleanCNCQEngineSimple extends AbstractSemiBooleanCNCQEngine
     private boolean _rollUpBeforeChecking = false;
     private Map<ATermAppl, ATermAppl> _queryVarsToFreshInds = new HashMap<>();
     private ABoxChanges _changes;
-    private ABox _abox = null;
 
     public SemiBooleanCNCQEngineSimple()
     {
@@ -57,8 +56,8 @@ public class SemiBooleanCNCQEngineSimple extends AbstractSemiBooleanCNCQEngine
         // 1. PRELIMINARY CONSISTENCY CHECK
         if (q.getKB().isConsistent())
         {
-            _abox = q.getKB().getABox();
-            _changes = new ABoxChanges(_abox);
+            _changes = new ABoxChanges(q.getKB().getABox());
+            _abox = _changes.getABox();
 
             // 2. SEPARATE POSITIVE AND NEGATIVE PART & MERGE POSITIVE PART
             ConjunctiveQuery positiveQuery = q.mergePositiveQueries();
@@ -123,7 +122,7 @@ public class SemiBooleanCNCQEngineSimple extends AbstractSemiBooleanCNCQEngine
     private QueryResult computeSatisfiableBindings(CNCQQuery query)
     {
         QueryResult res = new QueryResultImpl(query);
-        if (_abox.getKB().isConsistent())
+        if (_abox.isConsistent())
         {
             UnionQuery ucq = new UnionQueryImpl(_abox.getKB(), query.isDistinct());
             for (ConjunctiveQuery negQuery : query.getNegativeQueries())
@@ -132,7 +131,7 @@ public class SemiBooleanCNCQEngineSimple extends AbstractSemiBooleanCNCQEngine
                 positiveQuery.setNegation(false);
                 ucq.addQuery(positiveQuery);
             }
-            res = _ucqEngine.exec(ucq);
+            res = _ucqEngine.exec(ucq, _abox);
         }
         // If ABox is inconsistent, the query is not satisfiable (thus the UCQ is trivially entailed)
         else

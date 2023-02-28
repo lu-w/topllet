@@ -307,11 +307,6 @@ public class KnowledgeBaseImpl implements KnowledgeBase
 		CONSISTENCY, CLASSIFY, REALIZE
 	}
 
-	public enum AssertionType
-	{
-		TYPE, OBJ_ROLE, DATA_ROLE
-	}
-
 	public KnowledgeBaseImpl()
 	{
 		clear();
@@ -1877,6 +1872,18 @@ public class KnowledgeBaseImpl implements KnowledgeBase
 	}
 
 	@Override
+	public void addChange(ChangeType type)
+	{
+		_changes.add(type);
+	}
+
+	@Override
+	public void removeABoxAssertion(AssertionType type, ATermAppl assertion)
+	{
+		_aboxAssertions.remove(type, assertion);
+	}
+
+	@Override
 	public Taxonomy<ATermAppl> getToldTaxonomy()
 	{
 		return getTaxonomyBuilder().getToldTaxonomy();
@@ -1979,6 +1986,12 @@ public class KnowledgeBaseImpl implements KnowledgeBase
 	public int getIndividualsCount()
 	{
 		return _individuals.size();
+	}
+
+	@Override
+	public boolean canUseIncrementalConsistency()
+	{
+		return _canUseIncConsistency;
 	}
 
 	@Override

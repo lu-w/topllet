@@ -198,6 +198,8 @@ public interface ABox extends Logging
 	 */
 	void removeNodeEntirely(final ATermAppl x);
 
+	boolean removePropertyValue(final ATermAppl p, final ATermAppl i1, final ATermAppl i2);
+
 	void removeType(final ATermAppl x, ATermAppl c);
 
 	/**

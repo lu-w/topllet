@@ -30,6 +30,7 @@ public class ProfileCNCQQuery
 
     public ProfileCNCQQuery(KnowledgeBase kb)
     {
+        System.out.println("Expressivity: " + kb.getExpressivity());
         _kb = kb;
     }
 

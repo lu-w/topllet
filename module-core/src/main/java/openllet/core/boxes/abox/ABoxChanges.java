@@ -62,13 +62,13 @@ public class ABoxChanges
         @Override
         protected void revert()
         {
-            _abox.getKB().removeType(_ind, _type);
+            _abox.removeType(_ind, _type);
         }
 
         @Override
         protected void apply()
         {
-            _abox.getKB().addType(_ind, _type);
+            _abox.addType(_ind, _type);
         }
     }
 
@@ -95,11 +95,11 @@ public class ABoxChanges
         {
             try
             {
-                _abox.getKB().removePropertyValue(_pred, _subj, _obj);
+                _abox.removePropertyValue(_pred, _subj, _obj);
             }
             catch (UnsupportedFeatureException e)
             {
-                // TODO Lukas: fix this bug
+                // TODO Lukas: fix this bug -> this leads to bad
                 _logger.warning("Can not deleted property value " + this + ", probably because " + _subj + " was " +
                         "removed earlier from the ABox.");
             }
@@ -108,7 +108,7 @@ public class ABoxChanges
         @Override
         protected void apply()
         {
-            _abox.getKB().addPropertyValue(_pred, _subj, _obj);
+            _abox.addEdge(_pred, _subj, _obj, DependencySet.INDEPENDENT);
         }
     }
 
@@ -156,7 +156,12 @@ public class ABoxChanges
      */
     public ABoxChanges(ABox abox)
     {
-        _abox = abox;
+        _abox = abox.copy();
+    }
+
+    public ABox getABox()
+    {
+        return _abox;
     }
 
     /**

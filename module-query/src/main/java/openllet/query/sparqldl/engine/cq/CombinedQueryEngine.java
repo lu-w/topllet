@@ -29,6 +29,7 @@ import openllet.aterm.ATermAppl;
 import openllet.atom.OpenError;
 import openllet.core.KnowledgeBase;
 import openllet.core.OpenlletOptions;
+import openllet.core.boxes.abox.ABox;
 import openllet.core.exceptions.InternalReasonerException;
 import openllet.core.exceptions.UnsupportedQueryException;
 import openllet.core.taxonomy.Taxonomy;
@@ -228,6 +229,12 @@ public class CombinedQueryEngine implements QueryExec<ConjunctiveQuery>
 	{
 		// TODO fully undist.vars queries are not supported !!!
 		return !q.isNegated() && !q.hasCycle();
+	}
+
+	@Override
+	public QueryResult exec(ConjunctiveQuery q, ABox abox)
+	{
+		return exec(q);
 	}
 
 	/**

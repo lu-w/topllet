@@ -188,7 +188,8 @@ public abstract class Node
 
 			if (null == from)
 			{
-				_logger.severe(() -> "The 'from' individual, " + edge.getFrom() + " is now null is the edge when updating references. The edge is ignore.");
+				_logger.severe(() -> "The 'from' individual, " + edge.getFrom() + " is now null in the edge when " +
+						"updating references. The edge is ignored.");
 				continue;
 			}
 

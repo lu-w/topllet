@@ -1,8 +1,6 @@
 package openllet.query.sparqldl.engine.cncq;
 
-import openllet.aterm.ATerm;
 import openllet.aterm.ATermAppl;
-import openllet.core.boxes.abox.Individual;
 import openllet.core.utils.Bool;
 import openllet.query.sparqldl.engine.QueryBindingCandidateGenerator;
 import openllet.query.sparqldl.engine.QueryCandidateGeneratorNaive;
@@ -42,7 +40,7 @@ public class CNCQQueryEngineSimple extends AbstractCNCQQueryEngine
             if (_logger.isLoggable(Level.FINE))
                 _logger.fine("Trying candidate binding for positive part: " + candidateBinding);
             CNCQQuery partiallyBoundQuery = q.apply(candidateBinding);
-            QueryResult partialResult = _semiBooleanEngine.exec(partiallyBoundQuery);
+            QueryResult partialResult = _semiBooleanEngine.exec(partiallyBoundQuery, _abox);
             if (_logger.isLoggable(Level.FINE))
                 _logger.fine("Boolean CNCQ engine returned: " + (partialResult.isEmpty() ? "false" : "true"));
             // We may have gotten n > 0 bindings from the semi-Boolean engine -> create a copy and merge current binding

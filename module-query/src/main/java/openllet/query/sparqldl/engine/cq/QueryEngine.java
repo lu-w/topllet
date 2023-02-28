@@ -88,6 +88,12 @@ public class QueryEngine implements QueryExec<ConjunctiveQuery>
 		return execQuery(query);
 	}
 
+	@Override
+	public QueryResult exec(ConjunctiveQuery q, ABox abox)
+	{
+		return exec(q);
+	}
+
 	public static QueryResult execQuery(final ConjunctiveQuery query, final KnowledgeBase kb)
 	{
 		final KnowledgeBase queryKB = query.getKB();

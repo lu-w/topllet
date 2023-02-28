@@ -1,6 +1,7 @@
 package openllet.query.sparqldl.engine;
 
 import openllet.core.KnowledgeBase;
+import openllet.core.boxes.abox.ABox;
 import openllet.core.utils.Timer;
 import openllet.query.sparqldl.model.Query;
 import openllet.query.sparqldl.model.cncq.CNCQQuery;
@@ -16,6 +17,8 @@ public abstract class AbstractBooleanQueryEngine<QueryType extends Query<QueryTy
 {
     public static final Logger _logger = Log.getLogger(AbstractBooleanQueryEngine.class);
 
+    protected ABox _abox = null;
+
     @Override
     public boolean supports(QueryType q)
     {
@@ -23,17 +26,26 @@ public abstract class AbstractBooleanQueryEngine<QueryType extends Query<QueryTy
     }
 
     @Override
+    public QueryResult exec(QueryType q, ABox abox)
+    {
+        _abox = abox;
+        return exec(q);
+    }
+
+    @Override
     public QueryResult exec(QueryType q)
     {
+        if (_abox == null)
+            _abox = q.getKB().getABox();
+
         // Implements some organizational features (logging, timing, etc.) around the actual Boolean CNC query engines
         assert(supports(q));
 
         if (_logger.isLoggable(Level.FINER))
             _logger.finer("Exec Boolean ABox query: " + q);
 
-        KnowledgeBase kb = q.getKB();
-        final long satCount = kb.getABox().getStats()._satisfiabilityCount;
-        final long consCount = kb.getABox().getStats()._consistencyCount;
+        final long satCount = _abox.getStats()._satisfiabilityCount;
+        final long consCount = _abox.getStats()._consistencyCount;
 
         final Timer timer = new Timer("BooleanCNCQueryEngine");
         timer.start();
@@ -48,8 +60,8 @@ public abstract class AbstractBooleanQueryEngine<QueryType extends Query<QueryTy
         if (_logger.isLoggable(Level.FINE))
         {
             _logger.fine("Total time: " + timer.getLast() + " ms.");
-            _logger.fine("Total satisfiability operations: " + (kb.getABox().getStats()._satisfiabilityCount - satCount));
-            _logger.fine("Total consistency operations: " + (kb.getABox().getStats()._consistencyCount - consCount));
+            _logger.fine("Total satisfiability operations: " + (_abox.getStats()._satisfiabilityCount - satCount));
+            _logger.fine("Total consistency operations: " + (_abox.getStats()._consistencyCount - consCount));
             _logger.fine("Result of Boolean union query: " + (isEntailed ? "entailed" : "not entailed"));
         }
 

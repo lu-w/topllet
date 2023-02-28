@@ -1,5 +1,6 @@
 package openllet.query.sparqldl.engine;
 
+import openllet.core.boxes.abox.ABox;
 import openllet.query.sparqldl.model.Query;
 import openllet.query.sparqldl.model.results.QueryResult;
 
@@ -20,4 +21,6 @@ public interface QueryExec<QueryType extends Query<QueryType>>
      * containing a single, empty ResultBinding.
      */
     QueryResult exec(QueryType query);
+
+    QueryResult exec(QueryType q, ABox abox);
 }

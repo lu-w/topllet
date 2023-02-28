@@ -31,6 +31,8 @@
 package openllet.core.boxes.abox;
 
 import static java.lang.String.format;
+import static openllet.core.knowledge.MessageBase._isNotAnIndividual;
+import static openllet.core.knowledge.MessageBase._isNotAnProperty;
 
 import java.io.PrintStream;
 import java.util.*;
@@ -53,7 +55,9 @@ import openllet.core.datatypes.exceptions.DatatypeReasonerException;
 import openllet.core.datatypes.exceptions.InvalidLiteralException;
 import openllet.core.datatypes.exceptions.UnrecognizedDatatypeException;
 import openllet.core.exceptions.InternalReasonerException;
+import openllet.core.exceptions.UnsupportedFeatureException;
 import openllet.core.expressivity.Expressivity;
+import openllet.core.knowledge.Base;
 import openllet.core.tableau.branch.Branch;
 import openllet.core.tableau.cache.CachedNode;
 import openllet.core.tableau.cache.CachedNodeFactory;
@@ -1761,6 +1765,107 @@ public class ABoxImpl implements ABox
 	{
 		removeNode(x);
 		_nodeList.remove(x);
+	}
+
+	@Override
+	public boolean removePropertyValue(final ATermAppl p, final ATermAppl i1, final ATermAppl i2)
+	{
+		if (null == p || null == i1 || null == i2)
+			return false;
+
+		final ATermAppl ind1 = i1;
+		final ATermAppl ind2;
+		if (ATermUtils.isLiteral(i2))
+			try
+			{
+				ind2 = getDatatypeReasoner().getCanonicalRepresentation(i2);
+			}
+			catch (final InvalidLiteralException e)
+			{
+				_logger.warning(format("Unable to remove property value (%s,%s,%s) due to invalid literal: %s", p, i1, i2, e.getMessage()));
+				return false;
+			}
+			catch (final UnrecognizedDatatypeException e)
+			{
+				_logger.warning(format("Unable to remove property value (%s,%s,%s) due to unrecognized datatype for literal: %s", p, i1, i2, e.getMessage()));
+				return false;
+			}
+		else
+			ind2 = i2;
+
+		final Individual subj = getIndividual(ind1);
+		final Node obj = getNode(ind2);
+		final Role role = getRole(p);
+
+		if (subj == null)
+			if (OpenlletOptions.SILENT_UNDEFINED_ENTITY_HANDLING)
+				throw new UnsupportedFeatureException(ind1 + _isNotAnIndividual);
+			else
+				return false;
+
+		if (obj == null)
+		{
+			Base.handleUndefinedEntity(ind2 + _isNotAnIndividual);
+			return false;
+		}
+
+		if (role == null)
+		{
+			Base.handleUndefinedEntity(p + _isNotAnProperty);
+			return false;
+		}
+
+		_logger.finer(() -> "Remove ObjectPropertyValue " + ind1 + " " + p + " " + ind2);
+
+		// make sure edge exists in assertions
+		Edge edge = subj.getOutEdges().getExactEdge(subj, role, obj);
+
+		if (edge == null && obj.isMerged())
+			edge = obj.getInEdges().getExactEdge(subj, role, obj);
+
+		if (edge == null)
+			return false;
+
+		// set deletion flag
+		_kb.addChange(KnowledgeBase.ChangeType.ABOX_DEL);
+
+		if (!_kb.canUseIncrementalConsistency())
+		{
+			reset();
+
+			subj.removeEdge(edge);
+			obj.removeInEdge(edge);
+		}
+		else
+		{
+			// if use inc. reasoning then we need to track the deleted
+			// assertion.
+			// Note that the actual edge will be deleted when
+			// undo all dependent
+			// structures in ABox.isIncConsistent()
+
+			// add to deleted assertions
+			_kb.getDeletedAssertions().add(ATermUtils.makePropAtom(p, ind1, ind2));
+
+			// add this _individual to the affected list
+			getIncrementalChangeTracker().addUpdatedIndividual(subj);
+
+			// if this is an object property then add the object to the affected
+			// list
+			if (!role.isDatatypeRole())
+				getIncrementalChangeTracker().addUpdatedIndividual((Individual) obj);
+		}
+
+		if (OpenlletOptions.KEEP_ABOX_ASSERTIONS)
+		{
+			final ATermAppl propAxiom = ATermUtils.makePropAtom(p, ind1, ind2);
+			if (ATermUtils.isLiteral(ind2))
+				_kb.removeABoxAssertion(KnowledgeBase.AssertionType.DATA_ROLE, propAxiom);
+			else
+				_kb.removeABoxAssertion(KnowledgeBase.AssertionType.OBJ_ROLE, propAxiom);
+		}
+
+		return true;
 	}
 
 	@Override

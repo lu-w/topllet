@@ -20,6 +20,7 @@ import java.util.logging.Logger;
 
 import openllet.aterm.ATermAppl;
 import openllet.core.KnowledgeBase;
+import openllet.core.boxes.abox.ABox;
 import openllet.query.sparqldl.model.Query;
 import openllet.query.sparqldl.model.results.QueryResult;
 import openllet.query.sparqldl.model.results.QueryResultImpl;

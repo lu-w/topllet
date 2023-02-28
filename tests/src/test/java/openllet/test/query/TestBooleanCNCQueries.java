@@ -218,4 +218,19 @@ public class TestBooleanCNCQueries extends AbstractQueryTest
 
         testQuery(cncqq, false);
     }
+
+    @Test
+    public void testUndistVarOnlyInObjectProperty()
+    {
+        // PropertyValue(?_undist_y0, listedCourse, Publication3) , Type(UndergraduateStudent416, Chair) , Type(?_undist_y0, GraduateCourse).
+        // TODO Lukas: test case for undist var at pos. 1 of a property
+        individuals(_a, _b);
+        classes(_A, _B, _C);
+        objectProperties(_r);
+        _kb.addType(_a, _A);
+
+        CNCQQuery cncqq = cncqQuery(query(PropertyValueAtom(x, _r, _a), TypeAtom(_b, _B), TypeAtom(x, _C)));
+
+        testQuery(cncqq, true);
+    }
 }
