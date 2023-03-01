@@ -17,12 +17,16 @@ import openllet.core.KnowledgeBase;
 import openllet.query.sparqldl.model.cncq.CNCQQuery;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Random;
 
 public class ProfileCNCQQuery
 {
     private final KnowledgeBase _kb;
+    private final List<ATermAppl> _inds;
+    private final List<ATermAppl> _classes;
+    private final List<ATermAppl> _roles;
     private static final String _PREFIX_DIST_VAR = "_dist_x";
     private static final String _PREFIX_UNDIST_VAR = "_undist_y";
     private Random _random;
@@ -32,11 +36,21 @@ public class ProfileCNCQQuery
     {
         System.out.println("Expressivity: " + kb.getExpressivity());
         _kb = kb;
+        _inds = new ArrayList<>(_kb.getIndividuals().stream().toList());
+        _classes = new ArrayList<>(_kb.getClasses());
+        _roles = new ArrayList<>(_kb.getObjectProperties());
+        _roles.remove(ATermUtils.TOP_OBJECT_PROPERTY);
+        _roles.remove(ATermUtils.BOTTOM_OBJECT_PROPERTY);
+        _classes.remove(ATermUtils.TOP);
+        _classes.remove(ATermUtils.BOTTOM);
+        // Ensures deterministic order
+        _inds.sort(Comparator.comparing(Object::toString));
+        _roles.sort(Comparator.comparing(Object::toString));
+        _classes.sort(Comparator.comparing(Object::toString));
     }
 
     private ATermAppl getRandomVarOrInt(int distVars, int undistVars)
     {
-        List<ATermAppl> inds = _kb.getIndividuals().stream().toList();
         List<Integer> rand = new ArrayList<>();
         if (distVars > 0)
             rand.add(0);
@@ -52,28 +66,22 @@ public class ProfileCNCQQuery
                     case 1 ->
                             ATermUtils.makeVar(_PREFIX_UNDIST_VAR + _random.ints(1, 0, undistVars + 1).findFirst().getAsInt());
                     default ->
-                            inds.get(_random.ints(1, 0, inds.size()).findFirst().getAsInt());
+                            _inds.get(_random.ints(1, 0, _inds.size()).findFirst().getAsInt());
                 };
     }
 
     private QueryAtom createRandomQueryAtom(int distVars, int undistVars)
     {
-        List<ATermAppl> classes = new ArrayList<>(_kb.getClasses());
-        List<ATermAppl> roles = new ArrayList<>(_kb.getObjectProperties());
-        roles.remove(ATermUtils.TOP_OBJECT_PROPERTY);
-        roles.remove(ATermUtils.BOTTOM_OBJECT_PROPERTY);
-        classes.remove(ATermUtils.TOP);
-        classes.remove(ATermUtils.BOTTOM);
         QueryAtom atom;
         if (_random.nextInt(2) == 0)
         {
-            ATermAppl clazz = classes.get(_random.ints(1, 0, classes.size()).findFirst().getAsInt());
+            ATermAppl clazz = _classes.get(_random.ints(1, 0, _classes.size()).findFirst().getAsInt());
             ATermAppl var = getRandomVarOrInt(distVars, undistVars);
             atom = new QueryAtomImpl(QueryPredicate.Type, var, clazz);
         }
         else
         {
-            ATermAppl role = roles.get(_random.ints(1, 0, roles.size()).findFirst().getAsInt());
+            ATermAppl role = _roles.get(_random.ints(1, 0, _roles.size()).findFirst().getAsInt());
             ATermAppl var1 = getRandomVarOrInt(distVars, undistVars);
             ATermAppl var2 = getRandomVarOrInt(distVars, undistVars);
             atom = new QueryAtomImpl(QueryPredicate.PropertyValue, var1, role, var2);
@@ -146,7 +154,8 @@ public class ProfileCNCQQuery
         QueryExec<CNCQQuery> eng = new CNCQQueryEngineSimple();
         Timer t = new Timer();
         t.start();
-        for (CNCQQuery q : queries)
+        List<CNCQQuery> queries_ = List.of(queries.get(39));
+        for (CNCQQuery q : queries_)
         {
             System.out.println("Executing:");
             System.out.println(q);
