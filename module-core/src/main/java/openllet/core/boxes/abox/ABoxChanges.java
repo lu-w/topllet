@@ -55,7 +55,8 @@ public class ABoxChanges
         }
 
         @Override
-        public String toString() {
+        public String toString()
+        {
             return _type + "(" + _ind + ")";
         }
 
@@ -86,7 +87,8 @@ public class ABoxChanges
         }
 
         @Override
-        public String toString() {
+        public String toString()
+        {
             return _pred + "(" + _subj + ", " + _obj + ")";
         }
 
@@ -114,7 +116,8 @@ public class ABoxChanges
         public FreshIndChange() { }
 
         @Override
-        public String toString() {
+        public String toString()
+        {
             return "FreshInd(" + (_ind != null ? _ind.toString() : "not yet applied") + ")";
         }
 

@@ -1,8 +1,10 @@
 package openllet.test.query;
 
 import openllet.aterm.ATermAppl;
+import openllet.core.boxes.abox.ABox;
 import openllet.query.sparqldl.model.cncq.CNCQQuery;
 import org.junit.Test;
+import static org.junit.Assert.*;
 
 import java.util.List;
 
@@ -263,6 +265,39 @@ public class TestCNCQueries extends AbstractQueryTest
         CNCQQuery cncqq = cncqQuery(select(x), where(query(TypeAtom(x, _B))));
 
         testQuery(cncqq);
+    }
+
+    @Test
+    public void testMultipleExecsOnSameKB()
+    {
+        setupKB1();
+        CNCQQuery cncqq1 = cncqQuery(
+                select(x),
+                where(
+                        query(TypeAtom(x, _B), PropertyValueAtom(x, _r, y)),
+                        negatedQuery(TypeAtom(x, _C), PropertyValueAtom(z, _r, _b))
+                )
+        );
+        int indCount = _kb.getIndividualsCount();
+        int clsCount = _kb.getClasses().size();
+        int prpCount = _kb.getProperties().size();
+        int ndsCount = _kb.getABox().size();
+        List<List<ATermAppl>> res = List.of(List.of(_a), List.of(_b), List.of(_c));
+        testQuery(cncqq1, res);
+        assertEquals(_kb.getIndividualsCount(), indCount);
+        assertEquals(_kb.getClasses().size(), clsCount);
+        assertEquals(_kb.getProperties().size(), prpCount);
+        assertEquals(_kb.getABox().size(), ndsCount + 1); // one anon node is created by the reasoner due to exist
+        testQuery(cncqq1, res);
+        assertEquals(_kb.getIndividualsCount(), indCount);
+        assertEquals(_kb.getClasses().size(), clsCount);
+        assertEquals(_kb.getProperties().size(), prpCount);
+        assertEquals(_kb.getABox().size(), ndsCount + 1);
+        testQuery(cncqq1, res);
+        assertEquals(_kb.getIndividualsCount(), indCount);
+        assertEquals(_kb.getClasses().size(), clsCount);
+        assertEquals(_kb.getProperties().size(), prpCount);
+        assertEquals(_kb.getABox().size(), ndsCount + 1);
     }
 
     @Test
