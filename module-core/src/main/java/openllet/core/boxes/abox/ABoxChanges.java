@@ -108,12 +108,9 @@ public class ABoxChanges
 
     // TODO Lukas: may want to think about using C subseteq TOP instead of creating fresh individuals. However, this
     //  requires rolling up the positive part of the CNCQ.
-    // TODO Lukas: or even better, operate always on the KB, and copy the ORIGINAL before doing anything. After we
-    //  are finished with our modifications of the ABox, just restore the ORIGINAL (but how?)
     public static class FreshIndChange extends ABoxChange
     {
         private ATermAppl _ind = null;
-        private int _freshIndCounter = 0;
 
         public FreshIndChange() { }
 
@@ -124,7 +121,7 @@ public class ABoxChanges
         }
 
         /**
-         * @return the fresh individual if the change is applied and null otherwise.
+         * @return the ATermAppl of the fresh individual if the change is applied and null otherwise.
          */
         public ATermAppl getInd()
         {
@@ -135,25 +132,15 @@ public class ABoxChanges
         protected void revert()
         {
             // _abox.removeNodeEntirely(_ind.getTerm()); // -> not needed: ABox is copied
-            // _abox.getKB().removeIndividual(_ind);
         }
 
         @Override
         protected void apply()
         {
-            //_abox.getKB().addIndividual(_ind.getTerm());
-            do
-            {
-                _ind = ATermUtils.makeTermAppl("_NEW_IND_" + _freshIndCounter);
-                _freshIndCounter++;
-            }
-            while (_abox.getNodeList().contains(_ind));
-            // _ind = _abox.getKB().addIndividual(newName);
-
             final int remember = _abox.getBranchIndex();
             _abox.setBranchIndex(DependencySet.NO_BRANCH);
             _abox.setSyntacticUpdate(true);
-            _abox.addIndividual(_ind, DependencySet.INDEPENDENT);
+            _ind = _abox.addFreshIndividual(null, DependencySet.INDEPENDENT).getTerm();
             _abox.setSyntacticUpdate(false);
             _abox.setBranchIndex(remember);
         }
@@ -198,8 +185,8 @@ public class ABoxChanges
         // refer to deleted individuals)
         _changes.sort((c1, c2) -> c1 instanceof FreshIndChange && !(c2 instanceof FreshIndChange) ? 1 :
                 !(c1 instanceof FreshIndChange) && c2 instanceof FreshIndChange ? -1 : 0);
-        for (ABoxChange change : _changes)
-            change.revert();
+        //for (ABoxChange change : _changes)
+        //    change.revert(); // -> not needed: ABox is copied
         _changes = new ArrayList<>();
     }
 }
