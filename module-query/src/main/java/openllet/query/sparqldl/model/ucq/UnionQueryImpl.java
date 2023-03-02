@@ -67,20 +67,19 @@ public class UnionQueryImpl extends AbstractCompositeQuery<ConjunctiveQuery, Uni
      * Recursive implementation of toCNF.
      * Note: This method creates new query and union query objects, but it does not create new atoms. It rather re-uses
      * the atoms from the original query.
-     * TODO Lukas: check whether we need to do a deep copy of the atoms. For now, this should suffice.
      * @param query The input union query (i.e. of the form (a ^ ... ^ b) v ... v (c ^ ... ^ d)) to convert into CNF
      * @return A list of union queries, where each conjunctive query of each union query contains only one atom
      * representing the CNF of the input query
      */
     private List<DisjunctiveQuery> toCNFRec(UnionQuery query)
     {
-        List<DisjunctiveQuery> newCnf = new ArrayList<>();
         // Safety check: no queries given
         if (query.getQueries().size() == 0)
-            return newCnf;
+            return new ArrayList<>();
         // Base case: CNF(a_1 ^ ... ^ a_n) = a_1 ^ ... ^ a_n
         // Return a list of atoms (wrapped in a Query and again in a UnionQuery) to represent this conjunction.
         else if (query.getQueries().size() == 1) {
+            List<DisjunctiveQuery> newCnf = new ArrayList<>();
             for (QueryAtom a : query.getQueries().get(0).getAtoms())
             {
                 DisjunctiveQuery singleUnion = new DisjunctiveQueryImpl(query.getKB(), query.isDistinct());
@@ -101,7 +100,7 @@ public class UnionQueryImpl extends AbstractCompositeQuery<ConjunctiveQuery, Uni
         {
             // Fetch CNF(q)
             UnionQuery subQuery = new UnionQueryImpl(query.getKB(), query.isDistinct());
-            subQuery.setQueries(query.getQueries().subList(1, query.getQueries().size()));
+            subQuery.setQueries(new ArrayList<>(query.getQueries().subList(1, query.getQueries().size())));
             for (ATermAppl var : query.getResultVars())
                 subQuery.addResultVar(var);
             for (VarType varType : query.getDistVarsWithVarType().keySet())
@@ -110,23 +109,21 @@ public class UnionQueryImpl extends AbstractCompositeQuery<ConjunctiveQuery, Uni
             List<DisjunctiveQuery> cnf = toCNFRec(subQuery);
             // Create (x v c) for all atoms x and conjuncts c
             for (QueryAtom atom : query.getQueries().get(0).getAtoms())
+            {
                 for (DisjunctiveQuery conjunct : cnf)
                 {
-                    DisjunctiveQuery c = new DisjunctiveQueryImpl(query.getKB(), query.isDistinct());
-                    for (QueryAtom sq : conjunct.getAtoms())
-                        c.add(sq);
+                    conjunct.add(new QueryAtomImpl(atom.getPredicate(), atom.getArguments()));
                     for (VarType varType : query.getDistVarsWithVarType().keySet())
                         for (ATermAppl var : query.getDistVarsForType(varType))
                             if (atom.getArguments().contains(var))
-                                c.addDistVar(var, varType);
+                                conjunct.addDistVar(var, varType);
                     for (ATermAppl var : query.getResultVars())
                         if (atom.getArguments().contains(var))
-                            c.addResultVar(var);
-                    c.add(atom);
-                    newCnf.add(c);
+                            conjunct.addResultVar(var);
                 }
+            }
+            return cnf;
         }
-        return newCnf;
     }
 
     @Override

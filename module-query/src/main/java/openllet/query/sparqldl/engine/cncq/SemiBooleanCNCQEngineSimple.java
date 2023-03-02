@@ -124,7 +124,6 @@ public class SemiBooleanCNCQEngineSimple extends AbstractSemiBooleanCNCQEngine
         QueryResult res = new QueryResultImpl(query);
         if (_abox.isConsistent())
         {
-            ABox abox2 = _abox;
             UnionQuery ucq = new UnionQueryImpl(_abox.getKB(), query.isDistinct());
             for (ConjunctiveQuery negQuery : query.getNegativeQueries())
             {
@@ -142,9 +141,6 @@ public class SemiBooleanCNCQEngineSimple extends AbstractSemiBooleanCNCQEngine
 
     private void cleanUp()
     {
-        _changes.revertAll(); // TODO Lukas: we do not need to use the ABox Change class anymore - since we are
-        // working on the copies only. Therefore, also no reverting. Nevertheless, profiling (for n=100) gives some
-        // weird unknown edges still....
         _queryVarsToFreshInds = new HashMap<>();
     }
 }
