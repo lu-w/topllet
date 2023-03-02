@@ -123,6 +123,7 @@ public class SROIQStrategy extends CompletionStrategy
 	@Override
 	public void complete(final Expressivity expr)
 	{
+		ABox abox1 = _abox;
 		initialize(expr);
 
 		while (!_abox.isComplete())
@@ -212,7 +213,6 @@ public class SROIQStrategy extends CompletionStrategy
 				else
 					_abox.setComplete(true);
 		}
-
 	}
 
 }

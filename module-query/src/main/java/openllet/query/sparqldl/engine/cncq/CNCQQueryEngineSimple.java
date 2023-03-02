@@ -31,6 +31,7 @@ public class CNCQQueryEngineSimple extends AbstractCNCQQueryEngine
     protected QueryResult execABoxQuery(CNCQQuery q)
     {
         QueryResult result = new QueryResultImpl(q);
+
         // FETCH AND APPLY BINDINGS TO POSITIVE PARTS
         List<ATermAppl> vars = new ArrayList<>(q.getPositiveResultVars());
         List<ATermAppl> inds = q.getKB().getIndividuals().stream().toList();

@@ -62,7 +62,8 @@ public abstract class AbstractQueryEngine<QueryType extends Query<QueryType>> im
         final Timer timer = new Timer("CNCQueryEngine");
         timer.start();
         QueryResult results = new QueryResultImpl(q);
-        if (!q.isEmpty())
+        // We can only check the query if it is non-empty and the KB is consistent
+        if (!q.isEmpty() && q.getKB().isConsistent())
         {
             // Use the Boolean engine if we can
             if (q.getResultVars().isEmpty() && _booleanEngine != null)

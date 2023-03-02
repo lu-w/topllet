@@ -2676,7 +2676,7 @@ public class ABoxImpl implements ABox
 			if (!node.isRootNominal())
 			{
 				i.remove();
-				_nodes.remove(nodeName);
+				removeNode(nodeName);
 			}
 			else
 				node.reset(false);

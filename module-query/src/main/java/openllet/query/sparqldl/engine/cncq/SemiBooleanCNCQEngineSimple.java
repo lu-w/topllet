@@ -112,7 +112,7 @@ public class SemiBooleanCNCQEngineSimple extends AbstractSemiBooleanCNCQEngine
             {
                 ABoxChanges.FreshIndChange change = new ABoxChanges.FreshIndChange();
                 _changes.apply(change);
-                _queryVarsToFreshInds.put(var, change.getInd().getTerm());
+                _queryVarsToFreshInds.put(var, change.getInd());
             }
             res = _queryVarsToFreshInds.get(var);
         }
@@ -124,6 +124,7 @@ public class SemiBooleanCNCQEngineSimple extends AbstractSemiBooleanCNCQEngine
         QueryResult res = new QueryResultImpl(query);
         if (_abox.isConsistent())
         {
+            ABox abox2 = _abox;
             UnionQuery ucq = new UnionQueryImpl(_abox.getKB(), query.isDistinct());
             for (ConjunctiveQuery negQuery : query.getNegativeQueries())
             {

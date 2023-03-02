@@ -2,6 +2,7 @@ package openllet.core.boxes.abox;
 
 import openllet.aterm.ATermAppl;
 import openllet.core.DependencySet;
+import openllet.core.KnowledgeBase;
 import openllet.core.exceptions.UnsupportedFeatureException;
 import openllet.core.utils.ATermUtils;
 import openllet.shared.tools.Log;
@@ -102,15 +103,16 @@ public class ABoxChanges
         protected void apply()
         {
             _abox.addEdge(_pred, _subj, _obj, DependencySet.INDEPENDENT);
-            // TODO Lukas: do we need to add smth for the KB as well?
         }
     }
 
     // TODO Lukas: may want to think about using C subseteq TOP instead of creating fresh individuals. However, this
     //  requires rolling up the positive part of the CNCQ.
+    // TODO Lukas: or even better, operate always on the KB, and copy the ORIGINAL before doing anything. After we
+    //  are finished with our modifications of the ABox, just restore the ORIGINAL (but how?)
     public static class FreshIndChange extends ABoxChange
     {
-        private Individual _ind = null;
+        private ATermAppl _ind = null;
         private int _freshIndCounter = 0;
 
         public FreshIndChange() { }
@@ -124,7 +126,7 @@ public class ABoxChanges
         /**
          * @return the fresh individual if the change is applied and null otherwise.
          */
-        public Individual getInd()
+        public ATermAppl getInd()
         {
             return _ind;
         }
@@ -133,23 +135,27 @@ public class ABoxChanges
         protected void revert()
         {
             // _abox.removeNodeEntirely(_ind.getTerm()); // -> not needed: ABox is copied
-            _abox.getKB().removeIndividual(_ind.getTerm());
+            // _abox.getKB().removeIndividual(_ind);
         }
 
         @Override
         protected void apply()
         {
-            //_ind = _abox.addFreshIndividual(null, DependencySet.EMPTY);
             //_abox.getKB().addIndividual(_ind.getTerm());
-            ATermAppl newName;
-            StringBuilder prefix = new StringBuilder();
-            // Safely creates new individuals by prepending "_" until no collision is found
             do
-                newName = ATermUtils.makeTermAppl(prefix.append("_") + "NEW_IND_" + _freshIndCounter);
-            while (_abox.getKB().getIndividuals().contains(newName));
-            _ind = _abox.getKB().addIndividual(newName);
-            _abox.addIndividual(_ind.getTerm(), DependencySet.INDEPENDENT);
-            _freshIndCounter++;
+            {
+                _ind = ATermUtils.makeTermAppl("_NEW_IND_" + _freshIndCounter);
+                _freshIndCounter++;
+            }
+            while (_abox.getNodeList().contains(_ind));
+            // _ind = _abox.getKB().addIndividual(newName);
+
+            final int remember = _abox.getBranchIndex();
+            _abox.setBranchIndex(DependencySet.NO_BRANCH);
+            _abox.setSyntacticUpdate(true);
+            _abox.addIndividual(_ind, DependencySet.INDEPENDENT);
+            _abox.setSyntacticUpdate(false);
+            _abox.setBranchIndex(remember);
         }
     }
 
