@@ -160,8 +160,7 @@ public class ProfileCNCQQuery
         QueryExec<CNCQQuery> eng = new CNCQQueryEngineSimple();
         Timer t = new Timer();
         t.start();
-        List<CNCQQuery> queries_ = List.of(queries.get(74));
-        for (CNCQQuery q : queries_)
+        for (CNCQQuery q : queries)
         {
             System.out.println("Executing:");
             System.out.println(q);
