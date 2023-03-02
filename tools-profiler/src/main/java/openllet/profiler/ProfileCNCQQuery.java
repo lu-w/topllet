@@ -29,6 +29,7 @@ public class ProfileCNCQQuery
     private final List<ATermAppl> _roles;
     private static final String _PREFIX_DIST_VAR = "_dist_x";
     private static final String _PREFIX_UNDIST_VAR = "_undist_y";
+    private int _numDistVars = 0;
     private Random _random;
     private static final boolean _USE_INDIVIDUALS_IN_ATOMS = true;
 
@@ -59,15 +60,21 @@ public class ProfileCNCQQuery
         if (_USE_INDIVIDUALS_IN_ATOMS)
             rand.add(2);
         int varCase = rand.get(_random.nextInt(rand.size()));
-        return switch (varCase)
-                {
-                    case 0 ->
-                            ATermUtils.makeVar(_PREFIX_DIST_VAR + _random.ints(1, 0, distVars + 1).findFirst().getAsInt());
-                    case 1 ->
-                            ATermUtils.makeVar(_PREFIX_UNDIST_VAR + _random.ints(1, 0, undistVars + 1).findFirst().getAsInt());
-                    default ->
-                            _inds.get(_random.ints(1, 0, _inds.size()).findFirst().getAsInt());
-                };
+        if (_numDistVars < distVars)
+            varCase = 0;
+        switch (varCase)
+        {
+            case 0:
+                int index = _numDistVars;
+                if (index >= distVars)
+                    index = _random.ints(1, 1, distVars + 1).findFirst().getAsInt();
+                _numDistVars++;
+                return ATermUtils.makeVar(_PREFIX_DIST_VAR + index);
+            case 1:
+                return ATermUtils.makeVar(_PREFIX_UNDIST_VAR + _random.ints(1, 1, undistVars + 1).findFirst().getAsInt());
+            default:
+                return _inds.get(_random.ints(1, 0, _inds.size()).findFirst().getAsInt());
+        }
     }
 
     private QueryAtom createRandomQueryAtom(int distVars, int undistVars)
@@ -125,25 +132,24 @@ public class ProfileCNCQQuery
                 for (ATermAppl v : a.getArguments())
                     if (v.toString().contains(_PREFIX_DIST_VAR)) // quite hacky
                     {
-                        cq.addResultVar(v);
-                        cq.addDistVar(v, Query.VarType.INDIVIDUAL);
-                        q.addResultVar(v);
-                        q.addDistVar(v, Query.VarType.INDIVIDUAL);
+                        if (!cq.getResultVars().contains(v))
+                            cq.addResultVar(v);
+                        if (!cq.getDistVars().contains(v))
+                            cq.addDistVar(v, Query.VarType.INDIVIDUAL);
+                        if (!q.getDistVars().contains(v))
+                            q.addDistVar(v, Query.VarType.INDIVIDUAL);
+                        if (!q.getResultVars().contains(v))
+                            q.addResultVar(v);
                     }
         return q;
     }
 
-    public List<CNCQQuery> createRandomCNCQQueries(int minNumAtoms, int maxNumAtoms, int minDistVars, int maxDistVars,
-                                                   int minUndistVars, int maxUndistVars, int numQueries, int seed)
+    public List<CNCQQuery> createRandomCNCQQueries(int atoms, int distVars, int undistVars, int numQueries, int seed)
     {
-        assert(minNumAtoms <= maxNumAtoms  && minDistVars <= maxDistVars && minUndistVars <= maxUndistVars);
         List<CNCQQuery> queries = new ArrayList<>();
         for (int i = 0; i < numQueries; i++)
         {
             _random = new Random(seed + i);
-            int atoms = _random.ints(1, minNumAtoms, maxNumAtoms + 1).findFirst().getAsInt();
-            int distVars = _random.ints(1, minDistVars, maxDistVars + 1).findFirst().getAsInt();
-            int undistVars = _random.ints(1, minUndistVars, maxUndistVars + 1).findFirst().getAsInt();
             queries.add(createRandomCNCQQuery(atoms, distVars, undistVars));
         }
         return queries;
@@ -154,7 +160,7 @@ public class ProfileCNCQQuery
         QueryExec<CNCQQuery> eng = new CNCQQueryEngineSimple();
         Timer t = new Timer();
         t.start();
-        List<CNCQQuery> queries_ = List.of(queries.get(39));
+        List<CNCQQuery> queries_ = List.of(queries.get(74));
         for (CNCQQuery q : queries_)
         {
             System.out.println("Executing:");
@@ -183,36 +189,24 @@ public class ProfileCNCQQuery
         input.setRequired(true);
         options.addOption(input);
 
-        Option a1 = new Option("a1", "min-atoms", true, "Minimum number of atoms");
-        a1.setRequired(false);
-        options.addOption(a1);
+        Option a = new Option("a", "atoms", true, "Number of atoms");
+        a.setRequired(true);
+        options.addOption(a);
 
-        Option a2 = new Option("a2", "max-atoms", true, "Maximum number of atoms");
-        a2.setRequired(false);
-        options.addOption(a2);
+        Option d = new Option("d", "distvars", true, "Number of dist. vars (default 0)");
+        d.setRequired(false);
+        options.addOption(d);
 
-        Option d1 = new Option("d1", "min-distvars", true, "Minimum number of dist. vars");
-        a2.setRequired(false);
-        options.addOption(d1);
+        Option u = new Option("u", "undistvars", true, "Number of dist. vars (default: 0)");
+        u.setRequired(false);
+        options.addOption(u);
 
-        Option d2 = new Option("d2", "max-distvars", true, "Maximum number of dist. vars");
-        a2.setRequired(false);
-        options.addOption(d2);
-
-        Option u1 = new Option("u1", "min-undistvars", true, "Minimum number of dist. vars");
-        a2.setRequired(false);
-        options.addOption(u1);
-
-        Option u2 = new Option("u2", "min-undistvars", true, "Maximum number of dist. vars");
-        a2.setRequired(false);
-        options.addOption(u2);
-
-        Option q = new Option("q", "queries", true, "Number of queries");
-        a2.setRequired(false);
+        Option q = new Option("q", "queries", true, "Number of queries (default: 1)");
+        q.setRequired(false);
         options.addOption(q);
 
-        Option s = new Option("s", "seed", true, "The seed");
-        a2.setRequired(false);
+        Option s = new Option("s", "seed", true, "The seed (default: 0)");
+        s.setRequired(false);
         options.addOption(s);
 
         CommandLineParser parser = new DefaultParser();
@@ -232,19 +226,16 @@ public class ProfileCNCQQuery
         }
 
         String kbPath = cmd.getOptionValue("kb");
-        int a1v = Integer.parseInt(cmd.getOptionValue("a1"));
-        int a2v = Integer.parseInt(cmd.getOptionValue("a2"));
-        int d1v = Integer.parseInt(cmd.getOptionValue("d1"));
-        int d2v = Integer.parseInt(cmd.getOptionValue("d2"));
-        int u1v = Integer.parseInt(cmd.getOptionValue("u1"));
-        int u2v = Integer.parseInt(cmd.getOptionValue("u2"));
-        int qv = Integer.parseInt(cmd.getOptionValue("q"));
-        int sv = Integer.parseInt(cmd.getOptionValue("s"));
+        int av = Integer.parseInt(cmd.getOptionValue("a"));
+        int dv = Integer.parseInt(cmd.getOptionValue("d", "0"));
+        int uv = Integer.parseInt(cmd.getOptionValue("u", "0"));
+        int qv = Integer.parseInt(cmd.getOptionValue("q", "1"));
+        int sv = Integer.parseInt(cmd.getOptionValue("s", "0"));
 
         try
         {
             final ProfileCNCQQuery profiler = new ProfileCNCQQuery(readKB(kbPath));
-            final List<CNCQQuery> queries = profiler.createRandomCNCQQueries(a1v, a2v, d1v, d2v, u1v, u2v, qv, sv);
+            final List<CNCQQuery> queries = profiler.createRandomCNCQQueries(av, dv, uv, qv, sv);
             profiler.profile(queries);
         }
         catch (final Throwable t)

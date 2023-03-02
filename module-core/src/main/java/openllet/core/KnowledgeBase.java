@@ -233,6 +233,8 @@ public interface KnowledgeBase extends InstancesBase, PropertiesBase, ClassesBas
 
 	Individual addIndividual(final ATermAppl i);
 
+	void removeIndividual(final ATermAppl i);
+
 	void addEquivalentClass(final ATermAppl c1, final ATermAppl c2);
 
 	void addSubClass(final ATermAppl sub, final ATermAppl sup);

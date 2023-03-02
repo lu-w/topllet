@@ -62,7 +62,7 @@ public class ABoxChanges
         @Override
         protected void revert()
         {
-            _abox.removeType(_ind, _type);
+            // _abox.removeType(_ind, _type); // -> not needed: ABox is copied
         }
 
         @Override
@@ -93,22 +93,14 @@ public class ABoxChanges
         @Override
         protected void revert()
         {
-            try
-            {
-                _abox.removePropertyValue(_pred, _subj, _obj);
-            }
-            catch (UnsupportedFeatureException e)
-            {
-                // TODO Lukas: fix this bug -> this leads to bad
-                _logger.warning("Can not deleted property value " + this + ", probably because " + _subj + " was " +
-                        "removed earlier from the ABox.");
-            }
+            // _abox.removePropertyValue(_pred, _subj, _obj); // -> not needed: ABox is copied
         }
 
         @Override
         protected void apply()
         {
             _abox.addEdge(_pred, _subj, _obj, DependencySet.INDEPENDENT);
+            // TODO Lukas: do we need to add smth for the KB as well?
         }
     }
 
@@ -117,12 +109,13 @@ public class ABoxChanges
     public static class FreshIndChange extends ABoxChange
     {
         private Individual _ind = null;
+        private int _freshIndCounter = 0;
 
         public FreshIndChange() { }
 
         @Override
         public String toString() {
-            return "FreshInd(" + _ind.toString() + ")";
+            return "FreshInd(" + (_ind != null ? _ind.toString() : "not yet applied") + ")";
         }
 
         /**
@@ -136,13 +129,24 @@ public class ABoxChanges
         @Override
         protected void revert()
         {
-            _abox.removeNodeEntirely(_ind.getTerm());
+            // _abox.removeNodeEntirely(_ind.getTerm()); // -> not needed: ABox is copied
+            _abox.getKB().removeIndividual(_ind.getTerm());
         }
 
         @Override
         protected void apply()
         {
-            _ind = _abox.addFreshIndividual(null, DependencySet.INDEPENDENT);
+            //_ind = _abox.addFreshIndividual(null, DependencySet.EMPTY);
+            //_abox.getKB().addIndividual(_ind.getTerm());
+            ATermAppl newName;
+            StringBuilder prefix = new StringBuilder();
+            // Safely creates new individuals by prepending "_" until no collision is found
+            do
+                newName = ATermUtils.makeTermAppl(prefix.append("_") + "NEW_IND_" + _freshIndCounter);
+            while (_abox.getKB().getIndividuals().contains(newName));
+            _ind = _abox.getKB().addIndividual(newName);
+            _abox.addIndividual(_ind.getTerm(), DependencySet.INDEPENDENT);
+            _freshIndCounter++;
         }
     }
 

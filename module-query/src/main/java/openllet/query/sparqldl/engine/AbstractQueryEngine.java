@@ -56,7 +56,6 @@ public abstract class AbstractQueryEngine<QueryType extends Query<QueryType>> im
         if (_logger.isLoggable(Level.FINER))
             _logger.finer("Exec Boolean ABox query: " + q);
 
-        KnowledgeBase kb = q.getKB();
         final long satCount = _abox.getStats()._satisfiabilityCount;
         final long consCount = _abox.getStats()._consistencyCount;
 

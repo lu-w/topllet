@@ -141,7 +141,9 @@ public class SemiBooleanCNCQEngineSimple extends AbstractSemiBooleanCNCQEngine
 
     private void cleanUp()
     {
-        _changes.revertAll();
+        _changes.revertAll(); // TODO Lukas: we do not need to use the ABox Change class anymore - since we are
+        // working on the copies only. Therefore, also no reverting. Nevertheless, profiling (for n=100) gives some
+        // weird unknown edges still....
         _queryVarsToFreshInds = new HashMap<>();
     }
 }
