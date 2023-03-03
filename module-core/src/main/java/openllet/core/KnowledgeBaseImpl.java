@@ -724,25 +724,6 @@ public class KnowledgeBaseImpl implements KnowledgeBase
 
 		return ind;
 	}
-
-	@Override
-	public void removeIndividual(final ATermAppl i)
-	{
-		// ABox update
-		_abox.setSyntacticUpdate(true);
-		_abox.removeNodeEntirely(i);
-		_abox.setSyntacticUpdate(false);
-
-		// KB update
-		// TODO free up anon() counter?
-		_individuals.remove(i);
-
-		// TODO Lukas: this might be incompatible with incremental consistency.
-
-		// Set deletion flag
-		_changes.add(ChangeType.ABOX_DEL);
-	}
-
 	@Override
 	public void addType(final ATermAppl i, final ATermAppl c)
 	{
