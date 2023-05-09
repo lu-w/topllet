@@ -153,6 +153,11 @@
         <version>[1.0.13,)</version>
       </dependency>
       <dependency>
+        <groupId>net.automatalib</groupId>
+        <artifactId>automata-core</artifactId>
+        <version>0.10.0</version>
+      </dependency>
+      <dependency>
         <groupId>org.eclipse.jetty</groupId> <!-- Used for the examples. -->
         <artifactId>jetty-server</artifactId>
         <version>11.0.6</version>
