@@ -20,6 +20,7 @@
     <module>module-shared</module>
     <module>module-core</module>
     <module>module-query</module>
+    <module>module-tcq</module>
     <module>module-owlapi</module>
     <module>module-jena</module>
     <module>module-explanation</module>
@@ -151,11 +152,6 @@
         <groupId>gnu.getopt</groupId>
         <artifactId>java-getopt</artifactId>
         <version>[1.0.13,)</version>
-      </dependency>
-      <dependency>
-        <groupId>net.automatalib</groupId>
-        <artifactId>automata-core</artifactId>
-        <version>0.10.0</version>
       </dependency>
       <dependency>
         <groupId>org.eclipse.jetty</groupId> <!-- Used for the examples. -->

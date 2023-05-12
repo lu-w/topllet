@@ -1,7 +1,6 @@
 package openllet.query.sparqldl.engine;
 
 import openllet.aterm.ATermAppl;
-import openllet.core.KnowledgeBase;
 import openllet.query.sparqldl.model.Query;
 import openllet.query.sparqldl.model.results.ResultBinding;
 import openllet.query.sparqldl.model.results.ResultBindingImpl;
