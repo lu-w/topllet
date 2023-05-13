@@ -1,22 +1,25 @@
 package openllet.tcq.engine.automaton;
 
-import net.automatalib.automata.fsa.impl.compact.CompactDFA;
 import net.automatalib.serialization.dot.DOTParsers;
-import net.automatalib.words.impl.ListAlphabet;
+import openllet.shared.tools.Log;
+import openllet.tcq.engine.BooleanTCQEngineImpl;
 import openllet.tcq.engine.mltl.MLTL2LTLf;
+import openllet.tcq.model.automaton.DFA;
 import org.apache.commons.io.IOUtils;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
+import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class MLTL2DFA
 {
-    public static CompactDFA<String> convert(String mltlFormula) throws IOException, InterruptedException,
+    public static final Logger _logger = Log.getLogger(MLTL2DFA.class);
+
+    public static DFA convert(String mltlFormula) throws IOException, InterruptedException,
             RuntimeException {
         String ltlfFormula = MLTL2LTLf.convert(mltlFormula);
         ltlfFormula = ltlfFormula.replace("\n", "");
@@ -36,33 +39,27 @@ public class MLTL2DFA
         FileInputStream fis = new FileInputStream(tmpFile);
         String dotAutomaton = IOUtils.toString(fis, StandardCharsets.UTF_8);
 
+        _logger.info("Lydia DFA is located at " + tmpFile);
+
         // AutomataLib assumes a certain shape for DFAs that Lydia does not adhere to. Some fixes are required.
-        dotAutomaton = dotAutomaton.replace("init", "__start0").
-                replace("node [height = .5, width = .5];", "");
-        Pattern r1 = Pattern.compile("node \\[shape = doublecircle\\]; ([0-9]+)");
+        Pattern r1 = Pattern.compile("([0-9]+) ");
         Matcher m1 = r1.matcher(dotAutomaton);
         if (m1.find())
-            dotAutomaton = m1.replaceAll("s$1 node [shape = doublecircle];");
-        Pattern r2 = Pattern.compile("node \\[shape = circle\\]; ([0-9 ]+)");
+            dotAutomaton = m1.replaceAll("s$1 ");
+        Pattern r2 = Pattern.compile(" ([0-9]+)");
         Matcher m2 = r2.matcher(dotAutomaton);
         if (m2.find())
-            dotAutomaton = m2.replaceAll("s$1 node [shape = circle];");
-        Pattern r3 = Pattern.compile("([^a-z])([0-9]+) ");
-        Matcher m3 = r3.matcher(dotAutomaton);
-        if (m3.find())
-            dotAutomaton = m3.replaceAll("$1s$2 ");
-        Pattern r4 = Pattern.compile(" ([0-9]+)([^\".])");
-        Matcher m4 = r4.matcher(dotAutomaton);
-        if (m4.find())
-            dotAutomaton = m4.replaceAll(" s$1$2");
+            dotAutomaton = m2.replaceAll(" s$1");
+        dotAutomaton = dotAutomaton.replace("init", "__start0").
+                replace("node [height = .5, width = .5];", "");
 
         try
         {
-            return DOTParsers.dfa().readModel(dotAutomaton.getBytes()).model;
+            return new DFA(DOTParsers.dfa().readModel(dotAutomaton.getBytes()).model);
         }
         catch (IOException e)
         {
-            return new CompactDFA<>(new ListAlphabet<>(new ArrayList<>()));
+            return new DFA();
         }
     }
 }

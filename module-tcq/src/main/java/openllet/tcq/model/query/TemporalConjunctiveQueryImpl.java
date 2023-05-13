@@ -1,16 +1,20 @@
 package openllet.tcq.model.query;
 
 import openllet.query.sparqldl.model.cq.ConjunctiveQuery;
+import openllet.shared.tools.Log;
 import openllet.tcq.model.kb.TemporalKnowledgeBase;
 import openllet.tcq.parser.ConjunctiveQueryParser;
 
 import java.util.*;
+import java.util.logging.Logger;
 
 public class TemporalConjunctiveQueryImpl implements TemporalConjunctiveQuery
 {
+    public static final Logger _logger = Log.getLogger(TemporalConjunctiveQueryImpl.class);
+
     private final boolean _distinct;
     private TemporalKnowledgeBase _kb;
-    private final Map<Proposition, ConjunctiveQuery> _propAbs = new HashMap<>();
+    private final Map<Proposition, ConjunctiveQuery> _propAbs = new TreeMap<>();
     private String _propAbsTcq;
     private final String _tcq;
 
@@ -24,6 +28,8 @@ public class TemporalConjunctiveQueryImpl implements TemporalConjunctiveQuery
 
     private void buildPropositionalAbstraction(String tcq)
     {
+        _logger.info("Building propositional abstraction...");
+
         _propAbsTcq = tcq;
 
         final String[] validMLTLToken = {"F", "G", "U", "X", "_", "<", "=", "[", "]", "(", ")", "W", "X[!]", "last",
@@ -58,7 +64,7 @@ public class TemporalConjunctiveQueryImpl implements TemporalConjunctiveQuery
                 }
             }
             int cqBeg = curIndex;
-            curIndex++;
+            curIndex--;  // we consumed the opening bracket - undo
 
             // check if this was preceded by an opening bracket (ignoring whitespaces)
             boolean openingBracketFound = false;
@@ -75,6 +81,7 @@ public class TemporalConjunctiveQueryImpl implements TemporalConjunctiveQuery
             }
 
             // iterate until we find the closing bracket
+            curIndex++;  // consume opening bracket
             int numOpenBrackets = 1;
             while (numOpenBrackets > 0 && curIndex < tcq.length())
             {
@@ -84,14 +91,15 @@ public class TemporalConjunctiveQueryImpl implements TemporalConjunctiveQuery
                     numOpenBrackets--;
                 curIndex++;
             }
-            int cqEnd = curIndex - 1;
+            int cqEnd = curIndex - 1;  // we do not want the closing bracket included
             String cqString = tcq.substring(cqBeg, cqEnd);
             tcq = tcq.substring(curIndex);
-            ConjunctiveQuery q = ConjunctiveQueryParser.parse(cqString);
+            ConjunctiveQuery q = ConjunctiveQueryParser.parse(cqString, getKB().first());
             Proposition qProp = propositionFactory.create(q);
             _propAbs.put(qProp, q);
             _propAbsTcq = _propAbsTcq.replace(cqString, qProp.toString());
         }
+        _logger.info("Propositional abstraction is " + _propAbs);
     }
 
     @Override

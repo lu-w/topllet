@@ -6,5 +6,5 @@ import java.util.Iterator;
 
 public interface TemporalKnowledgeBase extends Iterator<KnowledgeBase>
 {
-
+    KnowledgeBase first();
 }

@@ -27,7 +27,7 @@ public class PropositionFactory
                 curPropLength += 1;
                 curChar = 0;
             }
-            Proposition prop = new PropositionImpl(propString);
+            Proposition prop = new PropositionImpl(propString, _alreadyCreated.size());
             _alreadyCreated.put(query, prop);
             return prop;
         }
