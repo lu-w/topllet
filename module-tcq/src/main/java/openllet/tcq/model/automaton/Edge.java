@@ -26,6 +26,8 @@ public class Edge
 
     public List<CNCQQuery> getCNCQs(Map<Proposition, ConjunctiveQuery> propositionalAbstraction)
     {
+        // TODO Lydia/Mona seems to sometimes deliver useless edges e.g. "0 1\n1,1" -> simplify to "X 1"
+        //  probably best done using a simplify method on CNCQs
         if (_cncqs == null && _label.length() > 0)
         {
             _cncqs = new ArrayList<>();
