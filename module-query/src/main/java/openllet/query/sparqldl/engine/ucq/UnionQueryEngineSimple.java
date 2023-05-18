@@ -4,6 +4,7 @@ import openllet.core.utils.Bool;
 import openllet.query.sparqldl.engine.AbstractQueryEngine;
 import openllet.query.sparqldl.engine.QueryBindingCandidateGenerator;
 import openllet.query.sparqldl.engine.QueryCandidateGeneratorNaive;
+import openllet.query.sparqldl.engine.cq.CombinedQueryEngine;
 import openllet.query.sparqldl.model.results.MultiQueryResults;
 import openllet.query.sparqldl.model.results.QueryResult;
 import openllet.query.sparqldl.model.results.QueryResultImpl;
@@ -46,6 +47,8 @@ public class UnionQueryEngineSimple extends AbstractUnionQueryEngine
     @Override
     protected QueryResult execABoxQuery(UnionQuery q)
     {
+        if (q.getQueries().size() == 1)
+            return new CombinedQueryEngine().exec(q.getQueries().get(0));
         return switch (_bindingTime)
         {
             case BEFORE_CNF -> execABoxQueryBindingBeforeCNF(q);
