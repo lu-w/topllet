@@ -23,7 +23,8 @@ public class PropositionImpl implements Proposition
     }
 
     @Override
-    public int compareTo(Proposition other) {
+    public int compareTo(Proposition other)
+    {
         return Integer.compare(_integerRepr, other.getIntegerRepresentation());
     }
 }
