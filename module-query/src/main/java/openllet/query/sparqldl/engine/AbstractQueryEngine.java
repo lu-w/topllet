@@ -63,8 +63,11 @@ public abstract class AbstractQueryEngine<QueryType extends Query<QueryType>> im
         timer.start();
         QueryResult results = new QueryResultImpl(q);
         // We can only check the query if it is non-empty and the KB is consistent
-        if (!q.isEmpty() && q.getKB().isConsistent())
+        _logger.finest("Starting prerequisite consistency check.");
+        boolean kbConsistent = q.getKB().isConsistent();
+        if (!q.isEmpty() && kbConsistent)
         {
+            _logger.finest("Consistency check passed; starting query engine.");
             // Use the Boolean engine if we can
             if (q.getResultVars().isEmpty() && _booleanEngine != null)
                 results = _booleanEngine.exec(q, _abox);
