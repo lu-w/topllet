@@ -23,18 +23,18 @@ public class ConjunctiveQueryParser
                     if (splitAtom[1].contains(","))
                     {
                         // Role
-                        String role = splitAtom[0];
+                        String role = splitAtom[0].trim();
                         String[] inds = splitAtom[1].split(",");
-                        String ind1 = inds[0];
-                        String ind2 = inds[1];
-                        qAtom = QueryAtomFactory.PropertyValueAtom(ATermUtils.makeTermAppl(ind1), ATermUtils.makeTermAppl(role),
-                                ATermUtils.makeTermAppl(ind2));
+                        String ind1 = inds[0].trim();
+                        String ind2 = inds[1].trim();
+                        qAtom = QueryAtomFactory.PropertyValueAtom(ATermUtils.makeTermAppl(ind1),
+                                ATermUtils.makeTermAppl(role), ATermUtils.makeTermAppl(ind2));
                     }
                     else
                     {
                         // Class
-                        String cls = splitAtom[0];
-                        String ind = splitAtom[1];
+                        String cls = splitAtom[0].trim();
+                        String ind = splitAtom[1].trim();
                         qAtom = QueryAtomFactory.TypeAtom(ATermUtils.makeTermAppl(ind), ATermUtils.makeTermAppl(cls));
                     }
                     cq.add(qAtom);
