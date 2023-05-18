@@ -29,6 +29,15 @@ public class TestUnionQueries extends AbstractQueryTest
     }
 
     @Test
+    public void testSingleQuery()
+    {
+        setupKB1();
+        UnionQuery ucq = unionQuery(select(x), where(
+                query(TypeAtom(x, _B), PropertyValueAtom(x, _r, _b), TypeAtom(y, _D))));
+        testQuery(ucq, new ATermAppl[][]{{_a}});
+    }
+
+    @Test
     public void testUnionQueries1()
     {
         setupKB1();
