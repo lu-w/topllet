@@ -2,7 +2,6 @@ package openllet.tcq.engine.automaton;
 
 import net.automatalib.serialization.dot.DOTParsers;
 import openllet.shared.tools.Log;
-import openllet.tcq.engine.BooleanTCQEngineImpl;
 import openllet.tcq.engine.mltl.MLTL2LTLf;
 import openllet.tcq.model.automaton.DFA;
 import org.apache.commons.io.IOUtils;
@@ -41,15 +40,18 @@ public class MLTL2DFA
 
         _logger.info("Lydia DFA is located at " + tmpFile);
 
-        // AutomataLib assumes a certain shape for DFAs that Lydia does not adhere to. Some fixes are required.
-        Pattern r1 = Pattern.compile("([0-9]+) ");
+        // AutomataLib assumes a certain shape for DFAs that Lydia/Mona does not adhere to. Some fixes are required.
+        Pattern r1 = Pattern.compile("([0-9]+) -> ([0-9]+)");
         Matcher m1 = r1.matcher(dotAutomaton);
         if (m1.find())
-            dotAutomaton = m1.replaceAll("s$1 ");
-        Pattern r2 = Pattern.compile(" ([0-9]+)");
+            dotAutomaton = m1.replaceAll("s$1 -> s$2");
+        Pattern r2 = Pattern.compile("(;[^s\\[]*)([0-9]+)(.*)");
         Matcher m2 = r2.matcher(dotAutomaton);
-        if (m2.find())
-            dotAutomaton = m2.replaceAll(" s$1");
+        while (m2.find())
+        {
+            dotAutomaton = m2.replaceAll("$1s$2$3");
+            m2 = r2.matcher(dotAutomaton);
+        }
         dotAutomaton = dotAutomaton.replace("init", "__start0").
                 replace("node [height = .5, width = .5];", "");
 
