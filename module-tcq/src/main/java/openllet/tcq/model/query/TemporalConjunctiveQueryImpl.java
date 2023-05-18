@@ -37,12 +37,12 @@ public class TemporalConjunctiveQueryImpl implements TemporalConjunctiveQuery
                 ","};
         final PropositionFactory propositionFactory = new PropositionFactory();
 
-        // iterate until we first observe a non-whitespace non valid MLTL token
-        while(tcq.length() > 0)
+        while(tcq.replace(")", "").length() > 0)
         {
             String remainder = tcq;
             int curIndex = 0;
             boolean tokenFound = true;
+            // iterate until we first observe a non-whitespace non-valid MLTL token
             while (tokenFound)
             {
                 tokenFound = false;
@@ -73,7 +73,10 @@ public class TemporalConjunctiveQueryImpl implements TemporalConjunctiveQuery
             else
                 for (int i = curIndex - 1; i >= 0 && tcq.charAt(i) == ' '; i--)
                     if (tcq.charAt(i) == '(')
+                    {
                         openingBracketFound = true;
+                        break;
+                    }
 
             if (!openingBracketFound)
             {
@@ -91,12 +94,13 @@ public class TemporalConjunctiveQueryImpl implements TemporalConjunctiveQuery
                     numOpenBrackets--;
                 curIndex++;
             }
-            int cqEnd = curIndex - 1;  // we do not want the closing bracket included
+            int cqEnd = curIndex - 1;  // we do not want the closing bracket included in the CQ itself
             String cqString = tcq.substring(cqBeg, cqEnd);
             tcq = tcq.substring(curIndex);
             ConjunctiveQuery q = ConjunctiveQueryParser.parse(cqString, getKB().first());
             Proposition qProp = propositionFactory.create(q);
             _propAbs.put(qProp, q);
+            // TODO replace only in cqString region, else this happens: "F(C(a)) & (C(a) ^ D(b))" -> F(a) & (a ^ D(b))
             _propAbsTcq = _propAbsTcq.replace(cqString, qProp.toString());
         }
         _logger.info("Propositional abstraction is " + _propAbs);
