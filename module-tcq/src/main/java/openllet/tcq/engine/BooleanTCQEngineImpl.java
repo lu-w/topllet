@@ -10,9 +10,9 @@ import openllet.tcq.engine.automaton.MLTL2DFA;
 import openllet.tcq.model.automaton.DFA;
 import openllet.tcq.model.automaton.Edge;
 import openllet.tcq.model.query.TemporalConjunctiveQuery;
+import openllet.core.utils.Timer;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -45,12 +45,16 @@ public class BooleanTCQEngineImpl implements BooleanTCQEngine
         try
         {
             DFA automaton = MLTL2DFA.convert(negTcqProp);
+            Timer timer = new Timer();
+            timer.start();
             boolean dfaSatisfiable = _checkDFASatisfiability(automaton, tcq);
+            timer.stop();
             _logger.info("DFA check returned " + (dfaSatisfiable ? "satisfiable" : "unsatisfiable") +
                     ", therefore TCQ is " + (dfaSatisfiable ? "not entailed" : "entailed"));
+            _logger.info("DFA satisfiability check took " + timer.getTotal() + " ms");
             return !dfaSatisfiable;
         }
-        catch (IOException | InterruptedException | RuntimeException e)
+        catch (IOException | InterruptedException e)
         {
             System.out.println("TCQ " + tcq + " can not be checked, error: " + e);
             return false;
@@ -59,6 +63,7 @@ public class BooleanTCQEngineImpl implements BooleanTCQEngine
 
     private boolean _checkDFASatisfiability(DFA dfa, TemporalConjunctiveQuery tcq)
     {
+        Timer cncqTimer = new Timer();
         Integer initState = dfa.getInitialState();
         Set<Integer> states = new HashSet<>();
         if (initState != null)
@@ -67,13 +72,15 @@ public class BooleanTCQEngineImpl implements BooleanTCQEngine
         int numLetter = 0;
         if (states.size() > 0)
         {
-            while (tcq.getKB().hasNext())
+            boolean trappedInAcceptingSink = false;
+            while (tcq.getKB().hasNext() && !trappedInAcceptingSink)
             {
                 KnowledgeBase letter =  tcq.getKB().next();
                 _logger.info("Checking ABox #" + numLetter + " for states " + states);
                 Set<Integer> newStates = new HashSet<>();
                 for (int state : states)
                 {
+                    // TODO we can abort overall if there is some state in states that is a sink AND accepting
                     _logger.info("\tExamining state " + state);
                     List<Edge> edges = dfa.getEdges(state);
                     // check if we are in a sink (i.e. state - X -> state) then early abort
@@ -82,10 +89,19 @@ public class BooleanTCQEngineImpl implements BooleanTCQEngine
                         List<CNCQQuery> cncqs = edges.get(0).getCNCQs(tcq.getPropositionalAbstraction());
                         if (cncqs.size() == 1 && cncqs.get(0).isEmpty())
                         {
-                            _logger.info("\t\tSink detected at state " + state + " - early abort. Added " +
-                                    edges.get(0).getToState() + " to new states");
-                            newStates.add(edges.get(0).getToState());
-                            break;
+                            _logger.info("\t\tSink detected at state " + state);
+                            int toState = edges.get(0).getToState();
+                            if (dfa.isAccepting(toState))
+                            {
+                                // we are "trapped" in an accepting sink - early escape from looping over ABoxes
+                                trappedInAcceptingSink = true;
+                                _logger.info("Early abort of DFA iteration - trapped in accepting sink " + toState);
+                                break;
+                            }
+                            else
+                                // continue with next state - no need to add the sink to the newStates list, no counter
+                                // example can ever be generated from it
+                                continue;
                         }
                     }
                     // if we are not in a sink, we find the successor state
@@ -103,7 +119,9 @@ public class BooleanTCQEngineImpl implements BooleanTCQEngine
                                 if (!cncq.isEmpty())
                                 {
                                     cncq.setKB(letter);
+                                    cncqTimer.start();
                                     boolean querySat = !queryEngine.exec(cncq).isEmpty();
+                                    cncqTimer.stop();
                                     if (querySat)
                                     {
                                         newStates.add(edge.getToState());
@@ -139,6 +157,8 @@ public class BooleanTCQEngineImpl implements BooleanTCQEngine
                 isAccepting |= dfa.isAccepting(state);
             _logger.info("ABoxes completely iterated, end state are " + states + " which are " +
                     (isAccepting ? "accepting" : "not accepting"));
+            _logger.info("Checked a total of " + cncqTimer.getCount() + " CNCQ queries, which took " +
+                    cncqTimer.getTotal() + " ms");
             return isAccepting;
         }
         else
