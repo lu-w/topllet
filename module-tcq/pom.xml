@@ -45,5 +45,23 @@
 			<version>2.6.6-SNAPSHOT</version>
 			<scope>compile</scope>
 		</dependency>
-	</dependencies>
+        <dependency>
+            <groupId>com.github.galigator.openllet</groupId>
+            <artifactId>openllet-modularity</artifactId>
+            <version>2.6.6-SNAPSHOT</version>
+            <scope>compile</scope>
+        </dependency>
+		<dependency>
+			<groupId>edu.stanford.protege</groupId>
+			<artifactId>org.protege.xmlcatalog</artifactId>
+			<version>1.0.5</version>
+			<!-- org.protege.xmlcatalog depends on OWLAPIv3, which is incompatible with v5 -->
+			<exclusions>
+				<exclusion>
+					<groupId>net.sourceforge.owlapi</groupId>
+					<artifactId>*</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+    </dependencies>
 </project>
