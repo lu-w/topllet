@@ -2,17 +2,12 @@ package openllet.tcq.model.kb;
 
 import openllet.core.KnowledgeBase;
 import openllet.core.utils.iterator.IteratorUtils;
-import openllet.owlapi.OpenlletReasoner;
-import openllet.owlapi.OpenlletReasonerFactory;
 import openllet.shared.tools.Log;
-import org.semanticweb.owlapi.apibinding.OWLManager;
-import org.semanticweb.owlapi.model.IRI;
-import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
+import openllet.tcq.model.kb.loader.IncrementalKnowledgeBaseLoader;
+import openllet.tcq.model.kb.loader.KnowledgeBaseLoader;
+import openllet.tcq.model.kb.loader.ReloadKnowledgeBaseLoader;
 
 import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -22,28 +17,41 @@ public class TemporalKnowledgeBaseImpl implements TemporalKnowledgeBase
 
     private int _curKBIndex = -1;
     private KnowledgeBase _curKB;
+    private KnowledgeBaseLoader _loader;
     private final List<String> _files;
     private boolean _firstCalled = false;
 
     public TemporalKnowledgeBaseImpl(Iterable<String> files)
     {
+        this(files, LoadingMode.INCREMENTAL);
+    }
+
+    public TemporalKnowledgeBaseImpl(Iterable<String> files, LoadingMode loadingMode)
+    {
         _files = IteratorUtils.toList(files.iterator());
+        // TODO we can cleverly decide which loader to use based on the number of CNCQs estimated and the size of the ABox..
+        //  high # CNCQs & small ABox -> inc loader
+        switch (loadingMode)
+        {
+            case DEFAULT -> _loader = new ReloadKnowledgeBaseLoader();
+            case INCREMENTAL -> _loader = new IncrementalKnowledgeBaseLoader();
+        }
     }
 
     @Override
     public boolean hasNext()
     {
-        return _curKBIndex < _files.size() - 1;
+        return (_curKBIndex < _files.size() - 1) || (_firstCalled && !_files.isEmpty());
     }
 
     @Override
     public @Nullable KnowledgeBase next()
     {
-        // first() may have already loaded the current KB - do nothing
+        // first() may have already loaded the current KB - then do nothing
         if (hasNext() && !(_firstCalled && _curKB != null))
         {
             _curKBIndex++;
-            _loadKB(_files.get(_curKBIndex));
+            _curKB = _loader.load(_files.get(_curKBIndex));
         }
         _firstCalled = false;
         return _curKB;
@@ -56,32 +64,8 @@ public class TemporalKnowledgeBaseImpl implements TemporalKnowledgeBase
         {
             _curKBIndex = 0;
             _firstCalled = true;
-            _loadKB(_files.get(0));
+            _curKB = _loader.load(_files.get(0));
         }
         return _curKB;
-    }
-
-    private void _loadKB(String file)
-    {
-        // TODO this implementation shall deliver the new ABox "on the fly" as requested, i.e. it computes the next
-        //  ABox on demand by using the addType, removeType, etc. operations on the current KnowledgeBase.
-        _logger.info("Loading ABox from " + file);
-        //KBLoader loader = new OWLAPILoader();
-        //loader.parse(arg);
-        //loader.load();
-        // TODO add XMLcatalog from protegeproject to parse and manage local catalogs
-        // TODO outsource into a Loader class
-        OWLOntologyManager man = OWLManager.createOWLOntologyManager();
-        try
-        {
-            OWLOntology ont = man.loadOntology(IRI.create("file://" + file));
-            OpenlletReasoner reasoner = OpenlletReasonerFactory.getInstance().createReasoner(ont);
-            _curKB = reasoner.getKB();
-        }
-        catch (final Exception e)
-        {
-            _logger.warning("Can not load ABox: " + e);
-            _curKB = null;
-        }
     }
 }
