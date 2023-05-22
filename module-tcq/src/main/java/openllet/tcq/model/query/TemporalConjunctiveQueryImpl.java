@@ -1,138 +1,62 @@
 package openllet.tcq.model.query;
 
+import openllet.aterm.ATermAppl;
+import openllet.core.KnowledgeBase;
+import openllet.query.sparqldl.model.AbstractCompositeQuery;
 import openllet.query.sparqldl.model.cq.ConjunctiveQuery;
 import openllet.shared.tools.Log;
 import openllet.tcq.model.kb.TemporalKnowledgeBase;
-import openllet.tcq.parser.ConjunctiveQueryParser;
+import openllet.tcq.model.kb.TemporalKnowledgeBaseImpl;
 
 import java.util.*;
 import java.util.logging.Logger;
 
-public class TemporalConjunctiveQueryImpl implements TemporalConjunctiveQuery
+public class TemporalConjunctiveQueryImpl extends AbstractCompositeQuery<ConjunctiveQuery, TemporalConjunctiveQuery>
+        implements TemporalConjunctiveQuery
 {
     public static final Logger _logger = Log.getLogger(TemporalConjunctiveQueryImpl.class);
 
-    private final boolean _distinct;
-    private TemporalKnowledgeBase _kb;
+    private TemporalKnowledgeBase _temporalKb;
     private final Map<Proposition, ConjunctiveQuery> _propAbs = new TreeMap<>();
     private String _propAbsTcq;
     private final String _tcq;
 
-    public TemporalConjunctiveQueryImpl(String tcq, TemporalKnowledgeBase kb, boolean distinct)
+    public TemporalConjunctiveQueryImpl(String tcq, TemporalKnowledgeBase temporalKb, boolean distinct)
     {
-        _distinct = distinct;
-        _kb = kb;
+        super(temporalKb.first(), distinct);
+        _temporalKb = temporalKb;
         _tcq = tcq;
-        buildPropositionalAbstraction(tcq);
-    }
-
-    private void buildPropositionalAbstraction(String tcq)
-    {
-        _logger.info("Building propositional abstraction...");
-
         _propAbsTcq = tcq;
-
-        final String[] validMLTLToken = {"F", "G", "U", "X", "_", "<", "=", "[", "]", "(", ")", "W", "X[!]", "last",
-                "end", "R", "V", "M", "->", "<->", "^", "&", "!", "|", "0", "1", "2", "3", "4", "5", "6", "7", "8", "9",
-                ","};
-        final PropositionFactory propositionFactory = new PropositionFactory();
-
-        while(tcq.replace(")", "").length() > 0)
-        {
-            String remainder = tcq;
-            int curIndex = 0;
-            boolean tokenFound = true;
-            // iterate until we first observe a non-whitespace non-valid MLTL token
-            while (tokenFound)
-            {
-                tokenFound = false;
-                if (remainder.startsWith(" "))
-                {
-                    remainder = remainder.substring(1);
-                    curIndex += 1;
-                    tokenFound = true;
-                }
-                for (String token : validMLTLToken)
-                {
-                    if (remainder.startsWith(token))
-                    {
-                        remainder = remainder.substring(token.length());
-                        curIndex += token.length();
-                        tokenFound = true;
-                        break;
-                    }
-                }
-            }
-            int cqBeg = curIndex;
-            curIndex--;  // we consumed the opening bracket - undo
-
-            // check if this was preceded by an opening bracket (ignoring whitespaces)
-            boolean openingBracketFound = false;
-            if (tcq.charAt(curIndex) == '(')
-                openingBracketFound = true;
-            else
-                for (int i = curIndex - 1; i >= 0 && tcq.charAt(i) == ' '; i--)
-                    if (tcq.charAt(i) == '(')
-                    {
-                        openingBracketFound = true;
-                        break;
-                    }
-
-            if (!openingBracketFound)
-            {
-                throw new IllegalArgumentException("Can not find opening bracket for conjunctive query in " + tcq);
-            }
-
-            // iterate until we find the closing bracket
-            curIndex++;  // consume opening bracket
-            int numOpenBrackets = 1;
-            while (numOpenBrackets > 0 && curIndex < tcq.length())
-            {
-                if (tcq.charAt(curIndex) == '(')
-                    numOpenBrackets++;
-                else if (tcq.charAt(curIndex) == ')')
-                    numOpenBrackets--;
-                curIndex++;
-            }
-            int cqEnd = curIndex - 1;  // we do not want the closing bracket included in the CQ itself
-            String cqString = tcq.substring(cqBeg, cqEnd);
-            tcq = tcq.substring(curIndex);
-            ConjunctiveQuery q = ConjunctiveQueryParser.parse(cqString, getKB().first());
-            Proposition qProp = propositionFactory.create(q);
-            _propAbs.put(qProp, q);
-            // TODO replace only in cqString region, else this happens: "F(C(a)) & (C(a) ^ D(b))" -> F(a) & (a ^ D(b))
-            _propAbsTcq = _propAbsTcq.replace(cqString, qProp.toString());
-        }
-        _logger.info("Propositional abstraction is " + _propAbs);
     }
 
     @Override
-    public boolean isDistinct()
-    {
-        return _distinct;
-    }
-
-    @Override
-    public String getPropositionalAbstractionTCQ()
-    {
-        return _propAbsTcq;
-    }
-
-    @Override
-    public String getNegatedPropositionalAbstractionTCQ()
-    {
-        return "!(" + getPropositionalAbstractionTCQ() + ")";
-    }
-
-    @Override
-    public Set<Proposition> getPropositionsInAbstraction()
+    public Collection<Proposition> getPropositionsInAbstraction()
     {
         return _propAbs.keySet();
     }
 
     @Override
-    public Collection<ConjunctiveQuery> getConjunctiveQueries() {
+    public Collection<ConjunctiveQuery> getConjunctiveQueries()
+    {
         return _propAbs.values();
+    }
+
+    @Override
+    public void addConjunctiveQuery(Proposition proposition, ConjunctiveQuery query)
+    {
+        addConjunctiveQuery(proposition, query, null);
+    }
+
+    @Override
+    public void addConjunctiveQuery(Proposition proposition, ConjunctiveQuery query, String queryString)
+    {
+        super.addQuery(query);
+        _propAbs.put(proposition, query);
+        if (queryString != null)
+        {
+            // TODO replace only in cqString region, else this happens: "F(C(a)) & (C(a) ^ D(b))" -> F(a) & (a ^ D(b))
+            _propAbsTcq = _propAbsTcq.replace(queryString, proposition.toString());
+        }
     }
 
     @Override
@@ -142,20 +66,67 @@ public class TemporalConjunctiveQueryImpl implements TemporalConjunctiveQuery
     }
 
     @Override
-    public TemporalKnowledgeBase getKB()
+    public TemporalKnowledgeBase getTemporalKB()
     {
-        return _kb;
+        return _temporalKb;
     }
 
     @Override
-    public void setKB(TemporalKnowledgeBase kb)
+    public void setTemporalKB(TemporalKnowledgeBase temporalKb)
     {
-        _kb = kb;
+        _temporalKb = temporalKb;
+    }
+
+    @Override
+    protected String getCompositeDelimiter()
+    {
+        return " [...] ";
     }
 
     @Override
     public String toString()
     {
-        return _tcq;
+        List<String> resultVarStrings = new ArrayList<>();
+        for (ATermAppl var : _resultVars)
+            if (var.getArguments().getLength() > 0)
+                resultVarStrings.add(var.getArgument(0).toString());
+        return "query(" + String.join(", ", resultVarStrings) + ") :- " + _tcq;
+    }
+
+    @Override
+    public String toPropositionalAbstractionString()
+    {
+        return _propAbsTcq;
+    }
+
+    @Override
+    public String toNegatedPropositionalAbstractionString()
+    {
+        return "!(" + toPropositionalAbstractionString() + ")";
+    }
+
+    @Override
+    public List<TemporalConjunctiveQuery> split()
+    {
+        _logger.fine("Tried to split a temporal conjunctive query, but temporal conjunctive queries shall not be split.");
+        return List.of(this);
+    }
+
+    @Override
+    public TemporalConjunctiveQuery createQuery(KnowledgeBase kb, boolean isDistinct)
+    {
+        _logger.warning("Using createQuery(..) on a temporal conjunctive query - this method shall not be used");
+        return new TemporalConjunctiveQueryImpl("", new TemporalKnowledgeBaseImpl(new ArrayList<>()), isDistinct);
+    }
+
+    @Override
+    public TemporalConjunctiveQuery copy()
+    {
+        TemporalConjunctiveQuery copy = new TemporalConjunctiveQueryImpl(_tcq, _temporalKb, _distinct);
+        for (ConjunctiveQuery q : getConjunctiveQueries())
+            copy.addQuery(q.copy());
+        copy.setDistVars(new EnumMap<>(getDistVarsWithVarType()));
+        copy.setResultVars(new ArrayList<>(getResultVars()));
+        return copy;
     }
 }

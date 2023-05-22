@@ -198,7 +198,7 @@ public interface Query<QueryType extends Query<QueryType>>
     boolean hasCycle();
 
     /**
-     * Splits the query into disjoint pats.
+     * Splits the query into disjoint parts.
      * @return A list of disjoint queries
      */
     List<QueryType> split();

@@ -59,7 +59,7 @@ abstract public class AbstractCompositeQuery<SubQueryType extends Query<SubQuery
                 _resultVars.add(resVar);
         for (final VarType type : VarType.values())
             _distVars.get(type).addAll(query.getDistVarsForType(type));
-        // Updates the ground information (this may have changed due to the new disjunct)
+        // Updates the ground information (this may have changed due to the new sub query)
         _ground &= query.isGround();
     }
 
