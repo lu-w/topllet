@@ -10,6 +10,7 @@ import openllet.tcq.model.query.TemporalConjunctiveQuery;
 
 import java.util.logging.Logger;
 
+// TODO eventually, this class shall replace the BooleanTCQEngine -- which then stays but just calls the TCQEngine
 public class TCQEngine extends AbstractQueryEngine<TemporalConjunctiveQuery>
         implements QueryExec<TemporalConjunctiveQuery>
 {
