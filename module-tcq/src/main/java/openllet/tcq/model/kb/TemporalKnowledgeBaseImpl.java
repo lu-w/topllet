@@ -13,6 +13,9 @@ import java.util.logging.Logger;
 
 public class TemporalKnowledgeBaseImpl implements TemporalKnowledgeBase
 {
+    // Remark: right now, we require all individuals to be present already in the first knowledge base (otherwise, the
+    // query may wrongly interpret atom arguments as answer variables and not as individuals.
+
     public static final Logger _logger = Log.getLogger(TemporalKnowledgeBaseImpl.class);
 
     private int _curKBIndex = -1;
@@ -29,8 +32,8 @@ public class TemporalKnowledgeBaseImpl implements TemporalKnowledgeBase
     public TemporalKnowledgeBaseImpl(Iterable<String> files, LoadingMode loadingMode)
     {
         _files = IteratorUtils.toList(files.iterator());
-        // TODO we can cleverly decide which loader to use based on the number of CNCQs estimated and the size of the ABox..
-        //  high # CNCQs & small ABox -> inc loader
+        // TODO we can cleverly decide which loader to use based on the number of CNCQs estimated and the size of the
+        //  ABox... high # CNCQs & small ABox -> inc loader
         switch (loadingMode)
         {
             case DEFAULT -> _loader = new ReloadKnowledgeBaseLoader();

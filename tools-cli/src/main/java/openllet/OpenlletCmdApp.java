@@ -200,7 +200,9 @@ public abstract class OpenlletCmdApp implements Logging
 	{
 		final OpenlletCmdOption option = new OpenlletCmdOption("input-format");
 		option.setDefaultValue(null);
-		option.setDescription("Format of the input file (valid only for the " + "Jena _loader). Default behaviour is to guess " + "the input format based on the file extension.");
+		option.setDescription("Format of the input file (valid only for the " +
+				"Jena _loader). Default behaviour is to guess " +
+				"the input format based on the file extension.");
 		option.setType("RDF/XML | Turtle | N-Triples");
 		option.setIsMandatory(false);
 		option.setArg(REQUIRED);

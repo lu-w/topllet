@@ -45,6 +45,7 @@ public class Openllet
 		COMMANDS.put("unsat", new OpenlletUnsatisfiable());
 		COMMANDS.put("explain", new OpenlletExplain());
 		COMMANDS.put("query", new OpenlletQuery());
+		COMMANDS.put("temporal-query", new OpenlletTemporalQuery());
 		COMMANDS.put("modularity", new OpenlletModularity());
 		COMMANDS.put("trans-tree", new OpenlletTransTree());
 		COMMANDS.put("extract", new OpenlletExtractInferences());
@@ -133,6 +134,7 @@ public class Openllet
 
 		buf.append("\n");
 		buf.append("Openllet is an OWL2 ontology (DL)reasoner.\n");
+		buf.append("This is the Openllet-TCQ variant, which is able to check temporal conjunctive queries.\n");
 		buf.append("For more information, see https://www.w3.org/TR/owl2-profiles/");
 
 		System.out.println(buf);
