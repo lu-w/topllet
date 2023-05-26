@@ -13,4 +13,8 @@ public interface TemporalKnowledgeBase extends Iterator<KnowledgeBase>
     }
 
     KnowledgeBase first();
+
+    void add(KnowledgeBase kb);
+
+    void reset();
 }

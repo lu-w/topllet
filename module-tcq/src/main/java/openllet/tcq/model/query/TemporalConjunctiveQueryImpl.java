@@ -6,7 +6,7 @@ import openllet.query.sparqldl.model.AbstractCompositeQuery;
 import openllet.query.sparqldl.model.cq.ConjunctiveQuery;
 import openllet.shared.tools.Log;
 import openllet.tcq.model.kb.TemporalKnowledgeBase;
-import openllet.tcq.model.kb.TemporalKnowledgeBaseImpl;
+import openllet.tcq.model.kb.FileBasedTemporalKnowledgeBaseImpl;
 
 import java.util.*;
 import java.util.logging.Logger;
@@ -53,10 +53,7 @@ public class TemporalConjunctiveQueryImpl extends AbstractCompositeQuery<Conjunc
         super.addQuery(query);
         _propAbs.put(proposition, query);
         if (queryString != null)
-        {
-            // TODO replace only in cqString region, else this happens: "F(C(a)) & (C(a) ^ D(b))" -> F(a) & (a ^ D(b))
-            _propAbsTcq = _propAbsTcq.replace(queryString, proposition.toString());
-        }
+            _propAbsTcq = _propAbsTcq.replace("(" + queryString + ")", "(" + proposition.toString() + ")");
     }
 
     @Override
@@ -115,8 +112,8 @@ public class TemporalConjunctiveQueryImpl extends AbstractCompositeQuery<Conjunc
     @Override
     public TemporalConjunctiveQuery createQuery(KnowledgeBase kb, boolean isDistinct)
     {
-        _logger.warning("Using createQuery(..) on a temporal conjunctive query - this method shall not be used");
-        return new TemporalConjunctiveQueryImpl("", new TemporalKnowledgeBaseImpl(new ArrayList<>()), isDistinct);
+        _logger.warning("Using createQuery() on a temporal conjunctive query - this method shall not be used");
+        return new TemporalConjunctiveQueryImpl("", new FileBasedTemporalKnowledgeBaseImpl(new ArrayList<>()), isDistinct);
     }
 
     @Override

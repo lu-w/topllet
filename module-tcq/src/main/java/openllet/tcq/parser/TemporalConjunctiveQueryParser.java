@@ -18,7 +18,7 @@ public class TemporalConjunctiveQueryParser
             "X[!]", "last", "end", "R", "V", "M", "->", "<->", "^", "&", "!", "|", "0", "1", "2", "3", "4", "5", "6",
             "7", "8", "9", ","};
 
-    static public TemporalConjunctiveQuery parse(String input, TemporalKnowledgeBase kb)
+    static public TemporalConjunctiveQuery parse(String input, TemporalKnowledgeBase kb) throws ParseException
     {
         _logger.info("Building propositional abstraction...");
 
@@ -68,7 +68,7 @@ public class TemporalConjunctiveQueryParser
                     }
 
             if (!openingBracketFound)
-                throw new IllegalArgumentException("Can not find opening bracket for conjunctive query in " + tcq);
+                throw new ParseException("Can not find opening bracket for conjunctive query in " + tcq);
 
             // iterate until we find the closing bracket
             curIndex++;  // consume opening bracket

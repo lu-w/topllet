@@ -13,12 +13,12 @@ import java.io.FileNotFoundException;
 import java.util.List;
 import java.util.logging.Logger;
 
-public class TemporalKnowledgeBaseImpl implements TemporalKnowledgeBase
+public class FileBasedTemporalKnowledgeBaseImpl implements TemporalKnowledgeBase
 {
     // Remark: right now, we require all individuals to be present already in the first knowledge base (otherwise, the
     // query may wrongly interpret atom arguments as answer variables and not as individuals.
 
-    public static final Logger _logger = Log.getLogger(TemporalKnowledgeBaseImpl.class);
+    public static final Logger _logger = Log.getLogger(FileBasedTemporalKnowledgeBaseImpl.class);
 
     private int _curKBIndex = -1;
     private KnowledgeBase _curKB;
@@ -27,22 +27,22 @@ public class TemporalKnowledgeBaseImpl implements TemporalKnowledgeBase
     private boolean _firstCalled = false;
     private static final LoadingMode defaultLoadingMode = LoadingMode.INCREMENTAL;
 
-    public TemporalKnowledgeBaseImpl(Iterable<String> files)
+    public FileBasedTemporalKnowledgeBaseImpl(Iterable<String> files)
     {
         this(files, null, defaultLoadingMode);
     }
 
-    public TemporalKnowledgeBaseImpl(Iterable<String> files, String catalogFile)
+    public FileBasedTemporalKnowledgeBaseImpl(Iterable<String> files, String catalogFile)
     {
         this(files, catalogFile, defaultLoadingMode);
     }
 
-    public TemporalKnowledgeBaseImpl(Iterable<String> files, String catalogFile, LoadingMode loadingMode)
+    public FileBasedTemporalKnowledgeBaseImpl(Iterable<String> files, String catalogFile, LoadingMode loadingMode)
     {
         this(files, catalogFile, loadingMode, null);
     }
 
-    public TemporalKnowledgeBaseImpl(Iterable<String> files, String catalogFile, LoadingMode loadingMode, Timer timer)
+    public FileBasedTemporalKnowledgeBaseImpl(Iterable<String> files, String catalogFile, LoadingMode loadingMode, Timer timer)
     {
         _files = IteratorUtils.toList(files.iterator());
         // TODO we can cleverly decide which loader to use based on the number of CNCQs estimated and the size of the
@@ -103,5 +103,19 @@ public class TemporalKnowledgeBaseImpl implements TemporalKnowledgeBase
             }
         }
         return _curKB;
+    }
+
+    @Override
+    public void add(KnowledgeBase kb)
+    {
+        // TODO Lukas: implement
+        throw new NoSuchMethodError("Adding not yet possible for file based temporal knowledge bases");
+    }
+
+    @Override
+    public void reset()
+    {
+        _curKBIndex = -1;
+        _curKB = null;
     }
 }

@@ -4,6 +4,7 @@ import net.automatalib.serialization.dot.DOTParsers;
 import openllet.shared.tools.Log;
 import openllet.tcq.engine.mltl.MLTL2LTLf;
 import openllet.tcq.model.automaton.DFA;
+import openllet.tcq.parser.ParseException;
 import org.apache.commons.io.IOUtils;
 
 import java.io.File;
@@ -18,8 +19,8 @@ public class MLTL2DFA
 {
     public static final Logger _logger = Log.getLogger(MLTL2DFA.class);
 
-    public static DFA convert(String mltlFormula) throws IOException, InterruptedException,
-            RuntimeException {
+    public static DFA convert(String mltlFormula) throws IOException, InterruptedException, ParseException
+    {
         String ltlfFormula = MLTL2LTLf.convert(mltlFormula);
         ltlfFormula = ltlfFormula.replace("\n", "");
         File file = File.createTempFile("mltl2dfa-", "");
@@ -32,7 +33,7 @@ public class MLTL2DFA
         child.waitFor();
         error = IOUtils.toString(child.getErrorStream());
         if (error.length() > 0)
-            throw new RuntimeException("Lydia error: " + error.replaceAll("[\r\n]", " "));
+            throw new ParseException("Lydia error: " + error.replaceAll("[\r\n]", " "));
 
         tmpFile += ".dot";
         FileInputStream fis = new FileInputStream(tmpFile);
@@ -45,11 +46,11 @@ public class MLTL2DFA
         Matcher m1 = r1.matcher(dotAutomaton);
         if (m1.find())
             dotAutomaton = m1.replaceAll("s$1 -> s$2");
-        Pattern r2 = Pattern.compile("(;[^s\\[]*)([0-9]+)(.*)");
+        Pattern r2 = Pattern.compile("(;[^s\\[]*[s0-9]* )([0-9]+)");
         Matcher m2 = r2.matcher(dotAutomaton);
         while (m2.find())
         {
-            dotAutomaton = m2.replaceAll("$1s$2$3");
+            dotAutomaton = m2.replaceAll("$1s$2");
             m2 = r2.matcher(dotAutomaton);
         }
         dotAutomaton = dotAutomaton.replace("init", "__start0").
@@ -61,7 +62,7 @@ public class MLTL2DFA
         }
         catch (IOException e)
         {
-            return new DFA();
+            throw new ParseException("AutomataLib can not read .dot DFA: " + e);
         }
     }
 }

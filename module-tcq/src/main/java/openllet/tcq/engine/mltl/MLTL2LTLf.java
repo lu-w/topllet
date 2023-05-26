@@ -1,11 +1,13 @@
 package openllet.tcq.engine.mltl;
 
+import openllet.tcq.parser.ParseException;
 import org.apache.commons.io.IOUtils;
 import java.io.IOException;
 
 public class MLTL2LTLf
 {
-    static public String convert(String mltlFormula) throws InterruptedException, IOException, RuntimeException {
+    static public String convert(String mltlFormula) throws InterruptedException, IOException, ParseException
+    {
         String ltlfFormula = "";
         String command = "mltl2ltl";
         String error = "";
@@ -22,7 +24,7 @@ public class MLTL2LTLf
                 errorMessage = "Unexpected input during parsing of " + mltlFormula + "\n" + errorMessage;
             else
                 errorMessage = "Other error - " + errorMessage;
-            throw new RuntimeException("MLTL2LTL error: " + errorMessage);
+            throw new ParseException("MLTL2LTL error: " + errorMessage);
         }
 
         return ltlfFormula;

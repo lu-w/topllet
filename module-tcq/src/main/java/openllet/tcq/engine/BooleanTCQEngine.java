@@ -11,6 +11,7 @@ import openllet.tcq.model.automaton.DFA;
 import openllet.tcq.model.automaton.Edge;
 import openllet.tcq.model.query.TemporalConjunctiveQuery;
 import openllet.core.utils.Timer;
+import openllet.tcq.parser.ParseException;
 
 import java.io.IOException;
 import java.util.HashSet;
@@ -39,7 +40,7 @@ public class BooleanTCQEngine extends AbstractBooleanQueryEngine<TemporalConjunc
                     ", therefore TCQ is " + (dfaSatisfiable ? "not entailed" : "entailed"));
             return !dfaSatisfiable;
         }
-        catch (IOException | InterruptedException e)
+        catch (IOException | InterruptedException | ParseException e)
         {
             return false;
         }
