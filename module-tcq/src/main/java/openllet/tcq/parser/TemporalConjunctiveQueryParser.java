@@ -22,10 +22,8 @@ public class TemporalConjunctiveQueryParser
     {
         _logger.info("Building propositional abstraction...");
 
-        TemporalConjunctiveQuery parsedTcq = new TemporalConjunctiveQueryImpl(input, kb, false);
-
-        String tcq = input;
-
+        String tcq = input.replaceAll("(\r\n|\r|\n)[\t ]*", "");
+        TemporalConjunctiveQuery parsedTcq = new TemporalConjunctiveQueryImpl(tcq, kb, false);
         final PropositionFactory propositionFactory = new PropositionFactory();
 
         while (tcq.replace(")", "").length() > 0)
@@ -37,7 +35,7 @@ public class TemporalConjunctiveQueryParser
             while (tokenFound)
             {
                 tokenFound = false;
-                if (remainder.startsWith(" "))
+                if (remainder.length() > 0 && Character.isWhitespace(remainder.charAt(0)))
                 {
                     remainder = remainder.substring(1);
                     curIndex += 1;
@@ -62,7 +60,7 @@ public class TemporalConjunctiveQueryParser
             if (tcq.charAt(curIndex) == '(')
                 openingBracketFound = true;
             else
-                for (int i = curIndex - 1; i >= 0 && tcq.charAt(i) == ' '; i--)
+                for (int i = curIndex - 1; i >= 0 && Character.isWhitespace(tcq.charAt(i)); i--)
                     if (tcq.charAt(i) == '(')
                     {
                         openingBracketFound = true;
