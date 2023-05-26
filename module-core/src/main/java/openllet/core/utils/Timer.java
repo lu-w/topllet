@@ -121,7 +121,7 @@ public class Timer
 	}
 
 	/**
-	 * Update the total time elapsed and number of counts by by adding the values from another timer. This is especially useful if we are running
+	 * Update the total time elapsed and number of counts by adding the values from another timer. This is especially useful if we are running
 	 *
 	 * @param timer
 	 */
