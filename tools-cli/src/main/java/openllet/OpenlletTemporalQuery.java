@@ -8,12 +8,12 @@ import openllet.core.output.TableData;
 import openllet.core.utils.Timer;
 import openllet.query.sparqldl.engine.QueryExec;
 import openllet.query.sparqldl.model.results.QueryResult;
-import openllet.query.sparqldl.model.results.QueryResultImpl;
 import openllet.query.sparqldl.model.results.ResultBinding;
 import openllet.tcq.engine.BooleanTCQEngine;
 import openllet.tcq.model.kb.TemporalKnowledgeBase;
-import openllet.tcq.model.kb.TemporalKnowledgeBaseImpl;
+import openllet.tcq.model.kb.FileBasedTemporalKnowledgeBaseImpl;
 import openllet.tcq.model.query.TemporalConjunctiveQuery;
+import openllet.tcq.parser.ParseException;
 import openllet.tcq.parser.TemporalConjunctiveQueryParser;
 import org.apache.jena.atlas.RuntimeIOException;
 import org.apache.jena.atlas.io.IO;
@@ -21,10 +21,7 @@ import org.apache.jena.query.*;
 import org.apache.jena.shared.NotFoundException;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.StringWriter;
-import java.nio.file.InvalidPathException;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -188,7 +185,7 @@ public class OpenlletTemporalQuery extends OpenlletCmdApp
             if (inputFiles.size() == 1)
                 // tries to parse from input files. if unsuccessful, the original input file is returned.
                 inputFiles = parseInputFilesFromFile(inputFiles.get(0));
-            kb = new TemporalKnowledgeBaseImpl(inputFiles, catalogFile, TemporalKnowledgeBase.LoadingMode.DEFAULT,
+            kb = new FileBasedTemporalKnowledgeBaseImpl(inputFiles, catalogFile, TemporalKnowledgeBase.LoadingMode.DEFAULT,
                     timer);
             try
             {
@@ -237,7 +234,7 @@ public class OpenlletTemporalQuery extends OpenlletCmdApp
             verbose(queryString.trim());
             verbose("-----------------------------------------------------");
         }
-        catch (final NotFoundException | RuntimeIOException | QueryParseException e)
+        catch (final NotFoundException | RuntimeIOException | QueryParseException | ParseException e)
         {
             throw new OpenlletCmdException(e);
         }
