@@ -5,10 +5,10 @@ import openllet.core.KnowledgeBase;
 import openllet.core.OpenlletOptions;
 import openllet.core.exceptions.InconsistentOntologyException;
 import openllet.core.output.TableData;
-import openllet.jena.NodeFormatter;
+import openllet.core.utils.Timer;
 import openllet.query.sparqldl.engine.QueryExec;
-import openllet.query.sparqldl.jena.SparqlDLExecutionFactory;
 import openllet.query.sparqldl.model.results.QueryResult;
+import openllet.query.sparqldl.model.results.QueryResultImpl;
 import openllet.query.sparqldl.model.results.ResultBinding;
 import openllet.tcq.engine.BooleanTCQEngine;
 import openllet.tcq.model.kb.TemporalKnowledgeBase;
@@ -18,10 +18,10 @@ import openllet.tcq.parser.TemporalConjunctiveQueryParser;
 import org.apache.jena.atlas.RuntimeIOException;
 import org.apache.jena.atlas.io.IO;
 import org.apache.jena.query.*;
-import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.shared.NotFoundException;
-import org.apache.jena.util.FileManager;
 
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.StringWriter;
 import java.nio.file.InvalidPathException;
 import java.nio.file.Paths;
@@ -30,12 +30,12 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
-import static openllet.OpenlletCmdOptionArg.NONE;
-import static openllet.OpenlletCmdOptionArg.REQUIRED;
+import static openllet.OpenlletCmdOptionArg.*;
 
 public class OpenlletTemporalQuery extends OpenlletCmdApp
 {
     private String queryFile;
+    private String catalogFile;
     private QueryResult queryResults;
     private String queryString;
     private TemporalConjunctiveQuery query;
@@ -82,6 +82,14 @@ public class OpenlletTemporalQuery extends OpenlletCmdApp
         option.setArg(REQUIRED);
         options.add(option);
 
+        option = new OpenlletCmdOption("catalog");
+        option.setShortOption("c");
+        option.setType("<file URI>");
+        option.setDescription("An OASIS XML catalog file to resolve URIs.");
+        option.setArg(REQUIRED);
+        option.setIsMandatory(false);
+        options.add(option);
+
         option = new OpenlletCmdOption("bnode");
         option.setDescription("Treat bnodes in the query as undistinguished variables. Undistinguished " +
                 "variables can match individuals whose existence is inferred by the " +
@@ -103,40 +111,41 @@ public class OpenlletTemporalQuery extends OpenlletCmdApp
         super.parseArgs(args);
 
         setQueryFile(_options.getOption("query-file").getValueAsString());
+        setCatalogFile(_options.getOption("catalog").getValueAsString());
         setOutputFormat(_options.getOption("output-format").getValueAsString());
         OpenlletOptions.TREAT_ALL_VARS_DISTINGUISHED = !_options.getOption("bnode").getValueAsBoolean();
     }
 
-    private String[] parseInputFilesFromFile(String inputFile)
+    private void setCatalogFile(final String s)
     {
-        try
-        {
-            String inputFilesFile = IO.readWholeFileAsUTF8(inputFile);
-            String[] inputFiles = inputFilesFile.split("\r\n|\r|\n");
-            if (!isListOfInputFiles(inputFiles))
-                // returns the original input file if unsuccessful
-                inputFiles = new String[] {inputFile};
-            return inputFiles;
-        }
-        catch (final NotFoundException | QueryParseException e)
-        {
-            throw new OpenlletCmdException(e);
-        }
+        catalogFile = s;
     }
 
-    private boolean isListOfInputFiles(String[] inputFiles)
+    private List<String> parseInputFilesFromFile(String inputFile)
     {
-        boolean isListOfInputFiles = true;
-        try
-        {
-            // TODO check if this works under Linux... ie. if RDF etc. do not start with valid Linux file names.
-            Paths.get(inputFiles[0]);
-        }
-        catch (InvalidPathException | NullPointerException | ArrayIndexOutOfBoundsException ignored)
-        {
-            isListOfInputFiles = false;
-        }
-        return isListOfInputFiles;
+        if (new File(inputFile).exists())
+            try
+            {
+                List<String> inputFiles = new ArrayList<>();
+                for (String line : IO.readWholeFileAsUTF8(inputFile).lines().toList())
+                    if (!line.startsWith("#"))
+                        inputFiles.add(line);
+                if (!isListOfInputFiles(inputFiles))
+                    // returns the original input file if unsuccessful
+                    inputFiles = List.of(inputFile);
+                return inputFiles;
+            }
+            catch (final NotFoundException | QueryParseException e)
+            {
+                throw new OpenlletCmdException(e);
+            }
+        else
+            throw new OpenlletCmdException("File " + inputFile + " does not exist");
+    }
+
+    private boolean isListOfInputFiles(List<String> inputFiles)
+    {
+        return new File(inputFiles.get(0)).exists();
     }
 
     @Override
@@ -172,34 +181,42 @@ public class OpenlletTemporalQuery extends OpenlletCmdApp
 
     private void loadInput()
     {
+        Timer timer = _timers.createTimer("loading ontologies");
         try
         {
-            String[] inputFiles = getInputFiles();
-            if (inputFiles.length == 1)
+            List<String> inputFiles = Arrays.asList(getInputFiles());
+            if (inputFiles.size() == 1)
                 // tries to parse from input files. if unsuccessful, the original input file is returned.
-                inputFiles = parseInputFilesFromFile(inputFiles[0]);
-            kb = new TemporalKnowledgeBaseImpl(Arrays.asList(inputFiles));
-            KnowledgeBase firstKb = kb.first();
-
-            if (firstKb != null)
+                inputFiles = parseInputFilesFromFile(inputFiles.get(0));
+            kb = new TemporalKnowledgeBaseImpl(inputFiles, catalogFile, TemporalKnowledgeBase.LoadingMode.DEFAULT,
+                    timer);
+            try
             {
-                startTask("consistency check");
-                final boolean isConsistent = firstKb.isConsistent();
-                finishTask("consistency check");
+                KnowledgeBase firstKb = kb.first();
+                if (firstKb != null)
+                {
+                    startTask("initial consistency check");
+                    final boolean isConsistent = firstKb.isConsistent();
+                    finishTask("initial consistency check");
 
-                if (!isConsistent)
-                    throw new OpenlletCmdException("Ontology is inconsistent, run \"openllet explain\" to get the " +
-                            "reason");
+                    if (!isConsistent)
+                        throw new OpenlletCmdException("Ontology is inconsistent, run \"openllet explain\" to get " +
+                                "the reason");
+                }
+            }
+            catch (Exception e)
+            {
+                throw new OpenlletCmdException(e);
             }
 
-        }
-        catch (final NotFoundException | QueryParseException e)
-        {
-            throw new OpenlletCmdException(e);
         }
         catch (final InconsistentOntologyException e)
         {
             throw new OpenlletCmdException("Cannot query inconsistent ontology!", e);
+        }
+        catch (final RuntimeException e)
+        {
+            throw new OpenlletCmdException(e);
         }
     }
 
@@ -228,9 +245,15 @@ public class OpenlletTemporalQuery extends OpenlletCmdApp
 
     private void execQuery()
     {
-        startTask("query execution");
-        queryResults = queryEngine.exec(query);
-        finishTask("query execution");
+        Timer timer = _timers.createTimer("query execution (w/o loading & initial consistency check)");
+        try
+        {
+            queryResults = queryEngine.exec(query, null, timer);
+        }
+        catch (RuntimeException e)
+        {
+            throw new OpenlletCmdException(e);
+        }
     }
 
     private void printQueryResults()
@@ -239,7 +262,6 @@ public class OpenlletTemporalQuery extends OpenlletCmdApp
             printAskQueryResult();
         else
             printSelectQueryResult();
-
     }
 
     private void printAskQueryResult()
@@ -304,6 +326,7 @@ public class OpenlletTemporalQuery extends OpenlletCmdApp
     private void printXMLQueryResults()
     {
         // TODO
+        System.out.println("XML query result output not implemented yet");
     }
 
     private void printJSONQueryResults()
@@ -314,6 +337,7 @@ public class OpenlletTemporalQuery extends OpenlletCmdApp
             System.out.println(queryString.replace("*/", "* /"));
             System.out.println("*/ ");
         }
+        System.out.println("JSON query result output not implemented yet");
         // TODO
     }
 
