@@ -8,8 +8,11 @@ import openllet.owlapi.OpenlletReasonerFactory;
 import openllet.shared.tools.Log;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyChange;
+import org.semanticweb.owlapi.model.OWLOntologyCreationException;
+import org.semanticweb.owlapi.model.OWLOntologyStorageException;
 
 import javax.annotation.Nullable;
+import java.io.*;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.logging.Logger;
@@ -20,35 +23,47 @@ public class IncrementalKnowledgeBaseLoader extends KnowledgeBaseLoader
 
     private OpenlletReasoner _reasoner = null;
     private KnowledgeBase _lastLoaded;
+    private OWLOntology _prevOnt;
+
+    public IncrementalKnowledgeBaseLoader()
+    {
+        super();
+    }
+
+    public IncrementalKnowledgeBaseLoader(Timer timer)
+    {
+        super(timer);
+    }
 
     @Nullable
     @Override
-    public KnowledgeBase load(String fileName)
+    public KnowledgeBase load(String fileName) throws OWLOntologyCreationException, FileNotFoundException
     {
-        Timer timer = new Timer("incrementalLoader");
-        timer.start();
+        _timer.start();
         int numChanges = -1;
-        OWLOntology ont = KnowledgeBaseLoader.loadOWLOntology(fileName);
         if (_reasoner == null)
         {
-            _reasoner = OpenlletReasonerFactory.getInstance().createReasoner(ont);
+            _reasoner = OpenlletReasonerFactory.getInstance().createReasoner(super.loadOntology(fileName));
+            _prevOnt = _reasoner.getOntology();
         }
-        if (_lastLoaded != null)
+        else
         {
-            OWLOntology oldOnt = _reasoner.getOntology();
-            OWLOntology newOnt = KnowledgeBaseLoader.loadOWLOntology(fileName);
-            final OntologyDiff ontologyDiff = OntologyDiff.diffAxioms(oldOnt.getAxioms(), newOnt.getAxioms());
-            if (ontologyDiff.getDiffCount() > 0)
+            OWLOntology newOnt = super.loadOntology(fileName);
+            final OntologyDiff ontologyDiff = OntologyDiff.diffOntologies(_prevOnt, newOnt);
+            _prevOnt = newOnt;
+            if (ontologyDiff.getDiffCount() >= 0)
             {
                 Collection<OWLOntologyChange> changes = ontologyDiff.getChanges(newOnt);
                 numChanges = changes.size();
-                _reasoner.ontologiesChanged(new LinkedList<>(changes));
+                boolean success = _reasoner.processChanges(new LinkedList<>(changes));
+                if (!success)
+                    _logger.warning("Some changes in incrementally loaded ontology could not be processed");
             }
         }
-        timer.stop();
         _lastLoaded = _reasoner.getKB();
-        _logger.info("Incrementally loaded " + fileName + (numChanges >= 0 ? " (" + numChanges + " changes were propagated)" : " (full load)"));
-        _logger.info("Loading took " + timer.getTotal() + " ms");
+        _timer.stop();
+        _logger.info("Incrementally loaded " + fileName + (numChanges >= 0 ? " (" + numChanges +
+                " changes were propagated)" : " (full load)"));
         return _lastLoaded;
     }
 }
