@@ -237,6 +237,15 @@ public class CombinedQueryEngine implements QueryExec<ConjunctiveQuery>
 		return exec(q);
 	}
 
+	@Override
+	public QueryResult exec(ConjunctiveQuery q, ABox abox, Timer timer)
+	{
+		timer.start();
+		QueryResult result = exec(q, abox);
+		timer.stop();
+		return result;
+	}
+
 	/**
 	 * {@inheritDoc}
 	 */
