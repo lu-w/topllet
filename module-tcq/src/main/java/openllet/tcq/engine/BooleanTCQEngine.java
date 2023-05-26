@@ -34,18 +34,13 @@ public class BooleanTCQEngine extends AbstractBooleanQueryEngine<TemporalConjunc
         try
         {
             DFA automaton = MLTL2DFA.convert(negTcqProp);
-            Timer timer = new Timer();
-            timer.start();
             boolean dfaSatisfiable = _checkDFASatisfiability(automaton, q);
-            timer.stop();
             _logger.info("DFA check returned " + (dfaSatisfiable ? "satisfiable" : "unsatisfiable") +
                     ", therefore TCQ is " + (dfaSatisfiable ? "not entailed" : "entailed"));
-            _logger.info("DFA satisfiability check took " + timer.getTotal() + " ms");
             return !dfaSatisfiable;
         }
         catch (IOException | InterruptedException e)
         {
-            System.out.println("TCQ " + q + " can not be checked, error: " + e);
             return false;
         }
     }
@@ -62,9 +57,14 @@ public class BooleanTCQEngine extends AbstractBooleanQueryEngine<TemporalConjunc
         if (states.size() > 0)
         {
             boolean trappedInAcceptingSink = false;
+            Set<Integer> eventuallyReachableStates = new HashSet<>();
             while (tcq.getTemporalKB().hasNext() && !trappedInAcceptingSink)
             {
+                if (_timer != null)
+                    _timer.stop();
                 KnowledgeBase letter =  tcq.getTemporalKB().next();
+                if (_timer != null)
+                    _timer.start();
                 _logger.info("Checking ABox #" + numLetter + " for states " + states);
                 Set<Integer> newStates = new HashSet<>();
                 for (int state : states)
@@ -87,9 +87,12 @@ public class BooleanTCQEngine extends AbstractBooleanQueryEngine<TemporalConjunc
                                 break;
                             }
                             else
-                                // continue with next state - no need to add the sink to the newStates list, no counter
-                                // example can ever be generated from it
+                            {
+                                // continue with next state. no need to add it to the newStates list as it will not
+                                // be useful for reachability anymore (it's a sink)
+                                eventuallyReachableStates.add(toState);
                                 continue;
+                            }
                         }
                     }
                     // if we are not in a sink, we find the successor state
@@ -114,11 +117,11 @@ public class BooleanTCQEngine extends AbstractBooleanQueryEngine<TemporalConjunc
                                     {
                                         newStates.add(edge.getToState());
                                         edgeSat = true;
-                                        _logger.info("\t\t\tCNCQ is satisfied!");
+                                        _logger.info("\t\t\tCNCQ is satisfiable!");
                                         break;
                                     }
                                     else
-                                        _logger.info("\t\t\tCNCQ unsatisfied!");
+                                        _logger.info("\t\t\tCNCQ unsatisfiable!");
                                 }
                                 else
                                 {
@@ -139,12 +142,16 @@ public class BooleanTCQEngine extends AbstractBooleanQueryEngine<TemporalConjunc
                 states = new HashSet<>(newStates);
                 numLetter++;
             }
-            // it suffices if one of the reached states is accepting
-            boolean isAccepting = false;
+            states.addAll(eventuallyReachableStates);
+            // it suffices if one of the reached states is accepting (or we were trapped in an accepting sink)
+            boolean isAccepting = trappedInAcceptingSink;
             for (int state : states)
                 isAccepting |= dfa.isAccepting(state);
-            _logger.info("ABoxes completely iterated, end state are " + states + " which are " +
-                    (isAccepting ? "accepting" : "not accepting"));
+            if (!trappedInAcceptingSink)
+                _logger.info("ABoxes completely iterated, end states are " + states + " which are " +
+                        (isAccepting ? "accepting" : "not accepting"));
+            else
+                _logger.info("DFA accepts the ABoxes due to being trapped in an accepting sink");
             _logger.info("Checked a total of " + cncqTimer.getCount() + " CNCQ queries, which took " +
                     cncqTimer.getTotal() + " ms");
             return isAccepting;
