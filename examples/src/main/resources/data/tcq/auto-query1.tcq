@@ -1,1 +1,8 @@
-(G((http://purl.org/auto/l4_core#Pedestrian(http://purl.org/auto/l4_de#veh0)) & X(http://purl.org/auto/l4_core#Vehicle(http://purl.org/auto/l4_de#veh2))))
+G(
+    (http://purl.org/auto/l4_core#Traffic_Object(http://purl.org/auto/l4_de#passenger_car1))
+    |
+    X
+        (http://purl.org/auto/l4_core#Traffic_Object(http://purl.org/auto/l4_de#passenger_car3))
+)
+&
+G(http://purl.org/auto/physics#is_left_of(http://purl.org/auto/l4_de#passenger_car2, x) ^ http://purl.org/auto/l4_de#Bicycle(x))
