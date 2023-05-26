@@ -32,7 +32,7 @@ public class MLTL2DFA
         child.waitFor();
         error = IOUtils.toString(child.getErrorStream());
         if (error.length() > 0)
-            throw new RuntimeException("Lydia error: " + error);
+            throw new RuntimeException("Lydia error: " + error.replaceAll("[\r\n]", " "));
 
         tmpFile += ".dot";
         FileInputStream fis = new FileInputStream(tmpFile);

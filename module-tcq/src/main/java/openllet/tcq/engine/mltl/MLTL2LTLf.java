@@ -16,7 +16,14 @@ public class MLTL2LTLf
         error = IOUtils.toString(child.getErrorStream());
 
         if (error.length() > 0)
-            throw new RuntimeException("Lydia error: " + error);
+        {
+            String errorMessage = error.replace("[\n\r]", " ");
+            if (error.contains("lark.exceptions.Unexpected"))
+                errorMessage = "Unexpected input during parsing of " + mltlFormula + "\n" + errorMessage;
+            else
+                errorMessage = "Other error - " + errorMessage;
+            throw new RuntimeException("MLTL2LTL error: " + errorMessage);
+        }
 
         return ltlfFormula;
     }
