@@ -1,13 +1,10 @@
 package openllet.query.sparqldl.engine;
 
-import openllet.core.KnowledgeBase;
 import openllet.core.boxes.abox.ABox;
 import openllet.core.utils.Timer;
 import openllet.query.sparqldl.model.Query;
-import openllet.query.sparqldl.model.cncq.CNCQQuery;
 import openllet.query.sparqldl.model.results.QueryResult;
 import openllet.query.sparqldl.model.results.QueryResultImpl;
-import openllet.query.sparqldl.model.results.ResultBindingImpl;
 import openllet.shared.tools.Log;
 
 import java.util.logging.Level;
@@ -20,6 +17,7 @@ public abstract class AbstractQueryEngine<QueryType extends Query<QueryType>> im
     protected AbstractBooleanQueryEngine<QueryType> _booleanEngine;
 
     protected ABox _abox = null;
+    protected Timer _timer = null;
 
     /**
      * Sets the Boolean engine to be internally used for checking Boolean queries after binding.
@@ -34,7 +32,17 @@ public abstract class AbstractQueryEngine<QueryType extends Query<QueryType>> im
     @Override
     public boolean supports(QueryType q)
     {
-        return !q.hasCycle();
+        return !q.hasCycle() && q.hasOnlyClassesOrPropertiesInKB();
+    }
+
+    @Override
+    public QueryResult exec(QueryType q, ABox abox, Timer timer)
+    {
+        _timer = timer;
+        timer.start();
+        QueryResult result = exec(q, abox);
+        timer.stop();
+        return result;
     }
 
     @Override
@@ -51,7 +59,8 @@ public abstract class AbstractQueryEngine<QueryType extends Query<QueryType>> im
             _abox = q.getKB().getABox();
 
         // Implements some organizational features (logging, timing, etc.) around the actual Boolean query engines
-        assert(supports(q));
+        if (!supports(q))
+            throw new UnsupportedOperationException("Unsupported query " + q);
 
         if (_logger.isLoggable(Level.FINER))
             _logger.finer("Exec Boolean ABox query: " + q);
@@ -59,15 +68,15 @@ public abstract class AbstractQueryEngine<QueryType extends Query<QueryType>> im
         final long satCount = _abox.getStats()._satisfiabilityCount;
         final long consCount = _abox.getStats()._consistencyCount;
 
-        final Timer timer = new Timer("CNCQueryEngine");
+        final Timer timer = new Timer();
         timer.start();
         QueryResult results = new QueryResultImpl(q);
         // We can only check the query if it is non-empty and the KB is consistent
         _logger.finest("Starting prerequisite consistency check.");
-        boolean kbConsistent = q.getKB().isConsistent();
-        if (!q.isEmpty() && kbConsistent)
+        q.getKB().ensureConsistency();
+        _logger.finest("Consistency check passed; starting query engine.");
+        if (!q.isEmpty())
         {
-            _logger.finest("Consistency check passed; starting query engine.");
             // Use the Boolean engine if we can
             if (q.getResultVars().isEmpty() && _booleanEngine != null)
                 results = _booleanEngine.exec(q, _abox);

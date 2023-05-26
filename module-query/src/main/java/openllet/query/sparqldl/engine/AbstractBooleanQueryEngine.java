@@ -1,10 +1,8 @@
 package openllet.query.sparqldl.engine;
 
-import openllet.core.KnowledgeBase;
 import openllet.core.boxes.abox.ABox;
 import openllet.core.utils.Timer;
 import openllet.query.sparqldl.model.Query;
-import openllet.query.sparqldl.model.cncq.CNCQQuery;
 import openllet.query.sparqldl.model.results.QueryResult;
 import openllet.query.sparqldl.model.results.QueryResultImpl;
 import openllet.query.sparqldl.model.results.ResultBindingImpl;
@@ -18,11 +16,22 @@ public abstract class AbstractBooleanQueryEngine<QueryType extends Query<QueryTy
     public static final Logger _logger = Log.getLogger(AbstractBooleanQueryEngine.class);
 
     protected ABox _abox = null;
+    protected Timer _timer = null;
 
     @Override
     public boolean supports(QueryType q)
     {
-        return !q.hasCycle() && q.getDistVars().isEmpty();
+        return !q.hasCycle() && q.hasOnlyClassesOrPropertiesInKB() && q.getDistVars().isEmpty();
+    }
+
+    @Override
+    public QueryResult exec(QueryType q, ABox abox, Timer timer)
+    {
+        _timer = timer;
+        _timer.start();
+        QueryResult result = exec(q, abox);
+        _timer.stop();
+        return result;
     }
 
     @Override
@@ -39,7 +48,8 @@ public abstract class AbstractBooleanQueryEngine<QueryType extends Query<QueryTy
             _abox = q.getKB().getABox();
 
         // Implements some organizational features (logging, timing, etc.) around the actual Boolean CNC query engines
-        assert(supports(q));
+        if (!supports(q))
+            throw new UnsupportedOperationException("Unsupported query " + q);
 
         if (_logger.isLoggable(Level.FINER))
             _logger.finer("Exec Boolean ABox query: " + q);
@@ -47,10 +57,13 @@ public abstract class AbstractBooleanQueryEngine<QueryType extends Query<QueryTy
         final long satCount = _abox.getStats()._satisfiabilityCount;
         final long consCount = _abox.getStats()._consistencyCount;
 
-        final Timer timer = new Timer("BooleanCNCQueryEngine");
+        final Timer timer = new Timer();
         timer.start();
+        _logger.finest("Starting prerequisite consistency check.");
+        q.getKB().ensureConsistency();
+        _logger.finest("Consistency check passed; starting query engine.");
         boolean isEntailed = true;
-        if (!q.isEmpty()) // No need to check empty queries - they are trivially entailed
+        if (!q.isEmpty())
             isEntailed = execBooleanABoxQuery(q);
         QueryResult results = new QueryResultImpl(q);
         if (isEntailed)

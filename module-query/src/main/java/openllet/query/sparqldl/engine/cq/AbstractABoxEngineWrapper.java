@@ -18,6 +18,7 @@ import openllet.aterm.ATermAppl;
 import openllet.core.KnowledgeBase;
 import openllet.core.boxes.abox.ABox;
 import openllet.core.utils.ATermUtils;
+import openllet.core.utils.Timer;
 import openllet.query.sparqldl.engine.QueryExec;
 import openllet.query.sparqldl.model.Query;
 import openllet.query.sparqldl.model.results.QueryResult;
@@ -53,6 +54,15 @@ public abstract class AbstractABoxEngineWrapper implements QueryExec<Conjunctive
 	protected ConjunctiveQuery schemaQuery;
 
 	protected ConjunctiveQuery aboxQuery;
+
+	@Override
+	public QueryResult exec(ConjunctiveQuery q, ABox abox, Timer timer)
+	{
+		timer.start();
+		QueryResult result = exec(q, abox);
+		timer.stop();
+		return result;
+	}
 
 	@Override
 	public QueryResult exec(ConjunctiveQuery q, ABox abox)

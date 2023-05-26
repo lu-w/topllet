@@ -35,6 +35,7 @@ import openllet.core.exceptions.InternalReasonerException;
 import openllet.core.utils.ATermUtils;
 import openllet.core.utils.Bool;
 import openllet.core.utils.SetUtils;
+import openllet.core.utils.Timer;
 import openllet.query.sparqldl.engine.QueryExec;
 import openllet.query.sparqldl.model.results.MultiQueryResults;
 import openllet.query.sparqldl.model.cq.NotKnownQueryAtom;
@@ -92,6 +93,15 @@ public class QueryEngine implements QueryExec<ConjunctiveQuery>
 	public QueryResult exec(ConjunctiveQuery q, ABox abox)
 	{
 		return exec(q);
+	}
+
+	@Override
+	public QueryResult exec(ConjunctiveQuery q, ABox abox, Timer timer)
+	{
+		timer.start();
+		QueryResult result = exec(q, abox);
+		timer.stop();
+		return result;
 	}
 
 	public static QueryResult execQuery(final ConjunctiveQuery query, final KnowledgeBase kb)
