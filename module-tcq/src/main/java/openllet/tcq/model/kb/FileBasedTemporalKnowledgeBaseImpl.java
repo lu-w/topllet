@@ -78,6 +78,10 @@ public class TemporalKnowledgeBaseImpl implements TemporalKnowledgeBase
                 throw new RuntimeException(e);
             }
         }
+        else if (!hasNext())
+        {
+            _curKB = null;
+        }
         _firstCalled = false;
         return _curKB;
     }

@@ -21,6 +21,8 @@ import openllet.query.sparqldl.model.Query.VarType;
 import openllet.query.sparqldl.model.cq.ConjunctiveQuery;
 import openllet.query.sparqldl.model.cq.QueryAtom;
 import openllet.query.sparqldl.model.cq.ConjunctiveQueryImpl;
+import openllet.tcq.engine.TCQEngine;
+import openllet.tcq.model.query.TemporalConjunctiveQuery;
 import openllet.test.AbstractKBTests;
 import org.junit.Assert;
 
@@ -222,6 +224,8 @@ public abstract class AbstractQueryTest extends AbstractKBTests
 			result = new UnionQueryEngineSimple(UnionQueryEngineSimple.BindingTime.AFTER_CNF).exec((UnionQuery) query);
 		else if (query instanceof CNCQQuery)
 			result = new CNCQQueryEngineSimple().exec((CNCQQuery) query);
+		else if (query instanceof TemporalConjunctiveQuery)
+			result = new TCQEngine().exec((TemporalConjunctiveQuery) query);
 		else
 			fail("Unknown query type " + query.getClass());
 		if (result == null)
