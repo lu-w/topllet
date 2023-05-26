@@ -335,4 +335,18 @@ public abstract class AbstractAtomQuery<QueryType extends AtomQuery<QueryType>> 
         }
         return sb.toString();
     }
+
+    public boolean hasOnlyClassesOrPropertiesInKB()
+    {
+        boolean hasOnlyClassesOrRolesInKB = true;
+        for (QueryAtom atom : getAtoms())
+        {
+            switch (atom.getPredicate())
+            {
+                case Type -> hasOnlyClassesOrRolesInKB &= _kb.isClass(atom.getArguments().get(1));
+                case PropertyValue -> hasOnlyClassesOrRolesInKB &= _kb.isProperty(atom.getArguments().get(1));
+            }
+        }
+        return hasOnlyClassesOrRolesInKB;
+    }
 }

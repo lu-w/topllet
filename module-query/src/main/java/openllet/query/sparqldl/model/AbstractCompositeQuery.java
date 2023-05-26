@@ -4,9 +4,6 @@ import openllet.aterm.ATermAppl;
 import openllet.core.KnowledgeBase;
 import openllet.core.utils.ATermUtils;
 import openllet.query.sparqldl.model.results.ResultBinding;
-import openllet.query.sparqldl.model.ucq.CNFQuery;
-import openllet.query.sparqldl.model.ucq.CNFQueryImpl;
-import openllet.query.sparqldl.model.ucq.DisjunctiveQuery;
 
 import java.util.*;
 
@@ -158,5 +155,16 @@ abstract public class AbstractCompositeQuery<SubQueryType extends Query<SubQuery
         if (multiLine)
             sb.append("\n");
         return sb.toString();
+    }
+
+    @Override
+    public boolean hasOnlyClassesOrPropertiesInKB()
+    {
+        boolean hasOnlyClassesOrRolesInKB = true;
+        for (SubQueryType query : _queries)
+        {
+            hasOnlyClassesOrRolesInKB &= query.hasOnlyClassesOrPropertiesInKB();
+        }
+        return hasOnlyClassesOrRolesInKB;
     }
 }

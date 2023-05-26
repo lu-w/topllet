@@ -191,18 +191,22 @@ public interface Query<QueryType extends Query<QueryType>>
     QueryType reorder(int[] queries);
 
     /**
-     * Checks if one of the disjuncts contains a cycle in its query graph. Note that this function only looks for
+     * Checks if one of the query parts contains a cycle in its query graph. Note that this function only looks for
      * cycles in property atoms. It ignores other kind of atom types (e.g. same as).
-     * @return True iff one of the disjuncts contains a cycle
+     * @return True iff one of the query parts contains a cycle
      */
     boolean hasCycle();
+
+    /**
+     * @return True iff the query contains an atom with a class or property not in its knowledge base.
+     */
+    boolean hasOnlyClassesOrPropertiesInKB();
 
     /**
      * Splits the query into disjoint parts.
      * @return A list of disjoint queries
      */
     List<QueryType> split();
-
 
     /**
      * Creates a new query of the given type - to be implemented by any concrete class.
