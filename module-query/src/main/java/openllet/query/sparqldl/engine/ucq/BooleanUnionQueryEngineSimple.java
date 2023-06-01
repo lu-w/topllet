@@ -46,20 +46,23 @@ public class BooleanUnionQueryEngineSimple extends AbstractBooleanUnionQueryEngi
         q.getKB().ensureConsistency();
 
         // 2. TRY TO USE STANDARD CQ ENGINE
-        boolean allConjunctsSizeOne = true;
-        for (DisjunctiveQuery subQuery : q.getQueries())
-            if (subQuery.getAtoms().size() > 1)
-            {
-                allConjunctsSizeOne = false;
-                break;
-            }
-        if (allConjunctsSizeOne)
+        if (OpenlletOptions.UCQ_ENGINE_USE_STANDARD_CQ_ENGINE_IF_POSSIBLE)
         {
-            ConjunctiveQuery cq = new ConjunctiveQueryImpl(q.getKB(), q.isDistinct());
+            boolean allConjunctsSizeOne = true;
             for (DisjunctiveQuery subQuery : q.getQueries())
-                if (subQuery.getAtoms().size() == 1)
-                    cq.add(subQuery.getAtoms().get(0));
-            return !new CombinedQueryEngine().exec(cq).isEmpty();
+                if (subQuery.getAtoms().size() > 1)
+                {
+                    allConjunctsSizeOne = false;
+                    break;
+                }
+            if (allConjunctsSizeOne)
+            {
+                ConjunctiveQuery cq = new ConjunctiveQueryImpl(q.getKB(), q.isDistinct());
+                for (DisjunctiveQuery subQuery : q.getQueries())
+                    if (subQuery.getAtoms().size() == 1)
+                        cq.add(subQuery.getAtoms().get(0));
+                return !(new CombinedQueryEngine().exec(cq).isEmpty());
+            }
         }
 
         // 3. CHECK ENTAILMENT FOR EACH CONJUNCT
@@ -73,8 +76,8 @@ public class BooleanUnionQueryEngineSimple extends AbstractBooleanUnionQueryEngi
         q.getKB().ensureConsistency();
 
         // 2. TRY TO USE STANDARD CQ ENGINE
-        if (q.getQueries().size() == 1)
-            return !new CombinedQueryEngine().exec(q.getQueries().get(0)).isEmpty();
+        if (OpenlletOptions.UCQ_ENGINE_USE_STANDARD_CQ_ENGINE_IF_POSSIBLE && q.getQueries().size() == 1)
+            return execUnderapproximatingSemanticsBoolean(q);
 
         // 3. TRY UNDER-APPROXIMATING SEMANTICS
         if (OpenlletOptions.UCQ_ENGINE_USE_UNDERAPPROXIMATING_SEMANTICS)
