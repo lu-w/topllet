@@ -12,11 +12,18 @@ public class MLTL2LTLf
         String command = "mltl2ltl";
         String error = "";
 
-        Process child = Runtime.getRuntime().exec(new String[]{command, mltlFormula});
-        child.waitFor();
-        ltlfFormula = IOUtils.toString(child.getInputStream());
-        error = IOUtils.toString(child.getErrorStream());
-
+        try
+        {
+            Process child = Runtime.getRuntime().exec(new String[]{command, mltlFormula});
+            child.waitFor();
+            ltlfFormula = IOUtils.toString(child.getInputStream());
+            error = IOUtils.toString(child.getErrorStream());
+        }
+        catch (IOException e)
+        {
+            throw new IOException("Can not execute " + command + " - is the '" + command +
+                    "' executable in your PATH?");
+        }
         if (error.length() > 0)
         {
             String errorMessage = error.replace("[\n\r]", " ");

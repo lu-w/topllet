@@ -1,7 +1,6 @@
 package openllet.query.sparqldl.engine.ucq;
 
 import openllet.core.utils.Bool;
-import openllet.query.sparqldl.engine.AbstractQueryEngine;
 import openllet.query.sparqldl.engine.QueryBindingCandidateGenerator;
 import openllet.query.sparqldl.engine.QueryCandidateGeneratorNaive;
 import openllet.query.sparqldl.engine.cq.CombinedQueryEngine;

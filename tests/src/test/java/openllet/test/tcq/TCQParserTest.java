@@ -1,12 +1,14 @@
 package openllet.test.tcq;
 
 import openllet.tcq.model.query.TemporalConjunctiveQuery;
+import openllet.tcq.parser.ParseException;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.util.Set;
 
 import static openllet.test.tcq.QueryUtilities.*;
+import static org.junit.Assert.assertThrows;
 
 public class TCQParserTest extends AbstractTCQTest
 {
@@ -90,5 +92,10 @@ public class TCQParserTest extends AbstractTCQTest
         testCQ(q.getQueries().get(1), atoms(x, _r, y));
         testCQ(q.getQueries().get(2), atoms(z, _C));
         testVars(q, Set.of(x), Set.of(y, z));
+    }
+    @Test
+    public void testIllegalMetricsToken()
+    {
+        assertThrows(ParseException.class, () -> uncheckedTemporalQuery("G_>=2 (C(a))"));
     }
 }

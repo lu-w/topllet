@@ -29,9 +29,17 @@ public class MLTL2DFA
         String command = "lydia";
         String error = "";
         String[] commandString = new String[]{command, "-l", "ltlf", "-i", ltlfFormula, "-p", "-g", tmpFile};
-        Process child = Runtime.getRuntime().exec(commandString);
-        child.waitFor();
-        error = IOUtils.toString(child.getErrorStream());
+        try
+        {
+            Process child = Runtime.getRuntime().exec(commandString);
+            child.waitFor();
+            error = IOUtils.toString(child.getErrorStream());
+        }
+        catch (IOException e)
+        {
+            throw new IOException("Can not execute " + command + " - is the '" + command +
+                    "' executable in your PATH?");
+        }
         if (error.length() > 0)
             throw new ParseException("Lydia error: " + error.replaceAll("[\r\n]", " "));
 

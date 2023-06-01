@@ -102,7 +102,7 @@ public class ConjunctiveQueryParser
     static private void ensureValidRole(ATermAppl role, ConjunctiveQuery cq) throws ParseException
     {
         if (!cq.getKB().getProperties().contains(role))
-            throw new ParseException("Class " + role + " not in knowledge base");
+            throw new ParseException("Role " + role + " not in knowledge base");
     }
 
     static private void ensureValidURI(String... uris) throws ParseException

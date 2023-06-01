@@ -20,8 +20,6 @@ public class TemporalConjunctiveQueryParser
 
     static public TemporalConjunctiveQuery parse(String input, TemporalKnowledgeBase kb) throws ParseException
     {
-        _logger.info("Building propositional abstraction...");
-
         String tcq = input.replaceAll("(\r\n|\r|\n)[\t ]*", "");
         TemporalConjunctiveQuery parsedTcq = new TemporalConjunctiveQueryImpl(tcq, kb, false);
         final PropositionFactory propositionFactory = new PropositionFactory();
@@ -88,6 +86,7 @@ public class TemporalConjunctiveQueryParser
             Proposition qProp = propositionFactory.create(q);
             parsedTcq.addConjunctiveQuery(qProp, q, cqString);
         }
+
         _logger.info("Propositional abstraction is " + parsedTcq.getPropositionalAbstraction());
 
         return parsedTcq;

@@ -3,6 +3,8 @@ package openllet.query.sparqldl.engine.cncq;
 import openllet.aterm.ATermAppl;
 import openllet.core.boxes.abox.ABox;
 import openllet.core.boxes.abox.ABoxChanges;
+import openllet.query.sparqldl.engine.QueryBindingCandidateGenerator;
+import openllet.query.sparqldl.engine.QueryCandidateGeneratorNaive;
 import openllet.query.sparqldl.engine.ucq.UnionQueryEngineSimple;
 import openllet.query.sparqldl.model.AtomQuery;
 import openllet.query.sparqldl.model.cncq.CNCQQuery;
@@ -10,6 +12,7 @@ import openllet.query.sparqldl.model.cq.ConjunctiveQuery;
 import openllet.query.sparqldl.model.cq.QueryAtom;
 import openllet.query.sparqldl.model.results.QueryResult;
 import openllet.query.sparqldl.model.results.QueryResultImpl;
+import openllet.query.sparqldl.model.results.ResultBinding;
 import openllet.query.sparqldl.model.results.ResultBindingImpl;
 import openllet.query.sparqldl.model.ucq.UnionQuery;
 import openllet.query.sparqldl.model.ucq.UnionQueryImpl;
@@ -131,7 +134,11 @@ public class SemiBooleanCNCQEngineSimple extends AbstractSemiBooleanCNCQEngine
                 positiveQuery.setNegation(false);
                 ucq.addQuery(positiveQuery);
             }
-            res = _ucqEngine.exec(ucq, _abox);
+            // If UCQ is empty, we only need to check satisfiability of negated parts wrt. the KB. Therefore,
+            // we have to assume that all possible bindings are satisfiable (which is later done by inverting the empty
+            // results binding).
+            if (!ucq.isEmpty())
+                res = _ucqEngine.exec(ucq, _abox);
         }
         // If ABox is inconsistent, the query is not satisfiable (thus the UCQ is trivially entailed)
         else

@@ -45,7 +45,7 @@ public class InMemoryTemporalKnowledgeBaseImpl implements TemporalKnowledgeBase
     @Override
     public boolean hasNext()
     {
-        return _curKBIndex < _kbs.size() - 1;
+        return _curKBIndex < _kbs.size();
     }
 
     @Override

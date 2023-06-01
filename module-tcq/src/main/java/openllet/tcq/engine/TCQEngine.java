@@ -18,17 +18,20 @@ public class TCQEngine extends AbstractQueryEngine<TemporalConjunctiveQuery>
 
     private final QueryExec<CNCQQuery> _cncqQueryEngine = new CNCQQueryEngineSimple();
 
-    public TCQEngine() {
+    public TCQEngine()
+    {
         this._booleanEngine = new BooleanTCQEngine();
-        super._booleanEngine = this._booleanEngine;
     }
 
     @Override
     protected QueryResult execABoxQuery(TemporalConjunctiveQuery q)
     {
-        // general idea:
-        // let CNCQ engine generate a first set of candidates for state 0, then keep track of those and call from then
-        // on only the Boolean cncq engine. keep track -> attach sets of individuals to each current state
-        return null;
+        if (q.getResultVars().isEmpty())
+            return _booleanEngine.exec(q);
+        else
+            // general idea:
+            // let CNCQ engine generate a first set of candidates for state 0, then keep track of those and call from then
+            // on only the Boolean cncq engine. keep track -> attach sets of individuals to each current state
+            return null;
     }
 }

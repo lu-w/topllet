@@ -1,13 +1,17 @@
 package openllet.test.tcq;
 
 import openllet.aterm.ATermAppl;
+import openllet.core.KnowledgeBase;
+import openllet.query.sparqldl.engine.QueryExec;
 import openllet.query.sparqldl.model.cq.ConjunctiveQuery;
 import openllet.query.sparqldl.model.cq.QueryAtom;
+import openllet.tcq.engine.BooleanTCQEngine;
 import openllet.tcq.model.query.PropositionFactory;
 import openllet.tcq.model.query.TemporalConjunctiveQuery;
 
 import java.util.Set;
 
+import static openllet.core.utils.TermFactory.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 

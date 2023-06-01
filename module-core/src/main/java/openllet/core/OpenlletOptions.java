@@ -428,6 +428,43 @@ public class OpenlletOptions
 
 	public static boolean USE_THREADED_KERNEL = false;
 
+	/*
+	 * Start options for openllet temporal-query
+	 */
+
+	/**
+	 * At which point in time variables are bound when calling the non-Boolean UCQ engine, i.e. before or after creating
+	 * the CNF.
+	 */
+	public static boolean UCQ_ENGINE_BINDING_BEFORE_CNF = true;
+
+	/**
+	 * The UCQ engine can check whether all the disjuncts are entailed separately. If this is the case, it can return
+	 * true directly, otherwise it has to run the expensive full semantics check.
+	 */
+	public static boolean UCQ_ENGINE_USE_UNDERAPPROXIMATING_SEMANTICS = true;
+
+	/**
+	 * The CNCQ Engine can either put all atoms of the positive queries into the ABox, or it can roll them up before it
+	 * does so.
+	 */
+	public static boolean CNCQ_ENGINE_ROLL_UP_POSITIVE_PART_BEFORE_CHECKING = false;
+
+	/**
+	 * Whether the CNCQ Engine caches results for a given ABox and CNCQ.
+	 * TODO: implement
+	 */
+	public static boolean CNCQ_ENGINE_USE_CACHING = true;
+
+	/**
+	 * When checking a CNCQ with no negated queries for satisfiability, the CNCQ engine can call the standard CQ engine
+	 * first. If the CQ is entailed, then the CNCQ is satisfiable as well.
+	 * TODO: implement
+	 */
+	public static boolean CNCQ_ENGINE_USE_CQ_ENTAILMENT_AS_SUFFICIENT_CONDITION = false;
+
+
+
 	static
 	{
 		final String configFile = System.getProperty("openllet.configuration");
