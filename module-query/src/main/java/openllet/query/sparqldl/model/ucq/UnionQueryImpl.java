@@ -106,20 +106,22 @@ public class UnionQueryImpl extends AbstractCompositeQuery<ConjunctiveQuery, Uni
             for (VarType varType : query.getDistVarsWithVarType().keySet())
                 for (ATermAppl var : query.getDistVarsForType(varType))
                     subQuery.addDistVar(var, varType);
-            List<DisjunctiveQuery> cnf = toCNFRec(subQuery);
+            List<DisjunctiveQuery> cnf = new ArrayList<>();
             // Create (x v c) for all atoms x and conjuncts c
-            for (QueryAtom atom : query.getQueries().get(0).getAtoms())
+            for (DisjunctiveQuery conjunct : toCNFRec(subQuery))
             {
-                for (DisjunctiveQuery conjunct : cnf)
+                for (QueryAtom atom : query.getQueries().get(0).getAtoms())
                 {
-                    conjunct.add(new QueryAtomImpl(atom.getPredicate(), atom.getArguments()));
+                    DisjunctiveQuery conjunctCopy = conjunct.copy();
+                    conjunctCopy.add(new QueryAtomImpl(atom.getPredicate(), atom.getArguments()));
                     for (VarType varType : query.getDistVarsWithVarType().keySet())
                         for (ATermAppl var : query.getDistVarsForType(varType))
                             if (atom.getArguments().contains(var))
-                                conjunct.addDistVar(var, varType);
+                                conjunctCopy.addDistVar(var, varType);
                     for (ATermAppl var : query.getResultVars())
                         if (atom.getArguments().contains(var))
-                            conjunct.addResultVar(var);
+                            conjunctCopy.addResultVar(var);
+                    cnf.add(conjunctCopy);
                 }
             }
             return cnf;

@@ -32,9 +32,6 @@ public class CNCQQueryEngineSimple extends AbstractCNCQQueryEngine
     {
         QueryResult result = new QueryResultImpl(q);
 
-        // TODO Lukas: If there are 0 negated subqueries in q, we could maybe check for entailment
-        //  if q is entailed, then it is satisfiable. But this expensive check would need to be empirically justified.
-
         // FETCH AND APPLY BINDINGS TO POSITIVE PARTS
         List<ATermAppl> vars = new ArrayList<>(q.getPositiveResultVars());
         List<ATermAppl> inds = q.getKB().getIndividuals().stream().toList();

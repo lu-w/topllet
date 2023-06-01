@@ -7,11 +7,6 @@ import java.util.Iterator;
 
 public interface TemporalKnowledgeBase extends Iterator<KnowledgeBase>
 {
-    enum LoadingMode
-    {
-        DEFAULT, INCREMENTAL;
-    }
-
     KnowledgeBase first();
 
     void add(KnowledgeBase kb);

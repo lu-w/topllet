@@ -451,19 +451,22 @@ public class OpenlletOptions
 	public static boolean CNCQ_ENGINE_ROLL_UP_POSITIVE_PART_BEFORE_CHECKING = false;
 
 	/**
+	 * When checking a CNCQ with no negated queries for satisfiability, the CNCQ engine can call the standard CQ engine
+	 * first. If the CQ is entailed, then the CNCQ is satisfiable as well.
+	 */
+	public static boolean CNCQ_ENGINE_USE_CQ_ENTAILMENT_AS_SUFFICIENT_CONDITION = true;
+
+	/**
 	 * Whether the CNCQ Engine caches results for a given ABox and CNCQ.
 	 * TODO: implement
 	 */
 	public static boolean CNCQ_ENGINE_USE_CACHING = true;
 
 	/**
-	 * When checking a CNCQ with no negated queries for satisfiability, the CNCQ engine can call the standard CQ engine
-	 * first. If the CQ is entailed, then the CNCQ is satisfiable as well.
-	 * TODO: implement
+	 * The TCQ Engine can update its current ABox on the fly by incrementally changing the DL axioms. This may increase
+	 * performance as the reasoner can re-use prior reasoning results.
 	 */
-	public static boolean CNCQ_ENGINE_USE_CQ_ENTAILMENT_AS_SUFFICIENT_CONDITION = false;
-
-
+	public static boolean TCQ_ENGINE_USE_INCREMENTAL_LOADING = true;
 
 	static
 	{

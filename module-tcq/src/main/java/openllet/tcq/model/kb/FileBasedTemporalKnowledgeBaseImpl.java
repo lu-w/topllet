@@ -1,6 +1,7 @@
 package openllet.tcq.model.kb;
 
 import openllet.core.KnowledgeBase;
+import openllet.core.OpenlletOptions;
 import openllet.core.utils.Timer;
 import openllet.core.utils.iterator.IteratorUtils;
 import openllet.shared.tools.Log;
@@ -22,36 +23,29 @@ public class FileBasedTemporalKnowledgeBaseImpl implements TemporalKnowledgeBase
 
     private int _curKBIndex = -1;
     private KnowledgeBase _curKB;
-    private KnowledgeBaseLoader _loader;
+    private final KnowledgeBaseLoader _loader;
     private final List<String> _files;
     private boolean _firstCalled = false;
-    private static final LoadingMode defaultLoadingMode = LoadingMode.INCREMENTAL;
 
     public FileBasedTemporalKnowledgeBaseImpl(Iterable<String> files)
     {
-        this(files, null, defaultLoadingMode);
+        this(files, null);
     }
 
     public FileBasedTemporalKnowledgeBaseImpl(Iterable<String> files, String catalogFile)
     {
-        this(files, catalogFile, defaultLoadingMode);
+        this(files, catalogFile, null);
     }
 
-    public FileBasedTemporalKnowledgeBaseImpl(Iterable<String> files, String catalogFile, LoadingMode loadingMode)
-    {
-        this(files, catalogFile, loadingMode, null);
-    }
-
-    public FileBasedTemporalKnowledgeBaseImpl(Iterable<String> files, String catalogFile, LoadingMode loadingMode, Timer timer)
+    public FileBasedTemporalKnowledgeBaseImpl(Iterable<String> files, String catalogFile, Timer timer)
     {
         _files = IteratorUtils.toList(files.iterator());
         // TODO we can cleverly decide which loader to use based on the number of CNCQs estimated and the size of the
         //  ABox... high # CNCQs & small ABox -> inc loader
-        switch (loadingMode)
-        {
-            case DEFAULT -> _loader = new KnowledgeBaseLoader(timer);
-            case INCREMENTAL -> _loader = new IncrementalKnowledgeBaseLoader(timer);
-        }
+        if (OpenlletOptions.TCQ_ENGINE_USE_INCREMENTAL_LOADING)
+            _loader = new IncrementalKnowledgeBaseLoader(timer);
+        else
+            _loader = new KnowledgeBaseLoader(timer);
         if (catalogFile != null)
             _loader.addCatalog(catalogFile);
     }

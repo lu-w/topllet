@@ -1,5 +1,6 @@
 package openllet.query.sparqldl.engine.ucq;
 
+import openllet.core.OpenlletOptions;
 import openllet.core.utils.Bool;
 import openllet.query.sparqldl.engine.QueryBindingCandidateGenerator;
 import openllet.query.sparqldl.engine.QueryCandidateGeneratorNaive;
@@ -29,6 +30,8 @@ public class UnionQueryEngineSimple extends AbstractUnionQueryEngine
     public UnionQueryEngineSimple() {
         this._booleanEngine = new BooleanUnionQueryEngineSimple();
         super._booleanEngine = this._booleanEngine;
+        if (!OpenlletOptions.UCQ_ENGINE_BINDING_BEFORE_CNF)
+            _bindingTime = BindingTime.AFTER_CNF;
     }
 
     public UnionQueryEngineSimple(BindingTime bindingTime)

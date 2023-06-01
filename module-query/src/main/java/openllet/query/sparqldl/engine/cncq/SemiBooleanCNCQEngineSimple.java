@@ -1,10 +1,9 @@
 package openllet.query.sparqldl.engine.cncq;
 
 import openllet.aterm.ATermAppl;
-import openllet.core.boxes.abox.ABox;
+import openllet.core.OpenlletOptions;
 import openllet.core.boxes.abox.ABoxChanges;
-import openllet.query.sparqldl.engine.QueryBindingCandidateGenerator;
-import openllet.query.sparqldl.engine.QueryCandidateGeneratorNaive;
+import openllet.query.sparqldl.engine.cq.CombinedQueryEngine;
 import openllet.query.sparqldl.engine.ucq.UnionQueryEngineSimple;
 import openllet.query.sparqldl.model.AtomQuery;
 import openllet.query.sparqldl.model.cncq.CNCQQuery;
@@ -23,7 +22,6 @@ import java.util.Map;
 public class SemiBooleanCNCQEngineSimple extends AbstractSemiBooleanCNCQEngine
 {
     private UnionQueryEngineSimple _ucqEngine = new UnionQueryEngineSimple();
-    private boolean _rollUpBeforeChecking = false;
     private Map<ATermAppl, ATermAppl> _queryVarsToFreshInds = new HashMap<>();
     private ABoxChanges _changes;
 
@@ -32,23 +30,10 @@ public class SemiBooleanCNCQEngineSimple extends AbstractSemiBooleanCNCQEngine
         super();
     }
 
-    public SemiBooleanCNCQEngineSimple(boolean rollUpBeforeChecking)
-    {
-        this();
-        _rollUpBeforeChecking = rollUpBeforeChecking;
-    }
-
     public SemiBooleanCNCQEngineSimple(UnionQueryEngineSimple ucqEngine)
     {
         this();
         _ucqEngine = ucqEngine;
-    }
-
-    public SemiBooleanCNCQEngineSimple(UnionQueryEngineSimple ucqEngine, boolean rollUpBeforeChecking)
-    {
-        this();
-        _ucqEngine = ucqEngine;
-        _rollUpBeforeChecking = rollUpBeforeChecking;
     }
 
     @Override
@@ -57,27 +42,39 @@ public class SemiBooleanCNCQEngineSimple extends AbstractSemiBooleanCNCQEngine
         QueryResult satResult = new QueryResultImpl(q);
 
         // 1. PRELIMINARY CONSISTENCY CHECK
-        if (q.getKB().isConsistent())
+        q.getKB().ensureConsistency();
+
+        // If there are 0 negated subqueries in q, we can check for entailment: if q is entailed, then it is satisfiable
+        if (OpenlletOptions.CNCQ_ENGINE_USE_CQ_ENTAILMENT_AS_SUFFICIENT_CONDITION && q.getNegativeQueries().size() == 0)
         {
-            _changes = new ABoxChanges(q.getKB().getABox());
-            _abox = _changes.getABox();
-
-            // 2. SEPARATE POSITIVE AND NEGATIVE PART & MERGE POSITIVE PART
-            ConjunctiveQuery positiveQuery = q.mergePositiveQueries();
-
-            // 2. SPLIT & ROLL-UP POSITIVE QUERIES (OPTIONAL)
-            if (_rollUpBeforeChecking)
-                positiveQuery = positiveQuery.splitAndRollUp(false);
-
-            // 3. PUT POSITIVE ATOMS IN A-BOX
-            putQueryAtomsInABox(positiveQuery);
-
-            // 4. CHECK FOR SATISFIABILITY
-            satResult = computeSatisfiableBindings(q);
-
-            // 5. CLEAN-UP & ROLLING-BACK CHANGES
-            cleanUp();
+            boolean isEntailed = true;
+            for (ConjunctiveQuery cq : q.getPositiveQueries())
+                isEntailed &= !(new CombinedQueryEngine().exec(cq).isEmpty());
+            if (isEntailed)
+            {
+                satResult.add(new ResultBindingImpl());
+                return satResult;
+            }
         }
+
+        _changes = new ABoxChanges(q.getKB().getABox());
+        _abox = _changes.getABox();
+
+        // 2. SEPARATE POSITIVE AND NEGATIVE PART & MERGE POSITIVE PART
+        ConjunctiveQuery positiveQuery = q.mergePositiveQueries();
+
+        // 2. SPLIT & ROLL-UP POSITIVE QUERIES (OPTIONAL)
+        if (OpenlletOptions.CNCQ_ENGINE_ROLL_UP_POSITIVE_PART_BEFORE_CHECKING)
+            positiveQuery = positiveQuery.splitAndRollUp(false);
+
+        // 3. PUT POSITIVE ATOMS IN A-BOX
+        putQueryAtomsInABox(positiveQuery);
+
+        // 4. CHECK FOR SATISFIABILITY
+        satResult = computeSatisfiableBindings(q);
+
+        // 5. CLEAN-UP & ROLLING-BACK CHANGES
+        cleanUp();
 
         return satResult;
     }

@@ -185,8 +185,7 @@ public class OpenlletTemporalQuery extends OpenlletCmdApp
             if (inputFiles.size() == 1)
                 // tries to parse from input files. if unsuccessful, the original input file is returned.
                 inputFiles = parseInputFilesFromFile(inputFiles.get(0));
-            kb = new FileBasedTemporalKnowledgeBaseImpl(inputFiles, catalogFile, TemporalKnowledgeBase.LoadingMode.DEFAULT,
-                    timer);
+            kb = new FileBasedTemporalKnowledgeBaseImpl(inputFiles, catalogFile, timer);
             try
             {
                 KnowledgeBase firstKb = kb.first();

@@ -3,11 +3,13 @@ package openllet.query.sparqldl.engine.ucq;
 import openllet.aterm.ATermAppl;
 import openllet.core.DependencySet;
 import openllet.core.KnowledgeBase;
+import openllet.core.OpenlletOptions;
 import openllet.core.boxes.abox.ABox;
 import openllet.core.boxes.rbox.Role;
 import openllet.core.utils.ATermUtils;
 import openllet.core.utils.Pair;
 import openllet.query.sparqldl.engine.AbstractBooleanQueryEngine;
+import openllet.query.sparqldl.engine.cq.CombinedQueryEngine;
 import openllet.query.sparqldl.engine.cq.QueryEngine;
 import openllet.query.sparqldl.model.Query;
 import openllet.query.sparqldl.model.cq.ConjunctiveQuery;
@@ -34,7 +36,6 @@ import static openllet.query.sparqldl.model.cq.QueryPredicate.*;
 public class BooleanUnionQueryEngineSimple extends AbstractBooleanUnionQueryEngine
 {
     public static final Logger _logger = Log.getLogger(BooleanUnionQueryEngineSimple.class);
-    private boolean useUnderapproximatingSemantics = false;
 
     @Override
     protected boolean execBooleanABoxQuery(CNFQuery q, ABox abox)
@@ -44,7 +45,24 @@ public class BooleanUnionQueryEngineSimple extends AbstractBooleanUnionQueryEngi
         // 1. PRELIMINARY CONSISTENCY CHECK
         q.getKB().ensureConsistency();
 
-        // 2. CHECK ENTAILMENT FOR EACH CONJUNCT
+        // 2. TRY TO USE STANDARD CQ ENGINE
+        boolean allConjunctsSizeOne = true;
+        for (DisjunctiveQuery subQuery : q.getQueries())
+            if (subQuery.getAtoms().size() > 1)
+            {
+                allConjunctsSizeOne = false;
+                break;
+            }
+        if (allConjunctsSizeOne)
+        {
+            ConjunctiveQuery cq = new ConjunctiveQueryImpl(q.getKB(), q.isDistinct());
+            for (DisjunctiveQuery subQuery : q.getQueries())
+                if (subQuery.getAtoms().size() == 1)
+                    cq.add(subQuery.getAtoms().get(0));
+            return !new CombinedQueryEngine().exec(cq).isEmpty();
+        }
+
+        // 3. CHECK ENTAILMENT FOR EACH CONJUNCT
         return isEntailed(q, q.getKB());
     }
 
@@ -54,8 +72,12 @@ public class BooleanUnionQueryEngineSimple extends AbstractBooleanUnionQueryEngi
         // 1. PRELIMINARY CONSISTENCY CHECK
         q.getKB().ensureConsistency();
 
-        // 2. TRY UNDER-APPROXIMATING SEMANTICS
-        if (useUnderapproximatingSemantics)
+        // 2. TRY TO USE STANDARD CQ ENGINE
+        if (q.getQueries().size() == 1)
+            return !new CombinedQueryEngine().exec(q.getQueries().get(0)).isEmpty();
+
+        // 3. TRY UNDER-APPROXIMATING SEMANTICS
+        if (OpenlletOptions.UCQ_ENGINE_USE_UNDERAPPROXIMATING_SEMANTICS)
         {
             boolean someDisjunctEntailed = execUnderapproximatingSemanticsBoolean(q);
             if (someDisjunctEntailed)
@@ -66,17 +88,17 @@ public class BooleanUnionQueryEngineSimple extends AbstractBooleanUnionQueryEngi
             }
         }
 
-        // 3. ROLL-UP UCQ
+        // 4. ROLL-UP UCQ
         UnionQuery rolledUpUnionQuery = q.rollUp();
         if (_logger.isLoggable(Level.FINER))
             _logger.finer("Rolled-up union query: " + rolledUpUnionQuery);
 
-        // 4. CONVERT TO CNF
+        // 5. CONVERT TO CNF
         CNFQuery cnfQuery = rolledUpUnionQuery.toCNF();
         if (_logger.isLoggable(Level.FINER))
             _logger.finer("Rolled-up union query in CNF is: " + cnfQuery);
 
-        // 5. CHECK ENTAILMENT FOR EACH CONJUNCT
+        // 6. CHECK ENTAILMENT FOR EACH CONJUNCT
         return isEntailed(cnfQuery, q.getKB());
     }
 
@@ -214,15 +236,5 @@ public class BooleanUnionQueryEngineSimple extends AbstractBooleanUnionQueryEngi
                 result.add(binding);
         }
         return result;
-    }
-
-    public boolean isUseUnderapproximatingSemantics()
-    {
-        return useUnderapproximatingSemantics;
-    }
-
-    public void setUseUnderapproximatingSemantics(boolean useUnderapproximatingSemantics)
-    {
-        this.useUnderapproximatingSemantics = useUnderapproximatingSemantics;
     }
 }

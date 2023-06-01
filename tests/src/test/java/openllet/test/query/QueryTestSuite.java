@@ -34,6 +34,10 @@ import openllet.sparqlowl.parser.test.ParserTest;
 		TestNaiveUnionQueries.class, //
 		TestMiscQueries.class, //
 		TestMiscSPARQL.class, //
+		TestCNCQueries.class, //
+		TestBooleanCNCQueries.class, //
+		TestUnionQueries.class, //
+		TestBooleanUnionQueries.class, //
 		SparqlDawgTestSuite.class, //
 		TestQuerySubsumption.class,//
 		UnionQueryTestSuite.class//

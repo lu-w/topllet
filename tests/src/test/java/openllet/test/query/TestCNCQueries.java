@@ -2,6 +2,7 @@ package openllet.test.query;
 
 import openllet.aterm.ATermAppl;
 import openllet.core.boxes.abox.ABox;
+import openllet.core.exceptions.InconsistentOntologyException;
 import openllet.query.sparqldl.model.cncq.CNCQQuery;
 import org.junit.Test;
 import static org.junit.Assert.*;
@@ -264,7 +265,7 @@ public class TestCNCQueries extends AbstractQueryTest
 
         CNCQQuery cncqq = cncqQuery(select(x), where(query(TypeAtom(x, _B))));
 
-        testQuery(cncqq);
+        assertThrows(InconsistentOntologyException.class, () -> testQuery(cncqq));
     }
 
     @Test
