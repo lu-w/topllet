@@ -436,13 +436,19 @@ public class OpenlletOptions
 	 * At which point in time variables are bound when calling the non-Boolean UCQ engine, i.e. before or after creating
 	 * the CNF.
 	 */
-	public static boolean UCQ_ENGINE_BINDING_BEFORE_CNF = true;
+	public static boolean UCQ_ENGINE_BINDING_BEFORE_CNF = false;
 
 	/**
 	 * The UCQ engine can check whether all the disjuncts are entailed separately. If this is the case, it can return
 	 * true directly, otherwise it has to run the expensive full semantics check.
 	 */
-	public static boolean UCQ_ENGINE_USE_UNDERAPPROXIMATING_SEMANTICS = true;
+	public static boolean UCQ_ENGINE_USE_UNDERAPPROXIMATING_SEMANTICS = false;
+
+	/**
+	 * The UCQ engine can check whether all the disjuncts are entailed separately. If this is the case, it can return
+	 * true directly, otherwise it has to run the expensive full semantics check.
+	 */
+	public static boolean UCQ_ENGINE_USE_STANDARD_CQ_ENGINE_IF_POSSIBLE = false;
 
 	/**
 	 * The CNCQ Engine can either put all atoms of the positive queries into the ABox, or it can roll them up before it
@@ -454,19 +460,21 @@ public class OpenlletOptions
 	 * When checking a CNCQ with no negated queries for satisfiability, the CNCQ engine can call the standard CQ engine
 	 * first. If the CQ is entailed, then the CNCQ is satisfiable as well.
 	 */
-	public static boolean CNCQ_ENGINE_USE_CQ_ENTAILMENT_AS_SUFFICIENT_CONDITION = true;
+	public static boolean CNCQ_ENGINE_USE_CQ_ENTAILMENT_AS_SUFFICIENT_CONDITION = false;
 
 	/**
 	 * Whether the CNCQ Engine caches results for a given ABox and CNCQ.
 	 * TODO: implement
+	 * TODO: maybe also implement caching on all other query engines? e.g. UCQ, Semi Boolean CNCQ etc.
+	 * in general check how many of the query-ABox combinations are re-checked in the test examples...
 	 */
-	public static boolean CNCQ_ENGINE_USE_CACHING = true;
+	public static boolean CNCQ_ENGINE_USE_CACHING = false;
 
 	/**
 	 * The TCQ Engine can update its current ABox on the fly by incrementally changing the DL axioms. This may increase
 	 * performance as the reasoner can re-use prior reasoning results.
 	 */
-	public static boolean TCQ_ENGINE_USE_INCREMENTAL_LOADING = true;
+	public static boolean TCQ_ENGINE_USE_INCREMENTAL_LOADING = false;
 
 	static
 	{
@@ -666,6 +674,20 @@ public class OpenlletOptions
 		PROCESS_JENA_UPDATES_INCREMENTALLY = getBooleanProperty(newOptions, "PROCESS_JENA_UPDATES_INCREMENTALLY", PROCESS_JENA_UPDATES_INCREMENTALLY, oldOptions);
 
 		IGNORE_ANNOTATION_CLASSES = getBooleanProperty(newOptions, "IGNORE_ANNOTATION_CLASSES", IGNORE_ANNOTATION_CLASSES, oldOptions);
+
+		UCQ_ENGINE_BINDING_BEFORE_CNF = getBooleanProperty(newOptions, "UCQ_ENGINE_BINDING_BEFORE_CNF", UCQ_ENGINE_BINDING_BEFORE_CNF, oldOptions);
+
+		UCQ_ENGINE_USE_UNDERAPPROXIMATING_SEMANTICS = getBooleanProperty(newOptions, "UCQ_ENGINE_USE_UNDERAPPROXIMATING_SEMANTICS", UCQ_ENGINE_USE_UNDERAPPROXIMATING_SEMANTICS, oldOptions);
+
+		UCQ_ENGINE_USE_STANDARD_CQ_ENGINE_IF_POSSIBLE = getBooleanProperty(newOptions, "UCQ_ENGINE_USE_STANDARD_CQ_ENGINE_IF_POSSIBLE", UCQ_ENGINE_USE_STANDARD_CQ_ENGINE_IF_POSSIBLE, oldOptions);
+
+		CNCQ_ENGINE_ROLL_UP_POSITIVE_PART_BEFORE_CHECKING = getBooleanProperty(newOptions, "CNCQ_ENGINE_ROLL_UP_POSITIVE_PART_BEFORE_CHECKING", CNCQ_ENGINE_ROLL_UP_POSITIVE_PART_BEFORE_CHECKING, oldOptions);
+
+		CNCQ_ENGINE_USE_CQ_ENTAILMENT_AS_SUFFICIENT_CONDITION = getBooleanProperty(newOptions, "CNCQ_ENGINE_USE_CQ_ENTAILMENT_AS_SUFFICIENT_CONDITION", CNCQ_ENGINE_USE_CQ_ENTAILMENT_AS_SUFFICIENT_CONDITION, oldOptions);
+
+		CNCQ_ENGINE_USE_CACHING = getBooleanProperty(newOptions, "CNCQ_ENGINE_USE_CACHING", CNCQ_ENGINE_USE_CACHING, oldOptions);
+
+		TCQ_ENGINE_USE_INCREMENTAL_LOADING = getBooleanProperty(newOptions, "TCQ_ENGINE_USE_INCREMENTAL_LOADING", TCQ_ENGINE_USE_INCREMENTAL_LOADING, oldOptions);
 
 		return oldOptions;
 	}
