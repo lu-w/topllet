@@ -128,6 +128,7 @@ public class SemiBooleanCNCQEngineSimple extends AbstractSemiBooleanCNCQEngine
             for (ConjunctiveQuery negQuery : query.getNegativeQueries())
             {
                 ConjunctiveQuery positiveQuery = negQuery.copy();
+                positiveQuery.setKB(ucq.getKB());
                 positiveQuery.setNegation(false);
                 ucq.addQuery(positiveQuery);
             }
