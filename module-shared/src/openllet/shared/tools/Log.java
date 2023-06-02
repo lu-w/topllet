@@ -94,7 +94,7 @@ public class Log implements Logging
 
 	public static Logger getLogger(final Class<?> type, final Level specificLevel)
 	{
-		return config(Logger.getLogger(type.getSimpleName()), specificLevel);
+		return config(Logger.getLogger(type.getName()), specificLevel);
 	}
 
 	public static org.slf4j.Logger logger(final String name)
@@ -104,7 +104,7 @@ public class Log implements Logging
 
 	public static org.slf4j.Logger logger(final Class<?> type)
 	{
-		return toSlf4j(config(Logger.getLogger(type.getSimpleName()), _defaultLevel));
+		return toSlf4j(config(Logger.getLogger(type.getName()), _defaultLevel));
 	}
 
 	public static org.slf4j.Logger logger(final String name, final Level specificLevel)
@@ -114,7 +114,7 @@ public class Log implements Logging
 
 	public static org.slf4j.Logger logger(final Class<?> type, final Level specificLevel)
 	{
-		return toSlf4j(config(Logger.getLogger(type.getSimpleName()), specificLevel));
+		return toSlf4j(config(Logger.getLogger(type.getName()), specificLevel));
 	}
 
 	public static void setLevel(final Logger logger, final Level level)
@@ -140,7 +140,7 @@ public class Log implements Logging
 
 	public static void setLevel(final Level level, final Class<?> type)
 	{
-		setLevel(level, type.getSimpleName());
+		setLevel(level, type.getName());
 	}
 
 	public static String error(final Logger logger, final String msg, final Function<String, Exception> pe) throws Exception

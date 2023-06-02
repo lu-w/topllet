@@ -24,7 +24,7 @@ public class TemporalConjunctiveQueryParser
     static public TemporalConjunctiveQuery parse(String input, TemporalKnowledgeBase kb) throws ParseException
     {
         // Removes comments (> and : are indicative of prefixes, which can use # without being a comment)
-        String tcq = (input + "\n").replaceAll("#[^>:]*(?=\\n)", "");
+        String tcq = (input + "\n").replaceAll("^#[^>:]*(?=\\n)", "");
 
         // Stores prefixes and removes them from string
         Map<String, String> prefixes = new HashMap<>();
