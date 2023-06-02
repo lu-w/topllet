@@ -61,6 +61,11 @@ public class OpenlletOptions
 	public final static Logger _logger = Log.getLogger(OpenlletOptions.class);
 
 	/**
+	 * An easier way to set Openllet's log level.
+	 */
+	public static LogLevel LOG_LEVEL = LogLevel.INFO;
+
+	/**
 	 * When this option is set completion will go on even if a clash is detected until the completion graph is saturated. Turning this option has very severe
 	 * performance effect and right now is only used for experimental purposes to generate explanations.
 	 * <p>
@@ -551,6 +556,11 @@ public class OpenlletOptions
 		}
 	}
 
+	public enum LogLevel
+	{
+		SEVERE, WARNING, INFO, CONFIG, FINE, FINER, FINEST
+	}
+
 	public enum InstanceRetrievalMethod
 	{
 		BINARY, TRACING_BASED
@@ -688,6 +698,8 @@ public class OpenlletOptions
 		CNCQ_ENGINE_USE_CACHING = getBooleanProperty(newOptions, "CNCQ_ENGINE_USE_CACHING", CNCQ_ENGINE_USE_CACHING, oldOptions);
 
 		TCQ_ENGINE_USE_INCREMENTAL_LOADING = getBooleanProperty(newOptions, "TCQ_ENGINE_USE_INCREMENTAL_LOADING", TCQ_ENGINE_USE_INCREMENTAL_LOADING, oldOptions);
+
+		LOG_LEVEL = getEnumProperty(newOptions, "LOG_LEVEL", LOG_LEVEL, oldOptions);
 
 		return oldOptions;
 	}

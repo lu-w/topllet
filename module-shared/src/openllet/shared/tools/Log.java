@@ -84,7 +84,7 @@ public class Log implements Logging
 
 	public static Logger getLogger(final Class<?> type)
 	{
-		return config(Logger.getLogger(type.getSimpleName()), _defaultLevel);
+		return config(Logger.getLogger(type.getName()), _defaultLevel);
 	}
 
 	public static Logger getLogger(final String name, final Level specificLevel)

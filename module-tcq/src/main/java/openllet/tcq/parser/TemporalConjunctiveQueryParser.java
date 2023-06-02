@@ -8,7 +8,10 @@ import openllet.tcq.model.query.PropositionFactory;
 import openllet.tcq.model.query.TemporalConjunctiveQuery;
 import openllet.tcq.model.query.TemporalConjunctiveQueryImpl;
 
+import java.util.*;
 import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class TemporalConjunctiveQueryParser
 {
@@ -20,7 +23,32 @@ public class TemporalConjunctiveQueryParser
 
     static public TemporalConjunctiveQuery parse(String input, TemporalKnowledgeBase kb) throws ParseException
     {
-        String tcq = input.replaceAll("(\r\n|\r|\n)[\t ]*", "");
+        // Removes comments (> and : are indicative of prefixes, which can use # without being a comment)
+        String tcq = (input + "\n").replaceAll("#[^>:]*(?=\\n)", "");
+
+        // Stores prefixes and removes them from string
+        Map<String, String> prefixes = new HashMap<>();
+        Scanner scanner = new Scanner(tcq);
+        while (scanner.hasNextLine()) {
+            String line = scanner.nextLine();
+            if (line.startsWith("PREFIX"))
+            {
+                Pattern pattern = Pattern.compile("^PREFIX *([^ ]*) *<([^ ]*)>$");
+                Matcher matcher = pattern.matcher(line);
+                if (matcher.find())
+                    prefixes.put(matcher.group(1), matcher.group(2));
+            }
+        }
+        scanner.close();
+        tcq = tcq.replaceAll("PREFIX.*(\r\n|\r|\n)", "");
+
+        // Resolves prefixes in remaining string
+        for (String prefix : prefixes.keySet())
+            tcq = tcq.replaceAll(prefix, prefixes.get(prefix));
+
+        // Removes irrelevant line breaks and tabs / whitespaces
+        tcq = tcq.replaceAll("(\r\n|\r|\n)[\t ]*", "").trim();
+
         TemporalConjunctiveQuery parsedTcq = new TemporalConjunctiveQueryImpl(tcq, kb, false);
         final PropositionFactory propositionFactory = new PropositionFactory();
 
