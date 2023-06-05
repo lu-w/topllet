@@ -16,8 +16,9 @@ import org.slf4j.Marker;
 public class Log implements Logging
 {
 	public static final Logger _parent = Logger.getLogger(Log.class.getName());
-	public static volatile Level _defaultLevel = Level.FINEST;
+	public static volatile Level _defaultLevel = Level.INFO;
 	public static volatile boolean _setDefaultParent = false;
+	private static boolean _setLevel = false;
 	public static final Handler _systemOutHandler = new Handler()
 	{
 		@Override
@@ -46,10 +47,14 @@ public class Log implements Logging
 
 	static
 	{
-		final String property = System.getProperty("java.util.logging.SimpleFormatter.format");
-		if (null == property)
-			System.setProperty("java.util.logging.SimpleFormatter.format", "%1$tF %1$tT %4$s %2$s %5$s%6$s%n");
-		_parent.setLevel(_defaultLevel);
+		if (System.getProperty("java.util.logging.config.file") == null)
+		{
+			final String property = System.getProperty("java.util.logging.SimpleFormatter.format");
+			if (null == property)
+				System.setProperty("java.util.logging.SimpleFormatter.format", "%1$tF %1$tT %4$s %2$s %5$s%6$s%n");
+			_parent.setLevel(_defaultLevel);
+			_setLevel = true;
+		}
 	}
 
 	@Override
@@ -73,7 +78,8 @@ public class Log implements Logging
 		if (_setDefaultParent)
 			logger.setParent(_parent);
 		_loggers.put(logger.getName(), logger);
-		logger.setLevel(level);
+		if (_setLevel && level != null)
+			logger.setLevel(level);
 		return logger;
 	}
 
@@ -94,7 +100,7 @@ public class Log implements Logging
 
 	public static Logger getLogger(final Class<?> type, final Level specificLevel)
 	{
-		return config(Logger.getLogger(type.getSimpleName()), specificLevel);
+		return config(Logger.getLogger(type.getName()), specificLevel);
 	}
 
 	public static org.slf4j.Logger logger(final String name)
@@ -104,7 +110,7 @@ public class Log implements Logging
 
 	public static org.slf4j.Logger logger(final Class<?> type)
 	{
-		return toSlf4j(config(Logger.getLogger(type.getSimpleName()), _defaultLevel));
+		return toSlf4j(config(Logger.getLogger(type.getName()), _defaultLevel));
 	}
 
 	public static org.slf4j.Logger logger(final String name, final Level specificLevel)
@@ -114,7 +120,7 @@ public class Log implements Logging
 
 	public static org.slf4j.Logger logger(final Class<?> type, final Level specificLevel)
 	{
-		return toSlf4j(config(Logger.getLogger(type.getSimpleName()), specificLevel));
+		return toSlf4j(config(Logger.getLogger(type.getName()), specificLevel));
 	}
 
 	public static void setLevel(final Logger logger, final Level level)
@@ -140,7 +146,7 @@ public class Log implements Logging
 
 	public static void setLevel(final Level level, final Class<?> type)
 	{
-		setLevel(level, type.getSimpleName());
+		setLevel(level, type.getName());
 	}
 
 	public static String error(final Logger logger, final String msg, final Function<String, Exception> pe) throws Exception
