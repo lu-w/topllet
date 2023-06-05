@@ -23,8 +23,13 @@ public class TemporalConjunctiveQueryParser
 
     static public TemporalConjunctiveQuery parse(String input, TemporalKnowledgeBase kb) throws ParseException
     {
-        // Removes comments (> and : are indicative of prefixes, which can use # without being a comment)
-        String tcq = (input + "\n").replaceAll("#[^>:]*(?=\\n)", "");
+        // Removes comments
+        Pattern commentLine = Pattern.compile("(?m)(^#.*$)");
+        Matcher commentLineMatcher = commentLine.matcher(input);
+        String tcq = commentLineMatcher.replaceAll("");
+        Pattern inlineComment = Pattern.compile("(?m)^(.*)(# .*)$");
+        Matcher inlineCommentMatcher = inlineComment.matcher(tcq);
+        tcq = inlineCommentMatcher.replaceAll("$1");
 
         // Stores prefixes and removes them from string
         Map<String, String> prefixes = new HashMap<>();
@@ -115,7 +120,7 @@ public class TemporalConjunctiveQueryParser
             parsedTcq.addConjunctiveQuery(qProp, q, cqString);
         }
 
-        _logger.info("Propositional abstraction is " + parsedTcq.getPropositionalAbstraction());
+        _logger.fine("Propositional abstraction is " + parsedTcq.getPropositionalAbstraction());
 
         return parsedTcq;
     }

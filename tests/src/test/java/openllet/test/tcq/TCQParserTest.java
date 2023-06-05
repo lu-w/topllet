@@ -107,12 +107,12 @@ public class TCQParserTest extends AbstractTCQTest
     {
         String formula = """
 # comment
-PREFIX pref: <http://pref#>#c
+PREFIX pref: <http://pref#># c
 PREFIX pref1: <http://pref1#>
 
 #comment2#asd
 #
-!G_[0,2] ((C(pref:a) ^ C(pref1:x))) U_<=2 (r(pref1:x,?y)) & (C(?z)) # test""";
+!G_[0,2] ((C(pref:a) ^ C(pref1:x))) U_<=2 (r(pref1:x,?y)) & (C(?z)) # inline comment""";
         TemporalConjunctiveQuery q = temporalQuery(formula);
         testTCQ(q, 3, "!(!G_[0,2] ((a)) U_<=2 (b) & (c))");
         testCQ(q.getQueries().get(0), atoms(var("http://pref#a"), _C), atoms(var("http://pref1#x"), _C));
