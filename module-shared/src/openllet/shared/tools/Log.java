@@ -16,8 +16,9 @@ import org.slf4j.Marker;
 public class Log implements Logging
 {
 	public static final Logger _parent = Logger.getLogger(Log.class.getName());
-	public static volatile Level _defaultLevel = Level.FINEST;
+	public static volatile Level _defaultLevel = Level.INFO;
 	public static volatile boolean _setDefaultParent = false;
+	private static boolean _setLevel = false;
 	public static final Handler _systemOutHandler = new Handler()
 	{
 		@Override
@@ -46,10 +47,14 @@ public class Log implements Logging
 
 	static
 	{
-		final String property = System.getProperty("java.util.logging.SimpleFormatter.format");
-		if (null == property)
-			System.setProperty("java.util.logging.SimpleFormatter.format", "%1$tF %1$tT %4$s %2$s %5$s%6$s%n");
-		_parent.setLevel(_defaultLevel);
+		if (System.getProperty("java.util.logging.config.file") == null)
+		{
+			final String property = System.getProperty("java.util.logging.SimpleFormatter.format");
+			if (null == property)
+				System.setProperty("java.util.logging.SimpleFormatter.format", "%1$tF %1$tT %4$s %2$s %5$s%6$s%n");
+			_parent.setLevel(_defaultLevel);
+			_setLevel = true;
+		}
 	}
 
 	@Override
@@ -73,7 +78,8 @@ public class Log implements Logging
 		if (_setDefaultParent)
 			logger.setParent(_parent);
 		_loggers.put(logger.getName(), logger);
-		logger.setLevel(level);
+		if (_setLevel && level != null)
+			logger.setLevel(level);
 		return logger;
 	}
 
