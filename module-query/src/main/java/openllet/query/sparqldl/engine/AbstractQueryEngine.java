@@ -3,6 +3,7 @@ package openllet.query.sparqldl.engine;
 import openllet.core.boxes.abox.ABox;
 import openllet.core.utils.Timer;
 import openllet.query.sparqldl.model.Query;
+import openllet.query.sparqldl.model.cncq.CNCQQuery;
 import openllet.query.sparqldl.model.results.QueryResult;
 import openllet.query.sparqldl.model.results.QueryResultImpl;
 import openllet.query.sparqldl.model.results.ResultBindingImpl;
@@ -38,6 +39,12 @@ public abstract class AbstractQueryEngine<QueryType extends Query<QueryType>> im
     }
 
     @Override
+    public QueryResult exec(QueryType query) throws IOException, InterruptedException
+    {
+        return exec(query, (QueryResult) null, null);
+    }
+
+    @Override
     public QueryResult exec(QueryType q, ABox abox, Timer timer) throws IOException, InterruptedException
     {
         _timer = timer;
@@ -54,8 +61,8 @@ public abstract class AbstractQueryEngine<QueryType extends Query<QueryType>> im
         return exec(q);
     }
 
-    @Override
-    public QueryResult exec(QueryType q) throws IOException, InterruptedException
+    public QueryResult exec(QueryType q, QueryResult excludeBindings, QueryResult restrictToBindings)
+            throws IOException, InterruptedException
     {
         if (_abox == null)
             _abox = q.getKB().getABox();
@@ -83,7 +90,7 @@ public abstract class AbstractQueryEngine<QueryType extends Query<QueryType>> im
             if (q.getResultVars().isEmpty() && _booleanEngine != null)
                 results = _booleanEngine.exec(q, _abox);
             else if (q.getKB().getIndividualsCount() > 0)
-                results = execABoxQuery(q);
+                results = execABoxQuery(q, excludeBindings, restrictToBindings);
             else
                 _logger.warning("Got non-Boolean query on a knowledge base with no individuals. Nothing to do here.");
         }
@@ -102,5 +109,12 @@ public abstract class AbstractQueryEngine<QueryType extends Query<QueryType>> im
         return results;
     }
 
-    protected abstract QueryResult execABoxQuery(QueryType q) throws IOException, InterruptedException;
+    protected QueryResult execABoxQuery(QueryType q) throws IOException, InterruptedException
+    {
+        return execABoxQuery(q, null, null);
+    }
+
+    protected abstract QueryResult execABoxQuery(QueryType q, QueryResult excludeBindings,
+                                                 QueryResult restrictToBindings)
+            throws IOException, InterruptedException;
 }

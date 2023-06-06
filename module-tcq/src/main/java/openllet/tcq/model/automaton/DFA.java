@@ -3,6 +3,7 @@ package openllet.tcq.model.automaton;
 import net.automatalib.automata.fsa.impl.compact.CompactDFA;
 import net.automatalib.words.Alphabet;
 import net.automatalib.words.impl.ListAlphabet;
+import openllet.tcq.model.query.TemporalConjunctiveQuery;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -10,6 +11,7 @@ import java.util.List;
 public class DFA extends CompactDFA<String>
 {
     private final List<Edge> _edges = new ArrayList<>();
+    private TemporalConjunctiveQuery _tcq = null;
 
     public DFA()
     {
@@ -23,6 +25,13 @@ public class DFA extends CompactDFA<String>
     public DFA(CompactDFA<String> dfa)
     {
         super(dfa);
+        _createEdges();
+    }
+
+    public DFA(CompactDFA<String> dfa, TemporalConjunctiveQuery tcq)
+    {
+        super(dfa);
+        _tcq = tcq;
         _createEdges();
     }
     
@@ -39,10 +48,8 @@ public class DFA extends CompactDFA<String>
             for (String letter : getInputAlphabet())
             {
                 Integer successorState = getTransition(state, letter);
-                if (getTransition(state, letter) != null && successorState >=0)
-                {
-                    _edges.add(new Edge(letter, state, successorState, getInputAlphabet()));
-                }
+                if (successorState != null && getTransition(state, letter) != null && successorState >=0)
+                    _edges.add(new Edge(letter, state, successorState, _tcq));
             }
         }
     }

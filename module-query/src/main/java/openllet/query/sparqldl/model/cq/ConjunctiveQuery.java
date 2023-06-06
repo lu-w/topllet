@@ -64,4 +64,10 @@ public interface ConjunctiveQuery extends AtomQuery<ConjunctiveQuery>
 	 * @return A list of split queries
 	 */
 	List<ConjunctiveQuery> split(boolean splitOnIndividuals, boolean splitOnDistVars);
+
+	/**
+	 * @param other The object to compare equality against.
+	 * @return True iff. the given object equals this query, but ignores whether this or the other query is negated.
+	 */
+	boolean equalsExceptNegation(Object other);
 }

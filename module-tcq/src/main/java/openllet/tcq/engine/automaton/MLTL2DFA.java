@@ -4,6 +4,7 @@ import net.automatalib.serialization.dot.DOTParsers;
 import openllet.shared.tools.Log;
 import openllet.tcq.engine.mltl.MLTL2LTLf;
 import openllet.tcq.model.automaton.DFA;
+import openllet.tcq.model.query.TemporalConjunctiveQuery;
 import openllet.tcq.parser.ParseException;
 import org.apache.commons.io.IOUtils;
 
@@ -19,7 +20,13 @@ public class MLTL2DFA
 {
     public static final Logger _logger = Log.getLogger(MLTL2DFA.class);
 
-    public static DFA convert(String mltlFormula) throws IOException, InterruptedException, ParseException
+    public static DFA convert(String mltlFormula) throws IOException, ParseException, InterruptedException
+    {
+        return convert(mltlFormula, null);
+    }
+
+    public static DFA convert(String mltlFormula, TemporalConjunctiveQuery tcq)
+            throws IOException, InterruptedException, ParseException
     {
         String ltlfFormula = MLTL2LTLf.convert(mltlFormula);
         ltlfFormula = ltlfFormula.replace("\n", "");
@@ -66,7 +73,7 @@ public class MLTL2DFA
 
         try
         {
-            return new DFA(DOTParsers.dfa().readModel(dotAutomaton.getBytes()).model);
+            return new DFA(DOTParsers.dfa().readModel(dotAutomaton.getBytes()).model, tcq);
         }
         catch (IOException e)
         {

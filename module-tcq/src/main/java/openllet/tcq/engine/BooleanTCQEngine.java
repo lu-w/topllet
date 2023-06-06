@@ -15,10 +15,12 @@ import openllet.tcq.parser.ParseException;
 
 import java.io.IOException;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.logging.Logger;
 
+@Deprecated
 public class BooleanTCQEngine extends AbstractBooleanQueryEngine<TemporalConjunctiveQuery>
         implements QueryExec<TemporalConjunctiveQuery>
 {
@@ -60,11 +62,12 @@ public class BooleanTCQEngine extends AbstractBooleanQueryEngine<TemporalConjunc
         {
             boolean trappedInAcceptingSink = false;
             Set<Integer> eventuallyReachableStates = new HashSet<>();
-            while (tcq.getTemporalKB().hasNext() && !trappedInAcceptingSink && !states.isEmpty())
+            Iterator<KnowledgeBase> kbIterator = tcq.getTemporalKB().iterator();
+            while (kbIterator.hasNext() && !trappedInAcceptingSink && !states.isEmpty())
             {
                 if (_timer != null)
                     _timer.stop();
-                KnowledgeBase letter =  tcq.getTemporalKB().next();
+                KnowledgeBase letter =  kbIterator.next();
                 if (_timer != null)
                     _timer.start();
                 _logger.finer("Checking ABox #" + numLetter + " for states " + states);
@@ -75,7 +78,7 @@ public class BooleanTCQEngine extends AbstractBooleanQueryEngine<TemporalConjunc
                     List<Edge> edges = dfa.getEdges(state);
                     if (edges.size() == 1)
                     {
-                        List<CNCQQuery> cncqs = edges.get(0).getCNCQs(tcq.getPropositionalAbstraction());
+                        List<CNCQQuery> cncqs = edges.get(0).getCNCQs();
                         int toState = edges.get(0).getToState();
                         if (cncqs.size() == 1 && cncqs.get(0).isEmpty())
                         {
@@ -115,7 +118,7 @@ public class BooleanTCQEngine extends AbstractBooleanQueryEngine<TemporalConjunc
                         if (!newStates.contains(edge.getToState()))
                         {
                             boolean edgeSat = false;
-                            for (CNCQQuery cncq : edge.getCNCQs(tcq.getPropositionalAbstraction()))
+                            for (CNCQQuery cncq : edge.getCNCQs())
                             {
                                 _logger.finer("\t\t\tChecking CNCQ " + cncq);
                                 if (!cncq.isEmpty())

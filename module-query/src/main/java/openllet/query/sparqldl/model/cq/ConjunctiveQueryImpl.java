@@ -9,7 +9,6 @@
 package openllet.query.sparqldl.model.cq;
 
 import java.util.*;
-import java.util.Map.Entry;
 import java.util.logging.Level;
 
 import openllet.aterm.ATermAppl;
@@ -22,9 +21,7 @@ import openllet.core.exceptions.InternalReasonerException;
 import openllet.core.utils.ATermUtils;
 import openllet.core.utils.DisjointSet;
 import openllet.query.sparqldl.model.AbstractAtomQuery;
-import openllet.query.sparqldl.model.AbstractQuery;
 import openllet.query.sparqldl.model.Query;
-import openllet.query.sparqldl.model.results.ResultBinding;
 
 import static openllet.core.utils.TermFactory.term;
 import static openllet.query.sparqldl.model.cq.QueryPredicate.*;
@@ -227,24 +224,23 @@ public class ConjunctiveQueryImpl extends AbstractAtomQuery<ConjunctiveQuery> im
 						return ATermUtils.makeSomeValues(pred, ATermUtils.makeAnd(outs));
 					}
 				}
+				else if (targetOuts.size() == 0)
+					// this is a simple leaf _node, but with classes specified
+					return ATermUtils.makeSomeValues(pred, ATermUtils.makeAnd(targetClasses));
 				else
-					if (targetOuts.size() == 0)
-						// this is a simple leaf _node, but with classes specified
-						return ATermUtils.makeSomeValues(pred, ATermUtils.makeAnd(targetClasses));
-					else
-					{
-						// not a leaf _node, recurse over all outgoing edges
-						ATermList outs = ATermUtils.EMPTY_LIST;
+				{
+					// not a leaf _node, recurse over all outgoing edges
+					ATermList outs = ATermUtils.EMPTY_LIST;
 
-						for (final QueryAtom currEdge : targetOuts)
-							outs = outs.append(rollEdgeOut(allowed, currEdge, visited, stopList));
+					for (final QueryAtom currEdge : targetOuts)
+						outs = outs.append(rollEdgeOut(allowed, currEdge, visited, stopList));
 
-						for (int i = 0; i < targetClasses.getLength(); i++)
-							outs = outs.append(targetClasses.elementAt(i));
+					for (int i = 0; i < targetClasses.getLength(); i++)
+						outs = outs.append(targetClasses.elementAt(i));
 
-						return ATermUtils.makeSomeValues(pred, ATermUtils.makeAnd(outs));
+					return ATermUtils.makeSomeValues(pred, ATermUtils.makeAnd(outs));
 
-					}
+				}
 			default:
 				throw new OpenError("This atom cannot be included to rolling-up : " + atom);
 		}
@@ -323,23 +319,22 @@ public class ConjunctiveQueryImpl extends AbstractAtomQuery<ConjunctiveQuery> im
 						return ATermUtils.makeSomeValues(invPred, ATermUtils.makeAnd(ins));
 					}
 				}
+				else if (targetIns.isEmpty())
+					return ATermUtils.makeSomeValues(invPred, ATermUtils.makeAnd(targetClasses));
 				else
-					if (targetIns.isEmpty())
-						return ATermUtils.makeSomeValues(invPred, ATermUtils.makeAnd(targetClasses));
-					else
-					{
-						// not a leaf _node, recurse over all outgoing edges
-						ATermList ins = ATermUtils.EMPTY_LIST;
+				{
+					// not a leaf _node, recurse over all outgoing edges
+					ATermList ins = ATermUtils.EMPTY_LIST;
 
-						for (final QueryAtom currEdge : targetIns)
-							ins = ins.append(rollEdgeIn(allowed, currEdge, visited, stopList));
+					for (final QueryAtom currEdge : targetIns)
+						ins = ins.append(rollEdgeIn(allowed, currEdge, visited, stopList));
 
-						for (int i = 0; i < targetClasses.getLength(); i++)
-							ins = ins.append(targetClasses.elementAt(i));
+					for (int i = 0; i < targetClasses.getLength(); i++)
+						ins = ins.append(targetClasses.elementAt(i));
 
-						return ATermUtils.makeSomeValues(invPred, ATermUtils.makeAnd(ins));
+					return ATermUtils.makeSomeValues(invPred, ATermUtils.makeAnd(ins));
 
-					}
+				}
 			default:
 				throw new OpenError("This atom cannot be included to rolling-up : " + atom);
 
@@ -465,4 +460,22 @@ public class ConjunctiveQueryImpl extends AbstractAtomQuery<ConjunctiveQuery> im
 	{
 		return isNegated() ? "!" : "";
 	}
+
+	@Override
+	public boolean equals(Object other)
+	{
+		return other instanceof ConjunctiveQuery qOther && equalsExceptNegation(qOther) &&
+				_isNegated == qOther.isNegated();
+	}
+
+	public boolean equalsExceptNegation(Object other)
+	{
+		return other instanceof ConjunctiveQuery qOther &&
+				qOther.getAtoms().size() == _allAtoms.size() && _allAtoms.equals(qOther.getAtoms()) &&
+				_distVars.equals(qOther.getDistVarsWithVarType()) && _resultVars.equals(qOther.getResultVars()) &&
+				getUndistVars().equals(qOther.getUndistVars());
+	}
+
+
+	// TODO Lukas: override hashCode() as well for use in hash-based data structures
 }

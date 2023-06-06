@@ -476,6 +476,12 @@ public class OpenlletOptions
 	 */
 	public static boolean TCQ_ENGINE_USE_INCREMENTAL_LOADING = false;
 
+	/**
+	 * Enables a prior run of the TCQ engine using the CQ engine instead of the CNCQ engine. This can lead to vast
+	 * performance improvements.
+	 */
+	public static boolean TCQ_ENGINE_USE_CQ_ENGINE = true;
+
 	static
 	{
 		final String configFile = System.getProperty("openllet.configuration");
@@ -688,6 +694,8 @@ public class OpenlletOptions
 		CNCQ_ENGINE_USE_CACHING = getBooleanProperty(newOptions, "CNCQ_ENGINE_USE_CACHING", CNCQ_ENGINE_USE_CACHING, oldOptions);
 
 		TCQ_ENGINE_USE_INCREMENTAL_LOADING = getBooleanProperty(newOptions, "TCQ_ENGINE_USE_INCREMENTAL_LOADING", TCQ_ENGINE_USE_INCREMENTAL_LOADING, oldOptions);
+
+		TCQ_ENGINE_USE_CQ_ENGINE = getBooleanProperty(newOptions, "TCQ_ENGINE_USE_CQ_ENGINE", TCQ_ENGINE_USE_CQ_ENGINE, oldOptions);
 
 		return oldOptions;
 	}

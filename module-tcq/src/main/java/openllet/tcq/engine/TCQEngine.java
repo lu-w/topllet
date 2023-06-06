@@ -1,38 +1,185 @@
 package openllet.tcq.engine;
 
+import openllet.core.OpenlletOptions;
+import openllet.core.utils.Timer;
 import openllet.query.sparqldl.engine.AbstractQueryEngine;
 import openllet.query.sparqldl.engine.QueryExec;
-import openllet.query.sparqldl.engine.cncq.CNCQQueryEngineSimple;
-import openllet.query.sparqldl.model.cncq.CNCQQuery;
 import openllet.query.sparqldl.model.results.QueryResult;
+import openllet.query.sparqldl.model.results.QueryResultImpl;
+import openllet.query.sparqldl.model.results.ResultBinding;
 import openllet.shared.tools.Log;
+import openllet.tcq.engine.automaton.MLTL2DFA;
+import openllet.tcq.model.automaton.DFA;
 import openllet.tcq.model.query.TemporalConjunctiveQuery;
+import openllet.tcq.parser.ParseException;
 
 import java.io.IOException;
+import java.util.*;
 import java.util.logging.Logger;
 
-// TODO eventually, this class shall replace the BooleanTCQEngine -- which then stays but just calls the TCQEngine
 public class TCQEngine extends AbstractQueryEngine<TemporalConjunctiveQuery>
         implements QueryExec<TemporalConjunctiveQuery>
 {
-    public static final Logger _logger = Log.getLogger(BooleanTCQEngine.class);
+    public static final Logger _logger = Log.getLogger(TCQEngine.class);
 
-    private final QueryExec<CNCQQuery> _cncqQueryEngine = new CNCQQueryEngineSimple();
+    private EdgeConstraintChecker _edgeChecker;
 
     public TCQEngine()
     {
-        this._booleanEngine = new BooleanTCQEngine();
+        _booleanEngine = null; // Enforces this engine also as the Boolean engine.
     }
 
     @Override
-    protected QueryResult execABoxQuery(TemporalConjunctiveQuery q) throws IOException, InterruptedException
+    protected QueryResult execABoxQuery(TemporalConjunctiveQuery q)
+            throws IOException, InterruptedException
     {
-        if (q.getResultVars().isEmpty())
-            return _booleanEngine.exec(q);
-        else
-            // general idea:
-            // let CNCQ engine generate a first set of candidates for state 0, then keep track of those and call from then
-            // on only the Boolean cncq engine. keep track -> attach sets of individuals to each current state
-            return null;
+        _logger.fine("Starting entailment check for TCQ " + q);
+        String negTcqProp = q.toNegatedPropositionalAbstractionString();
+        _logger.finer("Checking DFA satisfiability for negated and propositionally abstracted TCQ " + negTcqProp);
+        DFA automaton;
+        try
+        {
+            automaton = MLTL2DFA.convert(negTcqProp, q);
+        }
+        catch (ParseException e)
+        {
+            throw new IOException(e.getMessage());
+        }
+        _edgeChecker = new EdgeConstraintChecker(q, automaton);
+        // FIRST RUN - USE CQ ENGINE ONLY
+        QueryResult excludeResults = null;
+        Map<Boolean, QueryResult> satResult = new HashMap<>();
+        if (OpenlletOptions.TCQ_ENGINE_USE_CQ_ENGINE)
+        {
+            _logger.fine("Trying underapproximating semantics check on DFA");
+            Timer t = new Timer();
+            t.start();
+            _edgeChecker.setUnderapproximatingSemantics(true);
+            satResult = _checkDFASatisfiability(automaton, q);
+            excludeResults = new QueryResultImpl(q);
+            for (QueryResult excludeResult : satResult.values())
+                for (ResultBinding binding : excludeResult)
+                    excludeResults.add(binding);
+            t.stop();
+            _logger.finer("CQ semantics DFA check returned " + satResult.get(true).size() +
+                    " satisfiable and " + satResult.get(false).size() + " unsatisfiable bindings out of " +
+                    satResult.get(true).getMaxSize() + " bindings in " + t.getTotal() +  " ms");
+        }
+        // SECOND RUN - USE CNCQ ENGINE BASED ON RESULTS OF CQ ENGINE
+        if (excludeResults == null || !excludeResults.isComplete())
+        {
+            Timer t = new Timer();
+            t.start();
+            _edgeChecker.excludeBindings(excludeResults);
+            _edgeChecker.setUnderapproximatingSemantics(false);
+            _logger.fine("Trying full blown semantics check on DFA");
+            satResult = _checkDFASatisfiability(automaton, q);
+            _edgeChecker.doNotExcludeBindings();
+            t.stop();
+            _logger.finer("Full semantics DFA check returned " + satResult.get(true).size() +
+                    " satisfiable and " + satResult.get(false).size() + " unsatisfiable bindings out of " +
+                    satResult.get(true).getMaxSize() + " bindings in " + t.getTotal() +  " ms");
+        }
+        satResult.get(false).explicate();
+        return satResult.get(false);
+    }
+
+    @Override
+    protected QueryResult execABoxQuery(TemporalConjunctiveQuery q, QueryResult excludeBindings,
+                                        QueryResult restrictToBindings) throws IOException, InterruptedException
+    {
+        return execABoxQuery(q);
+    }
+
+    /**
+     * TODO
+     * @param dfa
+     * @param tcq
+     * @return Guaranteed satisfiability information, i.e. true -> final state has been reached, false -> it is certain
+     *  that no final state can be reached
+     */
+    private Map<Boolean, QueryResult> _checkDFASatisfiability(DFA dfa, TemporalConjunctiveQuery tcq)
+            throws IOException, InterruptedException
+    {
+        Integer initState = dfa.getInitialState();
+        DFAExecutableStates states = new DFAExecutableStates(dfa);
+
+        if (initState != null)
+            states.add(new DFAExecutableState(dfa, tcq, initState, 0, _edgeChecker, true, _timer));
+
+        _logger.finer("Starting in state " + states);
+
+        // Main loop - execute DFA states until nothing can be fired anymore
+        while(states.hasExecutableState())
+        {
+            DFAExecutableState execState = states.get(0);
+            if (execState != null)
+                for (DFAExecutableState newState : execState.execute())
+                    states.mergeOrAdd(newState);
+            states.remove(execState);
+        }
+
+        return assembleFinalResult(dfa, tcq, states);
+    }
+
+    private Map<Boolean, QueryResult> assembleFinalResult(DFA dfa, TemporalConjunctiveQuery tcq,
+                                                          DFAExecutableStates states)
+    {
+        Map<Boolean, QueryResult> result = new HashMap<>();
+        result.put(false, new QueryResultImpl(tcq));
+        result.put(true, new QueryResultImpl(tcq));
+
+        if (states.size() > 0)
+        {
+            if (_edgeChecker.isUnderapproximatingSemantics())
+            {
+                // Assemble final result - all bindings in final states satisfy the DFA, and all bindings in none final
+                // states do not. Note: there may be bindings not considered here (i.e., result unknown)
+                // Note 2: we can only for unsat for all final states if all actual DFA final states were examined
+                QueryResult unsatForAllFinalStates = null;
+                boolean canInferFromUnsat = states.coversDFAFinalStatesCompletely();
+                for (DFAExecutableState state : states)
+                    if (dfa.isAccepting(state.getDFAState()))
+                    {
+                        if (state.getSatBindings() != null)
+                            result.get(true).addAll(state.getSatBindings());
+                        if (canInferFromUnsat)
+                        {
+                            if (unsatForAllFinalStates == null)
+                                unsatForAllFinalStates = state.getUnsatBindings();
+                            else if (state.getUnsatBindings() == null)
+                                unsatForAllFinalStates = new QueryResultImpl(tcq);
+                            else
+                                unsatForAllFinalStates.retainAll(state.getUnsatBindings());
+                        }
+                    }
+                if (unsatForAllFinalStates != null)
+                    result.get(false).addAll(unsatForAllFinalStates);
+            }
+            else
+            {
+                // Finds all satisfiable bindings from some non-final state
+                QueryResult rejectedBindings = new QueryResultImpl(tcq);
+                for (DFAExecutableState state : states)
+                    if (!dfa.isAccepting(state.getDFAState()) && state.getSatBindings() != null)
+                        rejectedBindings.addAll(state.getSatBindings());
+                // Removes those for which a counterexample was generated (i.e. that were accepted)
+                QueryResult counterexampleFound = new QueryResultImpl(tcq);
+                for (ResultBinding potentiallyAcceptedBinding : rejectedBindings)
+                    for (DFAExecutableState state : states)
+                        if (dfa.isAccepting(state.getDFAState()))
+                            if (state.getSatBindings() != null &&
+                                    state.getSatBindings().contains(potentiallyAcceptedBinding))
+                            {
+                                counterexampleFound.add(potentiallyAcceptedBinding);
+                                break;
+                            }
+                rejectedBindings.removeAll(counterexampleFound);
+                result.put(false, rejectedBindings);
+                result.put(true, rejectedBindings.invert());
+            }
+        }
+
+        return result;
     }
 }

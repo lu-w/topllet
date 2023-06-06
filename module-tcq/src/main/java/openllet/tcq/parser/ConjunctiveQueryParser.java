@@ -42,7 +42,7 @@ public class ConjunctiveQueryParser
     static public ConjunctiveQuery parse(String input, KnowledgeBase kb) throws ParseException
     {
         // Parsing of CNCQ a la "C(a) ^ r(a,b)"
-        ConjunctiveQuery cq = new ConjunctiveQueryImpl(kb, false);
+        ConjunctiveQuery cq = new ConjunctiveQueryImpl(kb, true);
         for (String atom : input.split("\\^"))
         {
             if (atom.contains("(") && atom.contains(")"))

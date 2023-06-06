@@ -6,12 +6,12 @@
 
 package openllet.query.sparqldl.model.results;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 import openllet.aterm.ATermAppl;
+import openllet.core.rules.VariableBinding;
 import openllet.query.sparqldl.model.Query;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
  * <p>
@@ -42,6 +42,8 @@ public interface QueryResult extends Iterable<ResultBinding>
 	 */
 	void remove(final ResultBinding binding);
 
+	void expandToAllVariables(Collection<ATermAppl> variables);
+
 	/**
 	 * Returns result variables.
 	 *
@@ -59,11 +61,24 @@ public interface QueryResult extends Iterable<ResultBinding>
 	boolean isEmpty();
 
 	/**
+	 * @return The maximum possible size of this query result.
+	 */
+	int getMaxSize();
+
+	/**
+	 * @return The query that this query result belongs to.
+	 */
+	Query<?> getQuery();
+
+	/**
 	 * Returns number of bindings in the result.
 	 *
 	 * @return number of bindings
 	 */
 	int size();
+
+	// TODO
+	QueryResult restrictToVariables(List<ATermAppl> vars);
 
 	/**
 	 * Returns a copy of this query result where all bindings are inverted, i.e., the copy contains var -> ind iff.
@@ -72,18 +87,75 @@ public interface QueryResult extends Iterable<ResultBinding>
 	 */
 	QueryResult invert();
 
-	static QueryResult allBindings(Query<?> q, List<ATermAppl> variables, List<ATermAppl> individuals)
+	/**
+	 * @param binding The binding to find.
+	 * @return True iff. the query result contains the given binding
+	 */
+	boolean contains(ResultBinding binding);
+
+	/**
+	 * @param binding Binding to check whether it is partial or fully explicated.
+	 * @return True iff. there are result variables of this query result that are not mapped within the given binding
+	 */
+	boolean isPartialBinding(ResultBinding binding);
+
+	/**
+	 * @return True iff. the query result contains all possible bindings of its query
+	 */
+	boolean isComplete();
+
+	/**
+	 * Adds all bindings from the given query result to this query result.
+	 * @param toAdd Query result to add
+	 */
+	void addAll(QueryResult toAdd);
+
+	/**
+	 * Adds all bindings from the given query result to this query result.
+	 * @param toAdd Query result to add
+	 * @param restrictToBindings Only adds those bindings from toAdd also present in restrictToBindings
+	 */
+	void addAll(QueryResult toAdd, QueryResult restrictToBindings);
+
+	/**
+	 * Removes all bindings from the given query result from this query result.
+	 * @param toRemove Query result to remove
+	 */
+	void removeAll(QueryResult toRemove);
+
+	/**
+	 * Reduces this query result to the given set of bindings.
+	 * @param toRetain Bindings to reduce to.
+	 */
+	void retainAll(QueryResult toRetain);
+
+	/**
+	 * @return An exact copy of this query results.
+	 */
+	QueryResult copy();
+
+	void explicate();
+
+	static QueryResult allBindingsQueryResult(Query<?> q, List<ATermAppl> variables, List<ATermAppl> individuals)
 	{
+		QueryResult res = new QueryResultImpl(q);
+		for (ResultBinding binding : allBindings(q, variables, individuals))
+			res.add(binding);
+		return res;
+	}
+
+	static Collection<ResultBinding> allBindings(Query<?> q, List<ATermAppl> variables, List<ATermAppl> individuals)
+	{
+		Collection<ResultBinding> bindings = new HashSet<>();
 		// https://stackoverflow.com/a/40101377/4145563
 		int resultSize = variables.size();
-		QueryResult res = new QueryResultImpl(q);
 		int[] indexes = new int[Math.max(individuals.size(), resultSize)];
 		for (int j = (int) Math.pow(individuals.size(), resultSize); j > 0; j--)
 		{
 			ResultBinding binding = new ResultBindingImpl();
 			for (int i = 0; i < resultSize; i++)
 				binding.setValue(variables.get(i), individuals.get(indexes[i]));
-			res.add(binding);
+			bindings.add(binding);
 			for (int i = 0; i < resultSize; i++)
 				if (indexes[i] >= individuals.size() - 1)
 					indexes[i] = 0;
@@ -93,6 +165,6 @@ public interface QueryResult extends Iterable<ResultBinding>
 					break;
 				}
 		}
-		return res;
+		return bindings;
 	}
 }

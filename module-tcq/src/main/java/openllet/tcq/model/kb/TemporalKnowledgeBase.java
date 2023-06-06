@@ -1,15 +1,13 @@
 package openllet.tcq.model.kb;
 
 import openllet.core.KnowledgeBase;
-import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 
-import java.util.Iterator;
+import java.util.List;
 
-public interface TemporalKnowledgeBase extends Iterator<KnowledgeBase>
+public interface TemporalKnowledgeBase extends List<KnowledgeBase>
 {
-    KnowledgeBase first();
+    // Remark: right now, we require all individuals to be present already in the first knowledge base (otherwise, the
+    // query may wrongly interpret atom arguments as answer variables and not as individuals.
+    // TODO may add a getIndividuals() here
 
-    void add(KnowledgeBase kb);
-
-    void reset();
 }

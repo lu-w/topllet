@@ -38,84 +38,57 @@ public class AbstractTCQTest extends AbstractQueryTest
     @Override
     protected void classes(final ATermAppl... classes)
     {
-        _kb = _tkb.first();
-        if (_kb != null)
-            do
-            {
-                super.classes(classes);
-                _kb = _tkb.next();
-            }
-            while (_kb != null);
-        _tkb.reset();
+        for (KnowledgeBase kb : _tkb)
+        {
+            _kb = kb;
+            super.classes(classes);
+        }
     }
 
     protected void subClass(final ATermAppl sub, final ATermAppl sup)
     {
-        _kb = _tkb.first();
-        if (_kb != null)
-            do
-            {
-                _kb.addSubClass(sub, sup);
-                _kb = _tkb.next();
-            }
-            while (_kb != null);
-        _tkb.reset();
+        for (KnowledgeBase kb : _tkb)
+            kb.addSubClass(sub, sup);
     }
 
     @Override
     protected void objectProperties(final ATermAppl... props)
     {
-        _kb = _tkb.first();
-        if (_kb != null)
-            do
-            {
-                super.objectProperties(props);
-                _kb = _tkb.next();
-            }
-            while (_kb != null);
-        _tkb.reset();
+        for (KnowledgeBase kb : _tkb)
+        {
+            _kb = kb;
+            super.objectProperties(props);
+        }
     }
 
     @Override
     protected void dataProperties(final ATermAppl... props)
     {
-        _kb = _tkb.first();
-        if (_kb != null)
-            do
-            {
-                super.dataProperties(props);
-                _kb = _tkb.next();
-            }
-            while (_kb != null);
-        _tkb.reset();
+        for (KnowledgeBase kb : _tkb)
+        {
+            _kb = kb;
+            super.dataProperties(props);
+        }
     }
 
     @Override
     protected void annotationProperties(final ATermAppl... props)
     {
-        _kb = _tkb.first();
-        if (_kb != null)
-            do
-            {
-                super.annotationProperties(props);
-                _kb = _tkb.next();
-            }
-            while (_kb != null);
-        _tkb.reset();
+        for (KnowledgeBase kb : _tkb)
+        {
+            _kb = kb;
+            super.annotationProperties(props);
+        }
     }
 
     @Override
     protected void individuals(final ATermAppl... inds)
     {
-        _kb = _tkb.first();
-        if (_kb != null)
-            do
-            {
-                super.individuals(inds);
-                _kb = _tkb.next();
-            }
-            while (_kb != null);
-        _tkb.reset();
+        for (KnowledgeBase kb : _tkb)
+        {
+            _kb = kb;
+            super.individuals(inds);
+        }
     }
 
     protected void timeSteps(int size)
@@ -151,12 +124,25 @@ public class AbstractTCQTest extends AbstractQueryTest
     public void simpleTKB()
     {
         fillSimpleTKB(5);
-        _tkb.first();
-        while (_tkb.hasNext())
+        for (KnowledgeBase kb : _tkb)
         {
-            KnowledgeBase kb = _tkb.next();
             kb.addType(_a, _A);
+            kb.addType(_b, _B);
             kb.addPropertyValue(_r, _a, _b);
+        }
+    }
+
+    public void simpleTKB2()
+    {
+        fillSimpleTKB(5);
+        int i = 0;
+        for (KnowledgeBase kb : _tkb)
+        {
+            kb.addType(_a, _A);
+            if (i > 2)
+                kb.addType(_b, _B);
+            kb.addPropertyValue(_r, _a, _b);
+            i++;
         }
     }
 
@@ -173,9 +159,8 @@ public class AbstractTCQTest extends AbstractQueryTest
     {
         fillComplexTKB(10);
         int i = 0;
-        while (_tkb.hasNext())
+        for (KnowledgeBase kb : _tkb)
         {
-            KnowledgeBase kb = _tkb.next();
             if (i % 2 == 0)
             {
                 kb.addType(_a, _A);

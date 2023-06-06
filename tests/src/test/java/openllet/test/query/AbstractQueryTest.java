@@ -224,7 +224,8 @@ public abstract class AbstractQueryTest extends AbstractKBTests
 			if (query instanceof ConjunctiveQuery)
 				result = new QueryEngine().exec((ConjunctiveQuery) query);
 			else if (query instanceof UnionQuery)
-				result = new UnionQueryEngineSimple(UnionQueryEngineSimple.BindingTime.AFTER_CNF).exec((UnionQuery) query);
+				result = new UnionQueryEngineSimple(UnionQueryEngineSimple.BindingTime.AFTER_CNF).
+						exec((UnionQuery) query);
 			else if (query instanceof CNCQQuery)
 				result = new CNCQQueryEngineSimple().exec((CNCQQuery) query);
 			else if (query instanceof TemporalConjunctiveQuery)
@@ -290,7 +291,9 @@ public abstract class AbstractQueryTest extends AbstractKBTests
 		List<ATermAppl> resVars = new ArrayList<>();
 		for (int i = 0; i < resultSize; i++)
 			resVars.add(ATermUtils.makeVar(Integer.toString(i)));
-		QueryResult allBindings = QueryResult.allBindings(query, resVars, individuals);
+		ConjunctiveQuery resVarQuery = new ConjunctiveQueryImpl(query);
+		resVarQuery.setResultVars(resVars);
+		QueryResult allBindings = QueryResult.allBindingsQueryResult(resVarQuery, resVars, individuals);
 		List<List<ATermAppl>> res = new ArrayList<>();
 		for (ResultBinding binding : allBindings)
 		{

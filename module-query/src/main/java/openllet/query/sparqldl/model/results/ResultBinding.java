@@ -6,9 +6,12 @@
 
 package openllet.query.sparqldl.model.results;
 
+import java.util.Collection;
 import java.util.Set;
 
 import openllet.aterm.ATermAppl;
+
+import javax.xml.transform.Result;
 
 /**
  * <p>
@@ -83,4 +86,11 @@ public interface ResultBinding
 	 * @param binding the binding to merge into this binding
 	 */
 	void merge(ResultBinding binding);
+
+	/**
+	 * @param binding The binding that may be contained in this binding.
+	 * @return True iff. the given binding is contained in this binding, i.e. all the mappings from the given binding
+	 * 	are also present in this binding.
+	 */
+	boolean contains(ResultBinding binding);
 }

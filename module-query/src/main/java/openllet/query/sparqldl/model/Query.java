@@ -217,4 +217,11 @@ public interface Query<QueryType extends Query<QueryType>>
     QueryType createQuery(KnowledgeBase kb, boolean isDistinct);
 
     String toString(boolean multiLine, boolean onlyQueryBody);
+
+    /**
+     * @param other The object to compare equality against.
+     * @return Returns true iff. both are representing the same query, i.e. have the same variables and atoms.
+     */
+    @Override
+    boolean equals(Object other);
 }

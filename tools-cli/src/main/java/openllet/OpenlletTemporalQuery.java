@@ -189,7 +189,7 @@ public class OpenlletTemporalQuery extends OpenlletCmdApp
             kb = new FileBasedTemporalKnowledgeBaseImpl(inputFiles, catalogFile, timer);
             try
             {
-                KnowledgeBase firstKb = kb.first();
+                KnowledgeBase firstKb = kb.get(0);
                 if (firstKb != null)
                 {
                     startTask("initial consistency check");
@@ -303,8 +303,12 @@ public class OpenlletTemporalQuery extends OpenlletCmdApp
             {
                 final ATermAppl result = binding.getValue(resultVar);
                 // format the result
-                String bindingString = result.toString(); // TODO
-                formattedBinding.add(bindingString);
+                // TODO Lukas: consider partial results here correctly...
+                if (result != null)
+                {
+                    String bindingString = result.toString();
+                    formattedBinding.add(bindingString);
+                }
             }
 
             data.add(formattedBinding);

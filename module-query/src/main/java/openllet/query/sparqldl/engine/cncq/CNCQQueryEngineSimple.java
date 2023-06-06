@@ -14,7 +14,6 @@ import java.util.logging.Level;
 
 public class CNCQQueryEngineSimple extends AbstractCNCQQueryEngine
 {
-    protected QueryBindingCandidateGenerator _bindingGenerator;
     private AbstractSemiBooleanCNCQEngine _semiBooleanEngine;
 
     public CNCQQueryEngineSimple()
@@ -29,52 +28,52 @@ public class CNCQQueryEngineSimple extends AbstractCNCQQueryEngine
     }
 
     @Override
-    protected QueryResult execABoxQuery(CNCQQuery q) throws IOException, InterruptedException
+    protected QueryResult execABoxQuery(CNCQQuery q, QueryResult excludeBindings, QueryResult restrictToBindings)
+            throws IOException, InterruptedException
     {
-        QueryResult result = new QueryResultImpl(q);
+        QueryResult result;
 
-        // FETCH AND APPLY BINDINGS TO POSITIVE PARTS
-        List<ATermAppl> vars = new ArrayList<>(q.getPositiveResultVars());
-        List<ATermAppl> inds = q.getKB().getIndividuals().stream().toList();
-        _bindingGenerator = new QueryCandidateGeneratorNaive(inds, vars);
-        for (ResultBinding candidateBinding : _bindingGenerator)
+        if (q.getPositiveQueries().size() == 0)
+            result = _semiBooleanEngine.exec(q, excludeBindings, restrictToBindings);
+        else
         {
-            if (_logger.isLoggable(Level.FINE))
-                _logger.fine("Trying candidate binding for positive part: " + candidateBinding);
-            CNCQQuery partiallyBoundQuery = q.apply(candidateBinding);
-            QueryResult partialResult = _semiBooleanEngine.exec(partiallyBoundQuery, _abox);
-            if (_logger.isLoggable(Level.FINE))
-                _logger.fine("Boolean CNCQ engine returned: " + (partialResult.isEmpty() ? "false" : "true"));
-            // We may have gotten n > 0 bindings from the semi-Boolean engine -> create a copy and merge current binding
-            for (ResultBinding binding : partialResult)
+            result = new QueryResultImpl(q);
+            // FETCH AND APPLY BINDINGS TO POSITIVE PARTS
+            List<ATermAppl> vars = new ArrayList<>(q.getPositiveResultVars());
+            List<ATermAppl> inds = q.getKB().getIndividuals().stream().toList();
+            QueryBindingCandidateGenerator _bindingGenerator = new QueryCandidateGeneratorNaive(inds, vars);
+            if (excludeBindings != null)
+                _bindingGenerator.excludeBindings(excludeBindings);
+            if (restrictToBindings != null)
+                _bindingGenerator.restrictToBindings(restrictToBindings);
+            for (ResultBinding candidateBinding : _bindingGenerator)
             {
-                ResultBinding copyBinding = candidateBinding.duplicate();
-                copyBinding.merge(binding);
-                result.add(copyBinding);
-            }
-            _bindingGenerator.informAboutResultForBinding(partialResult.isEmpty() ? Bool.FALSE : Bool.TRUE);
-        }
-        // Special case: we have result variables that are constrained neither in the negative nor in the positive parts
-        // We just add all possible bindings for those.
-        List<ATermAppl> unconstrainedVars = q.getUnconstrainedResultVars();
-        if (unconstrainedVars.size() > 0)
-        {
-            List<QueryResult> results = new ArrayList<>();
-            results.add(result);
-            for (ATermAppl var : unconstrainedVars)
-            {
-                QueryResult varRes = new QueryResultImpl(q);
-                for (ATermAppl ind : inds)
+                if (_logger.isLoggable(Level.FINE))
+                    _logger.fine("Trying candidate binding for positive part: " + candidateBinding);
+                CNCQQuery partiallyBoundQuery = q.apply(candidateBinding);
+                QueryResult partialResult = _semiBooleanEngine.exec(partiallyBoundQuery, excludeBindings,
+                        restrictToBindings);
+                if (_logger.isLoggable(Level.FINE))
+                    _logger.fine("Boolean CNCQ engine returned: " + (partialResult.isEmpty() ? "false" : "true"));
+                // We may have gotten n > 0 bindings from the semi-Boolean engine, create a copy and merge curr. binding
+                for (ResultBinding binding : partialResult)
                 {
-                    ResultBinding newBinding = new ResultBindingImpl();
-                    newBinding.setValue(var, ind);
-                    varRes.add(newBinding);
+                    ResultBinding copyBinding = candidateBinding.duplicate();
+                    copyBinding.merge(binding);
+                    result.add(copyBinding);
                 }
-                results.add(varRes);
+                _bindingGenerator.informAboutResultForBinding(partialResult.isEmpty() ? Bool.FALSE : Bool.TRUE);
             }
-            vars.addAll(unconstrainedVars);
-            result = new MultiQueryResults(vars, results);
+            _bindingGenerator.doNotExcludeBindings();
+            _bindingGenerator.doNotRestrictToBindings();
         }
         return result;
+    }
+
+    @Override
+    public QueryResult exec(CNCQQuery query, QueryResult excludeBindings, QueryResult restrictToBindings)
+            throws IOException, InterruptedException
+    {
+        return execABoxQuery(query, excludeBindings, restrictToBindings);
     }
 }

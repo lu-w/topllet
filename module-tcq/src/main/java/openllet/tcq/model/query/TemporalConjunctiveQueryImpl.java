@@ -23,7 +23,7 @@ public class TemporalConjunctiveQueryImpl extends AbstractCompositeQuery<Conjunc
 
     public TemporalConjunctiveQueryImpl(String tcq, TemporalKnowledgeBase temporalKb, boolean distinct)
     {
-        super(temporalKb.first(), distinct);
+        super(temporalKb.get(0), distinct);
         _temporalKb = temporalKb;
         _tcq = tcq;
         _propAbsTcq = tcq;

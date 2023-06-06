@@ -48,23 +48,28 @@ public class UnionQueryEngineSimple extends AbstractUnionQueryEngine
     }
 
     @Override
-    protected QueryResult execABoxQuery(UnionQuery q) throws IOException, InterruptedException
+    protected QueryResult execABoxQuery(UnionQuery q, QueryResult excludeBindings, QueryResult restrictToBindings)
+            throws IOException, InterruptedException
     {
         if (q.getQueries().size() == 1)
             return new CombinedQueryEngine().exec(q.getQueries().get(0));
         return switch (_bindingTime)
         {
-            case BEFORE_CNF -> execABoxQueryBindingBeforeCNF(q);
-            case AFTER_CNF -> execABoxQueryBindingAfterCNF(q);
+            case BEFORE_CNF -> execABoxQueryBindingBeforeCNF(q, excludeBindings, restrictToBindings);
+            case AFTER_CNF -> execABoxQueryBindingAfterCNF(q, excludeBindings, restrictToBindings);
         };
     }
 
-    protected QueryResult execABoxQueryBindingBeforeCNF(UnionQuery q) throws IOException, InterruptedException
+    protected QueryResult execABoxQueryBindingBeforeCNF(UnionQuery q, QueryResult excludeBindings,
+                                                        QueryResult restrictToBindings)
+            throws IOException, InterruptedException
     {
         // Note: we can not split the query here due to semantics. Queries can only be split after conversion to CNF.
         QueryResult result = new QueryResultImpl(q);
         // FETCH AND APPLY BINDINGS
         _bindingGenerator = new QueryCandidateGeneratorNaive(q);
+        _bindingGenerator.excludeBindings(excludeBindings);
+        _bindingGenerator.restrictToBindings(restrictToBindings);
         for (ResultBinding candidateBinding : _bindingGenerator)
         {
             if (_logger.isLoggable(Level.FINE))
@@ -77,10 +82,14 @@ public class UnionQueryEngineSimple extends AbstractUnionQueryEngine
                 result.add(candidateBinding);
             _bindingGenerator.informAboutResultForBinding(booleanResult.isEmpty() ? Bool.FALSE : Bool.TRUE);
         }
+        _bindingGenerator.doNotExcludeBindings();
+        _bindingGenerator.doNotRestrictToBindings();
         return result;
     }
 
-    protected QueryResult execABoxQueryBindingAfterCNF(UnionQuery q) throws IOException, InterruptedException
+    protected QueryResult execABoxQueryBindingAfterCNF(UnionQuery q, QueryResult excludeBindings,
+                                                       QueryResult restrictToBindings)
+            throws IOException, InterruptedException
     {
         // 1. ROLL-UP UCQ
         UnionQuery rolledUpUnionQuery = q.rollUp(true);
@@ -101,6 +110,8 @@ public class UnionQueryEngineSimple extends AbstractUnionQueryEngine
             // 4. APPLY BINDINGS
             QueryResult result = new QueryResultImpl(cnfQueryPart);
             _bindingGenerator = new QueryCandidateGeneratorNaive(cnfQueryPart);
+            _bindingGenerator.excludeBindings(excludeBindings);
+            _bindingGenerator.restrictToBindings(restrictToBindings);
             for (ResultBinding candidateBinding : _bindingGenerator)
             {
                 if (_logger.isLoggable(Level.FINE))
@@ -114,8 +125,15 @@ public class UnionQueryEngineSimple extends AbstractUnionQueryEngine
                 _bindingGenerator.informAboutResultForBinding(booleanResult ? Bool.TRUE : Bool.FALSE);
             }
             results.add(result);
+            _bindingGenerator.doNotExcludeBindings();
+            _bindingGenerator.doNotRestrictToBindings();
         }
-        return new MultiQueryResults(q.getResultVars(), results);
+        if (results.size() > 1)
+            return new MultiQueryResults(q.getResultVars(), results);
+        else if (results.size() == 1)
+            return results.get(0);
+        else
+            return new QueryResultImpl(q).invert(); // empty query is trivially entailed
     }
 
     public void setBindingTime(BindingTime bindingTime)

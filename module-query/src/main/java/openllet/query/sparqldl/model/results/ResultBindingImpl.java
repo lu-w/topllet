@@ -6,6 +6,7 @@
 
 package openllet.query.sparqldl.model.results;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -109,6 +110,27 @@ public class ResultBindingImpl implements ResultBinding
 		for (ATermAppl var : binding.getAllVariables())
 			if (!getAllVariables().contains(var))
 				setValue(var, binding.getValue(var));
+	}
+
+	@Override
+	public boolean contains(ResultBinding binding)
+	{
+		boolean isContained = true;
+		if (!equals(binding))
+		{
+			if (getAllVariables().containsAll(binding.getAllVariables()))
+			{
+				for (ATermAppl var : binding.getAllVariables())
+					if (binding.getValue(var) != getValue(var))
+					{
+						isContained = false;
+						break;
+					}
+			}
+			else
+				isContained = false;
+		}
+		return isContained;
 	}
 
 	@Override

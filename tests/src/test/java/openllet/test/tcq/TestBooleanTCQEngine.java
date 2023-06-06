@@ -32,8 +32,7 @@ public class TestBooleanTCQEngine extends AbstractTCQTest
     public void testStrongAndWeakNextOverWordLength()
     {
         fillSimpleTKB(2);
-        _tkb.next();
-        _tkb.next().addType(_a, _A);
+        _tkb.get(1).addType(_a, _A);
         assertQueryNotEntailed("(A(a))");
         assertQueryEntailed("X[!](A(a))");
         assertQueryNotEntailed("X[!]X[!](A(a))");

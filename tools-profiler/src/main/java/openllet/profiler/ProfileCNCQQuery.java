@@ -11,11 +11,13 @@ import openllet.query.sparqldl.model.Query;
 import openllet.query.sparqldl.model.cncq.CNCQQueryImpl;
 import openllet.query.sparqldl.model.cq.*;
 import openllet.query.sparqldl.model.results.QueryResult;
+import openllet.query.sparqldl.model.results.QueryResultImpl;
 import org.apache.commons.cli.*;
 
 import openllet.core.KnowledgeBase;
 import openllet.query.sparqldl.model.cncq.CNCQQuery;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -164,7 +166,15 @@ public class ProfileCNCQQuery
         {
             System.out.println("Executing:");
             System.out.println(q);
-            QueryResult res = eng.exec(q);
+            QueryResult res = null;
+            try
+            {
+                res = eng.exec(q);
+            }
+            catch (IOException | InterruptedException e)
+            {
+                res = new QueryResultImpl(q);
+            }
             System.out.println(res.size());
         }
         t.stop();

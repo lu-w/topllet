@@ -54,7 +54,7 @@ public class TemporalConjunctiveQueryParser
         // Removes irrelevant line breaks and tabs / whitespaces
         tcq = tcq.replaceAll("(\r\n|\r|\n)[\t ]*", "").trim();
 
-        TemporalConjunctiveQuery parsedTcq = new TemporalConjunctiveQueryImpl(tcq, kb, false);
+        TemporalConjunctiveQuery parsedTcq = new TemporalConjunctiveQueryImpl(tcq, kb, true);
         final PropositionFactory propositionFactory = new PropositionFactory();
 
         while (tcq.replace(")", "").length() > 0)
@@ -115,7 +115,7 @@ public class TemporalConjunctiveQueryParser
             int cqEnd = curIndex - 1;  // we do not want the closing bracket included in the CQ itself
             String cqString = tcq.substring(cqBeg, cqEnd);
             tcq = tcq.substring(curIndex);
-            ConjunctiveQuery q = ConjunctiveQueryParser.parse(cqString, kb.first());
+            ConjunctiveQuery q = ConjunctiveQueryParser.parse(cqString, kb.get(0));
             Proposition qProp = propositionFactory.create(q);
             parsedTcq.addConjunctiveQuery(qProp, q, cqString);
         }

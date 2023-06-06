@@ -6,13 +6,11 @@
 
 package openllet.query.sparqldl.model.results;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.ListIterator;
-import java.util.NoSuchElementException;
+import java.util.*;
 
 import openllet.aterm.ATermAppl;
+import openllet.query.sparqldl.model.Query;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
  * <p>
@@ -64,6 +62,14 @@ public class MultiQueryResults implements QueryResult
 		throw new UnsupportedOperationException("MultiQueryResults do not support removal!");
 	}
 
+	@Override
+	public void expandToAllVariables(Collection<ATermAppl> variables)
+	{
+		for (ATermAppl variable : variables)
+			if (!_resultVars.contains(variable))
+				_resultVars.add(variable);
+	}
+
 	/**
 	 * {@inheritDoc}
 	 */
@@ -93,6 +99,25 @@ public class MultiQueryResults implements QueryResult
 	public boolean isEmpty()
 	{
 		return _size == 0;
+	}
+
+	@Override
+	public int getMaxSize()
+	{
+		if (_queryResults.size() > 0)
+			return (int) Math.pow(_queryResults.get(0).getQuery().getKB().getIndividuals().stream().toList().size(),
+					getResultVars().size());
+		else
+			return 0;
+	}
+
+	@Override
+	public Query<?> getQuery()
+	{
+		if (_queryResults.size() > 0)
+			return _queryResults.get(0).getQuery();
+		else
+			return null;
 	}
 
 	/**
@@ -191,11 +216,91 @@ public class MultiQueryResults implements QueryResult
 	}
 
 	@Override
+	public QueryResult restrictToVariables(List<ATermAppl> vars)
+	{
+		List<QueryResult> restrictedResults = new ArrayList<>();
+		for (QueryResult res : _queryResults)
+			restrictedResults.add(res.restrictToVariables(vars));
+		return new MultiQueryResults(vars, restrictedResults);
+	}
+
+	@Override
 	public QueryResult invert()
 	{
 		List<QueryResult> results = new ArrayList<>();
 		for (QueryResult res : _queryResults)
 			results.add(res.invert());
 		return new MultiQueryResults(getResultVars(), results);
+	}
+
+	@Override
+	public boolean contains(ResultBinding binding)
+	{
+		for (final QueryResult result : _queryResults)
+			if (result.contains(binding))
+				return true;
+
+		return false;
+	}
+
+	@Override
+	public boolean isPartialBinding(ResultBinding binding)
+	{
+		return binding.getAllVariables().size() < getResultVars().size() &&
+				new HashSet<>(getResultVars()).containsAll(binding.getAllVariables());
+	}
+
+	@Override
+	public boolean isComplete()
+	{
+		throw new UnsupportedOperationException("MultiQueryResults do not support completeness!");
+	}
+
+	@Override
+	public void addAll(QueryResult toAdd)
+	{
+		addAll(toAdd, null);
+	}
+
+	@Override
+	public void addAll(QueryResult toAdd, QueryResult restrictToBindings)
+	{
+		throw new UnsupportedOperationException("MultiQueryResults do not support addition!");
+	}
+
+	@Override
+	public void removeAll(QueryResult toRemove)
+	{
+		throw new UnsupportedOperationException("MultiQueryResults do not support removal!");
+	}
+
+	@Override
+	public void retainAll(QueryResult toRetain)
+	{
+		throw new UnsupportedOperationException("MultiQueryResults do not support retaining!");
+	}
+
+	@Override
+	public QueryResult copy()
+	{
+		final List<QueryResult> copies = new ArrayList<>();
+		for (QueryResult orig : _queryResults)
+			copies.add(orig.copy());
+		return new MultiQueryResults(new ArrayList<>(_resultVars), copies);
+	}
+
+	@Override
+	public void explicate()
+	{
+		for (QueryResult res : _queryResults)
+			res.explicate();
+	}
+
+	public QueryResultImpl toQueryResultImpl(Query<?> originalQuery)
+	{
+		QueryResultImpl qr = new QueryResultImpl(originalQuery);
+		for (ResultBinding binding : this)
+			qr.add(binding);
+		return qr;
 	}
 }

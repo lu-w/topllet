@@ -9,10 +9,7 @@ import openllet.query.sparqldl.model.AtomQuery;
 import openllet.query.sparqldl.model.cncq.CNCQQuery;
 import openllet.query.sparqldl.model.cq.ConjunctiveQuery;
 import openllet.query.sparqldl.model.cq.QueryAtom;
-import openllet.query.sparqldl.model.results.QueryResult;
-import openllet.query.sparqldl.model.results.QueryResultImpl;
-import openllet.query.sparqldl.model.results.ResultBinding;
-import openllet.query.sparqldl.model.results.ResultBindingImpl;
+import openllet.query.sparqldl.model.results.*;
 import openllet.query.sparqldl.model.ucq.UnionQuery;
 import openllet.query.sparqldl.model.ucq.UnionQueryImpl;
 
@@ -38,7 +35,8 @@ public class SemiBooleanCNCQEngineSimple extends AbstractSemiBooleanCNCQEngine
     }
 
     @Override
-    protected QueryResult execABoxQuery(CNCQQuery q) throws IOException, InterruptedException
+    protected QueryResult execABoxQuery(CNCQQuery q, QueryResult excludeBindings, QueryResult restrictToBindings)
+            throws IOException, InterruptedException
     {
         QueryResult satResult = new QueryResultImpl(q);
 
@@ -72,7 +70,7 @@ public class SemiBooleanCNCQEngineSimple extends AbstractSemiBooleanCNCQEngine
         putQueryAtomsInABox(positiveQuery);
 
         // 4. CHECK FOR SATISFIABILITY
-        satResult = computeSatisfiableBindings(q);
+        satResult = computeSatisfiableBindings(q, excludeBindings, restrictToBindings);
 
         // 5. CLEAN-UP & ROLLING-BACK CHANGES
         cleanUp();
@@ -120,7 +118,9 @@ public class SemiBooleanCNCQEngineSimple extends AbstractSemiBooleanCNCQEngine
         return res;
     }
 
-    private QueryResult computeSatisfiableBindings(CNCQQuery query) throws IOException, InterruptedException
+    private QueryResult computeSatisfiableBindings(CNCQQuery query, QueryResult excludeBindings,
+                                                   QueryResult restrictToBindings)
+            throws IOException, InterruptedException
     {
         QueryResult res = new QueryResultImpl(query);
         if (_abox.isConsistent())
@@ -137,12 +137,24 @@ public class SemiBooleanCNCQEngineSimple extends AbstractSemiBooleanCNCQEngine
             // we have to assume that all possible bindings are satisfiable (which is later done by inverting the empty
             // results binding).
             if (!ucq.isEmpty())
-                res = _ucqEngine.exec(ucq, _abox);
+            {
+                res = _ucqEngine.exec(ucq, excludeBindings, restrictToBindings);
+                if (res instanceof MultiQueryResults mqr)
+                    res = mqr.toQueryResultImpl(query);
+                // TODO do res.setQuery(query) - because the UCQ Engine will set the UCQ as the result's query.
+            }
+            res = res.invert();
+            if (!query.getResultVars().isEmpty())
+            {
+                // If we invert, we may include bindings that we should have excluded. If explicitly do so again.
+                res.removeAll(excludeBindings);
+                // If we invert, we need to restrict to bindings again.
+                res.retainAll(restrictToBindings);
+            }
         }
-        // If ABox is inconsistent, the query is not satisfiable (thus the UCQ is trivially entailed)
-        else
-            res.add(new ResultBindingImpl());
-        return res.invert();
+        // If ABox is inconsistent, we have put a positive atom from the CNCQ to the KB that lead to inconsistency
+        //  -> the query is not entailed and we return the empty query result.
+        return res;
     }
 
     private void cleanUp()
