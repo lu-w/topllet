@@ -264,12 +264,12 @@ public class OpenlletTemporalQuery extends OpenlletCmdApp
     private void printAskQueryResult()
     {
         output("ASK query result: ");
-        output(queryResults.isEmpty() ? "no" : "yes");
+        output(queryResults == null || queryResults.isEmpty() ? "no" : "yes");
     }
 
     private void printSelectQueryResult()
     {
-        if (!queryResults.isEmpty())
+        if (queryResults != null && !queryResults.isEmpty())
         {
             if (outputFormat == OutputFormat.TABULAR)
                 printTabularQueryResults();
