@@ -103,7 +103,7 @@ public class TCQParserTest extends AbstractTCQTest
     }
 
     @Test
-    public void testPrefixesAndComments()
+    public void testPrefixesAndComments1()
     {
         String formula = """
 # comment
@@ -118,5 +118,28 @@ PREFIX pref1: <http://pref1#>
         testCQ(q.getQueries().get(0), atoms(var("http://pref#a"), _C), atoms(var("http://pref1#x"), _C));
         testCQ(q.getQueries().get(1), atoms(var("http://pref1#x"), _r, y));
         testCQ(q.getQueries().get(2), atoms(z, _C));
+    }
+
+    @Test
+    public void testPrefixesAndComments2()
+    {
+        String formula = """
+# Illegitimate use of pedestrian crossing by bicyclist
+
+PREFIX l1c: <http://purl.org/auto/l1_core#>
+PREFIX l1d: <http://purl.org/auto/l1_de#>
+PREFIX l4c: <http://purl.org/auto/l4_core#>
+PREFIX l4d: <http://purl.org/auto/l4_de#>
+PREFIX phy: <http://purl.org/auto/physics#>
+PREFIX geo: <http://www.opengis.net/ont/geosparql#>
+
+G (A(?x) ^ B(?y) ^ C(?z) ^ C(?x) ^ A(?y) ^ r(?x,?l))
+	&
+(r(?x,?w))
+	U_<=20 # we exclude driving on the walkway and switching to road for a second as a valid behavior
+(G_<=5 (p(?x,?y) ^ r(?t,?l) ^ r(?t,?x))) # illegitimately taking right of way has to be sustained for some time to be significant
+""";
+        TemporalConjunctiveQuery q = temporalQuery(formula);
+        testTCQ(q, 3, "!(G (a)&(b)U_<=20 (G_<=5 (c)))");
     }
 }
