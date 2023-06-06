@@ -8,6 +8,7 @@
 
 package openllet.query.sparqldl.jena;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -270,6 +271,11 @@ class SparqlDLExecution implements QueryExecution
 				_logger.fine("Falling back to Jena _query engine");
 				return null;
 			}
+		}
+		catch (IOException | InterruptedException ignored)
+		{
+			_logger.fine("Encountered I/O Exception");
+			return null;
 		}
 	}
 

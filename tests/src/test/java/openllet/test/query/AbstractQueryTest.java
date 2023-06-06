@@ -26,6 +26,7 @@ import openllet.tcq.model.query.TemporalConjunctiveQuery;
 import openllet.test.AbstractKBTests;
 import org.junit.Assert;
 
+import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.util.*;
 
@@ -218,18 +219,25 @@ public abstract class AbstractQueryTest extends AbstractKBTests
 	private QueryResult execQuery(Query<?> query)
 	{
 		QueryResult result = null;
-		if (query instanceof ConjunctiveQuery)
-			result = new QueryEngine().exec((ConjunctiveQuery) query);
-		else if (query instanceof UnionQuery)
-			result = new UnionQueryEngineSimple(UnionQueryEngineSimple.BindingTime.AFTER_CNF).exec((UnionQuery) query);
-		else if (query instanceof CNCQQuery)
-			result = new CNCQQueryEngineSimple().exec((CNCQQuery) query);
-		else if (query instanceof TemporalConjunctiveQuery)
-			result = new TCQEngine().exec((TemporalConjunctiveQuery) query);
-		else
-			fail("Unknown query type " + query.getClass());
-		if (result == null)
-			fail("No result returned for query " + query);
+		try
+		{
+			if (query instanceof ConjunctiveQuery)
+				result = new QueryEngine().exec((ConjunctiveQuery) query);
+			else if (query instanceof UnionQuery)
+				result = new UnionQueryEngineSimple(UnionQueryEngineSimple.BindingTime.AFTER_CNF).exec((UnionQuery) query);
+			else if (query instanceof CNCQQuery)
+				result = new CNCQQueryEngineSimple().exec((CNCQQuery) query);
+			else if (query instanceof TemporalConjunctiveQuery)
+				result = new TCQEngine().exec((TemporalConjunctiveQuery) query);
+			else
+				fail("Unknown query type " + query.getClass());
+			if (result == null)
+				fail("No result returned for query " + query);
+		}
+		catch (IOException | InterruptedException e)
+		{
+			fail(e.toString());
+		}
 		return result;
 	}
 

@@ -18,6 +18,7 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import openllet.query.sparqldl.model.results.QueryResultImpl;
 import org.apache.jena.ontology.OntModel;
 import org.apache.jena.query.QueryFactory;
 import org.apache.jena.query.QuerySolution;
@@ -217,7 +218,15 @@ public class SparqlDLDawgTester implements SparqlDawgTester
 		final Timer t = new Timer("Single _query execution");
 
 		t.start();
-		final QueryResult bindings = QueryEngine.execQuery(query);
+		QueryResult bindings;
+		try
+		{
+			bindings = QueryEngine.execQuery(query);
+		}
+		catch (IOException | InterruptedException e)
+		{
+			bindings = new QueryResultImpl(query);
+		}
 		_logger.info("Execution time=" + t.getElapsed());
 		t.stop();
 		_logger.info("Result size = " + bindings.size());

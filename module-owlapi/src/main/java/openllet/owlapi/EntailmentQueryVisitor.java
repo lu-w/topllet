@@ -2,9 +2,11 @@ package openllet.owlapi;
 
 import static org.semanticweb.owlapi.util.OWLAPIStreamUtils.asList;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import openllet.query.sparqldl.model.results.QueryResultImpl;
 import org.semanticweb.owlapi.model.OWLAnonymousIndividual;
 import org.semanticweb.owlapi.model.OWLAxiomVisitor;
 import org.semanticweb.owlapi.model.OWLClassAssertionAxiom;
@@ -78,7 +80,14 @@ public class EntailmentQueryVisitor implements OWLAxiomVisitor, FacetReasonerOWL
 
 	public boolean isEntailed()
 	{
-		final QueryResult results = QueryEngine.execQuery(_query);
+		QueryResult results = new QueryResultImpl(_query);
+		try
+		{
+			results = QueryEngine.execQuery(_query);
+		}
+		catch (IOException | InterruptedException ignored)
+		{
+		}
 		return !results.isEmpty();
 
 	}

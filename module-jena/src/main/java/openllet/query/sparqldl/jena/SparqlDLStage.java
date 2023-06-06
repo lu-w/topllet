@@ -8,12 +8,14 @@
 
 package openllet.query.sparqldl.jena;
 
+import java.io.IOException;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import openllet.query.sparqldl.model.results.QueryResultImpl;
 import org.apache.jena.graph.Graph;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.Triple;
@@ -165,7 +167,14 @@ class SparqlDLStage
 		{
 			final ConjunctiveQuery newQuery = _query.apply(convertBinding(binding));
 
-			final QueryResult results = QueryEngine.execQuery(newQuery);
+			QueryResult results = new QueryResultImpl(_query);
+			try
+			{
+				results = QueryEngine.execQuery(newQuery);
+			}
+			catch (IOException | InterruptedException ignorede)
+			{
+			}
 
 			final SparqlDLResultSet resultSet = new SparqlDLResultSet(results, null, binding);
 
