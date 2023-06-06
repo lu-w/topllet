@@ -27,34 +27,34 @@ public class BooleanTCQEngine extends AbstractBooleanQueryEngine<TemporalConjunc
     private final QueryExec<CNCQQuery> _cncqQueryEngine = new CNCQQueryEngineSimple();
 
     @Override
-    protected boolean execBooleanABoxQuery(TemporalConjunctiveQuery q)
+    protected boolean execBooleanABoxQuery(TemporalConjunctiveQuery q) throws IOException, InterruptedException
     {
-        _logger.info("Starting entailment check for TCQ " + q);
+        _logger.fine("Starting entailment check for TCQ " + q);
         String negTcqProp = q.toNegatedPropositionalAbstractionString();
-        _logger.info("Checking DFA satisfiability for negated and propositionally abstracted TCQ " + negTcqProp);
+        _logger.finer("Checking DFA satisfiability for negated and propositionally abstracted TCQ " + negTcqProp);
         try
         {
             DFA automaton = MLTL2DFA.convert(negTcqProp);
             boolean dfaSatisfiable = _checkDFASatisfiability(automaton, q);
-            _logger.info("DFA check returned " + (dfaSatisfiable ? "satisfiable" : "unsatisfiable") +
+            _logger.finer("DFA check returned " + (dfaSatisfiable ? "satisfiable" : "unsatisfiable") +
                     ", therefore TCQ is " + (dfaSatisfiable ? "not entailed" : "entailed"));
             return !dfaSatisfiable;
         }
-        catch (IOException | InterruptedException | ParseException e)
+        catch (ParseException e)
         {
-            _logger.warning(e.getMessage());
-            return false;
+            throw new IOException(e.getMessage());
         }
     }
 
-    private boolean _checkDFASatisfiability(DFA dfa, TemporalConjunctiveQuery tcq)
+    private boolean _checkDFASatisfiability(DFA dfa, TemporalConjunctiveQuery tcq) throws IOException,
+            InterruptedException
     {
         Timer cncqTimer = new Timer();
         Integer initState = dfa.getInitialState();
         Set<Integer> states = new HashSet<>();
         if (initState != null)
             states.add(initState);
-        _logger.info("Starting in states " + states);
+        _logger.finer("Starting in states " + states);
         int numLetter = 0;
         if (states.size() > 0)
         {
@@ -67,11 +67,11 @@ public class BooleanTCQEngine extends AbstractBooleanQueryEngine<TemporalConjunc
                 KnowledgeBase letter =  tcq.getTemporalKB().next();
                 if (_timer != null)
                     _timer.start();
-                _logger.info("Checking ABox #" + numLetter + " for states " + states);
+                _logger.finer("Checking ABox #" + numLetter + " for states " + states);
                 Set<Integer> newStates = new HashSet<>();
                 for (int state : states)
                 {
-                    _logger.info("\tExamining state " + state);
+                    _logger.finer("\tExamining state " + state);
                     List<Edge> edges = dfa.getEdges(state);
                     if (edges.size() == 1)
                     {
@@ -82,12 +82,12 @@ public class BooleanTCQEngine extends AbstractBooleanQueryEngine<TemporalConjunc
                             // check if we are in a sink (i.e. state - X -> state)
                             if (toState == state)
                             {
-                                _logger.info("\t\tSink detected at state " + state);
+                                _logger.finer("\t\tSink detected at state " + state);
                                 if (dfa.isAccepting(toState))
                                 {
                                     // we are "trapped" in an accepting sink - early escape from looping over ABoxes
                                     trappedInAcceptingSink = true;
-                                    _logger.info("Early abort of DFA iteration - trapped in accepting sink " + toState);
+                                    _logger.finer("Early abort of DFA iteration - trapped in accepting sink " + toState);
                                     break;
                                 }
                                 else
@@ -111,13 +111,13 @@ public class BooleanTCQEngine extends AbstractBooleanQueryEngine<TemporalConjunc
                     {
                         // TODO find good order in which new states are examined -
                         //  trivial ones first (ie. those that are sinks)
-                        _logger.info("\t\tChecking edge " + edge + " to state " + edge.getToState());
+                        _logger.finer("\t\tChecking edge " + edge + " to state " + edge.getToState());
                         if (!newStates.contains(edge.getToState()))
                         {
                             boolean edgeSat = false;
                             for (CNCQQuery cncq : edge.getCNCQs(tcq.getPropositionalAbstraction()))
                             {
-                                _logger.info("\t\t\tChecking CNCQ " + cncq);
+                                _logger.finer("\t\t\tChecking CNCQ " + cncq);
                                 if (!cncq.isEmpty())
                                 {
                                     cncq.setKB(letter);
@@ -128,25 +128,25 @@ public class BooleanTCQEngine extends AbstractBooleanQueryEngine<TemporalConjunc
                                     {
                                         newStates.add(edge.getToState());
                                         edgeSat = true;
-                                        _logger.info("\t\t\tCNCQ is satisfiable!");
+                                        _logger.finer("\t\t\tCNCQ is satisfiable!");
                                         break;
                                     }
                                     else
-                                        _logger.info("\t\t\tCNCQ unsatisfiable!");
+                                        _logger.finer("\t\t\tCNCQ unsatisfiable!");
                                 }
                                 else
                                 {
                                     newStates.add(edge.getToState());
                                     edgeSat = true;
-                                    _logger.info("\t\t\tCNCQ empty, therefore trivially satisfied");
+                                    _logger.finer("\t\t\tCNCQ empty, therefore trivially satisfied");
                                     break;
                                 }
                             }
                             if (edgeSat)
-                                _logger.info("\t\tEdge satisfied, added " + edge.getToState() + " to new states");
+                                _logger.finer("\t\tEdge satisfied, added " + edge.getToState() + " to new states");
                         }
                         else
-                            _logger.info("\t\t\tEdge can be ignored since successor state " + edge.getToState() +
+                            _logger.finer("\t\t\tEdge can be ignored since successor state " + edge.getToState() +
                                     " is already in new states");
                     }
                 }
@@ -159,11 +159,11 @@ public class BooleanTCQEngine extends AbstractBooleanQueryEngine<TemporalConjunc
             for (int state : states)
                 isAccepting |= dfa.isAccepting(state);
             if (!trappedInAcceptingSink)
-                _logger.info("Finished iteration on ABoxes, end states are " + states + " which are " +
+                _logger.fine("Finished iteration on ABoxes, end states are " + states + " which are " +
                         (isAccepting ? "accepting" : "not accepting"));
             else
-                _logger.info("DFA accepts the ABoxes due to being trapped in an accepting sink");
-            _logger.info("Checked a total of " + cncqTimer.getCount() + " CNCQ queries, which took " +
+                _logger.fine("DFA accepts the ABoxes due to being trapped in an accepting sink");
+            _logger.fine("Checked a total of " + cncqTimer.getCount() + " CNCQ queries, which took " +
                     cncqTimer.getTotal() + " ms");
             return isAccepting;
         }

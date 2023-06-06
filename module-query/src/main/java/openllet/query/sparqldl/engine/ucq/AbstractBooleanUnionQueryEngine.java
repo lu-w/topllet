@@ -6,6 +6,7 @@ import openllet.query.sparqldl.model.ucq.UnionQuery;
 import openllet.query.sparqldl.model.ucq.CNFQuery;
 import openllet.shared.tools.Log;
 
+import java.io.IOException;
 import java.util.logging.Logger;
 
 abstract public class AbstractBooleanUnionQueryEngine extends AbstractBooleanQueryEngine<UnionQuery>
@@ -18,5 +19,5 @@ abstract public class AbstractBooleanUnionQueryEngine extends AbstractBooleanQue
      * @param q The CNF query to execute
      * @return True iff. the Boolean CNF query is entailed in its knowledge base
      */
-    abstract protected boolean execBooleanABoxQuery(CNFQuery q, ABox abox);
+    abstract protected boolean execBooleanABoxQuery(CNFQuery q, ABox abox) throws IOException, InterruptedException;
 }

@@ -1,5 +1,6 @@
 package openllet.query.sparqldl.engine.cq;
 
+import java.io.IOException;
 import java.util.List;
 
 import openllet.aterm.ATermAppl;
@@ -9,6 +10,8 @@ import openllet.core.utils.TermFactory;
 import openllet.query.sparqldl.model.cq.ConjunctiveQuery;
 import openllet.query.sparqldl.model.cq.QueryAtom;
 import openllet.query.sparqldl.model.results.QueryResult;
+import openllet.query.sparqldl.model.results.QueryResultImpl;
+import openllet.query.sparqldl.model.results.ResultBindingImpl;
 
 /**
  * Implements various methods regarding conjunctive query subsumption based on the ABox freezing method.
@@ -95,7 +98,14 @@ public class QuerySubsumption
 		kb.isConsistent();
 
 		sup.setKB(kb);
-		final QueryResult results = QueryEngine.execQuery(sup);
+		QueryResult results = new QueryResultImpl(sup);
+		try
+		{
+			results = QueryEngine.execQuery(sup);
+		}
+		catch (IOException | InterruptedException ignored)
+		{
+		}
 		sup.setKB(sup.getKB());
 
 		return results;

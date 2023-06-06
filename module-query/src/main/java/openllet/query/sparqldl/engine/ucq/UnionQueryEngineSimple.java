@@ -12,6 +12,7 @@ import openllet.query.sparqldl.model.results.ResultBinding;
 import openllet.query.sparqldl.model.ucq.CNFQuery;
 import openllet.query.sparqldl.model.ucq.UnionQuery;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
@@ -21,7 +22,7 @@ import java.util.logging.Level;
  */
 public class UnionQueryEngineSimple extends AbstractUnionQueryEngine
 {
-    public enum BindingTime { BEFORE_CNF, AFTER_CNF };
+    public enum BindingTime { BEFORE_CNF, AFTER_CNF }
 
     protected BindingTime _bindingTime = BindingTime.BEFORE_CNF;
     protected QueryBindingCandidateGenerator _bindingGenerator;
@@ -47,7 +48,7 @@ public class UnionQueryEngineSimple extends AbstractUnionQueryEngine
     }
 
     @Override
-    protected QueryResult execABoxQuery(UnionQuery q)
+    protected QueryResult execABoxQuery(UnionQuery q) throws IOException, InterruptedException
     {
         if (q.getQueries().size() == 1)
             return new CombinedQueryEngine().exec(q.getQueries().get(0));
@@ -58,7 +59,7 @@ public class UnionQueryEngineSimple extends AbstractUnionQueryEngine
         };
     }
 
-    protected QueryResult execABoxQueryBindingBeforeCNF(UnionQuery q)
+    protected QueryResult execABoxQueryBindingBeforeCNF(UnionQuery q) throws IOException, InterruptedException
     {
         // Note: we can not split the query here due to semantics. Queries can only be split after conversion to CNF.
         QueryResult result = new QueryResultImpl(q);
@@ -79,7 +80,7 @@ public class UnionQueryEngineSimple extends AbstractUnionQueryEngine
         return result;
     }
 
-    protected QueryResult execABoxQueryBindingAfterCNF(UnionQuery q)
+    protected QueryResult execABoxQueryBindingAfterCNF(UnionQuery q) throws IOException, InterruptedException
     {
         // 1. ROLL-UP UCQ
         UnionQuery rolledUpUnionQuery = q.rollUp(true);

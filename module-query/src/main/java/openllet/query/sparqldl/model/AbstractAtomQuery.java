@@ -341,10 +341,16 @@ public abstract class AbstractAtomQuery<QueryType extends AtomQuery<QueryType>> 
         boolean hasOnlyClassesOrRolesInKB = true;
         for (QueryAtom atom : getAtoms())
         {
-            switch (atom.getPredicate())
+            hasOnlyClassesOrRolesInKB = switch (atom.getPredicate())
             {
-                case Type -> hasOnlyClassesOrRolesInKB &= _kb.isClass(atom.getArguments().get(1));
-                case PropertyValue -> hasOnlyClassesOrRolesInKB &= _kb.isProperty(atom.getArguments().get(1));
+                case Type -> _kb.isClass(atom.getArguments().get(1));
+                case PropertyValue -> _kb.isProperty(atom.getArguments().get(1));
+                default -> true;
+            };
+            if (!hasOnlyClassesOrRolesInKB)
+            {
+                _logger.warning("Query atom " + atom + " uses a class or role not present in its knowledge base");
+                break;
             }
         }
         return hasOnlyClassesOrRolesInKB;

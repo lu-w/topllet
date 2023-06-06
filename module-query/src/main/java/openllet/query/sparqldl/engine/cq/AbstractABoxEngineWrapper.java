@@ -6,6 +6,7 @@
 
 package openllet.query.sparqldl.engine.cq;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -56,7 +57,7 @@ public abstract class AbstractABoxEngineWrapper implements QueryExec<Conjunctive
 	protected ConjunctiveQuery aboxQuery;
 
 	@Override
-	public QueryResult exec(ConjunctiveQuery q, ABox abox, Timer timer)
+	public QueryResult exec(ConjunctiveQuery q, ABox abox, Timer timer) throws IOException, InterruptedException
 	{
 		timer.start();
 		QueryResult result = exec(q, abox);
@@ -65,7 +66,7 @@ public abstract class AbstractABoxEngineWrapper implements QueryExec<Conjunctive
 	}
 
 	@Override
-	public QueryResult exec(ConjunctiveQuery q, ABox abox)
+	public QueryResult exec(ConjunctiveQuery q, ABox abox) throws IOException, InterruptedException
 	{
 		return exec(q);
 	}
@@ -74,7 +75,7 @@ public abstract class AbstractABoxEngineWrapper implements QueryExec<Conjunctive
 	 * {@inheritDoc}
 	 */
 	@Override
-	public QueryResult exec(final ConjunctiveQuery query)
+	public QueryResult exec(final ConjunctiveQuery query) throws IOException, InterruptedException
 	{
 		assert(supports(query));
 		_logger.fine(() -> "Executing query " + query);

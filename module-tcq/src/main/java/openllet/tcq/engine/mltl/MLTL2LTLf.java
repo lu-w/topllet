@@ -29,6 +29,8 @@ public class MLTL2LTLf
             String errorMessage = error.replace("[\n\r]", " ");
             if (error.contains("lark.exceptions.Unexpected"))
                 errorMessage = "Unexpected input during parsing of " + mltlFormula + "\n" + errorMessage;
+            else if (error.contains("recursion depth"))
+                errorMessage = "MLTL " + ltlfFormula + " formula has a too large bound for MLTL2LTL";
             else
                 errorMessage = "Other error - " + errorMessage;
             throw new ParseException("MLTL2LTL error: " + errorMessage);

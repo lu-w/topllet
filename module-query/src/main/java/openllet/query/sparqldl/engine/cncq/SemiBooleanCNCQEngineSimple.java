@@ -16,6 +16,7 @@ import openllet.query.sparqldl.model.results.ResultBindingImpl;
 import openllet.query.sparqldl.model.ucq.UnionQuery;
 import openllet.query.sparqldl.model.ucq.UnionQueryImpl;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -37,7 +38,7 @@ public class SemiBooleanCNCQEngineSimple extends AbstractSemiBooleanCNCQEngine
     }
 
     @Override
-    protected QueryResult execABoxQuery(CNCQQuery q)
+    protected QueryResult execABoxQuery(CNCQQuery q) throws IOException, InterruptedException
     {
         QueryResult satResult = new QueryResultImpl(q);
 
@@ -119,7 +120,7 @@ public class SemiBooleanCNCQEngineSimple extends AbstractSemiBooleanCNCQEngine
         return res;
     }
 
-    private QueryResult computeSatisfiableBindings(CNCQQuery query)
+    private QueryResult computeSatisfiableBindings(CNCQQuery query) throws IOException, InterruptedException
     {
         QueryResult res = new QueryResultImpl(query);
         if (_abox.isConsistent())

@@ -47,7 +47,7 @@ public class MLTL2DFA
         FileInputStream fis = new FileInputStream(tmpFile);
         String dotAutomaton = IOUtils.toString(fis, StandardCharsets.UTF_8);
 
-        _logger.info("Lydia DFA is located at " + tmpFile);
+        _logger.fine("Lydia DFA is located at " + tmpFile);
 
         // AutomataLib assumes a certain shape for DFAs that Lydia/Mona does not adhere to. Some fixes are required.
         Pattern r1 = Pattern.compile("([0-9]+) -> ([0-9]+)");

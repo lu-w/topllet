@@ -9,7 +9,7 @@ import openllet.core.utils.Timer;
 import openllet.query.sparqldl.engine.QueryExec;
 import openllet.query.sparqldl.model.results.QueryResult;
 import openllet.query.sparqldl.model.results.ResultBinding;
-import openllet.tcq.engine.BooleanTCQEngine;
+import openllet.tcq.engine.TCQEngine;
 import openllet.tcq.model.kb.TemporalKnowledgeBase;
 import openllet.tcq.model.kb.FileBasedTemporalKnowledgeBaseImpl;
 import openllet.tcq.model.query.TemporalConjunctiveQuery;
@@ -21,6 +21,7 @@ import org.apache.jena.query.*;
 import org.apache.jena.shared.NotFoundException;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -37,7 +38,7 @@ public class OpenlletTemporalQuery extends OpenlletCmdApp
     private String queryString;
     private TemporalConjunctiveQuery query;
     private TemporalKnowledgeBase kb;
-    private final QueryExec<TemporalConjunctiveQuery> queryEngine = new BooleanTCQEngine();
+    private final QueryExec<TemporalConjunctiveQuery> queryEngine = new TCQEngine();
     private OutputFormat outputFormat = OutputFormat.TABULAR;
 
     private enum OutputFormat
@@ -246,7 +247,7 @@ public class OpenlletTemporalQuery extends OpenlletCmdApp
         {
             queryResults = queryEngine.exec(query, null, timer);
         }
-        catch (RuntimeException e)
+        catch (RuntimeException | IOException | InterruptedException e)
         {
             throw new OpenlletCmdException(e);
         }

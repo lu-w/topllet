@@ -7,6 +7,7 @@ import openllet.query.sparqldl.engine.QueryCandidateGeneratorNaive;
 import openllet.query.sparqldl.model.cncq.CNCQQuery;
 import openllet.query.sparqldl.model.results.*;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
@@ -28,7 +29,7 @@ public class CNCQQueryEngineSimple extends AbstractCNCQQueryEngine
     }
 
     @Override
-    protected QueryResult execABoxQuery(CNCQQuery q)
+    protected QueryResult execABoxQuery(CNCQQuery q) throws IOException, InterruptedException
     {
         QueryResult result = new QueryResultImpl(q);
 

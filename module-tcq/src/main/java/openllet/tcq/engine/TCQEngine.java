@@ -8,6 +8,7 @@ import openllet.query.sparqldl.model.results.QueryResult;
 import openllet.shared.tools.Log;
 import openllet.tcq.model.query.TemporalConjunctiveQuery;
 
+import java.io.IOException;
 import java.util.logging.Logger;
 
 // TODO eventually, this class shall replace the BooleanTCQEngine -- which then stays but just calls the TCQEngine
@@ -24,7 +25,7 @@ public class TCQEngine extends AbstractQueryEngine<TemporalConjunctiveQuery>
     }
 
     @Override
-    protected QueryResult execABoxQuery(TemporalConjunctiveQuery q)
+    protected QueryResult execABoxQuery(TemporalConjunctiveQuery q) throws IOException, InterruptedException
     {
         if (q.getResultVars().isEmpty())
             return _booleanEngine.exec(q);

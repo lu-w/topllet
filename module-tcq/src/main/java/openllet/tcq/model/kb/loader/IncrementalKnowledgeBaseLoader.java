@@ -22,7 +22,6 @@ public class IncrementalKnowledgeBaseLoader extends KnowledgeBaseLoader
     public static final Logger _logger = Log.getLogger(IncrementalKnowledgeBaseLoader.class);
 
     private OpenlletReasoner _reasoner = null;
-    private KnowledgeBase _lastLoaded;
     private OWLOntology _prevOnt;
 
     public IncrementalKnowledgeBaseLoader()
@@ -60,10 +59,10 @@ public class IncrementalKnowledgeBaseLoader extends KnowledgeBaseLoader
                     _logger.warning("Some changes in incrementally loaded ontology could not be processed");
             }
         }
-        _lastLoaded = _reasoner.getKB();
+        KnowledgeBase loadedKB = _reasoner.getKB();
         _timer.stop();
-        _logger.info("Incrementally loaded " + fileName + (numChanges >= 0 ? " (" + numChanges +
+        _logger.fine("Incrementally loaded " + fileName + (numChanges >= 0 ? " (" + numChanges +
                 " changes were propagated)" : " (full load)"));
-        return _lastLoaded;
+        return loadedKB;
     }
 }

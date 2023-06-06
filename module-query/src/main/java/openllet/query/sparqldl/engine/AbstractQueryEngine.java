@@ -8,6 +8,7 @@ import openllet.query.sparqldl.model.results.QueryResultImpl;
 import openllet.query.sparqldl.model.results.ResultBindingImpl;
 import openllet.shared.tools.Log;
 
+import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -37,7 +38,7 @@ public abstract class AbstractQueryEngine<QueryType extends Query<QueryType>> im
     }
 
     @Override
-    public QueryResult exec(QueryType q, ABox abox, Timer timer)
+    public QueryResult exec(QueryType q, ABox abox, Timer timer) throws IOException, InterruptedException
     {
         _timer = timer;
         timer.start();
@@ -47,14 +48,14 @@ public abstract class AbstractQueryEngine<QueryType extends Query<QueryType>> im
     }
 
     @Override
-    public QueryResult exec(QueryType q, ABox abox)
+    public QueryResult exec(QueryType q, ABox abox) throws IOException, InterruptedException
     {
         _abox = abox;
         return exec(q);
     }
 
     @Override
-    public QueryResult exec(QueryType q)
+    public QueryResult exec(QueryType q) throws IOException, InterruptedException
     {
         if (_abox == null)
             _abox = q.getKB().getABox();
@@ -101,5 +102,5 @@ public abstract class AbstractQueryEngine<QueryType extends Query<QueryType>> im
         return results;
     }
 
-    protected abstract QueryResult execABoxQuery(QueryType q);
+    protected abstract QueryResult execABoxQuery(QueryType q) throws IOException, InterruptedException;
 }

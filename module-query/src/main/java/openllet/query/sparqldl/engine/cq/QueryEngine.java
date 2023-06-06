@@ -13,6 +13,7 @@ import static openllet.core.utils.TermFactory.TOP_OBJECT_PROPERTY;
 import static openllet.core.utils.TermFactory.hasValue;
 import static openllet.core.utils.TermFactory.not;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -84,19 +85,19 @@ public class QueryEngine implements QueryExec<ConjunctiveQuery>
 		return getQueryExec().supports(query);
 	}
 
-	public QueryResult exec(final ConjunctiveQuery query)
+	public QueryResult exec(final ConjunctiveQuery query) throws IOException, InterruptedException
 	{
 		return execQuery(query);
 	}
 
 	@Override
-	public QueryResult exec(ConjunctiveQuery q, ABox abox)
+	public QueryResult exec(ConjunctiveQuery q, ABox abox) throws IOException, InterruptedException
 	{
 		return exec(q);
 	}
 
 	@Override
-	public QueryResult exec(ConjunctiveQuery q, ABox abox, Timer timer)
+	public QueryResult exec(ConjunctiveQuery q, ABox abox, Timer timer) throws IOException, InterruptedException
 	{
 		timer.start();
 		QueryResult result = exec(q, abox);
@@ -104,7 +105,8 @@ public class QueryEngine implements QueryExec<ConjunctiveQuery>
 		return result;
 	}
 
-	public static QueryResult execQuery(final ConjunctiveQuery query, final KnowledgeBase kb)
+	public static QueryResult execQuery(final ConjunctiveQuery query, final KnowledgeBase kb) throws IOException,
+			InterruptedException
 	{
 		final KnowledgeBase queryKB = query.getKB();
 		query.setKB(kb);
@@ -113,7 +115,7 @@ public class QueryEngine implements QueryExec<ConjunctiveQuery>
 		return result;
 	}
 
-	public static QueryResult execQuery(final ConjunctiveQuery query)
+	public static QueryResult execQuery(final ConjunctiveQuery query) throws IOException, InterruptedException
 	{
 		if (query.getAtoms().isEmpty())
 		{
@@ -326,7 +328,7 @@ public class QueryEngine implements QueryExec<ConjunctiveQuery>
 		return hasUndefinedTerm(query.getAtoms(), query.getKB());
 	}
 
-	private static QueryResult execSingleQuery(final ConjunctiveQuery query)
+	private static QueryResult execSingleQuery(final ConjunctiveQuery query) throws IOException, InterruptedException
 	{
 		if (hasUndefinedTerm(query))
 			return new QueryResultImpl(query);
