@@ -27,9 +27,9 @@ public class TestTCQEngine extends AbstractTCQTest
     {
         simpleTKB();
         // TODO check if we can optimize: if we check an edge (in full semantics) in a state N then we can add N's sat+unsat bindings to exclude
-        //testQuery("(A(?x)) U (B(?y))", new ATermAppl[][] { { _a, _b }, { _b, _b }, { _c, _b } }); // works
-        testQuery("(A(?x)) U (B(?y)) | F(C(?y))", new ATermAppl[][] { { _a, _b }, { _b, _b }, { _c, _b } }); // works
-        //testQuery("((A(?x)) U (B(?y))) | X(C(?y))", new ATermAppl[][] { { _a, _b }, { _b, _b }, { _c, _b } }); // works
+        testQuery("(A(?x)) U (B(?y))", new ATermAppl[][] { { _a, _b }, { _b, _b }, { _c, _b } }); // works
+        testQuery("((A(?x)) U (B(?y))) | F(C(?y))", new ATermAppl[][] { { _a, _b }, { _b, _b }, { _c, _b } }); // works
+        testQuery("((A(?x)) U (B(?y))) | X(C(?y))", new ATermAppl[][] { { _a, _b }, { _b, _b }, { _c, _b } }); // works
     }
 
     @Test

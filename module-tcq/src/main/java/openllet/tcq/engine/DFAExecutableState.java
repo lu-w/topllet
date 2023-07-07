@@ -182,13 +182,17 @@ public class DFAExecutableState
                 newState.addUnsatBindings(_unsatBindings);
                 // Propagate empty results only if we have a complete overall result - otherwise, they indicate a 'don't
                 // know'.
+                edgeResult.get(Bool.TRUE).removeAll(_unsatBindings);
                 if (!edgeResult.get(Bool.TRUE).isEmpty() || edgeResult.get(Bool.FALSE).isComplete())
                     newState.setSatBindings(edgeResult.get(Bool.TRUE));
                 if (!edgeResult.get(Bool.FALSE).isEmpty() || edgeResult.get(Bool.TRUE).isComplete())
                     newState.addUnsatBindings(edgeResult.get(Bool.FALSE));
+                // TODO check if this is the right place
                 for (ResultBinding unsatBinding : edgeResult.get(Bool.FALSE))
-                    // We can later only infer satisfiability on unsatisfiability for those that we know are satisfiable
-                    if (_satBindings == null || _satBindings.contains(unsatBinding))
+                    // We can later only infer satisfiability from unsatisfiability for those bindings that we know were
+                    // satisfiable and were not unsatisfiable in this state
+                    if ((_satBindings == null || _satBindings.contains(unsatBinding)) &&
+                            (_unsatBindings == null || !_unsatBindings.contains(unsatBinding)))
                     {
                         if (bindingsUnsatCount.containsKey(unsatBinding))
                             bindingsUnsatCount.put(unsatBinding, bindingsUnsatCount.get(unsatBinding) + 1);
@@ -201,8 +205,7 @@ public class DFAExecutableState
             // This is an optimization:
             // Iterates through all bindings that have an unsatisfiability count for |Edges|-1. For those, we know that
             // the missing edge *has* to be satisfiable. We add this to the new states and inform the CNCQ sat. manager.
-            // TODO this is not true anymore. This only holds if the binding was NOT in the _unsatBindings before firing
-            //  this state!
+            // TODO this is not true anymore. This only holds if the binding was NOT in the _unsatBindings
             for (ResultBinding binding : bindingsUnsatCount.keySet())
                 if (bindingsUnsatCount.get(binding) == edges.size() - 1)
                     for (Edge edge : edgeResults.keySet())
