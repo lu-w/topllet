@@ -26,6 +26,16 @@ public class TestUnionQueries extends AbstractQueryTest
         _kb.addType(_a, _A);
         _kb.addType(_b, _D);
         _kb.addPropertyValue(_r, _a, _b);
+        _kb.addPropertyValue(_q, _b, _a);
+    }
+
+    private void setupKB2()
+    {
+        individuals(_a, _b, _c, _d);
+        objectProperties(_r, _q);
+        _kb.addPropertyValue(_r, _a, _b);
+        _kb.addPropertyValue(_q, _c, _a);
+        _kb.addPropertyValue(_r, _d, _c);
     }
 
     @Test
@@ -255,5 +265,21 @@ public class TestUnionQueries extends AbstractQueryTest
         assertEquals(1, q4.split().size());
     }
 
-    // TODO Lukas: more test cases (also comparing after and before CNF binding engines results)
+    @Test
+    public void testCyclicQuery1()
+    {
+        setupKB1();
+        UnionQuery ucq = unionQuery(select(), where(
+                query(PropertyValueAtom(x, _r, y), PropertyValueAtom(y, _q, x))));
+        assertThrows(UnsupportedOperationException.class, () -> testQuery(ucq, true));
+    }
+
+    @Test
+    public void testCyclicQuery2()
+    {
+        setupKB2();
+        UnionQuery ucq = unionQuery(select(), where(
+                query(PropertyValueAtom(x, _r, y), PropertyValueAtom(y, _q, x))));
+        assertThrows(UnsupportedOperationException.class, () -> testQuery(ucq, false));
+    }
 }

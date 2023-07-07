@@ -143,7 +143,9 @@ public class SatisfiabilityKnowledgeManager
     {
         if (!_cqCache.containsKey(timePoint) || !_cqCache.get(timePoint).contains(query))
         {
-            QueryResult result = toQueryResult(_cqEngine.exec(query), query);
+            // query.copy() is required because for some queries and KBs, Openllet's CQ engine alters the query.
+            //  Example: "r(x, y)" for undist. variables x and y results in "r(x, y) ^ SubPropertyOf(r,r)" after exec().
+            QueryResult result = toQueryResult(_cqEngine.exec(query.copy()), query);
             if (!_cqCache.containsKey(timePoint))
                 _cqCache.put(timePoint, new ArrayList<>());
             _cqCache.get(timePoint).add(query);

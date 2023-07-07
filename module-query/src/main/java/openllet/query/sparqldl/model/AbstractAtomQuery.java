@@ -194,22 +194,28 @@ public abstract class AbstractAtomQuery<QueryType extends AtomQuery<QueryType>> 
         Set<ATermAppl> neighbors = new HashSet<>();
         for (QueryAtom edge : edges)
         {
-            ATermAppl n1 = edge.getArguments().get(0);
-            ATermAppl n2;
-            if (ternaryQueryPredicates.contains(edge.getPredicate()))
-                n2 = edge.getArguments().get(2);
-            else
-                n2 = edge.getArguments().get(1);
-            if (n1 == curNode && n2 != prevNode)
-                neighbors.add(n2);
-            if (n1 != prevNode && n2 == curNode)
-                neighbors.add(n1);
+            ATermAppl[] nodes = getNodes(edge);
+            if (nodes[0] == curNode && nodes[1] != prevNode)
+                neighbors.add(nodes[1]);
+            if (nodes[0] != prevNode && nodes[1] == curNode)
+                neighbors.add(nodes[0]);
         }
         boolean hasCycle = false;
         for (ATermAppl neighbor : neighbors)
             hasCycle |= cycle(neighbor, visitedNodes, finishedNodes, edges, curNode);
         finishedNodes.add(curNode);
         return hasCycle;
+    }
+
+    private ATermAppl[] getNodes(QueryAtom edge)
+    {
+        ATermAppl n1 = edge.getArguments().get(0);
+        ATermAppl n2;
+        if (ternaryQueryPredicates.contains(edge.getPredicate()))
+            n2 = edge.getArguments().get(2);
+        else
+            n2 = edge.getArguments().get(1);
+        return new ATermAppl[] {n1, n2};
     }
 
     /**
@@ -229,7 +235,21 @@ public abstract class AbstractAtomQuery<QueryType extends AtomQuery<QueryType>> 
             for (ATermAppl node : nodes)
                 hasCycle |= cycle(node, visitedNodes, finishedNodes, edges, null);
         }
-        return hasCycle;
+        return hasCycle || hasTwoNodeCycle(nodes, edges);
+    }
+
+    private boolean hasTwoNodeCycle(Collection<ATermAppl> nodes, Collection<QueryAtom> edges)
+    {
+        for (QueryAtom edge1 : edges)
+            for (QueryAtom edge2 : edges)
+                if (!edge1.equals(edge2))
+                {
+                    ATermAppl[] nodes1 = getNodes(edge1);
+                    ATermAppl[] nodes2 = getNodes(edge2);
+                    if (nodes1[0].equals(nodes2[1]) && nodes1[1].equals(nodes2[0]))
+                        return true;
+                }
+        return false;
     }
 
     @Override

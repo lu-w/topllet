@@ -102,8 +102,9 @@ public class TestBooleanTCQEngine extends AbstractTCQTest
     {
         complexTKB();
         assertThrows(UnsupportedOperationException.class, () -> testQuery("F(r(x,y) ^ p(y,z) ^ q(z,x))", false));
-        assertQueryEntailed("F(r(x,y) ^ q(y,x))");
-        assertQueryEntailed("F(r(x,y)) & F(p(y,x)) & F(q(z,x))");
+        assertThrows(UnsupportedOperationException.class, () -> testQuery("F(r(x,y) ^ q(y,x))", false));
+        assertThrows(UnsupportedOperationException.class, () -> testQuery("F(r(x,y)) & F(p(y,x)) & F(q(z,x))", false));
+        // TODO specify an example where there is a cycle in the TCQ but not in the checked CNCQs / UCQs
     }
 
     @Test

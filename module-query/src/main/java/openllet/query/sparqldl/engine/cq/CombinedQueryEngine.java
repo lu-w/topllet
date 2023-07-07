@@ -253,7 +253,9 @@ public class CombinedQueryEngine implements QueryExec<ConjunctiveQuery>
 	@Override
 	public QueryResult exec(final ConjunctiveQuery q) throws IOException, InterruptedException
 	{
-		assert(supports(q));
+		if (!supports(q))
+			throw new UnsupportedOperationException("Unsupported query " + q);
+
 		_logger.fine(() -> "Executing query " + q);
 
 		final Timer timer = new Timer("CombinedQueryEngine");

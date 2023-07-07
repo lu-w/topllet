@@ -187,7 +187,6 @@ public class DFAExecutableState
                     newState.setSatBindings(edgeResult.get(Bool.TRUE));
                 if (!edgeResult.get(Bool.FALSE).isEmpty() || edgeResult.get(Bool.TRUE).isComplete())
                     newState.addUnsatBindings(edgeResult.get(Bool.FALSE));
-                // TODO check if this is the right place
                 for (ResultBinding unsatBinding : edgeResult.get(Bool.FALSE))
                     // We can later only infer satisfiability from unsatisfiability for those bindings that we know were
                     // satisfiable and were not unsatisfiable in this state
@@ -205,7 +204,6 @@ public class DFAExecutableState
             // This is an optimization:
             // Iterates through all bindings that have an unsatisfiability count for |Edges|-1. For those, we know that
             // the missing edge *has* to be satisfiable. We add this to the new states and inform the CNCQ sat. manager.
-            // TODO this is not true anymore. This only holds if the binding was NOT in the _unsatBindings
             for (ResultBinding binding : bindingsUnsatCount.keySet())
                 if (bindingsUnsatCount.get(binding) == edges.size() - 1)
                     for (Edge edge : edgeResults.keySet())
@@ -240,9 +238,8 @@ public class DFAExecutableState
             // unsatisfiable bindings have valuable information, so we keep them)
             List<DFAExecutableState> emptyStates = new ArrayList<>();
             for (DFAExecutableState state : newExecutableStates)
-                if ((state.getSatBindings() == null && state.getUnsatBindings() == null) ||
-                        (state.getSatBindings() != null && state.getSatBindings().isEmpty() &&
-                                state.getUnsatBindings() != null && state.getUnsatBindings().isEmpty()))
+                if ((state.getSatBindings() != null && state.getSatBindings().isEmpty() &&
+                        state.getUnsatBindings() != null && state.getUnsatBindings().isEmpty()))
                     emptyStates.add(state);
             newExecutableStates.removeAll(emptyStates);
         }
@@ -285,7 +282,8 @@ public class DFAExecutableState
                 _unsatBindings.retainAll(toMerge.getUnsatBindings());
         }
         // In prior iterations, we may have added an unsat info that becomes sat through some other incoming edge.
-        _unsatBindings.removeAll(_satBindings);
+        if (_unsatBindings != null)
+            _unsatBindings.removeAll(_satBindings);
     }
 
     @Override

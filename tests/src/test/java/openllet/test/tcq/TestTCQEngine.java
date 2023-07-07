@@ -3,8 +3,6 @@ package openllet.test.tcq;
 import openllet.aterm.ATermAppl;
 import org.junit.Test;
 
-import java.util.List;
-
 public class TestTCQEngine extends AbstractTCQTest
 {
     @Test
