@@ -286,14 +286,12 @@ public abstract class AbstractQueryTest extends AbstractKBTests
 	 * Shared helper methods
 	 */
 
-	protected static List<List<ATermAppl>> allResults(Query<?> query, List<ATermAppl> individuals, int resultSize)
+	protected static List<List<ATermAppl>> allResults(List<ATermAppl> individuals, int resultSize)
 	{
 		List<ATermAppl> resVars = new ArrayList<>();
 		for (int i = 0; i < resultSize; i++)
 			resVars.add(ATermUtils.makeVar(Integer.toString(i)));
-		ConjunctiveQuery resVarQuery = new ConjunctiveQueryImpl(query);
-		resVarQuery.setResultVars(resVars);
-		QueryResult allBindings = QueryResult.allBindingsQueryResult(resVarQuery, resVars, individuals);
+		Collection<ResultBinding> allBindings = QueryResult.allBindings(resVars, individuals);
 		List<List<ATermAppl>> res = new ArrayList<>();
 		for (ResultBinding binding : allBindings)
 		{

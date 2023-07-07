@@ -136,15 +136,7 @@ public interface QueryResult extends Iterable<ResultBinding>
 
 	void explicate();
 
-	static QueryResult allBindingsQueryResult(Query<?> q, List<ATermAppl> variables, List<ATermAppl> individuals)
-	{
-		QueryResult res = new QueryResultImpl(q);
-		for (ResultBinding binding : allBindings(q, variables, individuals))
-			res.add(binding);
-		return res;
-	}
-
-	static Collection<ResultBinding> allBindings(Query<?> q, List<ATermAppl> variables, List<ATermAppl> individuals)
+	static Collection<ResultBinding> allBindings(List<ATermAppl> variables, List<ATermAppl> individuals)
 	{
 		Collection<ResultBinding> bindings = new HashSet<>();
 		// https://stackoverflow.com/a/40101377/4145563

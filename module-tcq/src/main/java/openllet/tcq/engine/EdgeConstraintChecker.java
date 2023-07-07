@@ -4,13 +4,10 @@ import openllet.core.KnowledgeBase;
 import openllet.core.utils.Bool;
 import openllet.query.sparqldl.model.cncq.CNCQQuery;
 import openllet.query.sparqldl.model.results.QueryResult;
-import openllet.query.sparqldl.model.results.QueryResultImpl;
-import openllet.query.sparqldl.model.results.ResultBinding;
 import openllet.tcq.model.automaton.DFA;
 import openllet.tcq.model.automaton.Edge;
 import openllet.tcq.model.query.TemporalConjunctiveQuery;
 
-import javax.annotation.Nullable;
 import java.io.IOException;
 import java.util.*;
 
@@ -67,11 +64,11 @@ public class EdgeConstraintChecker
     public Map<Bool, QueryResult> checkEdge(Edge edge, int timePoint, KnowledgeBase kb)
             throws IOException, InterruptedException
     {
-        return checkEdge(edge, timePoint, kb, null, null);
+        return checkEdge(edge, timePoint, kb, null);
     }
 
     public Map<Bool, QueryResult> checkEdge(Edge edge, int timePoint, KnowledgeBase kb,
-                                            QueryResult restrictSatToBindings, QueryResult restrictUnsatToBindings)
+                                            QueryResult restrictSatToBindings)
             throws IOException, InterruptedException
     {
         Map<Bool, QueryResult> result = new HashMap<>();
@@ -80,19 +77,23 @@ public class EdgeConstraintChecker
         for (CNCQQuery cncq : cncqs)
         {
             Map<Bool, QueryResult> cncqResult = _cncqSatManager.computeSatisfiableBindings(cncq, timePoint, kb,
-                    _useUnderapproximatingSemantics, restrictSatToBindings, restrictUnsatToBindings);
+                    _useUnderapproximatingSemantics, restrictSatToBindings);
             if (firstCncq)
             {
                 result.put(Bool.TRUE, cncqResult.get(Bool.TRUE));
+                result.put(Bool.FALSE, cncqResult.get(Bool.FALSE));
+                /*
+                TODO commented out because it does not seem to make a difference whether we retain all unsat bindings here
                 QueryResult unsatResult = cncqResult.get(Bool.FALSE);
                 if (restrictSatToBindings != null)
                 {
                     // TODO copy is inefficient, but probably needed if the result stored and used elsewhere
                     //  (e.g. to keep track of things)
-                    unsatResult = unsatResult.copy();
-                    unsatResult.retainAll(restrictUnsatToBindings);
+                    //unsatResult = unsatResult.copy();
+                    //unsatResult.retainAll(restrictUnsatToBindings);
                 }
                 result.put(Bool.FALSE, unsatResult);
+                */
                 firstCncq = false;
             }
             else

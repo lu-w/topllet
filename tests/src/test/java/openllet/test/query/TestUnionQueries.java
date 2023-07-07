@@ -64,7 +64,7 @@ public class TestUnionQueries extends AbstractQueryTest
         UnionQuery ucq3 = unionQuery(select(y, z), where(
                 query(TypeAtom(_a, _B), PropertyValueAtom(_a, _p, x)),
                 query(TypeAtom(z, _D), PropertyValueAtom(y, _r, z))));
-        testQuery(ucq3, allResults(ucq3, List.of(_a, _b, _c), 2));
+        testQuery(ucq3, allResults(List.of(_a, _b, _c), 2));
     }
 
     @Test
@@ -161,7 +161,7 @@ public class TestUnionQueries extends AbstractQueryTest
                 query(TypeAtom(x, _B), PropertyValueAtom(x, _r, y), PropertyValueAtom(x1, _r, z)),
                 query(TypeAtom(_a, _B)))
         );
-        testQuery(ucq13, allResults(ucq13, List.of(_a, _b, _c), 3));
+        testQuery(ucq13, allResults(List.of(_a, _b, _c), 3));
     }
 
     @Test

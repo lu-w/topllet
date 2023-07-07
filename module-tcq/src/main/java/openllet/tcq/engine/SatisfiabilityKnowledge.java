@@ -44,6 +44,7 @@ public class SatisfiabilityKnowledge
         // works over ?x and ?y. Therefore, we expand the query result to all variables of the TCQ.
         if (!bindings.getResultVars().equals(_tcq.getResultVars()))
             bindings.expandToAllVariables(_tcq.getResultVars());
+        bindings.explicate();
 
         Map<Integer, QueryResult> applicableBindings;
 
@@ -63,11 +64,10 @@ public class SatisfiabilityKnowledge
 
     public Map<Bool, QueryResult> getCertainSatisfiabilityKnowledge(int timePoint)
     {
-        return getCertainSatisfiabilityKnowledge(timePoint, null, null);
+        return getCertainSatisfiabilityKnowledge(timePoint, null);
     }
 
-    public Map<Bool, QueryResult> getCertainSatisfiabilityKnowledge(int timePoint, QueryResult restrictSatToBindings,
-                                                                    QueryResult restrictUnsatToBindings)
+    public Map<Bool, QueryResult> getCertainSatisfiabilityKnowledge(int timePoint, QueryResult restrictSatToBindings)
     {
         Map<Bool, QueryResult> knowledge = new HashMap<>();
         if (_satisfiableBindings.containsKey(timePoint))
@@ -75,7 +75,7 @@ public class SatisfiabilityKnowledge
         else
             knowledge.put(Bool.TRUE, new QueryResultImpl(_cncq));
         if (_unsatisfiableBindings.containsKey(timePoint))
-            knowledge.put(Bool.FALSE, filterBindings(_unsatisfiableBindings.get(timePoint), restrictUnsatToBindings));
+            knowledge.put(Bool.FALSE, _unsatisfiableBindings.get(timePoint));
         else
             knowledge.put(Bool.FALSE, new QueryResultImpl(_cncq));
         return knowledge;

@@ -199,7 +199,7 @@ public class QueryResultImpl implements QueryResult
 		if (!isPartialBinding(binding))
 			explicatedBindings.add(binding);
 		else
-			for (ResultBinding newBinding : QueryResult.allBindings(_query,
+			for (ResultBinding newBinding : QueryResult.allBindings(
 					getUnspecifiedVariablesInBinding(binding, getResultVars()),
 					_query.getKB().getIndividuals().stream().toList()))
 			{
@@ -288,7 +288,7 @@ public class QueryResultImpl implements QueryResult
 		// If this result contains all possible bindings anyhow, we skip this and just return the empty result
 		else if (size() > 0)
 		{
-			invBindings = QueryResult.allBindings(_query, _resultVars, inds);
+			invBindings = QueryResult.allBindings(_resultVars, inds);
 			for (ResultBinding binding : _bindings)
 				invBindings.remove(binding);
 		}

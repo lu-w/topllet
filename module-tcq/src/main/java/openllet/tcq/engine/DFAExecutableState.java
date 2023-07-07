@@ -93,22 +93,20 @@ public class DFAExecutableState
             _timer.start();
         _edgeChecker = edgeChecker;
         _isInitial = isInitial;
-        /*
-        if (_satBindings == null)
-            _satBindings = new QueryResultImpl(_tcq).invert();
-        if (_unsatBindings == null)
-            _unsatBindings = new QueryResultImpl(_tcq);
-        */
     }
 
     protected void setSatBindings(QueryResult satBindings)
     {
-        _satBindings = satBindings;
+        if (satBindings != null)
+            _satBindings = satBindings.copy();
     }
 
-    protected void setUnsatBindings(QueryResult unsatBindings)
+    protected void addUnsatBindings(QueryResult unsatBindings)
     {
-        _unsatBindings = unsatBindings;
+        if (_unsatBindings == null && unsatBindings != null)
+            _unsatBindings = unsatBindings.copy();
+        else if (unsatBindings != null)
+            _unsatBindings.addAll(unsatBindings);
     }
 
     public QueryResult getSatBindings()
@@ -159,7 +157,7 @@ public class DFAExecutableState
             DFAExecutableState newState = new DFAExecutableState(_dfa, _tcq, _dfaState, _timePoint + 1,
                     _edgeChecker, _timer);
             newState.setSatBindings(_satBindings);
-            newState.setUnsatBindings(_unsatBindings);
+            newState.addUnsatBindings(_unsatBindings);
             newExecutableStates.add(newState);
         }
         else if (canExecute())
@@ -171,43 +169,40 @@ public class DFAExecutableState
             for (Edge edge : edges)
             {
                 QueryResult restrictSatToBindings = null;
-                QueryResult restrictUnsatToBindings = null;
-                if (!_isInitial)
-                {
-                    if (_satBindings != null)
-                        restrictSatToBindings = _satBindings.copy();  // TODO .copy() maybe not required
-                    if (_unsatBindings != null)
-                    {
-                        restrictUnsatToBindings = _unsatBindings.copy();
-                        restrictUnsatToBindings.addAll(_satBindings);
-                    }
-                }
-
+                if (!_isInitial && _satBindings != null)
+                    restrictSatToBindings = _satBindings.copy();  // TODO .copy() maybe not required
                 Map<Bool, QueryResult> edgeResult = _edgeChecker.checkEdge(edge, _timePoint, _kb,
-                        restrictSatToBindings, restrictUnsatToBindings);
+                        restrictSatToBindings);
                 edgeResults.put(edge, edgeResult);
                 // TODO: isEdgeCompletelyChecked not absolute but wrt. sat bindings of current state (no need to check more)
                 fullyCheckedAllEdges &= _edgeChecker.isEdgeCompletelyChecked(edge, _timePoint);
                 DFAExecutableState newState = new DFAExecutableState(_dfa, _tcq, edge.getToState(), _timePoint + 1,
                         _edgeChecker, _timer);
+                // Already unsatisfiable bindings can be directly propagated
+                newState.addUnsatBindings(_unsatBindings);
                 // Propagate empty results only if we have a complete overall result - otherwise, they indicate a 'don't
                 // know'.
                 if (!edgeResult.get(Bool.TRUE).isEmpty() || edgeResult.get(Bool.FALSE).isComplete())
                     newState.setSatBindings(edgeResult.get(Bool.TRUE));
                 if (!edgeResult.get(Bool.FALSE).isEmpty() || edgeResult.get(Bool.TRUE).isComplete())
-                    newState.setUnsatBindings(edgeResult.get(Bool.FALSE));
-                // TODO explicit iteration - this is bad
+                    newState.addUnsatBindings(edgeResult.get(Bool.FALSE));
                 for (ResultBinding unsatBinding : edgeResult.get(Bool.FALSE))
-                    if (bindingsUnsatCount.containsKey(unsatBinding))
-                        bindingsUnsatCount.put(unsatBinding, bindingsUnsatCount.get(unsatBinding) + 1);
-                    else
-                        bindingsUnsatCount.put(unsatBinding, 1);
+                    // We can later only infer satisfiability on unsatisfiability for those that we know are satisfiable
+                    if (_satBindings == null || _satBindings.contains(unsatBinding))
+                    {
+                        if (bindingsUnsatCount.containsKey(unsatBinding))
+                            bindingsUnsatCount.put(unsatBinding, bindingsUnsatCount.get(unsatBinding) + 1);
+                        else
+                            bindingsUnsatCount.put(unsatBinding, 1);
+                    }
                 newExecutableStates.add(newState);
             }
 
             // This is an optimization:
             // Iterates through all bindings that have an unsatisfiability count for |Edges|-1. For those, we know that
             // the missing edge *has* to be satisfiable. We add this to the new states and inform the CNCQ sat. manager.
+            // TODO this is not true anymore. This only holds if the binding was NOT in the _unsatBindings before firing
+            //  this state!
             for (ResultBinding binding : bindingsUnsatCount.keySet())
                 if (bindingsUnsatCount.get(binding) == edges.size() - 1)
                     for (Edge edge : edgeResults.keySet())
@@ -265,6 +260,12 @@ public class DFAExecutableState
 
     public void merge(DFAExecutableState toMerge)
     {
+        // TODO
+        //  We shall actually only add "unsat" definitely here if ALL states agreed on UNSAT!!!!
+        //  -> done by retainAll
+        //  however, unsatBindings shall *always* be passed from one state to ALL its successors
+        //  no matter what we do, if we had an unsat binding in the past, we can never satisfy it again
+        //  -> done in execute when generating new states
         assert(getTimePoint() == toMerge.getTimePoint() && getDFAState() == toMerge.getDFAState());
         if (toMerge.getSatBindings() != null)
         {
@@ -278,8 +279,10 @@ public class DFAExecutableState
             if (_unsatBindings == null)
                 _unsatBindings = toMerge.getUnsatBindings().copy();
             else
-                _unsatBindings.addAll(toMerge.getUnsatBindings());
+                _unsatBindings.retainAll(toMerge.getUnsatBindings());
         }
+        // In prior iterations, we may have added an unsat info that becomes sat through some other incoming edge.
+        _unsatBindings.removeAll(_satBindings);
     }
 
     @Override

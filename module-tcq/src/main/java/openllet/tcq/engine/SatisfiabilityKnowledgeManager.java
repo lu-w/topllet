@@ -153,10 +153,12 @@ public class SatisfiabilityKnowledgeManager
 
     private QueryResult toQueryResult(QueryResult result, Query<?> origQuery)
     {
+        QueryResult usableResult;
         if (result instanceof MultiQueryResults mqr)
-            return mqr.toQueryResultImpl(origQuery);
+            usableResult = mqr.toQueryResultImpl(origQuery);
         else
-            return result;
+            usableResult = result;
+        return usableResult;
     }
 
     private void execCNCQQueryEngine(CNCQQuery query, int timePoint, SatisfiabilityKnowledge knowledgeOnQuery,
@@ -173,8 +175,7 @@ public class SatisfiabilityKnowledgeManager
 
     public Map<Bool, QueryResult> computeSatisfiableBindings(CNCQQuery query, int timePoint, KnowledgeBase kb,
                                                              boolean useUnderapproximatingSemantics,
-                                                             QueryResult restrictSatToBindings,
-                                                             QueryResult restrictUnsatToBindings)
+                                                             QueryResult restrictSatToBindings)
             throws IOException, InterruptedException
     {
         query.setKB(kb);
@@ -191,8 +192,7 @@ public class SatisfiabilityKnowledgeManager
                 {
                     execCNCQQueryEngine(query, timePoint, knowledgeOnQuery, restrictSatToBindings);
                 }
-            return knowledgeOnQuery.getCertainSatisfiabilityKnowledge(timePoint, restrictSatToBindings,
-                    useUnderapproximatingSemantics ? restrictUnsatToBindings : null);
+            return knowledgeOnQuery.getCertainSatisfiabilityKnowledge(timePoint, restrictSatToBindings);
         }
         else
             throw new RuntimeException("Knowledge on query " + query + " has not been initialized");
