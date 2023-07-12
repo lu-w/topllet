@@ -48,7 +48,7 @@ public abstract class AbstractAtomQuery<QueryType extends AtomQuery<QueryType>> 
             return;
         _allAtoms.add(atom);
         for (final ATermAppl a : atom.getArguments())
-            if (ATermUtils.isVar(a))
+            if (ATermUtils.isVar(a) && !_allVars.contains(a))
                 _allVars.add(a);
             else if (ATermUtils.isLiteral(a) || _kb.isIndividual(a))
                 _individualsAndLiterals.add(a);

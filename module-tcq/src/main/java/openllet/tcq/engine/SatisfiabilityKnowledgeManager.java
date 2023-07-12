@@ -168,8 +168,11 @@ public class SatisfiabilityKnowledgeManager
     {
         for (QueryResult results : knowledgeOnQuery.getCertainSatisfiabilityKnowledge(timePoint).values())
             _globallyExcludeBindings.addAll(results);
-        QueryResult result = _cncqEngine.exec(query, _globallyExcludeBindings, restrictSatToBindings);
-        knowledgeOnQuery.informAboutSatisfiability(result, true, timePoint);
+        if (!_globallyExcludeBindings.isComplete())
+        {
+            QueryResult result = _cncqEngine.exec(query, _globallyExcludeBindings, restrictSatToBindings);
+            knowledgeOnQuery.informAboutSatisfiability(result, true, timePoint);
+        }
         knowledgeOnQuery.setComplete(timePoint);  // knowledge complete -> satisfying bindings can be inverted to get unsat bindings
         for (QueryResult results : knowledgeOnQuery.getCertainSatisfiabilityKnowledge(timePoint).values())
             _globallyExcludeBindings.removeAll(results);

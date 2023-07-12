@@ -28,8 +28,6 @@ public class Edge
 
     public List<CNCQQuery> getCNCQs()
     {
-        // TODO Lukas: Lydia/Mona seems to sometimes deliver useless edges e.g. "0 1\n1,1" -> simplify to "X 1"
-        //  probably best done using a simplify method on CNCQs
         if (_tcq == null)
         {
             return new ArrayList<>();

@@ -3,7 +3,6 @@ package openllet.query.sparqldl.model;
 import openllet.aterm.ATermAppl;
 import openllet.core.KnowledgeBase;
 import openllet.core.utils.TermFactory;
-import openllet.query.sparqldl.model.cncq.CNCQQuery;
 import openllet.query.sparqldl.model.cq.*;
 import openllet.shared.tools.Log;
 
@@ -76,7 +75,8 @@ public abstract class AbstractQuery<QueryType extends Query<QueryType>> implemen
     @Override
     public void addResultVar(final ATermAppl a)
     {
-        _resultVars.add(a);
+        if (!_resultVars.contains(a))
+            _resultVars.add(a);
     }
 
     @Override
@@ -96,7 +96,7 @@ public abstract class AbstractQuery<QueryType extends Query<QueryType>> implemen
     @Override
     public void setResultVars(final List<ATermAppl> resultVars)
     {
-        _resultVars = resultVars;
+        _resultVars = new ArrayList<>(resultVars);
     }
 
     @Override

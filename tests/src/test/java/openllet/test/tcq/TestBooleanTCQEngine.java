@@ -41,7 +41,7 @@ public class TestBooleanTCQEngine extends AbstractTCQTest
     }
 
     @Test
-    public void testNotEntailedAndNegationNotEntailedAndQuery()
+    public void testNotEntailedAndNegationNotEntailedQuery()
     {
         fillSimpleTKB(2);
         final String query = "X[!](A(a))";
@@ -54,7 +54,6 @@ public class TestBooleanTCQEngine extends AbstractTCQTest
     {
         complexTKB();
         // a query engine with a naive implementation of semantics will return "not entailed"
-        // however, nontrivial semantics can only arise in case of having to check negation of queries of size > 1
         assertQueryEntailed("!G(C(a) ^ r(a,b))");
         // this is due to the axiom "C subclass of not(some(r, TOP))". B does not have such a constraint, therefore:
         assertQueryNotEntailed("!G(B(a) ^ r(a,b))");

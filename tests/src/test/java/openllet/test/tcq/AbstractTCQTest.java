@@ -192,7 +192,6 @@ public class AbstractTCQTest extends AbstractQueryTest
         subClass(_A, not(_D));
         subClass(_B, some(_p, TOP));
         subClass(_C, not(some(_r, TOP)));
-
     }
 
     protected void assertQueryEntailed(String query)
