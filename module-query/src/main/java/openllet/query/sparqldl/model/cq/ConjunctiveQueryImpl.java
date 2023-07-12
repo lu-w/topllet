@@ -476,6 +476,16 @@ public class ConjunctiveQueryImpl extends AbstractAtomQuery<ConjunctiveQuery> im
 				getUndistVars().equals(qOther.getUndistVars());
 	}
 
-
-	// TODO Lukas: override hashCode() as well for use in hash-based data structures
+	@Override
+	public int hashCode()
+	{
+		final int PRIME = 31;
+		int result = 1;
+		result = PRIME * result + _allAtoms.hashCode();
+		result = PRIME * result + _distVars.hashCode();
+		result = PRIME * result + _resultVars.hashCode();
+		result = PRIME * result + getUndistVars().hashCode();
+		result = PRIME * result + (_isNegated ? 1 : 2);
+		return result;
+	}
 }

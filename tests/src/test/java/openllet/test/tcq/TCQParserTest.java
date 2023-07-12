@@ -40,9 +40,8 @@ public class TCQParserTest extends AbstractTCQTest
     public void testRepeatedCQ1()
     {
         TemporalConjunctiveQuery q = temporalQuery("G(C(a)) & X(C(a))");
-        testTCQ(q, 2, "!(G(a) & X(a))");
+        testTCQ(q, 1, "!(G(a) & X(a))");
         testCQ(q.getQueries().get(0), atoms(_a, _C));
-        testCQ(q.getQueries().get(1), atoms(_a, _C));
     }
 
     @Test
@@ -141,5 +140,12 @@ G (A(?x) ^ B(?y) ^ C(?z) ^ C(?x) ^ A(?y) ^ r(?x,?l))
 """;
         TemporalConjunctiveQuery q = temporalQuery(formula);
         testTCQ(q, 3, "!(G (a)&(b)U_<=20 (G_<=5 (c)))");
+    }
+
+    @Test
+    public void testDuplicateConjunctiveQuery()
+    {
+        TemporalConjunctiveQuery q = temporalQuery("((A(?x)) U (B(?y))) & (A(?x))");
+        testTCQ(q, 2, "!(((a) U (b)) & (a))");
     }
 }

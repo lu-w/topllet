@@ -116,8 +116,11 @@ public class TemporalConjunctiveQueryParser
             String cqString = tcq.substring(cqBeg, cqEnd);
             tcq = tcq.substring(curIndex);
             ConjunctiveQuery q = ConjunctiveQueryParser.parse(cqString, kb.get(0));
-            Proposition qProp = propositionFactory.create(q);
-            parsedTcq.addConjunctiveQuery(qProp, q, cqString);
+            if (!parsedTcq.getConjunctiveQueries().contains(q))
+            {
+                Proposition qProp = propositionFactory.create(q);
+                parsedTcq.addConjunctiveQuery(qProp, q, cqString);
+            }
         }
 
         _logger.fine("Propositional abstraction is " + parsedTcq.getPropositionalAbstraction());

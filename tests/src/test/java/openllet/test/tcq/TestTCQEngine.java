@@ -11,32 +11,31 @@ public class TestTCQEngine extends AbstractTCQTest
     public void testSimpleQuery1()
     {
         simpleTKB();
-        testQuery("G(A(?x))", new ATermAppl[][] { { _a } }); // works
-        testQuery("G(A(?x) ^ B(?y)) & F(r(?x,?y))", new ATermAppl[][] { { _a, _b } }); // works
-        testQuery("G((A(?x)) & (B(?y))) & F(r(?x,?y))", new ATermAppl[][] { { _a, _b } }); // works
-        testQuery("G(A(?x) ^ B(?y)) & F!(r(?x,?y))"); // works
-        testQuery("G(A(?x) ^ B(?y)) & G!(r(?x,?y))"); // works
-        testQuery("G((A(?x)) & (B(?y))) & G!(r(?x,?y))"); // works
-        testQuery("G(A(?x)) & G(r(?x,?y))", new ATermAppl[][] { { _a, _b } }); // works
-        testQuery("G(A(?x)) & F(p(?x,?y))"); // works
-        testQuery("G(A(?x)) & F(r(?x,?y))", new ATermAppl[][] { { _a, _b } }); // works
+        testQuery("G(A(?x))", new ATermAppl[][] { { _a } });
+        testQuery("G(A(?x) ^ B(?y)) & F(r(?x,?y))", new ATermAppl[][] { { _a, _b } });
+        testQuery("G((A(?x)) & (B(?y))) & F(r(?x,?y))", new ATermAppl[][] { { _a, _b } });
+        testQuery("G(A(?x) ^ B(?y)) & F!(r(?x,?y))");
+        testQuery("G(A(?x) ^ B(?y)) & G!(r(?x,?y))");
+        testQuery("G((A(?x)) & (B(?y))) & G!(r(?x,?y))");
+        testQuery("G(A(?x)) & G(r(?x,?y))", new ATermAppl[][] { { _a, _b } });
+        testQuery("G(A(?x)) & F(p(?x,?y))");
+        testQuery("G(A(?x)) & F(r(?x,?y))", new ATermAppl[][] { { _a, _b } });
     }
 
     @Test
     public void testSimpleQuery2()
     {
         simpleTKB();
-        // TODO check if we can optimize: if we check an edge (in full semantics) in a state N then we can add N's sat+unsat bindings to exclude
-        testQuery("(A(?x)) U (B(?y))", new ATermAppl[][] { { _a, _b }, { _b, _b }, { _c, _b } }); // works
-        testQuery("((A(?x)) U (B(?y))) | F(C(?y))", new ATermAppl[][] { { _a, _b }, { _b, _b }, { _c, _b } }); // works
-        testQuery("((A(?x)) U (B(?y))) | X(C(?y))", new ATermAppl[][] { { _a, _b }, { _b, _b }, { _c, _b } }); // works
+        testQuery("(A(?x)) U (B(?y))", new ATermAppl[][] { { _a, _b }, { _b, _b }, { _c, _b } });
+        testQuery("((A(?x)) U (B(?y))) | F(C(?y))", new ATermAppl[][] { { _a, _b }, { _b, _b }, { _c, _b } });
+        testQuery("((A(?x)) U (B(?y))) | X(C(?y))", new ATermAppl[][] { { _a, _b }, { _b, _b }, { _c, _b } });
     }
 
     @Test
     public void testSimpleQuery3()
     {
         simpleTKB2();
-        testQuery("(A(?x)) U (B(?y))", new ATermAppl[][] { { _a, _b } }); // works
+        testQuery("(A(?x)) U (B(?y))", new ATermAppl[][] { { _a, _b } });
     }
 
     @Test
@@ -115,10 +114,13 @@ public class TestTCQEngine extends AbstractTCQTest
         complexTKB();
         testQuery("!(D(?x))", new ATermAppl[][] { { _a } } );
         testQuery("G(D(?x))", new ATermAppl[][] { { _b } } );
-        testQuery("G(!(D(?x)) -> X(D(?y)))", new ATermAppl[][] { { _a, _b }, { _b, _a }, { _b, _b }, { _b, _c }, { _c, _b } });
-        testQuery("G((D(?x)) -> X(D(?y)))", new ATermAppl[][] { { _a, _a }, { _a, _b }, { _a, _c }, { _b, _b }, { _c, _a }, { _c, _b }, { _c, _c }  });
+        testQuery("G(!(D(?x)) -> X(D(?y)))", new ATermAppl[][] { { _a, _b }, { _b, _a }, { _b, _b }, { _b, _c },
+                { _c, _b } });
+        testQuery("G((D(?x)) -> X(D(?y)))", new ATermAppl[][] { { _a, _a }, { _a, _b }, { _a, _c }, { _b, _b },
+                { _c, _a }, { _c, _b }, { _c, _c }  });
         testQuery("G((A(?x)) -> X(r(?x,?y)))", new ATermAppl[][] { { _b, _a }, { _b, _b },  { _b, _c } });
-        testQuery("G(!(D(?x)) -> X(p(?y,z)))", new ATermAppl[][] { { _b, _a }, { _b, _b }, { _b, _c },  { _a, _c }, { _c, _c }  });
+        testQuery("G(!(D(?x)) -> X(p(?y,z)))", new ATermAppl[][] { { _b, _a }, { _b, _b }, { _b, _c },
+                { _a, _c }, { _c, _c }  });
         testQuery("G(!(D(?x)) U (E(?y)))", new ATermAppl[][] { { _a, _b } });
     }
 
