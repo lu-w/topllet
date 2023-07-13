@@ -152,6 +152,12 @@ public class DFAExecutableState
     public Collection<DFAExecutableState> execute() throws IOException, InterruptedException
     {
         Collection<DFAExecutableState> newExecutableStates = new HashSet<>();
+        QueryResult restrictSatToBindings = null;
+        if (!_isInitial && _satBindings != null)
+            restrictSatToBindings = _satBindings.copy();  // TODO .copy() maybe not required
+        else if (!_isInitial)
+            // We can not infer satisfiability if prior state has no information about its satisfiability.
+            restrictSatToBindings = new QueryResultImpl(_tcq);
         if (isInSink())
         {
             DFAExecutableState newState = new DFAExecutableState(_dfa, _tcq, _dfaState, _timePoint + 1,
@@ -168,9 +174,6 @@ public class DFAExecutableState
             Map<Edge, Map<Bool, QueryResult>> edgeResults = new HashMap<>();
             for (Edge edge : edges)
             {
-                QueryResult restrictSatToBindings = null;
-                if (!_isInitial && _satBindings != null)
-                    restrictSatToBindings = _satBindings.copy();  // TODO .copy() maybe not required
                 Map<Bool, QueryResult> edgeResult = _edgeChecker.checkEdge(edge, _timePoint, _kb,
                         restrictSatToBindings);
                 edgeResults.put(edge, edgeResult);
@@ -205,7 +208,8 @@ public class DFAExecutableState
             // Iterates through all bindings that have an unsatisfiability count for |Edges|-1. For those, we know that
             // the missing edge *has* to be satisfiable. We add this to the new states and inform the CNCQ sat. manager.
             for (ResultBinding binding : bindingsUnsatCount.keySet())
-                if (bindingsUnsatCount.get(binding) == edges.size() - 1)
+                if (bindingsUnsatCount.get(binding) == edges.size() - 1 &&
+                        (restrictSatToBindings == null || restrictSatToBindings.contains(binding)))
                     for (Edge edge : edgeResults.keySet())
                         if (!edgeResults.get(edge).get(Bool.TRUE).contains(binding) &&
                                 !edgeResults.get(edge).get(Bool.FALSE).contains(binding))
@@ -260,12 +264,6 @@ public class DFAExecutableState
 
     public void merge(DFAExecutableState toMerge)
     {
-        // TODO
-        //  We shall actually only add "unsat" definitely here if ALL states agreed on UNSAT!!!!
-        //  -> done by retainAll
-        //  however, unsatBindings shall *always* be passed from one state to ALL its successors
-        //  no matter what we do, if we had an unsat binding in the past, we can never satisfy it again
-        //  -> done in execute when generating new states
         assert(getTimePoint() == toMerge.getTimePoint() && getDFAState() == toMerge.getDFAState());
         if (toMerge.getSatBindings() != null)
         {
@@ -274,13 +272,14 @@ public class DFAExecutableState
             else
                 _satBindings.addAll(toMerge.getSatBindings());
         }
-        if (toMerge.getUnsatBindings() != null)
-        {
-            if (_unsatBindings == null)
-                _unsatBindings = toMerge.getUnsatBindings().copy();
-            else
-                _unsatBindings.retainAll(toMerge.getUnsatBindings());
-        }
+        if (toMerge.getUnsatBindings() != null && _unsatBindings != null)
+            // We can only merge unsatisfiable bindings if one of them is not null -> if we got some null unsatisfiable
+            // binding, this means we have NO knowledge, and it could be anything. No arbitration can be done.
+            _unsatBindings.retainAll(toMerge.getUnsatBindings());
+        // Required because retainAll does nothing wenn given null - but null means here 'don't know anything' about
+        // unsat, but we need total agreement from all states.
+        else
+            _unsatBindings = null;
         // In prior iterations, we may have added an unsat info that becomes sat through some other incoming edge.
         if (_unsatBindings != null)
             _unsatBindings.removeAll(_satBindings);

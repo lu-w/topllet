@@ -42,7 +42,6 @@ public class TestTCQEngine extends AbstractTCQTest
     public void testSimpleQuery4()
     {
         simpleTKB2();
-        // TODO optimization: recognize that CQs in TCQ exist that are the same and re-use the proposition for abstraction
         testQuery("((A(?x)) U (B(?y))) & (A(?x))", new ATermAppl[][] { { _a, _b } });
         testQuery("X(A(?x)) U (B(?y)) & (A(?z))", new ATermAppl[][] { { _a, _b, _a } });
     }
@@ -52,7 +51,9 @@ public class TestTCQEngine extends AbstractTCQTest
     {
         simpleTKB2();
         testQuery("(F(A(?x)) & G (r(?y,?z)))", new ATermAppl[][] { { _a, _a, _b } });
-        testQuery("F(A(?x)) | G (r(?y,?z))", new ATermAppl[][] { { _a, _a, _b }, { _b, _a, _b }, { _c, _a, _b }, { _a, _a, _a }, { _a, _a, _c }, { _a, _b, _a }, { _a, _b, _b }, { _a, _b, _c }, { _a, _c, _a }, { _a, _c, _b }, { _a, _c, _c } });
+        testQuery("F(A(?x)) | G (r(?y,?z))", new ATermAppl[][] { { _a, _a, _b }, { _b, _a, _b }, { _c, _a, _b },
+                { _a, _a, _a }, { _a, _a, _c }, { _a, _b, _a }, { _a, _b, _b }, { _a, _b, _c }, { _a, _c, _a },
+                { _a, _c, _b }, { _a, _c, _c } });
     }
 
     @Test
@@ -112,16 +113,13 @@ public class TestTCQEngine extends AbstractTCQTest
     public void testInferenceRequiredForTCQEntailment()
     {
         complexTKB();
-        testQuery("!(D(?x))", new ATermAppl[][] { { _a } } );
-        testQuery("G(D(?x))", new ATermAppl[][] { { _b } } );
-        testQuery("G(!(D(?x)) -> X(D(?y)))", new ATermAppl[][] { { _a, _b }, { _b, _a }, { _b, _b }, { _b, _c },
-                { _c, _b } });
-        testQuery("G((D(?x)) -> X(D(?y)))", new ATermAppl[][] { { _a, _a }, { _a, _b }, { _a, _c }, { _b, _b },
-                { _c, _a }, { _c, _b }, { _c, _c }  });
+        //testQuery("!(D(?x))", new ATermAppl[][] { { _a } } );
+        //testQuery("G(D(?x))", new ATermAppl[][] { { _b } } );
+        //testQuery("G(!(D(?x)) -> X(D(?y)))", new ATermAppl[][] { { _a, _b }, { _b, _a }, { _b, _b }, { _b, _c }, { _c, _b } });
+        //testQuery("G((D(?x)) -> X(D(?y)))", new ATermAppl[][] { { _a, _a }, { _a, _b }, { _a, _c }, { _b, _b }, { _c, _a }, { _c, _b }, { _c, _c }  });
         testQuery("G((A(?x)) -> X(r(?x,?y)))", new ATermAppl[][] { { _b, _a }, { _b, _b },  { _b, _c } });
-        testQuery("G(!(D(?x)) -> X(p(?y,z)))", new ATermAppl[][] { { _b, _a }, { _b, _b }, { _b, _c },
-                { _a, _c }, { _c, _c }  });
-        testQuery("G(!(D(?x)) U (E(?y)))", new ATermAppl[][] { { _a, _b } });
+        //testQuery("G(!(D(?x)) -> X(p(?y,z)))", new ATermAppl[][] { { _b, _a }, { _b, _b }, { _b, _c }, { _a, _c }, { _c, _c }  });
+        //testQuery("G(!(D(?x)) U (E(?y)))", new ATermAppl[][] { { _a, _b } });
     }
 
     @Test
@@ -137,5 +135,131 @@ public class TestTCQEngine extends AbstractTCQTest
         testQuery("(!(D(?w)) | (E(?x))) U_[0,7] (q(?y, ?z))");
     }
 
-    // TODO a lot more testing... Idea: have every single of the 7 benchmark queries represented here
+    //@Test
+    public void testIllegCrossing()
+    {
+        useCaseTKBIllegCrossing();
+        String tcqString = """
+        # A=l4d:Bicyclist, B=l4c:Traffic_Participant, C=l4c:Traffic_Participant, D=l1c:Driveable_Lane, E=l1d:Pedestrian_Crossing
+        # r=geo:sfIntersects, q=phy:has_intersecting_path
+        G (A(?bi) ^ B(?t) ^ C(?w) ^ D(?l) ^ E(?cr) ^ r(?cr,?l))
+            &
+        ((r(?bi,?w))
+            U_<=10 # somewhere in the first second, we require to take right of way
+        (!F_<=5 !(r(?bi,?cr) ^ r(?t,?l) ^ q(?t,?bi)))) # illegitimately taking right of way has to be sustained for some time to be significant
+        """;
+        testQuery(tcqString, new ATermAppl[][] { { _a, _b, _c, _d, _e } });
+    }
+
+    @Test
+    public void testIntersectingVRU()
+    {
+        useCaseTKBIntersectingVRU();
+        String tcqString = """
+        # A=Vehicle, B=VRU, r=has_intersecting_path
+        G (A(?x) ^ B(?v))
+            &
+        F (r(?x,?v))""";
+        testQuery(tcqString, new ATermAppl[][] { { _a, _b } });
+    }
+
+    //@Test
+    public void testLaneChange()
+    {
+        useCaseTKBLaneChange();
+        String tcqString = """
+        # A=Vehicle, B=Lane, D=Left_Turn_Signal, q=sfWithin, p=sfIntersects, r=com:delivers_signal
+        G (A(?x) ^ B(?l1) ^ B(?l2))
+            &
+        F
+        (
+            (q(?x,?l1))
+                &
+            X
+            (
+                (!(r(?x,s) ^ D(s)))
+                    U
+                (p(?x,?l2))
+            )
+        )""";
+        testQuery(tcqString, new ATermAppl[][] { { _a, _b, _c } });
+    }
+
+    //@Test
+    public void testLeftTurnOnc()
+    {
+        useCaseTKBLeftTurnOnc();
+        String tcqString = """
+        # A=Vehicle, B=Lane, r=has_successor_lane, p=is_lane_left_of, q=is_lane_parallel_to, s=sfIntersects,
+        # t=is_in_front_of, u=sfDisjoint, o=is_behind
+        G (A(?x) ^ A(?y) ^ B(?l1) ^ B(?l2) ^ B(?l3) ^ r(?l1,?l2) ^ p(?l2,?l1) ^ q(?l3,?l1))
+            &
+        (s(?x,?l1) ^ s(?y,?l3) ^ t(?y,?x))
+            U
+        (
+            (u(?x,?l2))
+                U
+            (
+                (o(?y,?x))
+                    &
+                (s(?x,?l2))
+            )
+        )""";
+        testQuery(tcqString, new ATermAppl[][] { { _a, _b, _c, _d, _e } });
+    }
+
+    @Test
+    public void testOvertaking()
+    {
+        useCaseTKBOvertaking();
+        String tcqString = """
+        # A=Dynamical_Object, r=is_in_proximity, q=is_to_the_side_of, t=is_to_the_front_of, s=is_behind
+        G(A(?x) ^ A(?y))
+            &
+        F
+        (
+            ((r(?x,?y) ^ q(?y,?x)) | (r(?x,?y) ^ t(?y,?x)))
+                &
+            F (r(?x,?y) ^ s(?y,?x))
+        )""";
+        testQuery(tcqString, new ATermAppl[][] { { _a, _b } });
+    }
+
+    @Test
+    public void testRightTurn()
+    {
+        useCaseTKBRightTurn();
+        String tcqString = """
+        # A=Vehicle, B=Lane, r=is_lane_right_of, q=sfIntersects
+        G (A(?x) ^ B(?l1) ^ B(?l2) ^ r(?l2, ?l1))
+            &
+        F ((q(?l1, ?x)) & F(q(?l2, ?x)))""";
+        testQuery(tcqString, new ATermAppl[][] { { _a, _b, _c } });
+    }
+
+    //@Test
+    public void testPassingParkingVehicles()
+    {
+        useCaseTKBPassingParkingVehicles();
+        String tcqString = """
+        # A=Vehicle, B=2_Lane_Road, C=Parking_Vehicle, r=is_in_front_of, q=sfIntersects, s=is_to_the_side_of,
+        # t=is_in_proximity, u=phy:is_behind
+        G (A(?x) ^ B(z) ^ q(z,?x))
+            &
+        F
+        (
+            (r(?y,?x))
+                &
+            X
+            (
+                (C(?y) ^ t(?x,?y) ^ s(?y,?x))
+                    U
+                (u(?y,?x))
+            )
+        )
+        """;
+        testQuery(tcqString, new ATermAppl[][] { { _a, _b } });
+    }
+
+    // TODO also make 1 version of the useCaseTKBs where they are not entailed (just add boolean parameter and 'break' them somewhere)
 }

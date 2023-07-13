@@ -1,6 +1,7 @@
 package openllet.tcq.engine;
 
 import openllet.core.OpenlletOptions;
+import openllet.core.utils.Bool;
 import openllet.core.utils.Timer;
 import openllet.query.sparqldl.engine.AbstractQueryEngine;
 import openllet.query.sparqldl.engine.QueryExec;
@@ -55,7 +56,7 @@ public class TCQEngine extends AbstractQueryEngine<TemporalConjunctiveQuery>
             Timer t = new Timer();
             t.start();
             _edgeChecker.setUnderapproximatingSemantics(true);
-            satResult = _checkDFASatisfiability(automaton, q);
+            satResult = _checkDFASatisfiability(automaton, q, null);
             excludeResults = new QueryResultImpl(q);
             for (QueryResult excludeResult : satResult.values())
                 for (ResultBinding binding : excludeResult)
@@ -73,7 +74,7 @@ public class TCQEngine extends AbstractQueryEngine<TemporalConjunctiveQuery>
             _edgeChecker.excludeBindings(excludeResults);
             _edgeChecker.setUnderapproximatingSemantics(false);
             _logger.fine("Trying full blown semantics check on DFA");
-            satResult = _checkDFASatisfiability(automaton, q);
+            satResult = _checkDFASatisfiability(automaton, q, satResult);
             _edgeChecker.doNotExcludeBindings();
             t.stop();
             _logger.finer("Full semantics DFA check returned " + satResult.get(true).size() +
@@ -98,7 +99,8 @@ public class TCQEngine extends AbstractQueryEngine<TemporalConjunctiveQuery>
      * @return Guaranteed satisfiability information, i.e. true -> final state has been reached, false -> it is certain
      *  that no final state can be reached
      */
-    private Map<Boolean, QueryResult> _checkDFASatisfiability(DFA dfa, TemporalConjunctiveQuery tcq)
+    private Map<Boolean, QueryResult> _checkDFASatisfiability(DFA dfa, TemporalConjunctiveQuery tcq,
+                                                              Map<Boolean, QueryResult> knownResults)
             throws IOException, InterruptedException
     {
         Integer initState = dfa.getInitialState();
@@ -119,15 +121,24 @@ public class TCQEngine extends AbstractQueryEngine<TemporalConjunctiveQuery>
             states.remove(execState);
         }
 
-        return assembleFinalResult(dfa, tcq, states);
+        return assembleFinalResult(dfa, tcq, states, knownResults);
     }
 
     private Map<Boolean, QueryResult> assembleFinalResult(DFA dfa, TemporalConjunctiveQuery tcq,
-                                                          DFAExecutableStates states)
+                                                          DFAExecutableStates states,
+                                                          Map<Boolean, QueryResult> knownResults)
     {
         Map<Boolean, QueryResult> result = new HashMap<>();
-        result.put(false, new QueryResultImpl(tcq));
-        result.put(true, new QueryResultImpl(tcq));
+        if (knownResults == null)
+        {
+            result.put(false, new QueryResultImpl(tcq));
+            result.put(true, new QueryResultImpl(tcq));
+        }
+        else
+        {
+            result.put(false, knownResults.get(false));
+            result.put(true, knownResults.get(true));
+        }
 
         if (states.size() > 0)
         {
@@ -158,25 +169,25 @@ public class TCQEngine extends AbstractQueryEngine<TemporalConjunctiveQuery>
             }
             else
             {
-                // Finds all satisfiable bindings from some non-final state
-                QueryResult rejectedBindings = new QueryResultImpl(tcq);
+                // Finds all satisfiable bindings from some non-final state (potential candidates for rejection)
+                QueryResult potentiallyRejectedBindings = new QueryResultImpl(tcq);
                 for (DFAExecutableState state : states)
                     if (!dfa.isAccepting(state.getDFAState()) && state.getSatBindings() != null)
-                        rejectedBindings.addAll(state.getSatBindings());
+                        potentiallyRejectedBindings.addAll(state.getSatBindings());
                 // Removes those for which a counterexample was generated (i.e. that were accepted)
                 QueryResult counterexampleFound = new QueryResultImpl(tcq);
-                for (ResultBinding potentiallyAcceptedBinding : rejectedBindings)
+                for (ResultBinding potentiallyRejectedBinding : potentiallyRejectedBindings)
                     for (DFAExecutableState state : states)
                         if (dfa.isAccepting(state.getDFAState()))
                             if (state.getSatBindings() != null &&
-                                    state.getSatBindings().contains(potentiallyAcceptedBinding))
+                                    state.getSatBindings().contains(potentiallyRejectedBinding))
                             {
-                                counterexampleFound.add(potentiallyAcceptedBinding);
+                                counterexampleFound.add(potentiallyRejectedBinding);
                                 break;
                             }
-                rejectedBindings.removeAll(counterexampleFound);
-                result.put(false, rejectedBindings);
-                result.put(true, rejectedBindings.invert());
+                potentiallyRejectedBindings.removeAll(counterexampleFound);
+                result.get(false).addAll(potentiallyRejectedBindings);
+                result.put(true, result.get(false).invert());
             }
         }
 

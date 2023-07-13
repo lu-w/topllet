@@ -194,6 +194,195 @@ public class AbstractTCQTest extends AbstractQueryTest
         subClass(_C, not(some(_r, TOP)));
     }
 
+    protected void useCaseTKBIllegCrossing()
+    {
+        fillUseCaseTKB(20);
+
+        int i = 0;
+        for (KnowledgeBase kb : _tkb)
+        {
+            kb.addType(_a, _A);
+            kb.addType(_b, _B);
+            kb.addType(_c, _C);
+            kb.addType(_d, _D);
+            kb.addType(_e, _E);
+            kb.addPropertyValue(_r, _e, _d);
+            if (i < 5)
+                kb.addPropertyValue(_r, _a, _c);
+            if (i < 13 && i > 5)
+            {
+                kb.addPropertyValue(_r, _a, _e);
+                kb.addPropertyValue(_r, _b, _d);
+                kb.addPropertyValue(_r, _b, _a);
+            }
+            i++;
+        }
+    }
+
+    protected void useCaseTKBIntersectingVRU()
+    {
+        fillUseCaseTKB(20);
+
+        int i = 0;
+        for (KnowledgeBase kb : _tkb)
+        {
+            kb.addType(_a, _A);
+            kb.addType(_b, _B);
+            kb.addPropertyValue(_r, _e, _d);
+            if (i < 16 && i > 12)
+                kb.addPropertyValue(_r, _a, _b);
+            i++;
+        }
+    }
+
+    protected void useCaseTKBLaneChange()
+    {
+        fillUseCaseTKB(20);
+
+        int i = 0;
+        for (KnowledgeBase kb : _tkb)
+        {
+            kb.addType(_a, _A);
+            kb.addType(_b, _B);
+            kb.addType(_c, _B);
+            if (i < 5)
+                kb.addPropertyValue(_q, _a, _b);
+            if (i == 8)
+            {
+                // one short turn signal -> not enough
+                kb.addType(_d, _D);
+                kb.addPropertyValue(_r, _a, _d);
+            }
+            else
+                kb.addType(_a, not(some(_r, _D)));
+            // intersecting lane 2 @t=13+
+            if (i > 12)
+                kb.addPropertyValue(_p, _a, _c);
+            i++;
+        }
+    }
+
+    protected void useCaseTKBLeftTurnOnc()
+    {
+        fillUseCaseTKB(20);
+
+        int i = 0;
+        for (KnowledgeBase kb : _tkb)
+        {
+            kb.addType(_a, _A);
+            kb.addType(_b, _A);
+            kb.addType(_c, _B);
+            kb.addType(_d, _B);
+            kb.addType(_e, _B);
+            kb.addPropertyValue(_r, _c, _d);
+            kb.addPropertyValue(_p, _d, _c);
+            kb.addPropertyValue(_q, _e, _c);
+
+            if (i < 8)
+            {
+                kb.addPropertyValue(_s, _a, _c);
+                kb.addPropertyValue(_s, _b, _e);
+                kb.addPropertyValue(_t, _a, _b);
+            }
+            else if (i < 14)
+                kb.addPropertyValue(_u, _a, _d);
+            else
+            {
+                kb.addPropertyValue(_o, _b, _a);
+                kb.addPropertyValue(_s, _a, _d);
+            }
+
+            i++;
+        }
+    }
+
+    protected void useCaseTKBOvertaking()
+    {
+        fillUseCaseTKB(20);
+
+        int i = 0;
+        for (KnowledgeBase kb : _tkb)
+        {
+            kb.addType(_a, _A);
+            kb.addType(_b, _A);
+            kb.addType(_c, _B);
+
+            if (i == 3)
+            {
+                kb.addPropertyValue(_r, _a, _b);
+                kb.addPropertyValue(_t, _b, _a);
+            }
+            if (i >= 4 && i < 8)
+            {
+                kb.addPropertyValue(_r, _a, _b);
+                kb.addPropertyValue(_q, _b, _a);
+            }
+            if (i >= 8 && i < 14)
+            {
+                kb.addPropertyValue(_r, _a, _b);
+                kb.addPropertyValue(_s, _b, _a);
+            }
+
+            i++;
+        }
+    }
+
+    protected void useCaseTKBRightTurn()
+    {
+        fillUseCaseTKB(20);
+
+        int i = 0;
+        for (KnowledgeBase kb : _tkb)
+        {
+            kb.addType(_a, _A);
+            kb.addType(_b, _B);
+            kb.addType(_c, _B);
+            kb.addPropertyValue(_r, _c, _b);
+
+            if (i > 7 && i < 10)
+                kb.addPropertyValue(_q, _b, _a);
+            if (i >= 10 && i < 15)
+                kb.addPropertyValue(_q, _c, _a);
+
+            i++;
+        }
+    }
+
+    protected void useCaseTKBPassingParkingVehicles()
+    {
+        fillUseCaseTKB(20);
+
+        int i = 0;
+        for (KnowledgeBase kb : _tkb)
+        {
+            kb.addType(_a, _A);
+            kb.addType(_b, _B); // TODO replace by axioms on 2 lane road
+            kb.addType(_c, _C); // TODO replace by axioms on parking vehicles
+            kb.addPropertyValue(_q, _b, _a);
+
+            if (i > 7 && i < 10)
+                kb.addPropertyValue(_r, _c, _a);
+            if (i >= 10 && i < 13)
+            {
+                kb.addPropertyValue(_t, _a, _c);
+                kb.addPropertyValue(_s, _c, _a);
+            }
+            if (i >= 13 && i < 17)
+                kb.addPropertyValue(_u, _c, _a);
+
+            i++;
+        }
+    }
+
+    protected void fillUseCaseTKB(int size)
+    {
+        timeSteps(size);
+
+        classes(_A, _B, _C, _D, _E);
+        individuals(_a, _b, _c, _d, _e, _f);
+        objectProperties(_r, _p, _q, _t, _s, _u, _o);
+    }
+
     protected void assertQueryEntailed(String query)
     {
         testQuery(query, true);
