@@ -156,10 +156,13 @@ public class TCQEngine extends AbstractQueryEngine<TemporalConjunctiveQuery>
                             result.get(true).addAll(state.getSatBindings());
                         if (canInferFromUnsat)
                         {
+                            if (state.getUnsatBindings() == null)
+                            {
+                                unsatForAllFinalStates = null;
+                                break;
+                            }
                             if (unsatForAllFinalStates == null)
                                 unsatForAllFinalStates = state.getUnsatBindings();
-                            else if (state.getUnsatBindings() == null)
-                                unsatForAllFinalStates = new QueryResultImpl(tcq);
                             else
                                 unsatForAllFinalStates.retainAll(state.getUnsatBindings());
                         }

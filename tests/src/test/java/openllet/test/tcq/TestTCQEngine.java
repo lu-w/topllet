@@ -113,13 +113,13 @@ public class TestTCQEngine extends AbstractTCQTest
     public void testInferenceRequiredForTCQEntailment()
     {
         complexTKB();
-        //testQuery("!(D(?x))", new ATermAppl[][] { { _a } } );
-        //testQuery("G(D(?x))", new ATermAppl[][] { { _b } } );
-        //testQuery("G(!(D(?x)) -> X(D(?y)))", new ATermAppl[][] { { _a, _b }, { _b, _a }, { _b, _b }, { _b, _c }, { _c, _b } });
-        //testQuery("G((D(?x)) -> X(D(?y)))", new ATermAppl[][] { { _a, _a }, { _a, _b }, { _a, _c }, { _b, _b }, { _c, _a }, { _c, _b }, { _c, _c }  });
+        testQuery("!(D(?x))", new ATermAppl[][] { { _a } } );
+        testQuery("G(D(?x))", new ATermAppl[][] { { _b } } );
+        testQuery("G(!(D(?x)) -> X(D(?y)))", new ATermAppl[][] { { _a, _b }, { _b, _a }, { _b, _b }, { _b, _c }, { _c, _b } });
+        testQuery("G((D(?x)) -> X(D(?y)))", new ATermAppl[][] { { _a, _a }, { _a, _b }, { _a, _c }, { _b, _b }, { _c, _a }, { _c, _b }, { _c, _c }  });
         testQuery("G((A(?x)) -> X(r(?x,?y)))", new ATermAppl[][] { { _b, _a }, { _b, _b },  { _b, _c } });
-        //testQuery("G(!(D(?x)) -> X(p(?y,z)))", new ATermAppl[][] { { _b, _a }, { _b, _b }, { _b, _c }, { _a, _c }, { _c, _c }  });
-        //testQuery("G(!(D(?x)) U (E(?y)))", new ATermAppl[][] { { _a, _b } });
+        testQuery("G(!(D(?x)) -> X(p(?y,z)))", new ATermAppl[][] { { _b, _a }, { _b, _b }, { _b, _c }, { _a, _c }, { _c, _c }  });
+        testQuery("G(!(D(?x)) U (E(?y)))", new ATermAppl[][] { { _a, _b } });
     }
 
     @Test
@@ -136,6 +136,7 @@ public class TestTCQEngine extends AbstractTCQTest
     }
 
     //@Test
+    // TODO runs too long - minimize abox
     public void testIllegCrossing()
     {
         useCaseTKBIllegCrossing();
@@ -163,10 +164,10 @@ public class TestTCQEngine extends AbstractTCQTest
         testQuery(tcqString, new ATermAppl[][] { { _a, _b } });
     }
 
-    //@Test
+    @Test
     public void testLaneChange()
     {
-        useCaseTKBLaneChange();
+        useCaseTKBLaneChange(false);
         String tcqString = """
         # A=Vehicle, B=Lane, D=Left_Turn_Signal, q=sfWithin, p=sfIntersects, r=com:delivers_signal
         G (A(?x) ^ B(?l1) ^ B(?l2))
@@ -186,6 +187,7 @@ public class TestTCQEngine extends AbstractTCQTest
     }
 
     //@Test
+    // TODO runs too long - minimize abox
     public void testLeftTurnOnc()
     {
         useCaseTKBLeftTurnOnc();
@@ -237,7 +239,7 @@ public class TestTCQEngine extends AbstractTCQTest
         testQuery(tcqString, new ATermAppl[][] { { _a, _b, _c } });
     }
 
-    //@Test
+    @Test
     public void testPassingParkingVehicles()
     {
         useCaseTKBPassingParkingVehicles();
@@ -258,7 +260,7 @@ public class TestTCQEngine extends AbstractTCQTest
             )
         )
         """;
-        testQuery(tcqString, new ATermAppl[][] { { _a, _b } });
+        testQuery(tcqString, new ATermAppl[][] { { _a, _c } });
     }
 
     // TODO also make 1 version of the useCaseTKBs where they are not entailed (just add boolean parameter and 'break' them somewhere)

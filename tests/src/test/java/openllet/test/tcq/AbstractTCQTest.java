@@ -235,7 +235,7 @@ public class AbstractTCQTest extends AbstractQueryTest
         }
     }
 
-    protected void useCaseTKBLaneChange()
+    protected void useCaseTKBLaneChange(boolean breakIt)
     {
         fillUseCaseTKB(20);
 
@@ -245,11 +245,11 @@ public class AbstractTCQTest extends AbstractQueryTest
             kb.addType(_a, _A);
             kb.addType(_b, _B);
             kb.addType(_c, _B);
-            if (i < 5)
+            if (i < 8)
                 kb.addPropertyValue(_q, _a, _b);
-            if (i == 8)
+            if (breakIt && i == 10)
             {
-                // one short turn signal -> not enough
+                // one short turn signal -> is enough
                 kb.addType(_d, _D);
                 kb.addPropertyValue(_r, _a, _d);
             }
