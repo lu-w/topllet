@@ -10,6 +10,7 @@ import java.util.*;
 import java.util.Map.Entry;
 
 import openllet.aterm.ATermAppl;
+import openllet.core.utils.Bool;
 import openllet.query.sparqldl.model.Query;
 import openllet.query.sparqldl.model.cq.QueryParameters;
 
@@ -34,6 +35,7 @@ public class QueryResultImpl implements QueryResult
 	private final Query<?> _query;
 	private final QueryParameters _parameters;
 	private boolean _isInverted = false;
+	private Collection<ATermAppl> _isExpandedWrt = null;
 
 	public QueryResultImpl(final Query<?> query)
 	{
@@ -115,10 +117,14 @@ public class QueryResultImpl implements QueryResult
 	@Override
 	public void expandToAllVariables(Collection<ATermAppl> variables)
 	{
-		for (ATermAppl variable : variables)
-			if (!_resultVars.contains(variable))
-				_resultVars.add(variable);
-		explicate();
+		if (_isExpandedWrt == null || !_isExpandedWrt.equals(variables))
+		{
+			for (ATermAppl variable : variables)
+				if (!_resultVars.contains(variable))
+					_resultVars.add(variable);
+			explicate();
+			_isExpandedWrt = new HashSet<>(variables);
+		}
 	}
 
 	/**
@@ -311,8 +317,13 @@ public class QueryResultImpl implements QueryResult
 	@Override
 	public boolean isPartialBinding(ResultBinding binding)
 	{
-		Set<ATermAppl> vars = new HashSet<>(getResultVars());
-		return binding.getAllVariables().size() < vars.size() && vars.containsAll(binding.getAllVariables());
+		return isPartialBinding(binding, _resultVars);
+	}
+
+	protected boolean isPartialBinding(ResultBinding binding, Collection<ATermAppl> variables)
+	{
+		return binding.getAllVariables().size() < variables.size() &&
+				variables.containsAll(binding.getAllVariables());
 	}
 
 	@Override
