@@ -209,11 +209,11 @@ public class AbstractTCQTest extends AbstractQueryTest
             kb.addPropertyValue(_r, _e, _d);
             if (i < 5)
                 kb.addPropertyValue(_r, _a, _c);
-            if (i < 13 && i > 5)
+            if (i < 13 && i >= 5)
             {
                 kb.addPropertyValue(_r, _a, _e);
                 kb.addPropertyValue(_r, _b, _d);
-                kb.addPropertyValue(_r, _b, _a);
+                kb.addPropertyValue(_q, _b, _a);
             }
             i++;
         }
@@ -264,7 +264,7 @@ public class AbstractTCQTest extends AbstractQueryTest
 
     protected void useCaseTKBLeftTurnOnc()
     {
-        fillUseCaseTKB(20);
+        fillUseCaseTKB(5);
 
         int i = 0;
         for (KnowledgeBase kb : _tkb)
@@ -278,13 +278,13 @@ public class AbstractTCQTest extends AbstractQueryTest
             kb.addPropertyValue(_p, _d, _c);
             kb.addPropertyValue(_q, _e, _c);
 
-            if (i < 8)
+            if (i < 2)
             {
                 kb.addPropertyValue(_s, _a, _c);
                 kb.addPropertyValue(_s, _b, _e);
-                kb.addPropertyValue(_t, _a, _b);
+                kb.addPropertyValue(_t, _b, _a);
             }
-            else if (i < 14)
+            else if (i < 3)
                 kb.addPropertyValue(_u, _a, _d);
             else
             {

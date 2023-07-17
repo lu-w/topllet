@@ -135,8 +135,10 @@ public class TestTCQEngine extends AbstractTCQTest
         testQuery("(!(D(?w)) | (E(?x))) U_[0,7] (q(?y, ?z))");
     }
 
-    //@Test
-    // TODO runs too long - minimize abox
+    @Test
+    // TODO only ONE binding is left after CQ engine check. All others are satisfied by the DFA, and can thus be rejected.
+    //  if this is only one binding - why is it taking so long? probably again some explicit iteration, esp. the binding generator.
+    //  Maybe we should use a .invert() and plug in a binding generator that iterates over a given QueryResult - that's it.
     public void testIllegCrossing()
     {
         useCaseTKBIllegCrossing();
@@ -187,7 +189,7 @@ public class TestTCQEngine extends AbstractTCQTest
     }
 
     //@Test
-    // TODO runs too long - minimize abox
+    // TODO a lot of results are excluded in candidate binding generator - bad performance
     public void testLeftTurnOnc()
     {
         useCaseTKBLeftTurnOnc();
@@ -196,15 +198,15 @@ public class TestTCQEngine extends AbstractTCQTest
         # t=is_in_front_of, u=sfDisjoint, o=is_behind
         G (A(?x) ^ A(?y) ^ B(?l1) ^ B(?l2) ^ B(?l3) ^ r(?l1,?l2) ^ p(?l2,?l1) ^ q(?l3,?l1))
             &
-        (s(?x,?l1) ^ s(?y,?l3) ^ t(?y,?x))
-            U
         (
-            (u(?x,?l2))
+            (s(?x,?l1) ^ s(?y,?l3) ^ t(?y,?x))
                 U
             (
-                (o(?y,?x))
-                    &
-                (s(?x,?l2))
+                (u(?x,?l2))
+                    U
+                (
+                    (o(?y,?x) ^ s(?x,?l2))
+                )
             )
         )""";
         testQuery(tcqString, new ATermAppl[][] { { _a, _b, _c, _d, _e } });
