@@ -136,9 +136,6 @@ public class TestTCQEngine extends AbstractTCQTest
     }
 
     @Test
-    // TODO only ONE binding is left after CQ engine check. All others are satisfied by the DFA, and can thus be rejected.
-    //  if this is only one binding - why is it taking so long? probably again some explicit iteration, esp. the binding generator.
-    //  Maybe we should use a .invert() and plug in a binding generator that iterates over a given QueryResult - that's it.
     public void testIllegCrossing()
     {
         useCaseTKBIllegCrossing();
@@ -188,7 +185,7 @@ public class TestTCQEngine extends AbstractTCQTest
         testQuery(tcqString, new ATermAppl[][] { { _a, _b, _c } });
     }
 
-    //@Test
+    @Test
     // TODO a lot of results are excluded in candidate binding generator - bad performance
     public void testLeftTurnOnc()
     {
