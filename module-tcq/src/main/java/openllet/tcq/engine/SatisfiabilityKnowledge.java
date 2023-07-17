@@ -2,6 +2,7 @@ package openllet.tcq.engine;
 
 import openllet.core.utils.Bool;
 import openllet.query.sparqldl.engine.QueryCandidateGeneratorNaive;
+import openllet.query.sparqldl.engine.QueryResultBasedBindingCandidateGenerator;
 import openllet.query.sparqldl.model.cncq.CNCQQuery;
 import openllet.query.sparqldl.model.results.QueryResult;
 import openllet.query.sparqldl.model.results.QueryResultImpl;
@@ -104,7 +105,7 @@ public class SatisfiabilityKnowledge
     {
         Map<Bool, QueryResult> knowledge = getCertainSatisfiabilityKnowledge(timePoint);
         knowledge.put(Bool.UNKNOWN, new QueryResultImpl(_cncq));
-        for (ResultBinding binding : new QueryCandidateGeneratorNaive(_cncq))
+        for (ResultBinding binding : new QueryResultBasedBindingCandidateGenerator(_cncq))
         {
             if ((!_satisfiableBindings.containsKey(timePoint) ||
                     !_satisfiableBindings.get(timePoint).contains(binding)) &&
