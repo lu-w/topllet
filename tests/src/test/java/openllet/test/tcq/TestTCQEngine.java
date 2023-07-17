@@ -193,7 +193,6 @@ public class TestTCQEngine extends AbstractTCQTest
     }
 
     @Test
-    // TODO a lot of results are excluded in candidate binding generator - bad performance
     public void testLeftTurnOnc()
     {
         useCaseTKBLeftTurnOnc();
