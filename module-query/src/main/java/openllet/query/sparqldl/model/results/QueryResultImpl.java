@@ -243,7 +243,7 @@ public class QueryResultImpl implements QueryResult
 	@Override
 	public QueryResult restrictToVariables(List<ATermAppl> vars)
 	{
-		if (vars.equals(_resultVars))
+		if (vars.containsAll(_resultVars))
 			return copy();
 		else
 		{
