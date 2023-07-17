@@ -3,7 +3,7 @@ package openllet.query.sparqldl.engine.ucq;
 import openllet.core.OpenlletOptions;
 import openllet.core.utils.Bool;
 import openllet.query.sparqldl.engine.QueryBindingCandidateGenerator;
-import openllet.query.sparqldl.engine.QueryCandidateGeneratorNaive;
+import openllet.query.sparqldl.engine.QueryResultBasedBindingCandidateGenerator;
 import openllet.query.sparqldl.engine.cq.CombinedQueryEngine;
 import openllet.query.sparqldl.model.results.MultiQueryResults;
 import openllet.query.sparqldl.model.results.QueryResult;
@@ -67,7 +67,7 @@ public class UnionQueryEngineSimple extends AbstractUnionQueryEngine
         // Note: we can not split the query here due to semantics. Queries can only be split after conversion to CNF.
         QueryResult result = new QueryResultImpl(q);
         // FETCH AND APPLY BINDINGS
-        _bindingGenerator = new QueryCandidateGeneratorNaive(q);
+        _bindingGenerator = new QueryResultBasedBindingCandidateGenerator(q);
         _bindingGenerator.excludeBindings(excludeBindings);
         _bindingGenerator.restrictToBindings(restrictToBindings);
         for (ResultBinding candidateBinding : _bindingGenerator)
@@ -109,7 +109,7 @@ public class UnionQueryEngineSimple extends AbstractUnionQueryEngine
         {
             // 4. APPLY BINDINGS
             QueryResult result = new QueryResultImpl(cnfQueryPart);
-            _bindingGenerator = new QueryCandidateGeneratorNaive(cnfQueryPart);
+            _bindingGenerator = new QueryResultBasedBindingCandidateGenerator(cnfQueryPart);
             _bindingGenerator.excludeBindings(excludeBindings);
             _bindingGenerator.restrictToBindings(restrictToBindings);
             for (ResultBinding candidateBinding : _bindingGenerator)

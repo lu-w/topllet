@@ -11,6 +11,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
+// Note: This generator is inefficient for large _excludeBindings.
 public class QueryCandidateGeneratorNaive extends QueryBindingCandidateGenerator
 {
     List<ATermAppl> _vars;

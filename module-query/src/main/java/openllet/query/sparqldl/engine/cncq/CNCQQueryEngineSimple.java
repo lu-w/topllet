@@ -3,13 +3,11 @@ package openllet.query.sparqldl.engine.cncq;
 import openllet.aterm.ATermAppl;
 import openllet.core.utils.Bool;
 import openllet.query.sparqldl.engine.QueryBindingCandidateGenerator;
-import openllet.query.sparqldl.engine.QueryCandidateGeneratorNaive;
+import openllet.query.sparqldl.engine.QueryResultBasedBindingCandidateGenerator;
 import openllet.query.sparqldl.model.cncq.CNCQQuery;
 import openllet.query.sparqldl.model.results.*;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.logging.Level;
 
 public class CNCQQueryEngineSimple extends AbstractCNCQQueryEngine
@@ -39,13 +37,10 @@ public class CNCQQueryEngineSimple extends AbstractCNCQQueryEngine
         {
             result = new QueryResultImpl(q);
             // FETCH AND APPLY BINDINGS TO POSITIVE PARTS
-            List<ATermAppl> vars = new ArrayList<>(q.getPositiveResultVars());
-            List<ATermAppl> inds = q.getKB().getIndividuals().stream().toList();
-            QueryBindingCandidateGenerator _bindingGenerator = new QueryCandidateGeneratorNaive(inds, vars);
-            if (excludeBindings != null)
-                _bindingGenerator.excludeBindings(excludeBindings);
-            if (restrictToBindings != null)
-                _bindingGenerator.restrictToBindings(restrictToBindings);
+            QueryBindingCandidateGenerator _bindingGenerator =
+                    new QueryResultBasedBindingCandidateGenerator(q.mergePositiveQueries());
+            _bindingGenerator.excludeBindings(excludeBindings);
+            _bindingGenerator.restrictToBindings(restrictToBindings);
             for (ResultBinding candidateBinding : _bindingGenerator)
             {
                 if (_logger.isLoggable(Level.FINE))
