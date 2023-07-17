@@ -71,7 +71,7 @@ public class SatisfiabilityKnowledgeManager
     public void setGloballyExcludedBindings(QueryResult excludedBindings)
     {
         if (excludedBindings != null)
-            _globallyExcludeBindings = excludedBindings;
+            _globallyExcludeBindings = excludedBindings.copy();
     }
 
     public void doNotGloballyExcludeBindings()
@@ -166,16 +166,17 @@ public class SatisfiabilityKnowledgeManager
     private void execCNCQQueryEngine(CNCQQuery query, int timePoint, SatisfiabilityKnowledge knowledgeOnQuery,
                                      QueryResult restrictSatToBindings) throws IOException, InterruptedException
     {
+        QueryResult excludeForQuery = new QueryResultImpl(query);
+        excludeForQuery.addAll(_globallyExcludeBindings);
         for (QueryResult results : knowledgeOnQuery.getCertainSatisfiabilityKnowledge(timePoint).values())
-            _globallyExcludeBindings.addAll(results);
+            excludeForQuery.addAll(results);
         if (!_globallyExcludeBindings.isComplete())
         {
             QueryResult result = _cncqEngine.exec(query, _globallyExcludeBindings, restrictSatToBindings);
             knowledgeOnQuery.informAboutSatisfiability(result, true, timePoint);
         }
-        knowledgeOnQuery.setComplete(timePoint);  // knowledge complete -> satisfying bindings can be inverted to get unsat bindings
-        for (QueryResult results : knowledgeOnQuery.getCertainSatisfiabilityKnowledge(timePoint).values())
-            _globallyExcludeBindings.removeAll(results);
+        // Sets knowledge complete s.t. satisfying bindings can be inverted to get unsatisfiable bindings.
+        knowledgeOnQuery.setComplete(timePoint);
     }
 
     public Map<Bool, QueryResult> computeSatisfiableBindings(CNCQQuery query, int timePoint, KnowledgeBase kb,
