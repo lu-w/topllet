@@ -18,8 +18,8 @@ public class TemporalConjunctiveQueryParser
     public static final Logger _logger = Log.getLogger(TemporalConjunctiveQueryParser.class);
 
     protected static final String[] validMLTLToken = {"F", "G", "U", "X", "_", "<", "=", "[", "]", "(", ")", "W",
-            "X[!]", "last", "end", "R", "V", "M", "->", "<->", "^", "&", "!", "|", "0", "1", "2", "3", "4", "5", "6",
-            "7", "8", "9", ","};
+            "X[!]", "last", "end", "first", "start", "R", "V", "M", "->", "<->", "^", "&", "!", "|", "0", "1", "2", "3",
+            "4", "5", "6", "7", "8", "9", ",", "true", "false", "tt", "ff"};
 
     static public TemporalConjunctiveQuery parse(String input, TemporalKnowledgeBase kb) throws ParseException
     {
