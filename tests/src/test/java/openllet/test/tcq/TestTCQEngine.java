@@ -129,10 +129,17 @@ public class TestTCQEngine extends AbstractTCQTest
         testQuery("G_[0,9] (!(D(?x)) | (E(?y)))", new ATermAppl[][] { { _a, _b } });
         testQuery("G_[0,10] (!(D(?x)) | (E(?y)))");
         testQuery("F_<=3 !(C(?x) ^ r(?x,?y))", allResults(List.of(_a, _b, _c), 2));
-        testQuery("(!(D(?w)) | (E(?x))) U_[0,9] (q(?y, ?z))", new ATermAppl[][] { { _a, _b, _c, _b },
-                { _a, _b, _b, _a } });
+        testQuery("F_<=9 (q(?y, ?z))", new ATermAppl[][] { { _b, _a }, { _c, _b } });
+        testQuery("(!(D(?w)) | (E(?x))) U_[0,9] (q(?y, ?z))", new ATermAppl[][] { { _a, _b, _c, _b }, { _a, _b, _b, _a } });
         testQuery("(!(D(?w)) | (E(?x))) U_[0,8] (q(?y, ?z))", new ATermAppl[][] { { _a, _b, _b, _a } });
         testQuery("(!(D(?w)) | (E(?x))) U_[0,7] (q(?y, ?z))");
+    }
+
+    @Test
+    public void testBoundUntil()
+    {
+        complexTKB1();
+        testQuery("((A(?x))) U_[0,3] (B(?y))", new ATermAppl[][] { { _a, _b }, { _a, _c } });
     }
 
     @Test

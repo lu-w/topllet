@@ -170,9 +170,9 @@ public class SatisfiabilityKnowledgeManager
         excludeForQuery.addAll(_globallyExcludeBindings);
         for (QueryResult results : knowledgeOnQuery.getCertainSatisfiabilityKnowledge(timePoint).values())
             excludeForQuery.addAll(results);
-        if (!_globallyExcludeBindings.isComplete())
+        if (!excludeForQuery.isComplete())
         {
-            QueryResult result = _cncqEngine.exec(query, _globallyExcludeBindings, restrictSatToBindings);
+            QueryResult result = _cncqEngine.exec(query, excludeForQuery, restrictSatToBindings);
             knowledgeOnQuery.informAboutSatisfiability(result, true, timePoint);
         }
         // Sets knowledge complete s.t. satisfying bindings can be inverted to get unsatisfiable bindings.

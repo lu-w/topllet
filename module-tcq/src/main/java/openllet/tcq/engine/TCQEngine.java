@@ -149,6 +149,8 @@ public class TCQEngine extends AbstractQueryEngine<TemporalConjunctiveQuery>
                 // Note 2: we can only for unsat for all final states if all actual DFA final states were examined
                 QueryResult unsatForAllFinalStates = null;
                 boolean canInferFromUnsat = states.coversDFAFinalStatesCompletely();
+                // TODO optimization: unsat for all final states theoretically reachable in N steps!
+                //  other final states can be excluded safely (e.g. n=10 and the initial state is final but has no incoming edge)
                 for (DFAExecutableState state : states)
                     if (dfa.isAccepting(state.getDFAState()))
                     {

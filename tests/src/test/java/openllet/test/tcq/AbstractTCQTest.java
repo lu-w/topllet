@@ -132,6 +132,23 @@ public class AbstractTCQTest extends AbstractQueryTest
         }
     }
 
+    public void complexTKB1()
+    {
+        fillComplexTKB(4);
+        int i = 0;
+        for (KnowledgeBase kb : _tkb)
+        {
+            kb.addType(_a, _A);
+            if (i == 2)
+            {
+                kb.addType(_b, _B);
+            }
+            if (i == 3)
+                kb.addType(_c, _B);
+            i++;
+        }
+    }
+
     public void simpleTKB2()
     {
         fillSimpleTKB(5);
