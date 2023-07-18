@@ -211,7 +211,7 @@ public class AbstractTCQTest extends AbstractQueryTest
         subClass(_C, not(some(_r, TOP)));
     }
 
-    protected void useCaseTKBIllegCrossing()
+    protected void useCaseTKBIllegCrossing(boolean entailed)
     {
         fillUseCaseTKB(20);
 
@@ -224,19 +224,33 @@ public class AbstractTCQTest extends AbstractQueryTest
             kb.addType(_d, _D);
             kb.addType(_e, _E);
             kb.addPropertyValue(_r, _e, _d);
-            if (i < 5)
-                kb.addPropertyValue(_r, _a, _c);
-            if (i < 13 && i >= 5)
+            if (entailed)
             {
-                kb.addPropertyValue(_r, _a, _e);
-                kb.addPropertyValue(_r, _b, _d);
-                kb.addPropertyValue(_q, _b, _a);
+                if (i < 5)
+                    kb.addPropertyValue(_r, _a, _c);
+                if (i < 13 && i >= 5)
+                {
+                    kb.addPropertyValue(_r, _a, _e);
+                    kb.addPropertyValue(_r, _b, _d);
+                    kb.addPropertyValue(_q, _b, _a);
+                }
+            }
+            else
+            {
+                if (i < 12)
+                    kb.addPropertyValue(_r, _a, _c);
+                if (i < 19 && i >= 12)
+                {
+                    kb.addPropertyValue(_r, _a, _e);
+                    kb.addPropertyValue(_r, _b, _d);
+                    kb.addPropertyValue(_q, _b, _a);
+                }
             }
             i++;
         }
     }
 
-    protected void useCaseTKBIntersectingVRU()
+    protected void useCaseTKBIntersectingVRU(boolean entailed)
     {
         fillUseCaseTKB(20);
 
@@ -246,13 +260,21 @@ public class AbstractTCQTest extends AbstractQueryTest
             kb.addType(_a, _A);
             kb.addType(_b, _B);
             kb.addPropertyValue(_r, _e, _d);
-            if (i < 16 && i > 12)
-                kb.addPropertyValue(_r, _a, _b);
+            if (entailed)
+            {
+                if (i < 16 && i > 12)
+                    kb.addPropertyValue(_r, _a, _b);
+            }
+            else
+            {
+                if (i < 16 && i > 12)
+                    kb.addPropertyValue(_r, _b, _a);
+            }
             i++;
         }
     }
 
-    protected void useCaseTKBLaneChange(boolean breakIt)
+    protected void useCaseTKBLaneChange(boolean entailed)
     {
         fillUseCaseTKB(20);
 
@@ -264,7 +286,7 @@ public class AbstractTCQTest extends AbstractQueryTest
             kb.addType(_c, _B);
             if (i < 8)
                 kb.addPropertyValue(_q, _a, _b);
-            if (breakIt && i == 10)
+            if (!entailed && i == 10)
             {
                 // one short turn signal -> is enough
                 kb.addType(_d, _D);
@@ -279,7 +301,7 @@ public class AbstractTCQTest extends AbstractQueryTest
         }
     }
 
-    protected void useCaseTKBLeftTurnOnc()
+    protected void useCaseTKBLeftTurnOnc(boolean entailed)
     {
         fillUseCaseTKB(5);
 
@@ -303,7 +325,7 @@ public class AbstractTCQTest extends AbstractQueryTest
             }
             else if (i < 3)
                 kb.addPropertyValue(_u, _a, _d);
-            else
+            else if (entailed || i > 3)
             {
                 kb.addPropertyValue(_o, _b, _a);
                 kb.addPropertyValue(_s, _a, _d);
@@ -313,7 +335,7 @@ public class AbstractTCQTest extends AbstractQueryTest
         }
     }
 
-    protected void useCaseTKBOvertaking()
+    protected void useCaseTKBOvertaking(boolean entailed)
     {
         fillUseCaseTKB(20);
 
@@ -324,15 +346,18 @@ public class AbstractTCQTest extends AbstractQueryTest
             kb.addType(_b, _A);
             kb.addType(_c, _B);
 
-            if (i == 3)
+            if (entailed)
             {
-                kb.addPropertyValue(_r, _a, _b);
-                kb.addPropertyValue(_t, _b, _a);
-            }
-            if (i >= 4 && i < 8)
-            {
-                kb.addPropertyValue(_r, _a, _b);
-                kb.addPropertyValue(_q, _b, _a);
+                if (i == 3)
+                {
+                    kb.addPropertyValue(_r, _a, _b);
+                    kb.addPropertyValue(_t, _b, _a);
+                }
+                if (i >= 4 && i < 8)
+                {
+                    kb.addPropertyValue(_r, _a, _b);
+                    kb.addPropertyValue(_q, _b, _a);
+                }
             }
             if (i >= 8 && i < 14)
             {
@@ -344,7 +369,7 @@ public class AbstractTCQTest extends AbstractQueryTest
         }
     }
 
-    protected void useCaseTKBRightTurn()
+    protected void useCaseTKBRightTurn(boolean entailed)
     {
         fillUseCaseTKB(20);
 
@@ -356,16 +381,21 @@ public class AbstractTCQTest extends AbstractQueryTest
             kb.addType(_c, _B);
             kb.addPropertyValue(_r, _c, _b);
 
-            if (i > 7 && i < 10)
+            if (i > 5 && i < 8)
                 kb.addPropertyValue(_q, _b, _a);
             if (i >= 10 && i < 15)
-                kb.addPropertyValue(_q, _c, _a);
+            {
+                if (entailed)
+                    kb.addPropertyValue(_q, _c, _a);
+                else
+                    kb.addPropertyValue(_q, _b, _a);
+            }
 
             i++;
         }
     }
 
-    protected void useCaseTKBPassingParkingVehicles()
+    protected void useCaseTKBPassingParkingVehicles(boolean entailed)
     {
         fillUseCaseTKB(20);
 
@@ -384,7 +414,7 @@ public class AbstractTCQTest extends AbstractQueryTest
                 kb.addPropertyValue(_t, _a, _c);
                 kb.addPropertyValue(_s, _c, _a);
             }
-            if (i >= 13 && i < 17)
+            if (entailed && i >= 13 && i < 17)
                 kb.addPropertyValue(_u, _c, _a);
 
             i++;

@@ -136,7 +136,7 @@ public class TestTCQEngine extends AbstractTCQTest
     }
 
     @Test
-    public void testBoundUntil()
+    public void testBoundedUntil()
     {
         complexTKB1();
         testQuery("((A(?x))) U_[0,3] (B(?y))", new ATermAppl[][] { { _a, _b }, { _a, _c } });
@@ -145,7 +145,7 @@ public class TestTCQEngine extends AbstractTCQTest
     @Test
     public void testIllegCrossing()
     {
-        useCaseTKBIllegCrossing();
+        useCaseTKBIllegCrossing(true);
         String tcqString = """
         # A=l4d:Bicyclist, B=l4c:Traffic_Participant, C=l4c:Traffic_Participant, D=l1c:Driveable_Lane, E=l1d:Pedestrian_Crossing
         # r=geo:sfIntersects, q=phy:has_intersecting_path
@@ -156,24 +156,30 @@ public class TestTCQEngine extends AbstractTCQTest
         (!F_<=5 !(r(?bi,?cr) ^ r(?t,?l) ^ q(?t,?bi)))) # illegitimately taking right of way has to be sustained for some time to be significant
         """;
         testQuery(tcqString, new ATermAppl[][] { { _a, _b, _c, _d, _e } });
+        initializeKB();
+        useCaseTKBIllegCrossing(false);
+        testQuery(tcqString);
     }
 
     @Test
     public void testIntersectingVRU()
     {
-        useCaseTKBIntersectingVRU();
+        useCaseTKBIntersectingVRU(true);
         String tcqString = """
         # A=Vehicle, B=VRU, r=has_intersecting_path
         G (A(?x) ^ B(?v))
             &
         F (r(?x,?v))""";
         testQuery(tcqString, new ATermAppl[][] { { _a, _b } });
+        initializeKB();
+        useCaseTKBIntersectingVRU(false);
+        testQuery(tcqString);
     }
 
     @Test
     public void testLaneChange()
     {
-        useCaseTKBLaneChange(false);
+        useCaseTKBLaneChange(true);
         String tcqString = """
         # A=Vehicle, B=Lane, D=Left_Turn_Signal, q=sfWithin, p=sfIntersects, r=com:delivers_signal
         G (A(?x) ^ B(?l1) ^ B(?l2))
@@ -190,12 +196,15 @@ public class TestTCQEngine extends AbstractTCQTest
             )
         )""";
         testQuery(tcqString, new ATermAppl[][] { { _a, _b, _c } });
+        initializeKB();
+        useCaseTKBLaneChange(false);
+        testQuery(tcqString);
     }
 
     @Test
     public void testLeftTurnOnc()
     {
-        useCaseTKBLeftTurnOnc();
+        useCaseTKBLeftTurnOnc(true);
         String tcqString = """
         # A=Vehicle, B=Lane, r=has_successor_lane, p=is_lane_left_of, q=is_lane_parallel_to, s=sfIntersects,
         # t=is_in_front_of, u=sfDisjoint, o=is_behind
@@ -213,12 +222,15 @@ public class TestTCQEngine extends AbstractTCQTest
             )
         )""";
         testQuery(tcqString, new ATermAppl[][] { { _a, _b, _c, _d, _e } });
+        initializeKB();
+        useCaseTKBLeftTurnOnc(false);
+        testQuery(tcqString);
     }
 
     @Test
     public void testOvertaking()
     {
-        useCaseTKBOvertaking();
+        useCaseTKBOvertaking(true);
         String tcqString = """
         # A=Dynamical_Object, r=is_in_proximity, q=is_to_the_side_of, t=is_to_the_front_of, s=is_behind
         G(A(?x) ^ A(?y))
@@ -230,24 +242,30 @@ public class TestTCQEngine extends AbstractTCQTest
             F (r(?x,?y) ^ s(?y,?x))
         )""";
         testQuery(tcqString, new ATermAppl[][] { { _a, _b } });
+        initializeKB();
+        useCaseTKBOvertaking(false);
+        testQuery(tcqString);
     }
 
     @Test
     public void testRightTurn()
     {
-        useCaseTKBRightTurn();
+        useCaseTKBRightTurn(true);
         String tcqString = """
         # A=Vehicle, B=Lane, r=is_lane_right_of, q=sfIntersects
         G (A(?x) ^ B(?l1) ^ B(?l2) ^ r(?l2, ?l1))
             &
         F ((q(?l1, ?x)) & F(q(?l2, ?x)))""";
         testQuery(tcqString, new ATermAppl[][] { { _a, _b, _c } });
+        initializeKB();
+        useCaseTKBRightTurn(false);
+        testQuery(tcqString);
     }
 
     @Test
     public void testPassingParkingVehicles()
     {
-        useCaseTKBPassingParkingVehicles();
+        useCaseTKBPassingParkingVehicles(true);
         String tcqString = """
         # A=Vehicle, B=2_Lane_Road, C=Parking_Vehicle, r=is_in_front_of, q=sfIntersects, s=is_to_the_side_of,
         # t=is_in_proximity, u=phy:is_behind
@@ -266,7 +284,8 @@ public class TestTCQEngine extends AbstractTCQTest
         )
         """;
         testQuery(tcqString, new ATermAppl[][] { { _a, _c } });
+        initializeKB();
+        useCaseTKBPassingParkingVehicles(false);
+        testQuery(tcqString);
     }
-
-    // TODO also make 1 version of the useCaseTKBs where they are not entailed (just add boolean parameter and 'break' them somewhere)
 }
