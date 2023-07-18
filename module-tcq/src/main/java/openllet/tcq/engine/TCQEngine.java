@@ -65,7 +65,6 @@ public class TCQEngine extends AbstractQueryEngine<TemporalConjunctiveQuery>
             _logger.finer("CQ semantics DFA check returned " + satResult.get(true).size() +
                     " satisfiable and " + satResult.get(false).size() + " unsatisfiable bindings out of " +
                     satResult.get(true).getMaxSize() + " bindings in " + t.getTotal() +  " ms");
-            System.out.println(satResult);
         }
         // SECOND RUN - USE CNCQ ENGINE BASED ON RESULTS OF CQ ENGINE
         if (excludeResults == null || !excludeResults.isComplete())
