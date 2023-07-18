@@ -65,6 +65,7 @@ public class TCQEngine extends AbstractQueryEngine<TemporalConjunctiveQuery>
             _logger.finer("CQ semantics DFA check returned " + satResult.get(true).size() +
                     " satisfiable and " + satResult.get(false).size() + " unsatisfiable bindings out of " +
                     satResult.get(true).getMaxSize() + " bindings in " + t.getTotal() +  " ms");
+            System.out.println(satResult);
         }
         // SECOND RUN - USE CNCQ ENGINE BASED ON RESULTS OF CQ ENGINE
         if (excludeResults == null || !excludeResults.isComplete())
@@ -144,15 +145,17 @@ public class TCQEngine extends AbstractQueryEngine<TemporalConjunctiveQuery>
         {
             if (_edgeChecker.isUnderapproximatingSemantics())
             {
+                int n = tcq.getTemporalKB().size();
                 // Assemble final result - all bindings in final states satisfy the DFA, and all bindings in none final
                 // states do not. Note: there may be bindings not considered here (i.e., result unknown)
                 // Note 2: we can only for unsat for all final states if all actual DFA final states were examined
                 QueryResult unsatForAllFinalStates = null;
-                boolean canInferFromUnsat = states.coversDFAFinalStatesCompletely();
-                // TODO optimization: unsat for all final states theoretically reachable in N steps!
-                //  other final states can be excluded safely (e.g. n=10 and the initial state is final but has no incoming edge)
+                boolean canInferFromUnsat = states.coversDFAFinalStatesCompletely(n);
+                // Optimization: Unsatisfiability for all final states has to be checked only for states reachable in
+                //  n steps. Other final states can be excluded safely.
+                Collection<Integer> reachableFinalStates = dfa.getStatesReachableInNSteps(n);
                 for (DFAExecutableState state : states)
-                    if (dfa.isAccepting(state.getDFAState()))
+                    if (dfa.isAccepting(state.getDFAState()) && reachableFinalStates.contains(state.getDFAState()))
                     {
                         if (state.getSatBindings() != null)
                             result.get(true).addAll(state.getSatBindings());

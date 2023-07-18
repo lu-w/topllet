@@ -6,6 +6,8 @@ import net.automatalib.words.impl.ListAlphabet;
 import openllet.tcq.model.query.TemporalConjunctiveQuery;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 
 public class DFA extends CompactDFA<String>
@@ -52,5 +54,19 @@ public class DFA extends CompactDFA<String>
                     _edges.add(new Edge(letter, state, successorState, _tcq));
             }
         }
+    }
+
+    public Collection<Integer> getStatesReachableInNSteps(int n)
+    {
+        Collection<Integer> reachableStates = getInitialStates();
+        for (int i = 0; i < n; i++)
+        {
+            Collection<Integer> reachableStatesNext = new HashSet<>();
+            for (Integer state : reachableStates)
+                for (Edge edge : getEdges(state))
+                    reachableStatesNext.add(edge.getToState());
+            reachableStates = reachableStatesNext;
+        }
+        return reachableStates;
     }
 }

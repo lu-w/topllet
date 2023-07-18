@@ -3,6 +3,7 @@ package openllet.tcq.engine;
 import openllet.tcq.model.automaton.DFA;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -44,19 +45,13 @@ public class DFAExecutableStates extends ArrayList<DFAExecutableState>
         return existsExecutableState;
     }
 
-    public boolean coversDFAStatesCompletely()
+    public boolean coversDFAFinalStatesCompletely(int n)
     {
+        Collection<Integer> reachableStates = _dfa.getStatesReachableInNSteps(n);
         Set<Integer> coveredStates = new HashSet<>();
         for (DFAExecutableState state : this)
-            coveredStates.add(state.getDFAState());
-        return coveredStates.size() == _dfa.getStates().size();
-    }
-    public boolean coversDFAFinalStatesCompletely()
-    {
-        Set<Integer> coveredStates = new HashSet<>();
-        for (DFAExecutableState state : this)
-            if (_dfa.isAccepting(state.getDFAState()))
+            if (_dfa.isAccepting(state.getDFAState()) && reachableStates.contains(state.getDFAState()))
                 coveredStates.add(state.getDFAState());
-        return coveredStates.size() == _dfa.getStates().stream().filter(_dfa::isAccepting).toList().size();
+        return coveredStates.size() == reachableStates.stream().filter(_dfa::isAccepting).toList().size();
     }
 }
