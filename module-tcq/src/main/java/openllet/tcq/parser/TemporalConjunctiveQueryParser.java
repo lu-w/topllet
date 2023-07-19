@@ -28,14 +28,15 @@ public class TemporalConjunctiveQueryParser
         Pattern commentLine = Pattern.compile("(?m)(^#.*$)");
         Matcher commentLineMatcher = commentLine.matcher(input);
         String tcq = commentLineMatcher.replaceAll("");
-        Pattern inlineComment = Pattern.compile("(?m)^(.*)(# .*)$");
+        Pattern inlineComment = Pattern.compile("(?m)^(.*?)(# .*)$");
         Matcher inlineCommentMatcher = inlineComment.matcher(tcq);
         tcq = inlineCommentMatcher.replaceAll("$1");
 
         // Stores prefixes and removes them from string
         Map<String, String> prefixes = new HashMap<>();
         Scanner scanner = new Scanner(tcq);
-        while (scanner.hasNextLine()) {
+        while (scanner.hasNextLine())
+        {
             String line = scanner.nextLine();
             if (line.startsWith("PREFIX"))
             {
@@ -58,7 +59,7 @@ public class TemporalConjunctiveQueryParser
         TemporalConjunctiveQuery parsedTcq = new TemporalConjunctiveQueryImpl(tcq, kb, true);
         final PropositionFactory propositionFactory = new PropositionFactory();
 
-        while (tcq.replace(")", "").length() > 0)
+        while (tcq.replaceAll("[\\s)]", "").length() > 0)
         {
             String remainder = tcq;
             int curIndex = 0;
