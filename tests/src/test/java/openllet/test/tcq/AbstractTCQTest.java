@@ -226,7 +226,7 @@ public class AbstractTCQTest extends AbstractQueryTest
             kb.addPropertyValue(_r, _e, _d);
             if (entailed)
             {
-                if (i < 5)
+                if (2 < i && i < 5)
                     kb.addPropertyValue(_r, _a, _c);
                 if (i < 13 && i >= 5)
                 {
@@ -237,9 +237,9 @@ public class AbstractTCQTest extends AbstractQueryTest
             }
             else
             {
-                if (i < 12)
+                if (2 < i && i < 5)
                     kb.addPropertyValue(_r, _a, _c);
-                if (i < 19 && i >= 12)
+                if (i < 19 && i >= 17)
                 {
                     kb.addPropertyValue(_r, _a, _e);
                     kb.addPropertyValue(_r, _b, _d);
@@ -303,7 +303,7 @@ public class AbstractTCQTest extends AbstractQueryTest
 
     protected void useCaseTKBLeftTurnOnc(boolean entailed)
     {
-        fillUseCaseTKB(5);
+        fillUseCaseTKB(20);
 
         int i = 0;
         for (KnowledgeBase kb : _tkb)
@@ -317,15 +317,19 @@ public class AbstractTCQTest extends AbstractQueryTest
             kb.addPropertyValue(_p, _d, _c);
             kb.addPropertyValue(_q, _e, _c);
 
-            if (i < 2)
+            if (2 < i && i < 5)
             {
                 kb.addPropertyValue(_s, _a, _c);
                 kb.addPropertyValue(_s, _b, _e);
                 kb.addPropertyValue(_t, _b, _a);
             }
-            else if (i < 3)
+            if (i == 5)
+                kb.addPropertyValue(_s, _a, _c);
+            if (6 <= i && i < 9)
                 kb.addPropertyValue(_u, _a, _d);
-            else if (entailed || i > 3)
+            if (entailed && 9 <= i && i <= 12)
+                kb.addPropertyValue(_o, _b, _a);
+            if (i > 14)
             {
                 kb.addPropertyValue(_o, _b, _a);
                 kb.addPropertyValue(_s, _a, _d);

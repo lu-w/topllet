@@ -151,10 +151,15 @@ public class TestTCQEngine extends AbstractTCQTest
         # r=geo:sfIntersects, q=phy:has_intersecting_path
         G (A(?bi) ^ B(?t) ^ C(?w) ^ D(?l) ^ E(?cr) ^ r(?cr,?l))
             &
-        ((r(?bi,?w))
-            U_<=10 # somewhere in the first second, we require to take right of way
-        (!F_<=5 !(r(?bi,?cr) ^ r(?t,?l) ^ q(?t,?bi)))) # illegitimately taking right of way has to be sustained for some time to be significant
-        """;
+        F
+        (
+            (
+                (r(?bi,?w))
+                    &
+                F_<=10 # somewhere in the first second, we require to take right of way
+                    (!F_<=5 !(r(?bi,?cr) ^ r(?t,?l) ^ q(?t,?bi))) # illegitimately taking right of way has to be sustained for some time to be significant
+            )
+        )""";
         testQuery(tcqString, new ATermAppl[][] { { _a, _b, _c, _d, _e } });
         initializeKB();
         useCaseTKBIllegCrossing(false);
@@ -210,14 +215,15 @@ public class TestTCQEngine extends AbstractTCQTest
         # t=is_in_front_of, u=sfDisjoint, o=is_behind
         G (A(?x) ^ A(?y) ^ B(?l1) ^ B(?l2) ^ B(?l3) ^ r(?l1,?l2) ^ p(?l2,?l1) ^ q(?l3,?l1))
             &
+        F
         (
             (s(?x,?l1) ^ s(?y,?l3) ^ t(?y,?x))
-                U
+                &
             (
-                (u(?x,?l2))
+                ((u(?x,?l2)) | (s(?x,?l1)))
                     U
                 (
-                    (o(?y,?x) ^ s(?x,?l2))
+                    (o(?y,?x)) & F (s(?x,?l2))
                 )
             )
         )""";
@@ -232,7 +238,7 @@ public class TestTCQEngine extends AbstractTCQTest
     {
         useCaseTKBOvertaking(true);
         String tcqString = """
-        # A=Dynamical_Object, r=is_in_proximity, q=is_to_the_side_of, t=is_to_the_front_of, s=is_behind
+        # A=Dynamical_Object, r=is_in_proximity, q=is_to_the_side_of, t=is_in_front_of, s=is_behind
         G(A(?x) ^ A(?y))
             &
         F
