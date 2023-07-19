@@ -34,6 +34,9 @@ public class AbstractKBTests
 	protected static final ATermAppl _F = term("F");
 	protected static final ATermAppl _G = term("G");
 	protected static final ATermAppl _H = term("H");
+	protected static final ATermAppl _L = term("L");
+	protected static final ATermAppl _M = term("M");
+	protected static final ATermAppl _N = term("N");
 
 	protected static final ATermAppl _p = term("p");
 	protected static final ATermAppl _q = term("q");

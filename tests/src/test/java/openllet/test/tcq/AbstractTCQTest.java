@@ -403,12 +403,26 @@ public class AbstractTCQTest extends AbstractQueryTest
     {
         fillUseCaseTKB(20);
 
+        subClass(_B, and(_E, min(_p, 2, _F)));  // F: Lane, E: Road
+        subClass(_B, and(_E, max(_p, 2, _F)));
+        subClass(and(_E, min(_p, 2, _F)), _B);
+        subClass(and(_E, max(_p, 2, _F)), _B);
+        subClass(and(_M, and(_N, some(_o, _G))), _C);
+
         int i = 0;
+
         for (KnowledgeBase kb : _tkb)
         {
             kb.addType(_a, _A);
-            kb.addType(_b, _B); // TODO replace by axioms on 2 lane road
-            kb.addType(_c, _C); // TODO replace by axioms on parking vehicles
+            kb.addType(_b, _E);
+            kb.addType(_d, _F);
+            kb.addType(_e, _F);
+            kb.addPropertyValue(_p, _b, _d);
+            kb.addPropertyValue(_p, _b, _e);
+            kb.addType(_f, _G);
+            kb.addPropertyValue(_o, _c, _f);
+            kb.addType(_c, _M);
+            kb.addType(_c, _N);
             kb.addPropertyValue(_q, _b, _a);
 
             if (i > 7 && i < 10)
