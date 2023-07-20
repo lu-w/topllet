@@ -12,12 +12,15 @@ import openllet.query.sparqldl.model.cq.ConjunctiveQuery;
 import openllet.query.sparqldl.model.results.MultiQueryResults;
 import openllet.query.sparqldl.model.results.QueryResult;
 import openllet.query.sparqldl.model.results.QueryResultImpl;
+import openllet.shared.tools.Log;
 import openllet.tcq.model.automaton.DFA;
 import openllet.tcq.model.automaton.Edge;
 import openllet.tcq.model.query.TemporalConjunctiveQuery;
+import openllet.tcq.parser.TemporalConjunctiveQueryParser;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.logging.Logger;
 import java.util.stream.IntStream;
 
 /**
@@ -28,9 +31,46 @@ import java.util.stream.IntStream;
  */
 public class SatisfiabilityKnowledgeManager
 {
+    public static final Logger _logger = Log.getLogger(SatisfiabilityKnowledgeManager.class);
+
     public enum SubQuerySelectionStrategy
     {
         LIGHTWEIGHT, AMAP
+    }
+
+    protected static class SatisfiabilityStats
+    {
+        private final Map<Integer, Map<CNCQQuery, Double>> _ratioOfExcludedBindings = new HashMap<>();
+
+        protected void informAboutBindingExclusion(int timePoint, CNCQQuery query, double ratioOfExcludedBindings)
+        {
+            if (!_ratioOfExcludedBindings.containsKey(timePoint))
+                _ratioOfExcludedBindings.put(timePoint, new HashMap<>());
+            Map<CNCQQuery, Double> map = _ratioOfExcludedBindings.get(timePoint);
+            if (!map.containsKey(query))
+                map.put(query, ratioOfExcludedBindings);
+            else
+                _logger.warning("Did not overwrite prior result with " + ratioOfExcludedBindings +
+                        " when collecting statistics.");
+        }
+
+        @Override
+        public String toString()
+        {
+            StringBuilder res = new StringBuilder("Already gathered satisfiability knowledge from CQ engine:\n");
+            // avg. over CNCQ sat. for each time point
+            List<Double> avgs = new ArrayList<>();
+            for (Integer t : _ratioOfExcludedBindings.keySet())
+            {
+                Map<CNCQQuery, Double> map = _ratioOfExcludedBindings.get(t);
+                double avgSat = map.values().stream().mapToDouble(val -> val).average().orElse(0.0);
+                avgs.add(avgSat);
+                res.append(String.format("t=" + t + ": %.4f\n", avgSat));
+            }
+            double avgSat = avgs.stream().mapToDouble(val -> val).average().orElse(0.0);
+            res.append(String.format("total: %.4f", avgSat));
+            return res.toString();
+        }
     }
 
     private SubQuerySelectionStrategy _strategy = SubQuerySelectionStrategy.AMAP;
@@ -40,6 +80,7 @@ public class SatisfiabilityKnowledgeManager
     private final QueryExec<ConjunctiveQuery> _cqEngine = new QueryEngine();
     private final Map<Integer, List<ConjunctiveQuery>> _cqCache = new HashMap<>();
     private QueryResult _globallyExcludeBindings;
+    private SatisfiabilityStats _stats = new SatisfiabilityStats();
 
     public SatisfiabilityKnowledgeManager(TemporalConjunctiveQuery query, DFA dfa)
     {
@@ -89,12 +130,10 @@ public class SatisfiabilityKnowledgeManager
 
     private Collection<ConjunctiveQuery> getCandidatesForCheckingUnderapproximatingSemantics(CNCQQuery query)
     {
-        // TODO do not add duplicate queries here? can this even happen?
-        List<ConjunctiveQuery> candidates = new ArrayList<>();
+        Set<ConjunctiveQuery> candidates = new HashSet<>();
         if (!query.getPositiveQueries().isEmpty())
         {
             candidates.add(query.mergePositiveQueries());
-            // TODO maybe add all positive subqueries of query as well
             if (_strategy.compareTo(SubQuerySelectionStrategy.AMAP) >= 0 && query.getPositiveQueries().size() > 1)
                 for (ConjunctiveQuery pQuery : query.getPositiveQueries())
                     candidates.add(pQuery.copy());
@@ -135,7 +174,7 @@ public class SatisfiabilityKnowledgeManager
                 query.setNegation(false);
             }
         }
-        // TODO propagate knowledge to all time points in which it also holds
+        // TODO PLANNED OPTIMIZATION: propagate knowledge to all time points in which it also holds
     }
 
     private void execConjunctiveQueryEngine(ConjunctiveQuery query, int timePoint)
@@ -170,6 +209,11 @@ public class SatisfiabilityKnowledgeManager
         excludeForQuery.addAll(_globallyExcludeBindings);
         for (QueryResult results : knowledgeOnQuery.getCertainSatisfiabilityKnowledge(timePoint).values())
             excludeForQuery.addAll(results);
+        double maxSize = excludeForQuery.getMaxSize();
+        double excludedBindingsSize = 1;
+        if (maxSize > 0)
+            excludedBindingsSize = (double) excludeForQuery.size() / excludeForQuery.getMaxSize();
+        _stats.informAboutBindingExclusion(timePoint, query, excludedBindingsSize);
         if (!excludeForQuery.isComplete())
         {
             QueryResult result = _cncqEngine.exec(query, excludeForQuery, restrictSatToBindings);
@@ -198,9 +242,16 @@ public class SatisfiabilityKnowledgeManager
                 {
                     execCNCQQueryEngine(query, timePoint, knowledgeOnQuery, restrictSatToBindings);
                 }
+            else if (!useUnderapproximatingSemantics)
+                _stats.informAboutBindingExclusion(timePoint, query, 1);
             return knowledgeOnQuery.getCertainSatisfiabilityKnowledge(timePoint, restrictSatToBindings);
         }
         else
             throw new RuntimeException("Knowledge on query " + query + " has not been initialized");
+    }
+
+    public String getStats()
+    {
+        return _stats.toString();
     }
 }

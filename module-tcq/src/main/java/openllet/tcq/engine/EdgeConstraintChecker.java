@@ -13,17 +13,12 @@ import java.util.*;
 
 public class EdgeConstraintChecker
 {
-    private final DFA _dfa;
-    private final TemporalConjunctiveQuery _tcq;
     private final SatisfiabilityKnowledgeManager _cncqSatManager;
     private boolean _useUnderapproximatingSemantics = true;
-    private QueryResult _excludeBindings = null;
 
     public EdgeConstraintChecker(TemporalConjunctiveQuery tcq, DFA dfa)
     {
-        _dfa = dfa;
-        _tcq = tcq;
-        _cncqSatManager = new SatisfiabilityKnowledgeManager(_tcq, _dfa);
+        _cncqSatManager = new SatisfiabilityKnowledgeManager(tcq, dfa);
     }
 
     public void setUnderapproximatingSemantics(boolean underapproximatingSemantics)
@@ -43,13 +38,11 @@ public class EdgeConstraintChecker
 
     public void excludeBindings(QueryResult bindings)
     {
-        _excludeBindings = bindings;
         _cncqSatManager.setGloballyExcludedBindings(bindings);
     }
 
     public void doNotExcludeBindings()
     {
-        _excludeBindings = null;
         _cncqSatManager.doNotGloballyExcludeBindings();
     }
 
@@ -82,18 +75,6 @@ public class EdgeConstraintChecker
             {
                 result.put(Bool.TRUE, cncqResult.get(Bool.TRUE));
                 result.put(Bool.FALSE, cncqResult.get(Bool.FALSE));
-                /*
-                TODO commented out because it does not seem to make a difference whether we retain all unsat bindings here
-                QueryResult unsatResult = cncqResult.get(Bool.FALSE);
-                if (restrictSatToBindings != null)
-                {
-                    // TODO copy is inefficient, but probably needed if the result stored and used elsewhere
-                    //  (e.g. to keep track of things)
-                    //unsatResult = unsatResult.copy();
-                    //unsatResult.retainAll(restrictUnsatToBindings);
-                }
-                result.put(Bool.FALSE, unsatResult);
-                */
                 firstCncq = false;
             }
             else

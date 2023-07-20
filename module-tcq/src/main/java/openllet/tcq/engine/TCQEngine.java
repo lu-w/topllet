@@ -50,6 +50,7 @@ public class TCQEngine extends AbstractQueryEngine<TemporalConjunctiveQuery>
         // FIRST RUN - USE CQ ENGINE ONLY
         QueryResult excludeResults = null;
         Map<Boolean, QueryResult> satResult = new HashMap<>();
+        int cqResultNumber = 0;
         if (OpenlletOptions.TCQ_ENGINE_USE_CQ_ENGINE)
         {
             _logger.fine("Trying underapproximating semantics check on DFA");
@@ -62,7 +63,8 @@ public class TCQEngine extends AbstractQueryEngine<TemporalConjunctiveQuery>
                 for (ResultBinding binding : excludeResult)
                     excludeResults.add(binding);
             t.stop();
-            _logger.finer("CQ semantics DFA check returned " + satResult.get(true).size() +
+            cqResultNumber = satResult.get(false).size();
+            _logger.fine("CQ semantics DFA check returned " + satResult.get(true).size() +
                     " satisfiable and " + satResult.get(false).size() + " unsatisfiable bindings out of " +
                     satResult.get(true).getMaxSize() + " bindings in " + t.getTotal() +  " ms");
         }
@@ -77,10 +79,16 @@ public class TCQEngine extends AbstractQueryEngine<TemporalConjunctiveQuery>
             satResult = _checkDFASatisfiability(automaton, q, satResult);
             _edgeChecker.doNotExcludeBindings();
             t.stop();
-            _logger.finer("Full semantics DFA check returned " + satResult.get(true).size() +
+            _logger.fine(_edgeChecker.getSatisfiabilityKnowledgeManager().getStats());
+            _logger.fine("Full semantics DFA check returned " + satResult.get(true).size() +
                     " satisfiable and " + satResult.get(false).size() + " unsatisfiable bindings out of " +
                     satResult.get(true).getMaxSize() + " bindings in " + t.getTotal() +  " ms");
         }
+        double cqResultRatio = 100.0;
+        if (satResult.get(false).size() > 0)
+            cqResultRatio = 100.0 * ((double) cqResultNumber / satResult.get(false).size());
+        _logger.fine(String.format("CQ semantics check returned a definite answer on %.2f %% of the entailed" +
+                " bindings", cqResultRatio));
         satResult.get(false).explicate();
         return satResult.get(false);
     }
