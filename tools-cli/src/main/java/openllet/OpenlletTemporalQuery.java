@@ -23,6 +23,9 @@ import org.apache.jena.shared.NotFoundException;
 import java.io.File;
 import java.io.IOException;
 import java.io.StringWriter;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -224,7 +227,7 @@ public class OpenlletTemporalQuery extends OpenlletCmdApp
             verbose("Query file: " + queryFile);
             startTask("parsing query file");
 
-            queryString = IO.readWholeFileAsUTF8(queryFile);
+            queryString = Files.readString(Paths.get(queryFile));
             query = TemporalConjunctiveQueryParser.parse(queryString, kb);
 
             finishTask("parsing query file");
@@ -234,7 +237,7 @@ public class OpenlletTemporalQuery extends OpenlletCmdApp
             verbose(queryString.trim());
             verbose("-----------------------------------------------------");
         }
-        catch (final NotFoundException | RuntimeIOException | QueryParseException | ParseException e)
+        catch (final IOException | NotFoundException | RuntimeIOException | QueryParseException | ParseException e)
         {
             throw new OpenlletCmdException(e);
         }
