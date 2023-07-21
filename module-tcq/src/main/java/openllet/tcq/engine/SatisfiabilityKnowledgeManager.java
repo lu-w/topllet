@@ -65,10 +65,10 @@ public class SatisfiabilityKnowledgeManager
                 Map<CNCQQuery, Double> map = _ratioOfExcludedBindings.get(t);
                 double avgSat = map.values().stream().mapToDouble(val -> val).average().orElse(0.0);
                 avgs.add(avgSat);
-                res.append(String.format("t=" + t + ": %.4f\n", avgSat));
+                res.append(String.format("t=" + t + ": %.2f\n", 100 * avgSat));
             }
             double avgSat = avgs.stream().mapToDouble(val -> val).average().orElse(0.0);
-            res.append(String.format("total: %.4f", avgSat));
+            res.append(String.format("total: %.2f", 100 * avgSat));
             return res.toString();
         }
     }
