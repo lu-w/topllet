@@ -51,38 +51,40 @@ public class TCQEngine extends AbstractQueryEngine<TemporalConjunctiveQuery>
         QueryResult excludeResults = null;
         Map<Boolean, QueryResult> satResult = new HashMap<>();
         int cqResultNumber = 0;
+        long timeFirstRun = 0;
         if (OpenlletOptions.TCQ_ENGINE_USE_CQ_ENGINE)
         {
             _logger.fine("Trying underapproximating semantics check on DFA");
-            Timer t = new Timer();
-            t.start();
             _edgeChecker.setUnderapproximatingSemantics(true);
             satResult = _checkDFASatisfiability(automaton, q, null);
             excludeResults = new QueryResultImpl(q);
             for (QueryResult excludeResult : satResult.values())
                 for (ResultBinding binding : excludeResult)
                     excludeResults.add(binding);
-            t.stop();
             cqResultNumber = satResult.get(false).size();
-            _logger.fine("CQ semantics DFA check returned " + satResult.get(true).size() +
-                    " satisfiable and " + satResult.get(false).size() + " unsatisfiable bindings out of " +
-                    satResult.get(true).getMaxSize() + " bindings in " + t.getTotal() +  " ms");
+            timeFirstRun = _timer.getTotal();
+            _logger.fine("CQ semantics DFA check took " + timeFirstRun +  " ms");
+            _logger.fine(String.format("CQ semantics DFA check returned %.2f %% (",
+                    (double) 100 * (satResult.get(true).size() + satResult.get(false).size()) /
+                            satResult.get(true).getMaxSize())
+                    + satResult.get(true).size() +  " satisfiable and " + satResult.get(false).size() +
+                    " unsatisfiable bindings out of " + satResult.get(true).getMaxSize() + " bindings)");
         }
         // SECOND RUN - USE CNCQ ENGINE BASED ON RESULTS OF CQ ENGINE
         if (excludeResults == null || !excludeResults.isComplete())
         {
-            Timer t = new Timer();
-            t.start();
             _edgeChecker.excludeBindings(excludeResults);
             _edgeChecker.setUnderapproximatingSemantics(false);
             _logger.fine("Trying full blown semantics check on DFA");
             satResult = _checkDFASatisfiability(automaton, q, satResult);
             _edgeChecker.doNotExcludeBindings();
-            t.stop();
             _logger.fine(_edgeChecker.getSatisfiabilityKnowledgeManager().getStats());
-            _logger.fine("Full semantics DFA check returned " + satResult.get(true).size() +
-                    " satisfiable and " + satResult.get(false).size() + " unsatisfiable bindings out of " +
-                    satResult.get(true).getMaxSize() + " bindings in " + t.getTotal() +  " ms");
+            _logger.fine("Full semantics DFA check took " + (_timer.getTotal() - timeFirstRun) +  " ms");
+            _logger.fine(String.format("Full semantics DFA check returned %.2f %% (",
+                    (double) 100 * (satResult.get(true).size() + satResult.get(false).size()) /
+                            satResult.get(true).getMaxSize())
+                    + satResult.get(true).size() +  " satisfiable and " + satResult.get(false).size() +
+                    " unsatisfiable bindings out of " + satResult.get(true).getMaxSize() + " bindings)");
         }
         double cqResultRatio = 100.0;
         if (satResult.get(false).size() > 0)
