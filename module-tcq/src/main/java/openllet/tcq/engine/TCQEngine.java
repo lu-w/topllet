@@ -62,8 +62,11 @@ public class TCQEngine extends AbstractQueryEngine<TemporalConjunctiveQuery>
                 for (ResultBinding binding : excludeResult)
                     excludeResults.add(binding);
             cqResultNumber = satResult.get(false).size();
-            timeFirstRun = _timer.getTotal();
-            _logger.fine("CQ semantics DFA check took " + timeFirstRun +  " ms");
+            if (_timer != null)
+            {
+                timeFirstRun = _timer.getTotal();
+                _logger.fine("CQ semantics DFA check took " + timeFirstRun + " ms");
+            }
             _logger.fine(String.format("CQ semantics DFA check returned %.2f %% (",
                     (double) 100 * (satResult.get(true).size() + satResult.get(false).size()) /
                             satResult.get(true).getMaxSize())
@@ -79,7 +82,8 @@ public class TCQEngine extends AbstractQueryEngine<TemporalConjunctiveQuery>
             satResult = _checkDFASatisfiability(automaton, q, satResult);
             _edgeChecker.doNotExcludeBindings();
             _logger.fine(_edgeChecker.getSatisfiabilityKnowledgeManager().getStats());
-            _logger.fine("Full semantics DFA check took " + (_timer.getTotal() - timeFirstRun) +  " ms");
+            if (_timer != null)
+                _logger.fine("Full semantics DFA check took " + (_timer.getTotal() - timeFirstRun) +  " ms");
             _logger.fine(String.format("Full semantics DFA check returned %.2f %% (",
                     (double) 100 * (satResult.get(true).size() + satResult.get(false).size()) /
                             satResult.get(true).getMaxSize())
