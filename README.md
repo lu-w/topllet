@@ -1,13 +1,12 @@
 Openllet: An Open Source OWL DL reasoner for Java
 -----------------------------------------------
 
-<!-- No support for java 17 [![Codeship Build Status](https://codeship.com/projects/1fe60a20-f84b-0134-33ee-76e4f316aab3/status?branch=integration)](https://app.codeship.com/projects/210924) -->
-[![CircleCI](https://circleci.com/gh/Galigator/openllet/tree/integration.svg?style=svg)](https://circleci.com/gh/Galigator/openllet/tree/integration)
-[![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/Galigator/pelletEvolution?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
-[![Twitter](https://img.shields.io/badge/twitter-openllet-blue.svg)](https://twitter.com/openllet)
-[![Codacy Badge](https://api.codacy.com/project/badge/Grade/d1acfdbe2c194252a311e223cd94e64e)](https://www.codacy.com/app/sejourne_kevin/openllet?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=Galigator/openllet&amp;utm_campaign=Badge_Grade)
-<!--<a href="https://www.versioneye.com/user/projects/5832fff3e7cea00029198b38"><img src="https://www.versioneye.com/user/projects/5832fff3e7cea00029198b38/badge.svg?style=flat"/></a>-->
-[![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.github.galigator.openllet/openllet-owlapi/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.github.galigator.openllet/openllet-owlapi)
+Openllet Temporal Query
+-----------------------
+
+This is a fork of Openllet containing support for answering temporal queries.
+
+TODO
 
 
 Openllet is an OWL 2 DL reasoner: 
@@ -25,7 +24,7 @@ Pellet community is on [pellet-users mailing list](https://groups.google.com/for
 
 
 Openllet 2.6.X:
------------
+---------------
 
 * Refactor modules dependencies.
 * Enforce interface usage in the core system.
