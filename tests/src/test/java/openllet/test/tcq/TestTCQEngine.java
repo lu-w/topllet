@@ -149,7 +149,7 @@ public class TestTCQEngine extends AbstractTCQTest
         String tcqString = """
         # A=l4d:Bicyclist, B=l4c:Traffic_Participant, C=l4c:Traffic_Participant, D=l1c:Driveable_Lane, E=l1d:Pedestrian_Crossing
         # r=geo:sfIntersects, q=phy:has_intersecting_path
-        G (A(?bi) ^ B(?t) ^ C(?w) ^ D(?l) ^ E(?cr) ^ r(?cr,?l))
+        G (A(?bi) ^ B(?t) ^ C(?w))
             &
         F
         (
@@ -157,10 +157,10 @@ public class TestTCQEngine extends AbstractTCQTest
                 (r(?bi,?w))
                     &
                 F_<=10 # somewhere in the first second, we require to take right of way
-                    (!F_<=5 !(r(?bi,?cr) ^ r(?t,?l) ^ q(?t,?bi))) # illegitimately taking right of way has to be sustained for some time to be significant
+                    (!F_<=5 !(D(l) ^ E(cr) ^ r(cr,l) ^ r(?bi,cr) ^ r(?t,l) ^ q(?t,?bi))) # illegitimately taking right of way has to be sustained for some time to be significant
             )
         )""";
-        testQuery(tcqString, new ATermAppl[][] { { _a, _b, _c, _d, _e } });
+        testQuery(tcqString, new ATermAppl[][] { { _a, _b, _c } });
         initializeKB();
         useCaseTKBIllegCrossing(false);
         testQuery(tcqString);
