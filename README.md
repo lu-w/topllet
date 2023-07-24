@@ -9,7 +9,17 @@ This is a fork of Openllet containing support for answering temporal queries.
 Installation
 ------------
 
-Requirements are Java >= 17 and a compatible Maven version.
+Requirements
+~~~~~
+
+Requirements:
+- Java >= 17 and a compatible Maven version.
+- `mltl2ltl` in `$PATH`: (TODO)
+- `lydia` in `$PATH`: https://github.com/whitemech/lydia
+
+Build
+~~~~~
+
 To build, clone this repository and run `mvn install -DskipTests` from the top level directory.
 The `openllet` binary is then located in `tools-cli/target/openlletcli/bin`.
 You can add it to your global path by adding 
@@ -17,7 +27,7 @@ You can add it to your global path by adding
 to your `~/.bashrc` (or equivalent for your shell).
 
 Tests
------
+~~~~~
 
 You can run the tests for the temporal query component by calling `mvn -pl tests test -Dtest=TCQTestSuite`
 
