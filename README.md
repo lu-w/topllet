@@ -6,8 +6,20 @@ Openllet Temporal Query
 
 This is a fork of Openllet containing support for answering temporal queries.
 
-TODO
+Installation
+------------
 
+Requirements are Java >= 17 and a compatible Maven version.
+To build, clone this repository and run `mvn install -DskipTests` from the top level directory.
+The `openllet` binary is then located in `tools-cli/target/openlletcli/bin`.
+You can add it to your global path by adding 
+`export PATH="/path/to/your/openllet/location/tools-cli/target/openlletcli/bin:$PATH"`
+to your `~/.bashrc` (or equivalent for your shell).
+
+Tests
+-----
+
+You can run the tests for the temporal query component by calling `mvn -pl tests test -Dtest=TCQTestSuite`
 
 Openllet is an OWL 2 DL reasoner: 
 --------------------------------
