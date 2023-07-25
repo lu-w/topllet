@@ -93,4 +93,9 @@ public interface ResultBinding
 	 * 	are also present in this binding.
 	 */
 	boolean contains(ResultBinding binding);
+
+	/**
+	 * @return True iff. all variables of this binding are mapped to a different element.
+	 */
+	boolean isDistinct();
 }

@@ -13,6 +13,7 @@ import openllet.aterm.ATermAppl;
 import openllet.core.utils.Bool;
 import openllet.query.sparqldl.model.Query;
 import openllet.query.sparqldl.model.cq.QueryParameters;
+import org.jgrapht.util.MathUtil;
 
 /**
  * <p>
@@ -162,7 +163,13 @@ public class QueryResultImpl implements QueryResult
 	@Override
 	public int getMaxSize()
 	{
-		return (int) Math.pow(getIndividualCount(), getResultVars().size());
+		int maxSize;
+		if (isDistinct())
+			maxSize = (int) (MathUtil.factorial(getIndividualCount()) /
+					MathUtil.factorial(getIndividualCount() - getResultVars().size()));
+		else
+			maxSize = (int) Math.pow(getIndividualCount(), getResultVars().size());
+		return maxSize;
 	}
 
 	protected int getIndividualCount()
@@ -199,20 +206,28 @@ public class QueryResultImpl implements QueryResult
 		_bindings.addAll(toAdd);
 	}
 
+
+	// TODO check if when we merge query results and add all bindings together this breaks distinctness -> then don't add it!
 	protected Collection<ResultBinding> explicate(ResultBinding binding)
 	{
-		Set<ResultBinding> explicatedBindings = new HashSet<>();
-		if (!isPartialBinding(binding))
-			explicatedBindings.add(binding);
+		if (_resultVars.size() > 0)
+		{
+			Set<ResultBinding> explicatedBindings = new HashSet<>();
+			if (!isPartialBinding(binding))
+				explicatedBindings.add(binding);
+			else
+				for (ResultBinding newBinding : QueryResult.allBindings(
+						getUnspecifiedVariablesInBinding(binding, getResultVars()),
+						_query.getKB().getIndividuals().stream().toList(), isDistinct()))
+				{
+					newBinding.merge(binding);
+					if (!isDistinct() || newBinding.isDistinct())
+						explicatedBindings.add(newBinding);
+				}
+			return explicatedBindings;
+		}
 		else
-			for (ResultBinding newBinding : QueryResult.allBindings(
-					getUnspecifiedVariablesInBinding(binding, getResultVars()),
-					_query.getKB().getIndividuals().stream().toList()))
-			{
-				newBinding.merge(binding);
-				explicatedBindings.add(newBinding);
-			}
-		return explicatedBindings;
+			return Set.of(binding);
 	}
 
 	@Override
@@ -294,7 +309,7 @@ public class QueryResultImpl implements QueryResult
 		// If this result contains all possible bindings anyhow, we skip this and just return the empty result
 		else if (size() > 0)
 		{
-			invBindings = QueryResult.allBindings(_resultVars, inds);
+			invBindings = QueryResult.allBindings(_resultVars, inds, isDistinct());
 			for (ResultBinding binding : _bindings)
 				invBindings.remove(binding);
 		}

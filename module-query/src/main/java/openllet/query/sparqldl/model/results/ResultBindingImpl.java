@@ -6,10 +6,7 @@
 
 package openllet.query.sparqldl.model.results;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import openllet.aterm.ATermAppl;
 
@@ -131,6 +128,17 @@ public class ResultBindingImpl implements ResultBinding
 				isContained = false;
 		}
 		return isContained;
+	}
+
+	@Override
+	public boolean isDistinct()
+	{
+		List<ATermAppl> keys = new ArrayList<>(_bindings.keySet());
+		for (int i = 0; i < keys.size(); i++)
+			for (int j = i + 1; j < keys.size(); j++)
+				if (_bindings.get(keys.get(i)).equals(_bindings.get(keys.get(j))))
+					return false;
+		return true;
 	}
 
 	@Override

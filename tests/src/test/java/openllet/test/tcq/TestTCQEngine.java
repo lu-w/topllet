@@ -26,9 +26,9 @@ public class TestTCQEngine extends AbstractTCQTest
     public void testSimpleQuery2()
     {
         simpleTKB();
-        testQuery("(A(?x)) U (B(?y))", new ATermAppl[][] { { _a, _b }, { _b, _b }, { _c, _b } });
-        testQuery("((A(?x)) U (B(?y))) | F(C(?y))", new ATermAppl[][] { { _a, _b }, { _b, _b }, { _c, _b } });
-        testQuery("((A(?x)) U (B(?y))) | X(C(?y))", new ATermAppl[][] { { _a, _b }, { _b, _b }, { _c, _b } });
+        testQuery("(A(?x)) U (B(?y))", new ATermAppl[][] { { _a, _b }, { _c, _b } });
+        testQuery("((A(?x)) U (B(?y))) | F(C(?y))", new ATermAppl[][] { { _a, _b }, { _c, _b } });
+        testQuery("((A(?x)) U (B(?y))) | X(C(?y))", new ATermAppl[][] { { _a, _b }, { _c, _b } });
     }
 
     @Test
@@ -43,17 +43,15 @@ public class TestTCQEngine extends AbstractTCQTest
     {
         simpleTKB2();
         testQuery("((A(?x)) U (B(?y))) & (A(?x))", new ATermAppl[][] { { _a, _b } });
-        testQuery("X(A(?x)) U (B(?y)) & (A(?z))", new ATermAppl[][] { { _a, _b, _a } });
+        testQuery("X(A(?x)) U (B(?y)) & (A(?z))");
     }
 
     @Test
     public void testSimpleQuery5()
     {
         simpleTKB2();
-        testQuery("(F(A(?x)) & G (r(?y,?z)))", new ATermAppl[][] { { _a, _a, _b } });
-        testQuery("F(A(?x)) | G (r(?y,?z))", new ATermAppl[][] { { _a, _a, _b }, { _b, _a, _b }, { _c, _a, _b },
-                { _a, _a, _a }, { _a, _a, _c }, { _a, _b, _a }, { _a, _b, _b }, { _a, _b, _c }, { _a, _c, _a },
-                { _a, _c, _b }, { _a, _c, _c } });
+        testQuery("(F(A(?x)) & G (r(?y,?z)))");
+        testQuery("F(A(?x)) | G (r(?y,?z))", new ATermAppl[][] { { _c, _a, _b }, { _a, _b, _c }, { _a, _c, _b } });
     }
 
     @Test
@@ -104,7 +102,7 @@ public class TestTCQEngine extends AbstractTCQTest
     {
         complexTKB();
         // a query engine with a naive implementation of semantics will return no binding.
-        testQuery("!G(C(?x) ^ r(?x,?y))", allResults(List.of(_a, _b, _c), 2));
+        testQuery("!G(C(?x) ^ r(?x,?y))", allResults(List.of(_a, _b, _c), 2, true));
         // this is due to the axiom "C subclass of not(some(r, TOP))". B does not have such a constraint, therefore:
         testQuery("!G(B(?x) ^ r(?x,?y))");
     }
@@ -115,10 +113,11 @@ public class TestTCQEngine extends AbstractTCQTest
         complexTKB();
         testQuery("!(D(?x))", new ATermAppl[][] { { _a } } );
         testQuery("G(D(?x))", new ATermAppl[][] { { _b } } );
-        testQuery("G(!(D(?x)) -> X(D(?y)))", new ATermAppl[][] { { _a, _b }, { _b, _a }, { _b, _b }, { _b, _c }, { _c, _b } });
-        testQuery("G((D(?x)) -> X(D(?y)))", new ATermAppl[][] { { _a, _a }, { _a, _b }, { _a, _c }, { _b, _b }, { _c, _a }, { _c, _b }, { _c, _c }  });
-        testQuery("G((A(?x)) -> X(r(?x,?y)))", new ATermAppl[][] { { _b, _a }, { _b, _b },  { _b, _c } });
-        testQuery("G(!(D(?x)) -> X(p(?y,z)))", new ATermAppl[][] { { _b, _a }, { _b, _b }, { _b, _c }, { _a, _c }, { _c, _c }  });
+        testQuery("G(!(D(?x)) -> X(D(?y)))", new ATermAppl[][] { { _a, _b }, { _b, _a }, { _b, _c }, { _c, _b } });
+        testQuery("!(D(?x)) | (D(?y))", new ATermAppl[][] { { _a, _b }, {_c, _b}, { _a, _c } });
+        testQuery("G(!(D(?x)) | X(D(?y)))", new ATermAppl[][] { { _a, _b }, {_c, _b} });
+        testQuery("G((A(?x)) -> X(r(?x,?y)))", new ATermAppl[][] { { _b, _a }, { _b, _c } });
+        testQuery("G(!(D(?x)) -> X(p(?y,z)))", new ATermAppl[][] { { _b, _a }, { _b, _c }, { _a, _c } });
         testQuery("G(!(D(?x)) U (E(?y)))", new ATermAppl[][] { { _a, _b } });
     }
 
@@ -128,10 +127,10 @@ public class TestTCQEngine extends AbstractTCQTest
         complexTKB();
         testQuery("G_[0,9] (!(D(?x)) | (E(?y)))", new ATermAppl[][] { { _a, _b } });
         testQuery("G_[0,10] (!(D(?x)) | (E(?y)))");
-        testQuery("F_<=3 !(C(?x) ^ r(?x,?y))", allResults(List.of(_a, _b, _c), 2));
+        testQuery("F_<=3 !(C(?x) ^ r(?x,?y))", allResults(List.of(_a, _b, _c), 2, true));
         testQuery("F_<=9 (q(?y, ?z))", new ATermAppl[][] { { _b, _a }, { _c, _b } });
-        testQuery("(!(D(?w)) | (E(?x))) U_[0,9] (q(?y, ?z))", new ATermAppl[][] { { _a, _b, _c, _b }, { _a, _b, _b, _a } });
-        testQuery("(!(D(?w)) | (E(?x))) U_[0,8] (q(?y, ?z))", new ATermAppl[][] { { _a, _b, _b, _a } });
+        testQuery("(!(D(?w)) | (E(?x))) U_[0,9] (q(?y, ?z))");
+        testQuery("(!(D(?w)) | (E(?x))) U_[0,8] (q(?y, ?z))");
         testQuery("(!(D(?w)) | (E(?x))) U_[0,7] (q(?y, ?z))");
     }
 

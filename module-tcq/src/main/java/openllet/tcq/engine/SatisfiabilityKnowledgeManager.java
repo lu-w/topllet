@@ -1,5 +1,6 @@
 package openllet.tcq.engine;
 
+import openllet.aterm.ATermAppl;
 import openllet.core.KnowledgeBase;
 import openllet.core.utils.Bool;
 import openllet.query.sparqldl.engine.QueryExec;
@@ -12,6 +13,7 @@ import openllet.query.sparqldl.model.cq.ConjunctiveQuery;
 import openllet.query.sparqldl.model.results.MultiQueryResults;
 import openllet.query.sparqldl.model.results.QueryResult;
 import openllet.query.sparqldl.model.results.QueryResultImpl;
+import openllet.query.sparqldl.model.results.ResultBinding;
 import openllet.shared.tools.Log;
 import openllet.tcq.model.automaton.DFA;
 import openllet.tcq.model.automaton.Edge;
@@ -80,7 +82,7 @@ public class SatisfiabilityKnowledgeManager
     private final QueryExec<ConjunctiveQuery> _cqEngine = new QueryEngine();
     private final Map<Integer, List<ConjunctiveQuery>> _cqCache = new HashMap<>();
     private QueryResult _globallyExcludeBindings;
-    private SatisfiabilityStats _stats = new SatisfiabilityStats();
+    private final SatisfiabilityStats _stats = new SatisfiabilityStats();
 
     public SatisfiabilityKnowledgeManager(TemporalConjunctiveQuery query, DFA dfa)
     {

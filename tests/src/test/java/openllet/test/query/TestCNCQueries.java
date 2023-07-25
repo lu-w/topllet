@@ -41,7 +41,7 @@ public class TestCNCQueries extends AbstractQueryTest
                 negatedQuery(TypeAtom(x, _C), PropertyValueAtom(z, _r, _b))
             )
         );
-        List<List<ATermAppl>> res = allResults(List.of(_a, _b, _c), 3);
+        List<List<ATermAppl>> res = allResults(List.of(_a, _b, _c), 3, false);
         testQuery(cncqq1, res);
     }
 
@@ -347,7 +347,7 @@ public class TestCNCQueries extends AbstractQueryTest
             )
         );
 
-        List<List<ATermAppl>> res1 = allResults(List.of(oedipus, iokaste, polyneikes, thersandros), 4);
+        List<List<ATermAppl>> res1 = allResults(List.of(oedipus, iokaste, polyneikes, thersandros), 4, false);
         res1.removeAll(
             List.of(
                 List.of(oedipus, polyneikes, polyneikes, thersandros),
@@ -356,7 +356,7 @@ public class TestCNCQueries extends AbstractQueryTest
         );
 
         testQuery(cncqq1, res1);
-        testQuery(cncqq2, allResults(List.of(oedipus, iokaste, polyneikes, thersandros), 2));
+        testQuery(cncqq2, allResults(List.of(oedipus, iokaste, polyneikes, thersandros), 2, false));
         testQuery(cncqq3, new ATermAppl[][]
             {
                 {oedipus, thersandros},

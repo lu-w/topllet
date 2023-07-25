@@ -45,6 +45,15 @@ public class SatisfiabilityKnowledge
         if (!bindings.getResultVars().equals(_tcq.getResultVars()))
             bindings.expandToAllVariables(_tcq.getResultVars());
         bindings.explicate();
+        // Removes all distinct bindings (e.g., x->a, y->a) if required
+        if (_cncq.isDistinct())
+        {
+            QueryResult toRemove = new QueryResultImpl(_cncq);
+            for (ResultBinding b : bindings)
+                if (!b.isDistinct())
+                    toRemove.add(b);
+            bindings.removeAll(toRemove);
+        }
 
         Map<Integer, QueryResult> applicableBindings;
 
