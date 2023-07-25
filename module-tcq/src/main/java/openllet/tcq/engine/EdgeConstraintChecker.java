@@ -86,9 +86,6 @@ public class EdgeConstraintChecker
             if (result.get(Bool.TRUE).size() >= result.get(Bool.TRUE).getMaxSize())
                 break;
         }
-        // TODO Copy -- can it be removed?
-        if (result.get(Bool.TRUE) != null)
-            result.put(Bool.TRUE, result.get(Bool.TRUE).copy());
         return result;
     }
 }

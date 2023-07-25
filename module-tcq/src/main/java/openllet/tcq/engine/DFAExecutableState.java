@@ -98,7 +98,7 @@ public class DFAExecutableState
     protected void setSatBindings(QueryResult satBindings)
     {
         if (satBindings != null)
-            _satBindings = satBindings.copy();
+            _satBindings = satBindings;
     }
 
     protected void addUnsatBindings(QueryResult unsatBindings)
@@ -154,7 +154,7 @@ public class DFAExecutableState
         Collection<DFAExecutableState> newExecutableStates = new HashSet<>();
         QueryResult restrictSatToBindings = null;
         if (!_isInitial && _satBindings != null)
-            restrictSatToBindings = _satBindings.copy();  // TODO .copy() maybe not required
+            restrictSatToBindings = _satBindings;
         else if (!_isInitial)
             // We can not infer satisfiability if prior state has no information about its satisfiability.
             restrictSatToBindings = new QueryResultImpl(_tcq);
@@ -268,16 +268,16 @@ public class DFAExecutableState
         if (toMerge.getSatBindings() != null)
         {
             if (_satBindings == null)
-                _satBindings = toMerge.getSatBindings().copy();
+                _satBindings = toMerge.getSatBindings();
             else
                 _satBindings.addAll(toMerge.getSatBindings());
         }
         if (toMerge.getUnsatBindings() != null && _unsatBindings != null)
             // We can only merge unsatisfiable bindings if one of them is not null -> if we got some null unsatisfiable
-            // binding, this means we have NO knowledge, and it could be anything. No arbitration can be done.
+            // binding, this means we have *no* knowledge, and it could be anything. No arbitration can be done.
             _unsatBindings.retainAll(toMerge.getUnsatBindings());
-        // Required because retainAll does nothing wenn given null - but null means here 'don't know anything' about
-        // unsat, but we need total agreement from all states.
+        // Required because retainAll does nothing when given null - but null means here 'don't know anything' about
+        // unsatisfiability, but we need total agreement from all states.
         else
             _unsatBindings = null;
         // In prior iterations, we may have added an unsat info that becomes sat through some other incoming edge.

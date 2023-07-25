@@ -114,7 +114,7 @@ public class SatisfiabilityKnowledgeManager
     public void setGloballyExcludedBindings(QueryResult excludedBindings)
     {
         if (excludedBindings != null)
-            _globallyExcludeBindings = excludedBindings.copy();
+            _globallyExcludeBindings = excludedBindings;
     }
 
     public void doNotGloballyExcludeBindings()
