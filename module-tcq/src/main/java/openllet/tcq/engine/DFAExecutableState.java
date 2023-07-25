@@ -7,15 +7,18 @@ import openllet.query.sparqldl.model.cncq.CNCQQuery;
 import openllet.query.sparqldl.model.results.QueryResult;
 import openllet.query.sparqldl.model.results.QueryResultImpl;
 import openllet.query.sparqldl.model.results.ResultBinding;
+import openllet.shared.tools.Log;
 import openllet.tcq.model.automaton.DFA;
 import openllet.tcq.model.automaton.Edge;
 import openllet.tcq.model.query.TemporalConjunctiveQuery;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.logging.Logger;
 
 public class DFAExecutableState
 {
+    public static final Logger _logger = Log.getLogger(DFAExecutableState.class);
     private final int _dfaState;
     private final DFA _dfa;
     private final TemporalConjunctiveQuery _tcq;
@@ -134,11 +137,6 @@ public class DFAExecutableState
         return _hasUncheckedBindingCandidates;
     }
 
-    public boolean isAccepting()
-    {
-        return !hasUncheckedBindingCandidates() && _dfa.isAccepting(_dfaState);
-    }
-
     public KnowledgeBase getKB()
     {
         return _kb;
@@ -177,7 +175,7 @@ public class DFAExecutableState
                 Map<Bool, QueryResult> edgeResult = _edgeChecker.checkEdge(edge, _timePoint, _kb,
                         restrictSatToBindings);
                 edgeResults.put(edge, edgeResult);
-                // TODO: isEdgeCompletelyChecked not absolute but wrt. sat bindings of current state (no need to check more)
+                // TODO: isEdgeCompletelyChecked not absolute but wrt. sat bindings of current state (no need to check more) (does not work with underapprox. semantics mode) - is it worth the cost?
                 fullyCheckedAllEdges &= _edgeChecker.isEdgeCompletelyChecked(edge, _timePoint);
                 DFAExecutableState newState = new DFAExecutableState(_dfa, _tcq, edge.getToState(), _timePoint + 1,
                         _edgeChecker, _timer);
@@ -257,11 +255,6 @@ public class DFAExecutableState
         return edges.size() == 1 && edges.get(0).getFromState() == edges.get(0).getToState();
     }
 
-    private boolean isInAcceptingSink()
-    {
-        return _dfa.isAccepting(_dfaState) && isInSink();
-    }
-
     public void merge(DFAExecutableState toMerge)
     {
         assert(getTimePoint() == toMerge.getTimePoint() && getDFAState() == toMerge.getDFAState());
@@ -281,8 +274,10 @@ public class DFAExecutableState
         else
             _unsatBindings = null;
         // In prior iterations, we may have added an unsat info that becomes sat through some other incoming edge.
-        if (_unsatBindings != null)
-            _unsatBindings.removeAll(_satBindings);
+        if (_unsatBindings != null && _satBindings != null)
+            for (ResultBinding binding : _satBindings)
+                if (_unsatBindings.contains(binding))
+                    _unsatBindings.remove(binding);
     }
 
     @Override

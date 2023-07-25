@@ -1,6 +1,5 @@
 package openllet.tcq.engine;
 
-import openllet.aterm.ATermAppl;
 import openllet.core.KnowledgeBase;
 import openllet.core.utils.Bool;
 import openllet.query.sparqldl.engine.QueryExec;
@@ -18,7 +17,6 @@ import openllet.shared.tools.Log;
 import openllet.tcq.model.automaton.DFA;
 import openllet.tcq.model.automaton.Edge;
 import openllet.tcq.model.query.TemporalConjunctiveQuery;
-import openllet.tcq.parser.TemporalConjunctiveQueryParser;
 
 import java.io.IOException;
 import java.util.*;
@@ -190,6 +188,16 @@ public class SatisfiabilityKnowledgeManager
             if (!_cqCache.containsKey(timePoint))
                 _cqCache.put(timePoint, new ArrayList<>());
             _cqCache.get(timePoint).add(query);
+            // Removes all non-distinct bindings (e.g., x->a, y->a), if the CQ engine returned some
+            if (_tcq.isDistinct())
+            {
+                List<ResultBinding> toRemove = new ArrayList<>();
+                for (ResultBinding b : result)
+                    if (!b.isDistinct())
+                        toRemove.add(b);
+                for (ResultBinding b : toRemove)
+                    result.remove(b);
+            }
             propagateKnowledge(query, result, timePoint);
         }
     }
@@ -209,8 +217,10 @@ public class SatisfiabilityKnowledgeManager
     {
         QueryResult excludeForQuery = new QueryResultImpl(query);
         excludeForQuery.addAll(_globallyExcludeBindings);
+        // TODO this takes some time - think whether we can optimize this (cache?)
         for (QueryResult results : knowledgeOnQuery.getCertainSatisfiabilityKnowledge(timePoint).values())
             excludeForQuery.addAll(results);
+        _logger.finest("Excluded " + excludeForQuery.size() + " bindings");
         double maxSize = excludeForQuery.getMaxSize();
         double excludedBindingsSize = 1;
         if (maxSize > 0)
@@ -237,15 +247,18 @@ public class SatisfiabilityKnowledgeManager
             if (!knowledgeOnQuery.isComplete(timePoint))
                 if (useUnderapproximatingSemantics)
                 {
+                    _logger.finer("Calling CQ engine for " + query);
                     for (ConjunctiveQuery subQuery : getCandidatesForCheckingUnderapproximatingSemantics(query))
                         execConjunctiveQueryEngine(subQuery, timePoint);
                 }
                 else
                 {
+                    _logger.finer("Calling CNCQ engine for " + query);
                     execCNCQQueryEngine(query, timePoint, knowledgeOnQuery, restrictSatToBindings);
                 }
             else if (!useUnderapproximatingSemantics)
                 _stats.informAboutBindingExclusion(timePoint, query, 1);
+            _logger.finer("Retrieving satisfiability knowledge on " + query);
             return knowledgeOnQuery.getCertainSatisfiabilityKnowledge(timePoint, restrictSatToBindings);
         }
         else

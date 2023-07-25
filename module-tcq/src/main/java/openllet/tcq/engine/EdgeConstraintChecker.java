@@ -4,15 +4,18 @@ import openllet.core.KnowledgeBase;
 import openllet.core.utils.Bool;
 import openllet.query.sparqldl.model.cncq.CNCQQuery;
 import openllet.query.sparqldl.model.results.QueryResult;
+import openllet.shared.tools.Log;
 import openllet.tcq.model.automaton.DFA;
 import openllet.tcq.model.automaton.Edge;
 import openllet.tcq.model.query.TemporalConjunctiveQuery;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.logging.Logger;
 
 public class EdgeConstraintChecker
 {
+    public static final Logger _logger = Log.getLogger(EdgeConstraintChecker.class);
     private final SatisfiabilityKnowledgeManager _cncqSatManager;
     private boolean _useUnderapproximatingSemantics = true;
 
@@ -67,6 +70,7 @@ public class EdgeConstraintChecker
         Map<Bool, QueryResult> result = new HashMap<>();
         List<CNCQQuery> cncqs = edge.getCNCQs();
         boolean firstCncq = true;
+        _logger.finer("Checking DFA edge " + edge);
         for (CNCQQuery cncq : cncqs)
         {
             Map<Bool, QueryResult> cncqResult = _cncqSatManager.computeSatisfiableBindings(cncq, timePoint, kb,

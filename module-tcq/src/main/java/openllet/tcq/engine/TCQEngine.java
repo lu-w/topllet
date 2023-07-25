@@ -130,8 +130,15 @@ public class TCQEngine extends AbstractQueryEngine<TemporalConjunctiveQuery>
         {
             DFAExecutableState execState = states.get(0);
             if (execState != null)
+            {
+                _logger.finer("Executing state " + execState.getDFAState() + " @ t = " + execState.getTimePoint());
                 for (DFAExecutableState newState : execState.execute())
+                {
+                    _logger.finer("Adding/merging state " + newState.getDFAState() + " @ t = "
+                            + newState.getTimePoint());
                     states.mergeOrAdd(newState);
+                }
+            }
             states.remove(execState);
         }
 

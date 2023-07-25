@@ -6,15 +6,18 @@ import openllet.query.sparqldl.model.cncq.CNCQQuery;
 import openllet.query.sparqldl.model.results.QueryResult;
 import openllet.query.sparqldl.model.results.QueryResultImpl;
 import openllet.query.sparqldl.model.results.ResultBinding;
+import openllet.shared.tools.Log;
 import openllet.tcq.model.query.TemporalConjunctiveQuery;
 
 import java.util.*;
+import java.util.logging.Logger;
 
 /**
  * Stores satisfiability information of an arbitrary BCQ wrt. different time points.
  */
 public class SatisfiabilityKnowledge
 {
+    public static final Logger _logger = Log.getLogger(SatisfiabilityKnowledge.class);
     private final CNCQQuery _cncq;
     private final TemporalConjunctiveQuery _tcq;
     private final Map<Integer, QueryResult> _satisfiableBindings = new HashMap<>();
@@ -42,18 +45,10 @@ public class SatisfiabilityKnowledge
     {
         // The information may have been gained from an impartial query check (e.g. A(?x) when the overall TCQ
         // works over ?x and ?y. Therefore, we expand the query result to all variables of the TCQ.
+        _logger.finer(_cncq + " is informed about satisfiability (" + satisfiability + ")");
         if (!bindings.getResultVars().equals(_tcq.getResultVars()))
             bindings.expandToAllVariables(_tcq.getResultVars());
         bindings.explicate();
-        // Removes all distinct bindings (e.g., x->a, y->a) if required
-        if (_cncq.isDistinct())
-        {
-            QueryResult toRemove = new QueryResultImpl(_cncq);
-            for (ResultBinding b : bindings)
-                if (!b.isDistinct())
-                    toRemove.add(b);
-            bindings.removeAll(toRemove);
-        }
 
         Map<Integer, QueryResult> applicableBindings;
 
@@ -66,9 +61,7 @@ public class SatisfiabilityKnowledge
             if (applicableBindings.containsKey(applicableTimePoint))
                 applicableBindings.get(applicableTimePoint).addAll(bindings);
             else
-            {
                 applicableBindings.put(applicableTimePoint, bindings);
-            }
     }
 
     public Map<Bool, QueryResult> getCertainSatisfiabilityKnowledge(int timePoint)
@@ -106,22 +99,6 @@ public class SatisfiabilityKnowledge
         else
             filtered = bindings;
         return filtered;
-    }
-
-    @Deprecated
-    public Map<Bool, QueryResult> getSatisfiabilityKnowledge(int timePoint)
-    {
-        Map<Bool, QueryResult> knowledge = getCertainSatisfiabilityKnowledge(timePoint);
-        knowledge.put(Bool.UNKNOWN, new QueryResultImpl(_cncq));
-        for (ResultBinding binding : new QueryResultBasedBindingCandidateGenerator(_cncq))
-        {
-            if ((!_satisfiableBindings.containsKey(timePoint) ||
-                    !_satisfiableBindings.get(timePoint).contains(binding)) &&
-                (!_unsatisfiableBindings.containsKey(timePoint) ||
-                    !_unsatisfiableBindings.get(timePoint).contains(binding)))
-                knowledge.get(Bool.UNKNOWN).add(binding);
-        }
-        return knowledge;
     }
 
     public boolean isComplete(int timePoint)
