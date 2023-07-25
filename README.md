@@ -26,6 +26,13 @@ to your `~/.bashrc`.
 
 You can run the tests for the temporal query component by calling `mvn -pl tests test -Dtest=TCQTestSuite`
 
+
+### Logging
+
+In contrast to the upstream version of `openllet`, this version allows a fine-tuned control over logging.
+For this, instead of running the `openllet` from `tools-cli/target/openlletcli/bin/openllet`, use
+`export JAVA_OPTS="-Djava.util.logging.config.file=path/to/logging.properties"; openllet`.
+
 ## Examples
 
 (TODO)
