@@ -164,11 +164,21 @@ public class QueryResultImpl implements QueryResult
 	public int getMaxSize()
 	{
 		int maxSize;
+		int indCount = getIndividualCount();
+		int resCount = getResultVars().size();
 		if (isDistinct())
-			maxSize = (int) (MathUtil.factorial(getIndividualCount()) /
-					MathUtil.factorial(getIndividualCount() - getResultVars().size()));
+		{
+			if (indCount >= resCount)
+			{
+				maxSize = indCount;
+				for (int i = 1; i < resCount; i++)
+					maxSize *= (indCount - i);
+			}
+			else
+				maxSize = 0;
+		}
 		else
-			maxSize = (int) Math.pow(getIndividualCount(), getResultVars().size());
+			maxSize = (int) Math.pow(indCount, resCount);
 		return maxSize;
 	}
 
