@@ -274,15 +274,15 @@ public class TestTCQEngine extends AbstractTCQTest
         String tcqString = """
         # A=Vehicle, B=2_Lane_Road, C=Parking_Vehicle, r=is_in_front_of, q=sfIntersects, s=is_to_the_side_of,
         # t=is_in_proximity, u=phy:is_behind
-        G (A(?x) ^ B(z) ^ q(z,?x))
+        G (A(?x) ^ B(z) ^ q(z,?x) ^ C(?y))
             &
         F
         (
             (r(?y,?x))
                 &
-            X
+            X[!]
             (
-                (C(?y) ^ t(?x,?y) ^ s(?y,?x))
+                (t(?x,?y) ^ s(?y,?x))
                     U
                 (u(?y,?x))
             )
