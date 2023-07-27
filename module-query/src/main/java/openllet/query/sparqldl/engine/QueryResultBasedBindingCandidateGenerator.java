@@ -27,6 +27,7 @@ public class QueryResultBasedBindingCandidateGenerator extends QueryBindingCandi
     {
         if (_restrictToBindings == null)
             _restrictToBindings = new QueryResultImpl(_query).invert();
+        // TODO this query result based candidate generator is inefficient if _excludeBindings is not empty.
         if (_excludeBindings != null && !_excludeBindings.isEmpty())
             _restrictToBindings.removeAll(_excludeBindings);
         return _restrictToBindings.iterator();

@@ -201,7 +201,7 @@ public class QueryResultImpl implements QueryResult
 
 	protected int getIndividualCount()
 	{
-		return _query.getKB().getIndividuals().stream().toList().size();
+		return _query.getKB().getIndividuals().size();
 	}
 
 	@Override
@@ -344,14 +344,13 @@ public class QueryResultImpl implements QueryResult
 			invBindings = new HashSet<>();
 		else
 			invBindings = new ArrayList<>();
-		List<ATermAppl> inds = _query.getKB().getIndividuals().stream().toList();
 		// If we have a Boolean result, and no binding in the result (i.e., the result is False), we just return True
 		if (_resultVars.size() == 0 && _bindings.size() == 0)
 			invBindings.add(new ResultBindingImpl());
 		// If this result contains all possible bindings anyhow, we skip this and just return the empty result
 		else if (size() > 0)
 		{
-			invBindings = QueryResult.allBindings(_resultVars, inds, isDistinct());
+			invBindings = QueryResult.allBindings(_resultVars, _query.getKB().getIndividuals(), isDistinct());
 			for (ResultBinding binding : _bindings)
 				invBindings.remove(binding);
 		}
@@ -398,7 +397,7 @@ public class QueryResultImpl implements QueryResult
 	@Override
 	public void addAll(QueryResult toAdd, QueryResult restrictToBindings)
 	{
-		if (toAdd != null)
+		if (toAdd != null && toAdd.size() > 0)
 		{
 			Iterable<ResultBinding> toAddExplicated;
 			if (toAdd.containsPartialBindings())
@@ -432,7 +431,7 @@ public class QueryResultImpl implements QueryResult
 	@Override
 	public void removeAll(QueryResult toRemove)
 	{
-		if (toRemove != null)
+		if (toRemove != null && toRemove.size() > 0)
 		{
 			Iterable<ResultBinding> toRemoveExplicated;
 			if (toRemove.containsPartialBindings())

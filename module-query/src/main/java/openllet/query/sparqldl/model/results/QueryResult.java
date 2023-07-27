@@ -146,19 +146,20 @@ public interface QueryResult extends Iterable<ResultBinding>
 		return allBindings(variables, individuals, true);
 	}
 
-	static Collection<ResultBinding> allBindings(Collection<ATermAppl> variables, List<ATermAppl> individuals,
+	static Collection<ResultBinding> allBindings(Collection<ATermAppl> variables, Collection<ATermAppl> individuals,
 												 boolean distinct)
 	{
 		Collection<ResultBinding> bindings = new HashSet<>();
 		// https://stackoverflow.com/a/40101377/4145563
 		List<ATermAppl> varList = variables.stream().toList();
+		List<ATermAppl> indList = individuals.stream().toList();
 		int resultSize = varList.size();
 		int[] indexes = new int[Math.max(individuals.size(), resultSize)];
 		for (int j = (int) Math.pow(individuals.size(), resultSize); j > 0; j--)
 		{
 			ResultBinding binding = new ResultBindingImpl();
 			for (int i = 0; i < resultSize; i++)
-				binding.setValue(varList.get(i), individuals.get(indexes[i]));
+				binding.setValue(varList.get(i), indList.get(indexes[i]));
 			if (!distinct || binding.isDistinct())
 				bindings.add(binding);
 			for (int i = 0; i < resultSize; i++)

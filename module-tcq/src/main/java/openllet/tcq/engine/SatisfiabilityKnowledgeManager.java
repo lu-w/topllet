@@ -215,11 +215,17 @@ public class SatisfiabilityKnowledgeManager
     private void execCNCQQueryEngine(CNCQQuery query, int timePoint, SatisfiabilityKnowledge knowledgeOnQuery,
                                      QueryResult restrictSatToBindings) throws IOException, InterruptedException
     {
-        QueryResult excludeForQuery = new QueryResultImpl(query);
-        excludeForQuery.addAll(_globallyExcludeBindings);
-        // TODO this takes some time - think whether we can optimize this (cache?)
-        for (QueryResult results : knowledgeOnQuery.getCertainSatisfiabilityKnowledge(timePoint).values())
-            excludeForQuery.addAll(results);
+        QueryResult excludeForQuery;
+        QueryResult certainSatKnowledge = knowledgeOnQuery.getCertainSatisfiabilityKnowledge(timePoint).get(Bool.TRUE);
+        QueryResult certainUnsatKnowledge = knowledgeOnQuery.getCertainSatisfiabilityKnowledge(timePoint).get(Bool.FALSE);
+        if (certainSatKnowledge.size() > 0 || certainUnsatKnowledge.size() > 0)
+        {
+            excludeForQuery = certainSatKnowledge;  // works because certainSatisfiabilityKnowledge returns a copy (for true)
+            excludeForQuery.addAll(certainUnsatKnowledge);
+            excludeForQuery.addAll(_globallyExcludeBindings);
+        }
+        else
+            excludeForQuery = _globallyExcludeBindings;
         _logger.finest("Excluded " + excludeForQuery.size() + " bindings");
         double maxSize = excludeForQuery.getMaxSize();
         double excludedBindingsSize = 1;

@@ -274,10 +274,9 @@ public class DFAExecutableState
         else
             _unsatBindings = null;
         // In prior iterations, we may have added an unsat info that becomes sat through some other incoming edge.
-        if (_unsatBindings != null && _satBindings != null)
-            for (ResultBinding binding : _satBindings)
-                if (_unsatBindings.contains(binding))
-                    _unsatBindings.remove(binding);
+        if (_unsatBindings != null && toMerge._satBindings != null)
+            for (ResultBinding binding : toMerge._satBindings)
+                _unsatBindings.remove(binding);
     }
 
     @Override
