@@ -1,0 +1,22 @@
+# Left turn with oncoming passing traffic
+
+PREFIX l1c: <http://purl.org/auto/l1_core#>
+PREFIX l1d: <http://purl.org/auto/l1_de#>
+PREFIX l4c: <http://purl.org/auto/l4_core#>
+PREFIX phy: <http://purl.org/auto/physics#>
+PREFIX geo: <http://www.opengis.net/ont/geosparql#>
+
+G (l4c:Vehicle(?x) ^ l4c:Vehicle(?y) ^ l1c:Lane(?l1) ^ l1c:Lane(?l2) ^ l1c:Lane(?l3) ^ l1c:has_successor_lane(?l1,?l2) ^ l1d:is_lane_left_of(?l2,?l1) ^ l1d:is_lane_parallel_to(?l3,?l1))
+	&
+F
+(
+	(geo:sfIntersects(?x,?l1) ^ geo:sfIntersects(?y,?l3) ^ phy:is_in_front_of(?y,?x))
+		&
+	(
+		((geo:sfDisjoint(?x,?l2)) | (geo:sfIntersects(?x,?l1)))
+			U
+		(
+			(phy:is_behind(?y,?x)) & F (geo:sfIntersects(?x,?l2))
+		)
+	)
+)
