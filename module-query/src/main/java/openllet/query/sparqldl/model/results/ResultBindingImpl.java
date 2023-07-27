@@ -28,7 +28,8 @@ import openllet.aterm.ATermAppl;
  */
 public class ResultBindingImpl implements ResultBinding
 {
-
+	private int _hashCode;
+	private int _isDistinct = 0;
 	private final Map<ATermAppl, ATermAppl> _bindings = new HashMap<>();
 
 	public ResultBindingImpl()
@@ -47,6 +48,8 @@ public class ResultBindingImpl implements ResultBinding
 	public void setValue(final ATermAppl var, final ATermAppl binding)
 	{
 		_bindings.put(var, binding);
+		_hashCode = 0;
+		_isDistinct = 0;
 	}
 
 	/**
@@ -60,6 +63,8 @@ public class ResultBindingImpl implements ResultBinding
 		else
 			for (final ATermAppl var : binding.getAllVariables())
 				setValue(var, binding.getValue(var));
+		_hashCode = 0;
+		_isDistinct = 0;
 	}
 
 	/**
@@ -133,11 +138,20 @@ public class ResultBindingImpl implements ResultBinding
 	@Override
 	public boolean isDistinct()
 	{
-		Set<ATermAppl> vals = new HashSet<>();
-		for (ATermAppl val: _bindings.values())
-			if (!vals.add(val))
-				return false;
-		return true;
+		if (_isDistinct == 0)
+		{
+			Set<ATermAppl> vals = new HashSet<>();
+			for (ATermAppl val : _bindings.values())
+				if (!vals.add(val))
+				{
+					_isDistinct = -1;
+					return false;
+				}
+			_isDistinct = 1;
+			return true;
+		}
+		else
+			return _isDistinct > 0;
 	}
 
 	@Override
@@ -158,9 +172,13 @@ public class ResultBindingImpl implements ResultBinding
 	@Override
 	public int hashCode()
 	{
-		final int PRIME = 31;
-		int result = 1;
-		result = PRIME * result + _bindings.hashCode();
+		int result = _hashCode;
+		if (result == 0)
+		{
+			result = 1;
+			result = 31 * result + _bindings.hashCode();
+			_hashCode = result;
+		}
 		return result;
 	}
 

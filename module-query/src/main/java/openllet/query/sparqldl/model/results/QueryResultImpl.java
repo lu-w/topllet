@@ -36,7 +36,7 @@ public class QueryResultImpl implements QueryResult
 	private final Query<?> _query;
 	private final QueryParameters _parameters;
 	private boolean _isInverted = false;
-	private Collection<ATermAppl> _isExpandedWrt = null;
+	private int _isExpandedWrt;
 
 	public QueryResultImpl(final Query<?> query)
 	{
@@ -118,13 +118,21 @@ public class QueryResultImpl implements QueryResult
 	@Override
 	public void expandToAllVariables(Collection<ATermAppl> variables)
 	{
-		if (_isExpandedWrt == null || !_isExpandedWrt.equals(variables))
+		int varHash = variables.hashCode();
+		if (_isExpandedWrt == 0 || _isExpandedWrt != varHash)
 		{
+			boolean equals = true;
 			for (ATermAppl variable : variables)
 				if (!_resultVars.contains(variable))
+				{
+					equals = false;
 					_resultVars.add(variable);
-			explicate();
-			_isExpandedWrt = new HashSet<>(variables);
+				}
+			if (!equals)
+			{
+				explicate();
+			}
+			_isExpandedWrt = varHash;
 		}
 	}
 
@@ -216,28 +224,31 @@ public class QueryResultImpl implements QueryResult
 		_bindings.addAll(toAdd);
 	}
 
-
-	// TODO check if when we merge query results and add all bindings together this breaks distinctness -> then don't add it!
+	// Assumes binding's variables to be subset of or equal to this query result's result variables.
 	protected Collection<ResultBinding> explicate(ResultBinding binding)
 	{
+		Set<ResultBinding> explicatedBindings;
 		if (_resultVars.size() > 0)
 		{
-			Set<ResultBinding> explicatedBindings = new HashSet<>();
-			if (!isPartialBinding(binding))
-				explicatedBindings.add(binding);
+			if (binding.getAllVariables().size() == getResultVars().size())
+				explicatedBindings = Set.of(binding);
 			else
+			{
+				explicatedBindings = new HashSet<>();
 				for (ResultBinding newBinding : QueryResult.allBindings(
-						getUnspecifiedVariablesInBinding(binding, getResultVars()),
+						getUnspecifiedVariablesInBinding(binding, getResultVars()).stream().toList(),
 						_query.getKB().getIndividuals().stream().toList(), isDistinct()))
 				{
 					newBinding.merge(binding);
 					if (!isDistinct() || newBinding.isDistinct())
 						explicatedBindings.add(newBinding);
 				}
+			}
 			return explicatedBindings;
 		}
 		else
-			return Set.of(binding);
+			explicatedBindings = Set.of(binding);
+		return explicatedBindings;
 	}
 
 	@Override
@@ -258,11 +269,23 @@ public class QueryResultImpl implements QueryResult
 		return numberOfOccurrences;
 	}
 
-	protected List<ATermAppl> getUnspecifiedVariablesInBinding(ResultBinding binding, List<ATermAppl> variables)
+	/**
+	 * Assumes bindings.getAllVariables() to be a subset of or equal to variables.
+	 * @param binding
+	 * @param variables
+	 * @return
+	 */
+	protected Collection<ATermAppl> getUnspecifiedVariablesInBinding(ResultBinding binding, List<ATermAppl> variables)
 	{
-		List<ATermAppl> variablesNotInBinding = new ArrayList<>(variables);
-		variablesNotInBinding.removeAll(binding.getAllVariables());
-		return variablesNotInBinding;
+		Collection<ATermAppl> bindingVars = binding.getAllVariables();
+		if (bindingVars.size() != variables.size())
+		{
+			Set<ATermAppl> variablesNotInBinding = new HashSet<>(variables);
+			variablesNotInBinding.removeAll(bindingVars);
+			return variablesNotInBinding;
+		}
+		else
+			return new HashSet<>();
 	}
 
 	@Override

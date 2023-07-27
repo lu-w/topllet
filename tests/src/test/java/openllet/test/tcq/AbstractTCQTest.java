@@ -211,9 +211,9 @@ public class AbstractTCQTest extends AbstractQueryTest
         subClass(_C, not(some(_r, TOP)));
     }
 
-    protected void useCaseTKBIllegCrossing(boolean entailed)
+    protected void useCaseTKBIllegCrossing(boolean entailed, int numberAdditionalIndividuals)
     {
-        fillUseCaseTKB(20);
+        fillUseCaseTKB(20, numberAdditionalIndividuals);
 
         int i = 0;
         for (KnowledgeBase kb : _tkb)
@@ -442,10 +442,17 @@ public class AbstractTCQTest extends AbstractQueryTest
 
     protected void fillUseCaseTKB(int size)
     {
+        fillUseCaseTKB(size, 0);
+    }
+
+    protected void fillUseCaseTKB(int size, int numberAdditionalIndividuals)
+    {
         timeSteps(size);
 
         classes(_A, _B, _C, _D, _E);
         individuals(_a, _b, _c, _d, _e, _f);
+        for (int i = 0; i < numberAdditionalIndividuals; i++)
+            individuals(term("i" + i));
         objectProperties(_r, _p, _q, _t, _s, _u, _o);
     }
 
