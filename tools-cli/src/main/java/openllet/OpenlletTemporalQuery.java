@@ -344,9 +344,4 @@ public class OpenlletTemporalQuery extends OpenlletCmdApp
         System.out.println("JSON query result output not implemented yet");
         // TODO
     }
-
-    public QueryResult getQueryResults()
-    {
-        return queryResults;
-    }
 }

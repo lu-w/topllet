@@ -155,7 +155,7 @@ public class TestTCQEngine extends AbstractTCQTest
             (
                 (r(?bi,?w))
                     &
-                F_<=10 # somewhere in the first second, we require to take right of way
+                F_[1,3] # somewhere in the first time points, we require to take right of way
                     (!F_<=5 !(D(l) ^ E(cr) ^ r(cr,l) ^ r(?bi,cr) ^ r(?t,l) ^ q(?t,?bi))) # illegitimately taking right of way has to be sustained for some time to be significant
             )
         )""";

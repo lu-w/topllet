@@ -221,6 +221,7 @@ public class AbstractTCQTest extends AbstractQueryTest
             kb.addType(_a, _A);
             kb.addType(_b, _B);
             kb.addType(_c, _C);
+            kb.addType(_f, _C);
             kb.addType(_d, _D);
             kb.addType(_e, _E);
             kb.addPropertyValue(_r, _e, _d);
