@@ -445,9 +445,21 @@ public class QueryResultImpl implements QueryResult
 	{
 		if (toRemove != null)
 		{
-			QueryResult copy = toRemove.copy();
-			copy.expandToAllVariables(_resultVars);
-			for (ResultBinding binding : copy)
+			Iterable<ResultBinding> toRemoveExplicated;
+			if (toRemove.containsPartialBindings())
+			{
+				List<ResultBinding> copy = new ArrayList<>();
+				for (ResultBinding binding : toRemove)
+					if (isPartialBinding(binding))
+						copy.addAll(explicate(binding));
+					else
+						copy.add(binding);
+				toRemoveExplicated = copy;
+			}
+			else
+				toRemoveExplicated = toRemove;
+
+			for (ResultBinding binding : toRemoveExplicated)
 				remove(binding);
 		}
 	}
