@@ -10,10 +10,8 @@ import java.util.*;
 import java.util.Map.Entry;
 
 import openllet.aterm.ATermAppl;
-import openllet.core.utils.Bool;
 import openllet.query.sparqldl.model.Query;
 import openllet.query.sparqldl.model.cq.QueryParameters;
-import org.jgrapht.util.MathUtil;
 
 /**
  * <p>
@@ -32,19 +30,18 @@ public class QueryResultImpl implements QueryResult
 {
 	private Collection<ResultBinding> _bindings;
 
-	private List<ATermAppl> _resultVars;
+	private Set<ATermAppl> _resultVars;
 	private final Query<?> _query;
 	private final QueryParameters _parameters;
 	private boolean _isInverted = false;
-	private int _isExpandedWrt;
-	private List<ATermAppl> _unmodifiableResultVars;
+	private Set<ATermAppl> _unmodifiableResultVars;
 	private int _containsPartialBinding = 0;
 
 	public QueryResultImpl(final Query<?> query)
 	{
 		_query = query;
 		_parameters = query.getQueryParameters();
-		_resultVars = new ArrayList<>(query.getResultVars());
+		_resultVars = new HashSet<>(query.getResultVars());
 
 		if (query.isDistinct())
 			_bindings = new HashSet<>();
@@ -133,24 +130,16 @@ public class QueryResultImpl implements QueryResult
 		}
 	}
 
+	// Assumes binding's variables to be subset of or equal to this query result's result variables.
 	@Override
 	public void expandToAllVariables(Collection<ATermAppl> variables)
 	{
-		int varHash = variables.hashCode();
-		if (_isExpandedWrt == 0 || _isExpandedWrt != varHash)
+		if (variables.size() > _resultVars.size())
 		{
-			boolean equals = true;
-			for (ATermAppl variable : variables)
-				if (!_resultVars.contains(variable))
-				{
-					equals = false;
-					_resultVars.add(variable);
-				}
+			boolean equals = _resultVars.addAll(variables);
 			if (!equals)
-			{
 				explicate();
-			}
-			_isExpandedWrt = varHash;
+			_resultVars = new HashSet<>(variables);
 		}
 	}
 
@@ -158,10 +147,10 @@ public class QueryResultImpl implements QueryResult
 	 * {@inheritDoc}
 	 */
 	@Override
-	public List<ATermAppl> getResultVars()
+	public Collection<ATermAppl> getResultVars()
 	{
 		if (_unmodifiableResultVars == null)
-			_unmodifiableResultVars = Collections.unmodifiableList(_resultVars);
+			_unmodifiableResultVars = Collections.unmodifiableSet(_resultVars);
 		return _unmodifiableResultVars;
 	}
 
@@ -256,7 +245,7 @@ public class QueryResultImpl implements QueryResult
 			{
 				explicatedBindings = new HashSet<>();
 				for (ResultBinding newBinding : QueryResult.allBindings(
-						getUnspecifiedVariablesInBinding(binding, _resultVars).stream().toList(),
+						getUnspecifiedVariablesInBinding(binding, _resultVars.stream().toList()).stream().toList(),
 						_query.getKB().getIndividuals().stream().toList(), isDistinct()))
 				{
 					newBinding.merge(binding);
@@ -316,7 +305,7 @@ public class QueryResultImpl implements QueryResult
 		else
 		{
 			QueryResultImpl restrictedResult = new QueryResultImpl(_query);
-			restrictedResult._resultVars = vars;
+			restrictedResult._resultVars = new HashSet<>(vars);
 			List<ATermAppl> ignoredVars = new ArrayList<>(_resultVars);
 			ignoredVars.removeAll(vars);
 			int numberOfIgnoredVars = ignoredVars.size();
