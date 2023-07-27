@@ -63,6 +63,15 @@ public class MultiQueryResults implements QueryResult
 	}
 
 	@Override
+	public boolean containsPartialBindings()
+	{
+		boolean result = true;
+		for (QueryResult q : _queryResults)
+			result &= q.containsPartialBindings();
+		return result;
+	}
+
+	@Override
 	public void expandToAllVariables(Collection<ATermAppl> variables)
 	{
 		for (ATermAppl variable : variables)

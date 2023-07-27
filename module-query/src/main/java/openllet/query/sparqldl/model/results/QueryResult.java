@@ -42,6 +42,11 @@ public interface QueryResult extends Iterable<ResultBinding>
 	 */
 	void remove(final ResultBinding binding);
 
+	/**
+	 * @return True iff. this result contains a partial (not fully explicated) binding.
+	 */
+	boolean containsPartialBindings();
+
 	void expandToAllVariables(Collection<ATermAppl> variables);
 
 	/**

@@ -37,6 +37,8 @@ public class QueryResultImpl implements QueryResult
 	private final QueryParameters _parameters;
 	private boolean _isInverted = false;
 	private int _isExpandedWrt;
+	private List<ATermAppl> _unmodifiableResultVars;
+	private int _containsPartialBinding = 0;
 
 	public QueryResultImpl(final Query<?> query)
 	{
@@ -81,6 +83,22 @@ public class QueryResultImpl implements QueryResult
 			for (ResultBinding add : bindings)
 				if (!_bindings.contains(add))
 					_bindings.add(process(add));
+	}
+
+	@Override
+	public boolean containsPartialBindings()
+	{
+		if (_containsPartialBinding == 0)
+		{
+			_containsPartialBinding = -1;
+			for (ResultBinding binding : _bindings)
+				if (isPartialBinding(binding))
+				{
+					_containsPartialBinding = 1;
+					break;
+				}
+		}
+		return _containsPartialBinding > 0;
 	}
 
 	@Override
@@ -142,7 +160,9 @@ public class QueryResultImpl implements QueryResult
 	@Override
 	public List<ATermAppl> getResultVars()
 	{
-		return Collections.unmodifiableList(_resultVars);
+		if (_unmodifiableResultVars == null)
+			_unmodifiableResultVars = Collections.unmodifiableList(_resultVars);
+		return _unmodifiableResultVars;
 	}
 
 	@Override
@@ -173,7 +193,7 @@ public class QueryResultImpl implements QueryResult
 	{
 		int maxSize;
 		int indCount = getIndividualCount();
-		int resCount = getResultVars().size();
+		int resCount = _resultVars.size();
 		if (isDistinct())
 		{
 			if (indCount >= resCount)
@@ -230,13 +250,13 @@ public class QueryResultImpl implements QueryResult
 		Set<ResultBinding> explicatedBindings;
 		if (_resultVars.size() > 0)
 		{
-			if (binding.getAllVariables().size() == getResultVars().size())
+			if (binding.getAllVariables().size() == _resultVars.size())
 				explicatedBindings = Set.of(binding);
 			else
 			{
 				explicatedBindings = new HashSet<>();
 				for (ResultBinding newBinding : QueryResult.allBindings(
-						getUnspecifiedVariablesInBinding(binding, getResultVars()).stream().toList(),
+						getUnspecifiedVariablesInBinding(binding, _resultVars).stream().toList(),
 						_query.getKB().getIndividuals().stream().toList(), isDistinct()))
 				{
 					newBinding.merge(binding);
@@ -337,7 +357,7 @@ public class QueryResultImpl implements QueryResult
 			invBindings = new ArrayList<>();
 		List<ATermAppl> inds = _query.getKB().getIndividuals().stream().toList();
 		// If we have a Boolean result, and no binding in the result (i.e., the result is False), we just return True
-		if (getResultVars().size() == 0 && _bindings.size() == 0)
+		if (_resultVars.size() == 0 && _bindings.size() == 0)
 			invBindings.add(new ResultBindingImpl());
 		// If this result contains all possible bindings anyhow, we skip this and just return the empty result
 		else if (size() > 0)
@@ -391,19 +411,30 @@ public class QueryResultImpl implements QueryResult
 	{
 		if (toAdd != null)
 		{
-			QueryResult copy = toAdd.copy();
-			copy.expandToAllVariables(getResultVars());
+			Iterable<ResultBinding> toAddExplicated;
+			if (toAdd.containsPartialBindings())
+			{
+				List<ResultBinding> copy = new ArrayList<>();
+				for (ResultBinding binding : toAdd)
+					if (isPartialBinding(binding))
+						copy.addAll(explicate(binding));
+					else
+						copy.add(binding);
+				toAddExplicated = copy;
+			}
+			else
+				toAddExplicated = toAdd;
+
 			if (restrictToBindings == null)
 			{
-				for (ResultBinding binding : copy)
-					if (!contains(binding))
-						add(binding);
+				for (ResultBinding binding : toAddExplicated)
+					add(binding);
 			}
 			else
 			{
 				for (ResultBinding restrictToBinding : restrictToBindings)
-					for (ResultBinding binding : copy)
-						if (restrictToBinding.contains(binding) && !contains(binding))
+					for (ResultBinding binding : toAddExplicated)
+						if (restrictToBinding.contains(binding))
 							add(restrictToBinding);
 			}
 		}
@@ -415,7 +446,7 @@ public class QueryResultImpl implements QueryResult
 		if (toRemove != null)
 		{
 			QueryResult copy = toRemove.copy();
-			copy.expandToAllVariables(getResultVars());
+			copy.expandToAllVariables(_resultVars);
 			for (ResultBinding binding : copy)
 				remove(binding);
 		}
@@ -438,7 +469,7 @@ public class QueryResultImpl implements QueryResult
 	{
 		if (toRetain != null)
 		{
-			if (!toRetain.getResultVars().equals(getResultVars()))
+			if (!toRetain.getResultVars().equals(_resultVars))
 				for (ATermAppl var : toRetain.getResultVars())
 					if (!_resultVars.contains(var))
 						_resultVars.add(var);
@@ -448,7 +479,7 @@ public class QueryResultImpl implements QueryResult
 			{
 				Set<ResultBinding> toRemove = new HashSet<>();
 				QueryResult copy = toRetain.copy();
-				copy.expandToAllVariables(getResultVars());
+				copy.expandToAllVariables(_resultVars);
 				for (ResultBinding thisBinding : this)
 					if (!toRetain.contains(thisBinding))
 						toRemove.add(thisBinding);
