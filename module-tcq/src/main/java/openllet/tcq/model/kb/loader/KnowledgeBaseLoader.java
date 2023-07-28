@@ -3,6 +3,7 @@ package openllet.tcq.model.kb.loader;
 import openllet.core.KnowledgeBase;
 import openllet.core.utils.Timer;
 import openllet.core.utils.Timers;
+import openllet.modularity.OntologyDiff;
 import openllet.owlapi.OpenlletReasoner;
 import openllet.owlapi.OpenlletReasonerFactory;
 import openllet.shared.tools.Log;
@@ -34,6 +35,13 @@ public class KnowledgeBaseLoader
     {
         if (timer != null)
             _timer = timer;
+    }
+
+    @Nullable
+    public OntologyDiff getDiffToLastKB()
+    {
+        _logger.fine("Difference between KBs only supported by incremental loader.");
+        return null;
     }
 
     @Nullable

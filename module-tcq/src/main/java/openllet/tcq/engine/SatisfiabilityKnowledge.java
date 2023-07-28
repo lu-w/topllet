@@ -1,11 +1,10 @@
 package openllet.tcq.engine;
 
 import openllet.core.utils.Bool;
-import openllet.query.sparqldl.engine.QueryResultBasedBindingCandidateGenerator;
+import openllet.modularity.OntologyDiff;
 import openllet.query.sparqldl.model.cncq.CNCQQuery;
 import openllet.query.sparqldl.model.results.QueryResult;
 import openllet.query.sparqldl.model.results.QueryResultImpl;
-import openllet.query.sparqldl.model.results.ResultBinding;
 import openllet.shared.tools.Log;
 import openllet.tcq.model.query.TemporalConjunctiveQuery;
 
@@ -111,6 +110,22 @@ public class SatisfiabilityKnowledge
         return filtered;
     }
 
+    public void transferKnowledgeFromPreviousStepTo(int timePoint)
+    {
+        if (timePoint > 0 && _satisfiableBindings.containsKey(timePoint - 1))
+        {
+            QueryResult satKnowledge = _satisfiableBindings.get(timePoint - 1);
+            QueryResult unsatKnowledge = _unsatisfiableBindings.get(timePoint - 1);
+            OntologyDiff diff = _tcq.getTemporalKB().getDiffToLastKB();
+            if (isSatisfiabilityTransferableUnderDifference(diff))
+            {
+                // copy()?
+                informAboutSatisfiability(satKnowledge, true, timePoint);
+                informAboutSatisfiability(unsatKnowledge, false, timePoint);
+            }
+        }
+    }
+
     public boolean isComplete(int timePoint)
     {
         return _isComplete.contains(timePoint) ||
@@ -119,8 +134,25 @@ public class SatisfiabilityKnowledge
                 new QueryResultImpl(_cncq).getMaxSize());
     }
 
+    public boolean isEmpty(int timePoint)
+    {
+        return (getCertainSatisfiabilityKnowledge(timePoint).get(Bool.FALSE).size() +
+                getCertainSatisfiabilityKnowledge(timePoint).get(Bool.TRUE).size()) == 0;
+    }
+
     public void setComplete(int timePoint)
     {
         _isComplete.add(timePoint);
+    }
+
+    protected boolean isSatisfiabilityTransferableUnderDifference(OntologyDiff diff)
+    {
+        if (diff == null)
+            return false;
+        else
+        {
+            // TODO implement
+            return false;
+        }
     }
 }

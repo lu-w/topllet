@@ -1,7 +1,9 @@
 package openllet.tcq.model.kb;
 
 import openllet.core.KnowledgeBase;
+import openllet.modularity.OntologyDiff;
 
+import javax.annotation.Nullable;
 import java.util.List;
 
 public interface TemporalKnowledgeBase extends List<KnowledgeBase>
@@ -10,4 +12,6 @@ public interface TemporalKnowledgeBase extends List<KnowledgeBase>
     // query may wrongly interpret atom arguments as answer variables and not as individuals.
     // TODO may add a getIndividuals() here
 
+    @Nullable
+    OntologyDiff getDiffToLastKB();
 }

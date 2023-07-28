@@ -4,6 +4,7 @@ import openllet.core.KnowledgeBase;
 import openllet.core.OpenlletOptions;
 import openllet.core.utils.Timer;
 import openllet.core.utils.iterator.IteratorUtils;
+import openllet.modularity.OntologyDiff;
 import openllet.shared.tools.Log;
 import openllet.tcq.model.kb.loader.IncrementalKnowledgeBaseLoader;
 import openllet.tcq.model.kb.loader.KnowledgeBaseLoader;
@@ -36,8 +37,6 @@ public class FileBasedTemporalKnowledgeBaseImpl extends ArrayList<KnowledgeBase>
     public FileBasedTemporalKnowledgeBaseImpl(Iterable<String> files, String catalogFile, Timer timer)
     {
         _files = IteratorUtils.toList(files.iterator());
-        // TODO we can cleverly decide which loader to use based on the number of CNCQs estimated and the size of the
-        //  ABox... high # CNCQs & small ABox -> inc loader
         if (OpenlletOptions.TCQ_ENGINE_USE_INCREMENTAL_LOADING)
             _loader = new IncrementalKnowledgeBaseLoader(timer);
         else
@@ -132,5 +131,12 @@ public class FileBasedTemporalKnowledgeBaseImpl extends ArrayList<KnowledgeBase>
     public void clear()
     {
         throw new RuntimeException("Manipulation of file based temporal knowledge base not possible");
+    }
+
+    @Nullable
+    @Override
+    public OntologyDiff getDiffToLastKB()
+    {
+        return _loader.getDiffToLastKB();
     }
 }

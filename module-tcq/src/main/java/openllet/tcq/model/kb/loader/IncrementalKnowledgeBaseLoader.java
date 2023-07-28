@@ -21,8 +21,9 @@ public class IncrementalKnowledgeBaseLoader extends KnowledgeBaseLoader
 {
     public static final Logger _logger = Log.getLogger(IncrementalKnowledgeBaseLoader.class);
 
-    private OpenlletReasoner _reasoner = null;
+    private OpenlletReasoner _reasoner;
     private OWLOntology _prevOnt;
+    private OntologyDiff _diffToPrevOnt;
 
     public IncrementalKnowledgeBaseLoader()
     {
@@ -32,6 +33,13 @@ public class IncrementalKnowledgeBaseLoader extends KnowledgeBaseLoader
     public IncrementalKnowledgeBaseLoader(Timer timer)
     {
         super(timer);
+    }
+
+    @Nullable
+    @Override
+    public OntologyDiff getDiffToLastKB()
+    {
+        return _diffToPrevOnt;
     }
 
     @Nullable
@@ -48,11 +56,11 @@ public class IncrementalKnowledgeBaseLoader extends KnowledgeBaseLoader
         else
         {
             OWLOntology newOnt = super.loadOntology(fileName);
-            final OntologyDiff ontologyDiff = OntologyDiff.diffOntologies(_prevOnt, newOnt);
+            _diffToPrevOnt = OntologyDiff.diffOntologies(_prevOnt, newOnt);
             _prevOnt = newOnt;
-            if (ontologyDiff.getDiffCount() >= 0)
+            if (_diffToPrevOnt.getDiffCount() >= 0)
             {
-                Collection<OWLOntologyChange> changes = ontologyDiff.getChanges(newOnt);
+                Collection<OWLOntologyChange> changes = _diffToPrevOnt.getChanges(newOnt);
                 numChanges = changes.size();
                 boolean success = _reasoner.processChanges(new LinkedList<>(changes));
                 if (!success)

@@ -466,7 +466,7 @@ public class OpenlletOptions
 	 * The TCQ Engine can update its current ABox on the fly by incrementally changing the DL axioms. This may increase
 	 * performance as the reasoner can re-use prior reasoning results.
 	 */
-	public static boolean TCQ_ENGINE_USE_INCREMENTAL_LOADING = false;
+	public static boolean TCQ_ENGINE_USE_INCREMENTAL_LOADING = true;
 
 	/**
 	 * Enables a prior run of the TCQ engine using the CQ engine instead of the CNCQ engine. This can lead to vast

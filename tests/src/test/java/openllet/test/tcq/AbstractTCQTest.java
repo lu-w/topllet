@@ -213,7 +213,7 @@ public class AbstractTCQTest extends AbstractQueryTest
 
     protected void useCaseTKBIllegCrossing(boolean entailed, int numberAdditionalIndividuals)
     {
-        fillUseCaseTKB(80, numberAdditionalIndividuals);
+        fillUseCaseTKB(20, numberAdditionalIndividuals);
 
         int i = 0;
         for (KnowledgeBase kb : _tkb)
@@ -246,6 +246,11 @@ public class AbstractTCQTest extends AbstractQueryTest
                     kb.addPropertyValue(_r, _b, _d);
                     kb.addPropertyValue(_q, _b, _a);
                 }
+            }
+            if (i >= 15)
+            {
+                kb.addPropertyValue(_r, _a, _f);
+                kb.addPropertyValue(_q, _b, _a);
             }
             i++;
         }

@@ -121,6 +121,14 @@ public class SatisfiabilityKnowledgeManager
         }
     }
 
+    public SatisfiabilityKnowledge transferAndGetKnowledgeOnQuery(CNCQQuery query, int timePoint)
+    {
+        SatisfiabilityKnowledge knowledge = getKnowledgeOnQuery(query);
+        if (knowledge != null)
+            knowledge.transferKnowledgeFromPreviousStepTo(timePoint);
+        return knowledge;
+    }
+
     public SatisfiabilityKnowledge getKnowledgeOnQuery(CNCQQuery query)
     {
         for (SatisfiabilityKnowledge knowledge : _knowledges)
@@ -266,21 +274,20 @@ public class SatisfiabilityKnowledgeManager
             throws IOException, InterruptedException
     {
         query.setKB(kb);
-        SatisfiabilityKnowledge knowledgeOnQuery = getKnowledgeOnQuery(query);
+        SatisfiabilityKnowledge knowledgeOnQuery = transferAndGetKnowledgeOnQuery(query, timePoint);
         if (knowledgeOnQuery != null)
         {
-            if (!knowledgeOnQuery.isComplete(timePoint))
-                if (useUnderapproximatingSemantics)
-                {
-                    _logger.finer("Calling CQ engine for " + query);
-                    for (ConjunctiveQuery subQuery : getCandidatesForCheckingUnderapproximatingSemantics(query))
-                        execConjunctiveQueryEngine(subQuery, timePoint);
-                }
-                else
-                {
-                    _logger.finer("Calling CNCQ engine for " + query);
-                    execCNCQQueryEngine(query, timePoint, knowledgeOnQuery, restrictSatToBindings);
-                }
+            if (useUnderapproximatingSemantics && knowledgeOnQuery.isEmpty(timePoint))
+            {
+                _logger.finer("Calling CQ engine for " + query);
+                for (ConjunctiveQuery subQuery : getCandidatesForCheckingUnderapproximatingSemantics(query))
+                    execConjunctiveQueryEngine(subQuery, timePoint);
+            }
+            else if (!useUnderapproximatingSemantics && !knowledgeOnQuery.isComplete(timePoint))
+            {
+                _logger.finer("Calling CNCQ engine for " + query);
+                execCNCQQueryEngine(query, timePoint, knowledgeOnQuery, restrictSatToBindings);
+            }
             else if (!useUnderapproximatingSemantics)
                 _stats.informAboutBindingExclusion(timePoint, query, 1);
             _logger.finer("Retrieving satisfiability knowledge on " + query);
