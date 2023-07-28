@@ -15,6 +15,30 @@ public class QueryResultBasedBindingCandidateGenerator extends QueryBindingCandi
     }
 
     @Override
+    public void excludeBindings(QueryResult bindings)
+    {
+        if (bindings != null)
+        {
+            _excludeBindings = bindings;
+            // If we exclude something non-empty, then we need to copy _restrictToBindings to avoid side effects.
+            if (_restrictToBindings != null && _excludeBindings.size() > 0)
+                _restrictToBindings = _restrictToBindings.copy();
+        }
+    }
+
+    @Override
+    public void restrictToBindings(QueryResult bindings)
+    {
+        if (bindings != null)
+        {
+            if (_excludeBindings != null && _excludeBindings.size() > 0)
+                _restrictToBindings = bindings.copy();
+            else
+                _restrictToBindings = bindings;
+        }
+    }
+
+    @Override
     public Iterator<ResultBinding> iterator()
     {
         if (_restrictToBindings == null)

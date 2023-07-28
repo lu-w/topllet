@@ -44,11 +44,6 @@ public class EdgeConstraintChecker
         _cncqSatManager.setGloballyExcludedBindings(bindings);
     }
 
-    public void doNotExcludeBindings()
-    {
-        _cncqSatManager.doNotGloballyExcludeBindings();
-    }
-
     public boolean isEdgeCompletelyChecked(Edge edge, int timePoint)
     {
         boolean allCncqsChecked = true;

@@ -121,12 +121,6 @@ public class SatisfiabilityKnowledgeManager
         }
     }
 
-    public void doNotGloballyExcludeBindings()
-    {
-        _globallyIncludeBindings = new QueryResultImpl(_tcq).invert();
-        _globallyIncludeBindings.iterator();
-    }
-
     public SatisfiabilityKnowledge getKnowledgeOnQuery(CNCQQuery query)
     {
         for (SatisfiabilityKnowledge knowledge : _knowledges)
@@ -222,16 +216,32 @@ public class SatisfiabilityKnowledgeManager
     private void execCNCQQueryEngine(CNCQQuery query, int timePoint, SatisfiabilityKnowledge knowledgeOnQuery,
                                      QueryResult restrictSatToBindings) throws IOException, InterruptedException
     {
-        QueryResult restrictTo = _globallyIncludeBindings.copy();
-        restrictTo.retainAll(restrictSatToBindings);
+        QueryResult restrictTo;
         QueryResult certainSatKnowledge = knowledgeOnQuery.getCertainSatisfiabilityKnowledge(timePoint).get(Bool.TRUE);
         QueryResult certainUnsatKnowledge = knowledgeOnQuery.getCertainSatisfiabilityKnowledge(timePoint).get(Bool.FALSE);
-        // addAll is expensive - we only do so if we gain substantial knowledge (i.e., over 5% more).
-        if ((double) (certainSatKnowledge.size() + certainUnsatKnowledge.size()) / certainSatKnowledge.getMaxSize() > 0.05)
+        int certainKnowledgeSize = certainSatKnowledge.size() + certainUnsatKnowledge.size();
+        int restrictToSize = restrictSatToBindings != null ? restrictSatToBindings.size() : 0;
+        double restrictToRatio = (double) restrictToSize / certainSatKnowledge.getMaxSize();
+        double certainKnowledgeRatio = (double) certainKnowledgeSize / certainSatKnowledge.getMaxSize();
+        // copy() is expensive - we need to avoid it if possible
+        boolean restrictedSatBindingsInRestrictTo = false;
+        if (restrictToRatio > 0.05 || certainKnowledgeRatio > 0.05)
         {
-            restrictTo.removeAll(certainSatKnowledge);  // works because certainSatisfiabilityKnowledge returns a copy (for true)
-            restrictTo.removeAll(certainUnsatKnowledge);
+            restrictTo = _globallyIncludeBindings.copy();
+            if (restrictToRatio > 0.05)
+            {
+                restrictedSatBindingsInRestrictTo = true;
+                restrictTo.retainAll(restrictSatToBindings);
+            }
+            // removeAll is expensive - we only do so if we gain substantial knowledge (i.e., over 5% more).
+            if (certainKnowledgeRatio > 0.05)
+            {
+                restrictTo.removeAll(certainSatKnowledge);
+                restrictTo.removeAll(certainUnsatKnowledge);
+            }
         }
+        else
+            restrictTo = _globallyIncludeBindings;
         // TODO fix stats for evaluation
         /*double maxSize = excludeForQuery.getMaxSize();
         double excludedBindingsSize = 1;
@@ -241,6 +251,8 @@ public class SatisfiabilityKnowledgeManager
         if (!restrictTo.isEmpty())
         {
             QueryResult result = _cncqEngine.exec(query, null, restrictTo);
+            if (!restrictedSatBindingsInRestrictTo)
+                result.retainAll(restrictSatToBindings);
             knowledgeOnQuery.informAboutSatisfiability(result, true, timePoint);
         }
         // Sets knowledge complete s.t. satisfying bindings can be inverted to get unsatisfiable bindings.

@@ -28,7 +28,6 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  */
 public interface QueryResult extends Iterable<ResultBinding>
 {
-
 	/**
 	 * Adds a new binding to the query result.
 	 *

@@ -149,7 +149,7 @@ public class DFAExecutableState
 
     public Collection<DFAExecutableState> execute() throws IOException, InterruptedException
     {
-        Collection<DFAExecutableState> newExecutableStates = new HashSet<>();
+        Collection<DFAExecutableState> newExecutableStates = new ArrayList<>();
         QueryResult restrictSatToBindings = null;
         if (!_isInitial && _satBindings != null)
             restrictSatToBindings = _satBindings;

@@ -80,7 +80,6 @@ public class TCQEngine extends AbstractQueryEngine<TemporalConjunctiveQuery>
             _edgeChecker.setUnderapproximatingSemantics(false);
             _logger.fine("Trying full blown semantics check on DFA");
             satResult = _checkDFASatisfiability(automaton, q, satResult);
-            _edgeChecker.doNotExcludeBindings();
             _logger.fine(_edgeChecker.getSatisfiabilityKnowledgeManager().getStats());
             if (_timer != null)
                 _logger.fine("Full semantics DFA check took " + (_timer.getTotal() - timeFirstRun) +  " ms");

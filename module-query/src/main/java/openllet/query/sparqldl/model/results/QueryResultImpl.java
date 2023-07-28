@@ -40,11 +40,16 @@ public class QueryResultImpl implements QueryResult
 
 	public QueryResultImpl(final Query<?> query)
 	{
+		this(query, query.isDistinct());
+	}
+
+	public QueryResultImpl(final Query<?> query, boolean isDistinct)
+	{
 		_query = query;
 		_parameters = query.getQueryParameters();
 		_resultVars = new HashSet<>(query.getResultVars());
 
-		if (query.isDistinct())
+		if (isDistinct)
 			_bindings = new HashSet<>();
 		else
 			_bindings = new ArrayList<>();
