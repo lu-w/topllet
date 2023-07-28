@@ -147,14 +147,7 @@ public class TestTCQEngine extends AbstractTCQTest
     @Test
     public void testIllegCrossing()
     {
-        useCaseTKBIllegCrossing(true, 60);
-        for (int i = 0; i < 3; i++)
-            for (KnowledgeBase kb : _tkb)
-            {
-                kb.addType(term("i" + i), _A);
-                kb.addType(term("i" + i), _C);
-            }
-
+        useCaseTKBIllegCrossing(true, 5);
         String tcqString = """
         # A=l4d:Bicyclist, B=l4c:Traffic_Participant, C=l4c:Traffic_Participant, D=l1c:Driveable_Lane, E=l1d:Pedestrian_Crossing
         # r=geo:sfIntersects, q=phy:has_intersecting_path
@@ -170,9 +163,9 @@ public class TestTCQEngine extends AbstractTCQTest
             )
         )""";
         testQuery(tcqString, new ATermAppl[][] { { _a, _b, _c } });
-        //initializeKB();
-        //useCaseTKBIllegCrossing(false, 60);
-        //testQuery(tcqString);
+        initializeKB();
+        useCaseTKBIllegCrossing(false, 5);
+        testQuery(tcqString);
     }
 
     @Test
