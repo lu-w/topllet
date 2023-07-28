@@ -226,7 +226,6 @@ public class SatisfiabilityKnowledgeManager
         }
         else
             excludeForQuery = _globallyExcludeBindings;
-        _logger.finest("Excluded " + excludeForQuery.size() + " bindings");
         double maxSize = excludeForQuery.getMaxSize();
         double excludedBindingsSize = 1;
         if (maxSize > 0)

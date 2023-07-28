@@ -442,13 +442,13 @@ public class OpenlletOptions
 	 * The UCQ engine can check whether all the disjuncts are entailed separately. If this is the case, it can return
 	 * true directly, otherwise it has to run the expensive full semantics check.
 	 */
-	public static boolean UCQ_ENGINE_USE_UNDERAPPROXIMATING_SEMANTICS = false;
+	public static boolean UCQ_ENGINE_USE_UNDERAPPROXIMATING_SEMANTICS = true;
 
 	/**
 	 * The UCQ engine can check whether all the disjuncts are entailed separately. If this is the case, it can return
 	 * true directly, otherwise it has to run the expensive full semantics check.
 	 */
-	public static boolean UCQ_ENGINE_USE_STANDARD_CQ_ENGINE_IF_POSSIBLE = false;
+	public static boolean UCQ_ENGINE_USE_STANDARD_CQ_ENGINE_IF_POSSIBLE = true;
 
 	/**
 	 * The CNCQ Engine can either put all atoms of the positive queries into the ABox, or it can roll them up before it
@@ -460,15 +460,7 @@ public class OpenlletOptions
 	 * When checking a CNCQ with no negated queries for satisfiability, the CNCQ engine can call the standard CQ engine
 	 * first. If the CQ is entailed, then the CNCQ is satisfiable as well.
 	 */
-	public static boolean CNCQ_ENGINE_USE_CQ_ENTAILMENT_AS_SUFFICIENT_CONDITION = false;
-
-	/**
-	 * Whether the CNCQ Engine caches results for a given ABox and CNCQ.
-	 * TODO: implement
-	 * TODO: maybe also implement caching on all other query engines? e.g. UCQ, Semi Boolean CNCQ etc.
-	 * in general check how many of the query-ABox combinations are re-checked in the test examples...
-	 */
-	public static boolean CNCQ_ENGINE_USE_CACHING = false;
+	public static boolean CNCQ_ENGINE_USE_CQ_ENTAILMENT_AS_SUFFICIENT_CONDITION = true;
 
 	/**
 	 * The TCQ Engine can update its current ABox on the fly by incrementally changing the DL axioms. This may increase
@@ -690,8 +682,6 @@ public class OpenlletOptions
 		CNCQ_ENGINE_ROLL_UP_POSITIVE_PART_BEFORE_CHECKING = getBooleanProperty(newOptions, "CNCQ_ENGINE_ROLL_UP_POSITIVE_PART_BEFORE_CHECKING", CNCQ_ENGINE_ROLL_UP_POSITIVE_PART_BEFORE_CHECKING, oldOptions);
 
 		CNCQ_ENGINE_USE_CQ_ENTAILMENT_AS_SUFFICIENT_CONDITION = getBooleanProperty(newOptions, "CNCQ_ENGINE_USE_CQ_ENTAILMENT_AS_SUFFICIENT_CONDITION", CNCQ_ENGINE_USE_CQ_ENTAILMENT_AS_SUFFICIENT_CONDITION, oldOptions);
-
-		CNCQ_ENGINE_USE_CACHING = getBooleanProperty(newOptions, "CNCQ_ENGINE_USE_CACHING", CNCQ_ENGINE_USE_CACHING, oldOptions);
 
 		TCQ_ENGINE_USE_INCREMENTAL_LOADING = getBooleanProperty(newOptions, "TCQ_ENGINE_USE_INCREMENTAL_LOADING", TCQ_ENGINE_USE_INCREMENTAL_LOADING, oldOptions);
 

@@ -144,7 +144,7 @@ public class TestTCQEngine extends AbstractTCQTest
     @Test
     public void testIllegCrossing()
     {
-        useCaseTKBIllegCrossing(true, 20);
+        useCaseTKBIllegCrossing(true, 30);
         String tcqString = """
         # A=l4d:Bicyclist, B=l4c:Traffic_Participant, C=l4c:Traffic_Participant, D=l1c:Driveable_Lane, E=l1d:Pedestrian_Crossing
         # r=geo:sfIntersects, q=phy:has_intersecting_path
