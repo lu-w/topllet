@@ -1,8 +1,11 @@
 package openllet.tcq.engine;
 
+import openllet.aterm.ATermAppl;
 import openllet.core.KnowledgeBase;
 import openllet.core.utils.Bool;
+import openllet.query.sparqldl.engine.QueryBindingCandidateGenerator;
 import openllet.query.sparqldl.engine.QueryExec;
+import openllet.query.sparqldl.engine.QueryResultBasedBindingCandidateGenerator;
 import openllet.query.sparqldl.engine.cncq.AbstractCNCQQueryEngine;
 import openllet.query.sparqldl.engine.cncq.CNCQQueryEngineSimple;
 import openllet.query.sparqldl.engine.cq.QueryEngine;
@@ -79,13 +82,13 @@ public class SatisfiabilityKnowledgeManager
     private final AbstractCNCQQueryEngine _cncqEngine = new CNCQQueryEngineSimple();
     private final QueryExec<ConjunctiveQuery> _cqEngine = new QueryEngine();
     private final Map<Integer, List<ConjunctiveQuery>> _cqCache = new HashMap<>();
-    private QueryResult _globallyExcludeBindings;
+    private QueryResult _globallyIncludeBindings;
     private final SatisfiabilityStats _stats = new SatisfiabilityStats();
 
     public SatisfiabilityKnowledgeManager(TemporalConjunctiveQuery query, DFA dfa)
     {
         _tcq = query;
-        _globallyExcludeBindings = new QueryResultImpl(query);
+        _globallyIncludeBindings = new QueryResultImpl(query).invert();
         for (int state: dfa.getStates())
             for (Edge edge : dfa.getEdges(state))
                 for (CNCQQuery cncq : edge.getCNCQs())
@@ -112,12 +115,16 @@ public class SatisfiabilityKnowledgeManager
     public void setGloballyExcludedBindings(QueryResult excludedBindings)
     {
         if (excludedBindings != null)
-            _globallyExcludeBindings = excludedBindings;
+        {
+            _globallyIncludeBindings = excludedBindings.invert();
+            _globallyIncludeBindings.iterator();
+        }
     }
 
     public void doNotGloballyExcludeBindings()
     {
-        _globallyExcludeBindings = new QueryResultImpl(_tcq);
+        _globallyIncludeBindings = new QueryResultImpl(_tcq).invert();
+        _globallyIncludeBindings.iterator();
     }
 
     public SatisfiabilityKnowledge getKnowledgeOnQuery(CNCQQuery query)
@@ -215,25 +222,25 @@ public class SatisfiabilityKnowledgeManager
     private void execCNCQQueryEngine(CNCQQuery query, int timePoint, SatisfiabilityKnowledge knowledgeOnQuery,
                                      QueryResult restrictSatToBindings) throws IOException, InterruptedException
     {
-        QueryResult excludeForQuery;
+        QueryResult restrictTo = _globallyIncludeBindings.copy();
+        restrictTo.retainAll(restrictSatToBindings);
         QueryResult certainSatKnowledge = knowledgeOnQuery.getCertainSatisfiabilityKnowledge(timePoint).get(Bool.TRUE);
         QueryResult certainUnsatKnowledge = knowledgeOnQuery.getCertainSatisfiabilityKnowledge(timePoint).get(Bool.FALSE);
-        if (certainSatKnowledge.size() > 0 || certainUnsatKnowledge.size() > 0)
+        // addAll is expensive - we only do so if we gain substantial knowledge (i.e., over 5% more).
+        if ((double) (certainSatKnowledge.size() + certainUnsatKnowledge.size()) / certainSatKnowledge.getMaxSize() > 0.05)
         {
-            excludeForQuery = certainSatKnowledge;  // works because certainSatisfiabilityKnowledge returns a copy (for true)
-            excludeForQuery.addAll(certainUnsatKnowledge);
-            excludeForQuery.addAll(_globallyExcludeBindings);
+            restrictTo.removeAll(certainSatKnowledge);  // works because certainSatisfiabilityKnowledge returns a copy (for true)
+            restrictTo.removeAll(certainUnsatKnowledge);
         }
-        else
-            excludeForQuery = _globallyExcludeBindings;
-        double maxSize = excludeForQuery.getMaxSize();
+        // TODO fix stats for evaluation
+        /*double maxSize = excludeForQuery.getMaxSize();
         double excludedBindingsSize = 1;
         if (maxSize > 0)
             excludedBindingsSize = (double) excludeForQuery.size() / excludeForQuery.getMaxSize();
-        _stats.informAboutBindingExclusion(timePoint, query, excludedBindingsSize);
-        if (!excludeForQuery.isComplete())
+        _stats.informAboutBindingExclusion(timePoint, query, excludedBindingsSize);*/
+        if (!restrictTo.isEmpty())
         {
-            QueryResult result = _cncqEngine.exec(query, excludeForQuery, restrictSatToBindings);
+            QueryResult result = _cncqEngine.exec(query, null, restrictTo);
             knowledgeOnQuery.informAboutSatisfiability(result, true, timePoint);
         }
         // Sets knowledge complete s.t. satisfying bindings can be inverted to get unsatisfiable bindings.

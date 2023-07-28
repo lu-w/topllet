@@ -43,12 +43,21 @@ public abstract class QueryBindingCandidateGenerator implements Iterable<ResultB
 
     public void excludeBindings(QueryResult bindings)
     {
-        _excludeBindings = bindings;
+        if (bindings != null)
+            // We maybe manipulate bindings later; copy to avoid side effects.
+            _excludeBindings = bindings.copy();
     }
 
     public void restrictToBindings(QueryResult bindings)
     {
-        _restrictToBindings = bindings;
+        if (bindings != null)
+        {
+            if (_restrictToBindings == null)
+                // We maybe manipulate bindings later; copy to avoid side effects.
+                _restrictToBindings = bindings.copy();
+            else
+                _restrictToBindings.retainAll(bindings);
+        }
     }
 
     public void doNotExcludeBindings()

@@ -15,14 +15,6 @@ public class QueryResultBasedBindingCandidateGenerator extends QueryBindingCandi
     }
 
     @Override
-    public void restrictToBindings(QueryResult bindings)
-    {
-        if (bindings != null)
-            // We maybe manipulate bindings later; copy to avoid side effects.
-            _restrictToBindings = bindings.copy();
-    }
-
-    @Override
     public Iterator<ResultBinding> iterator()
     {
         if (_restrictToBindings == null)
