@@ -442,13 +442,13 @@ public class OpenlletOptions
 	 * The UCQ engine can check whether all the disjuncts are entailed separately. If this is the case, it can return
 	 * true directly, otherwise it has to run the expensive full semantics check.
 	 */
-	public static boolean UCQ_ENGINE_USE_UNDERAPPROXIMATING_SEMANTICS = true;
+	public static boolean UCQ_ENGINE_USE_UNDERAPPROXIMATING_SEMANTICS = false;
 
 	/**
 	 * The UCQ engine can check whether all the disjuncts are entailed separately. If this is the case, it can return
 	 * true directly, otherwise it has to run the expensive full semantics check.
 	 */
-	public static boolean UCQ_ENGINE_USE_STANDARD_CQ_ENGINE_IF_POSSIBLE = true;
+	public static boolean UCQ_ENGINE_USE_STANDARD_CQ_ENGINE_IF_POSSIBLE = false;
 
 	/**
 	 * The CNCQ Engine can either put all atoms of the positive queries into the ABox, or it can roll them up before it

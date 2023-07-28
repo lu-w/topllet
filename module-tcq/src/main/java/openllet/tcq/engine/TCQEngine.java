@@ -148,6 +148,7 @@ public class TCQEngine extends AbstractQueryEngine<TemporalConjunctiveQuery>
                                                           DFAExecutableStates states,
                                                           Map<Boolean, QueryResult> knownResults)
     {
+        _logger.fine("Assembling final result of DFA check");
         Map<Boolean, QueryResult> result = new HashMap<>();
         if (knownResults == null)
         {

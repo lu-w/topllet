@@ -1,9 +1,12 @@
 package openllet.test.tcq;
 
 import openllet.aterm.ATermAppl;
+import openllet.core.KnowledgeBase;
 import org.junit.Test;
 
 import java.util.List;
+
+import static openllet.core.utils.TermFactory.term;
 
 public class TestTCQEngine extends AbstractTCQTest
 {
@@ -144,7 +147,14 @@ public class TestTCQEngine extends AbstractTCQTest
     @Test
     public void testIllegCrossing()
     {
-        useCaseTKBIllegCrossing(true, 120);
+        useCaseTKBIllegCrossing(true, 60);
+        for (int i = 0; i < 3; i++)
+            for (KnowledgeBase kb : _tkb)
+            {
+                kb.addType(term("i" + i), _A);
+                kb.addType(term("i" + i), _C);
+            }
+
         String tcqString = """
         # A=l4d:Bicyclist, B=l4c:Traffic_Participant, C=l4c:Traffic_Participant, D=l1c:Driveable_Lane, E=l1d:Pedestrian_Crossing
         # r=geo:sfIntersects, q=phy:has_intersecting_path

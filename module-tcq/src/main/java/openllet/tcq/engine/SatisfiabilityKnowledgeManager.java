@@ -225,16 +225,17 @@ public class SatisfiabilityKnowledgeManager
         double certainKnowledgeRatio = (double) certainKnowledgeSize / certainSatKnowledge.getMaxSize();
         // copy() is expensive - we need to avoid it if possible
         boolean restrictedSatBindingsInRestrictTo = false;
-        if (restrictToRatio > 0.05 || certainKnowledgeRatio > 0.05)
+        double minRatio = 0.05;
+        if (restrictToRatio > minRatio || certainKnowledgeRatio > minRatio)
         {
             restrictTo = _globallyIncludeBindings.copy();
-            if (restrictToRatio > 0.05)
+            if (restrictToRatio > minRatio)
             {
                 restrictedSatBindingsInRestrictTo = true;
                 restrictTo.retainAll(restrictSatToBindings);
             }
             // removeAll is expensive - we only do so if we gain substantial knowledge (i.e., over 5% more).
-            if (certainKnowledgeRatio > 0.05)
+            if (certainKnowledgeRatio > minRatio)
             {
                 restrictTo.removeAll(certainSatKnowledge);
                 restrictTo.removeAll(certainUnsatKnowledge);

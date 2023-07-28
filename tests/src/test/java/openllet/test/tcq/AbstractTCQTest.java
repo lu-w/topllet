@@ -213,7 +213,7 @@ public class AbstractTCQTest extends AbstractQueryTest
 
     protected void useCaseTKBIllegCrossing(boolean entailed, int numberAdditionalIndividuals)
     {
-        fillUseCaseTKB(20, numberAdditionalIndividuals);
+        fillUseCaseTKB(80, numberAdditionalIndividuals);
 
         int i = 0;
         for (KnowledgeBase kb : _tkb)
