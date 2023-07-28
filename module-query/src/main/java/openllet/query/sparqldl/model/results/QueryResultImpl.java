@@ -476,16 +476,12 @@ public class QueryResultImpl implements QueryResult
 		if (toRetain != null)
 		{
 			if (!toRetain.getResultVars().equals(_resultVars))
-				for (ATermAppl var : toRetain.getResultVars())
-					if (!_resultVars.contains(var))
-						_resultVars.add(var);
+				_resultVars.addAll(toRetain.getResultVars());
 			if (toRetain.size() == 0)
 				empty();
 			else if (!equals(toRetain) && !toRetain.isComplete())
 			{
 				Set<ResultBinding> toRemove = new HashSet<>();
-				QueryResult copy = toRetain.copy();
-				copy.expandToAllVariables(_resultVars);
 				for (ResultBinding thisBinding : this)
 					if (!toRetain.contains(thisBinding))
 						toRemove.add(thisBinding);

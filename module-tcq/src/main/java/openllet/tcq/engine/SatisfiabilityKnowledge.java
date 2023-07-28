@@ -93,8 +93,18 @@ public class SatisfiabilityKnowledge
         QueryResult filtered;
         if (restrictToBindings != null)
         {
-            filtered = bindings.copy();
-            filtered.retainAll(restrictToBindings);
+            // Depending on the sizes of the query results, it is more efficient to compute the intersection in
+            // different orders.
+            if (restrictToBindings.size() < bindings.size())
+            {
+                filtered = restrictToBindings.copy();
+                filtered.retainAll(bindings);
+            }
+            else
+            {
+                filtered = bindings.copy();
+                filtered.retainAll(restrictToBindings);
+            }
         }
         else
             filtered = bindings;
