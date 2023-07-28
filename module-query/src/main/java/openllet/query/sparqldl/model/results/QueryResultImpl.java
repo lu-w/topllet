@@ -36,6 +36,7 @@ public class QueryResultImpl implements QueryResult
 	private boolean _isInverted = false;
 	private Set<ATermAppl> _unmodifiableResultVars;
 	private int _containsPartialBinding = 0;
+	private int _maxSize = -1;
 
 	public QueryResultImpl(final Query<?> query)
 	{
@@ -138,7 +139,10 @@ public class QueryResultImpl implements QueryResult
 		{
 			boolean equals = _resultVars.addAll(variables);
 			if (!equals)
+			{
+				_maxSize = -1;
 				explicate();
+			}
 			_resultVars = new HashSet<>(variables);
 		}
 	}
@@ -180,23 +184,25 @@ public class QueryResultImpl implements QueryResult
 	@Override
 	public int getMaxSize()
 	{
-		int maxSize;
-		int indCount = getIndividualCount();
-		int resCount = _resultVars.size();
-		if (isDistinct())
+		if (_maxSize == -1)
 		{
-			if (indCount >= resCount)
+			int indCount = getIndividualCount();
+			int resCount = _resultVars.size();
+			if (isDistinct())
 			{
-				maxSize = indCount;
-				for (int i = 1; i < resCount; i++)
-					maxSize *= (indCount - i);
+				if (indCount >= resCount)
+				{
+					_maxSize = indCount;
+					for (int i = 1; i < resCount; i++)
+						_maxSize *= (indCount - i);
+				}
+				else
+					_maxSize = 0;
 			}
 			else
-				maxSize = 0;
+				_maxSize = (int) Math.pow(indCount, resCount);
 		}
-		else
-			maxSize = (int) Math.pow(indCount, resCount);
-		return maxSize;
+		return _maxSize;
 	}
 
 	protected int getIndividualCount()
