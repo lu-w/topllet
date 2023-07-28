@@ -460,7 +460,7 @@ public class OpenlletOptions
 	 * When checking a CNCQ with no negated queries for satisfiability, the CNCQ engine can call the standard CQ engine
 	 * first. If the CQ is entailed, then the CNCQ is satisfiable as well.
 	 */
-	public static boolean CNCQ_ENGINE_USE_CQ_ENTAILMENT_AS_SUFFICIENT_CONDITION = true;
+	public static boolean CNCQ_ENGINE_USE_CQ_ENTAILMENT_AS_SUFFICIENT_CONDITION = false;
 
 	/**
 	 * The TCQ Engine can update its current ABox on the fly by incrementally changing the DL axioms. This may increase
