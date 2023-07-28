@@ -57,6 +57,8 @@ public interface QueryResult extends Iterable<ResultBinding>
 
 	boolean isDistinct();
 
+	Iterator<ResultBinding> listIterator();
+
 	/**
 	 * Tests whether the result is empty or not.
 	 *

@@ -29,7 +29,7 @@ import openllet.query.sparqldl.model.cq.QueryParameters;
 public class QueryResultImpl implements QueryResult
 {
 	private Collection<ResultBinding> _bindings;
-
+	private List<ResultBinding> _listForIterator;
 	private Set<ATermAppl> _resultVars;
 	private final Query<?> _query;
 	private final QueryParameters _parameters;
@@ -72,6 +72,7 @@ public class QueryResultImpl implements QueryResult
 		else
 			for (ResultBinding rem : bindings)
 				_bindings.remove(process(rem));
+		_listForIterator = null;
 	}
 
 	@Override
@@ -86,6 +87,7 @@ public class QueryResultImpl implements QueryResult
 			for (ResultBinding add : bindings)
 				if (!_bindings.contains(add))
 					_bindings.add(process(add));
+		_listForIterator = null;
 	}
 
 	@Override
@@ -181,6 +183,16 @@ public class QueryResultImpl implements QueryResult
 	}
 
 	@Override
+	public Iterator<ResultBinding> listIterator()
+	{
+		if (_isInverted)
+			performInversion();
+		if (_listForIterator == null)
+			_listForIterator = _bindings.stream().toList();
+		return _listForIterator.iterator();
+	}
+
+	@Override
 	public boolean isEmpty()
 	{
 		return size() == 0;
@@ -242,6 +254,7 @@ public class QueryResultImpl implements QueryResult
 			}
 		_bindings.removeAll(toRemove);
 		_bindings.addAll(toAdd);
+		_listForIterator = null;
 	}
 
 	// Assumes binding's variables to be subset of or equal to this query result's result variables.
@@ -341,6 +354,7 @@ public class QueryResultImpl implements QueryResult
 		for (ResultBinding binding : _bindings)
 			inv.add(binding);
 		inv._isInverted = !this._isInverted;
+		_listForIterator = null;
 		return inv;
 	}
 
@@ -473,6 +487,7 @@ public class QueryResultImpl implements QueryResult
 		else
 			_bindings = new ArrayList<>();
 		_isInverted = false;
+		_listForIterator = null;
 	}
 
 	@Override

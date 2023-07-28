@@ -101,6 +101,12 @@ public class MultiQueryResults implements QueryResult
 		return true;
 	}
 
+	@Override
+	public Iterator<ResultBinding> listIterator()
+	{
+		return iterator();
+	}
+
 	/**
 	 * {@inheritDoc}
 	 */
