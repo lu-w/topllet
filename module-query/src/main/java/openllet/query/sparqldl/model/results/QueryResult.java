@@ -9,9 +9,7 @@ package openllet.query.sparqldl.model.results;
 import java.util.*;
 
 import openllet.aterm.ATermAppl;
-import openllet.core.rules.VariableBinding;
 import openllet.query.sparqldl.model.Query;
-import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
  * <p>
@@ -151,26 +149,29 @@ public interface QueryResult extends Iterable<ResultBinding>
 												 boolean distinct)
 	{
 		Collection<ResultBinding> bindings = new HashSet<>();
-		// https://stackoverflow.com/a/40101377/4145563
-		List<ATermAppl> varList = variables.stream().toList();
-		List<ATermAppl> indList = individuals.stream().toList();
-		int resultSize = varList.size();
-		int[] indexes = new int[Math.max(individuals.size(), resultSize)];
-		for (int j = (int) Math.pow(individuals.size(), resultSize); j > 0; j--)
+		if (variables.size() > 0)
 		{
-			ResultBinding binding = new ResultBindingImpl();
-			for (int i = 0; i < resultSize; i++)
-				binding.setValue(varList.get(i), indList.get(indexes[i]));
-			if (!distinct || binding.isDistinct())
-				bindings.add(binding);
-			for (int i = 0; i < resultSize; i++)
-				if (indexes[i] >= individuals.size() - 1)
-					indexes[i] = 0;
-				else
-				{
-					indexes[i]++;
-					break;
-				}
+			// https://stackoverflow.com/a/40101377/4145563
+			List<ATermAppl> varList = variables.stream().toList();
+			List<ATermAppl> indList = individuals.stream().toList();
+			int resultSize = varList.size();
+			int[] indexes = new int[Math.max(individuals.size(), resultSize)];
+			for (int j = (int) Math.pow(individuals.size(), resultSize); j > 0; j--)
+			{
+				ResultBinding binding = new ResultBindingImpl();
+				for (int i = 0; i < resultSize; i++)
+					binding.setValue(varList.get(i), indList.get(indexes[i]));
+				if (!distinct || binding.isDistinct())
+					bindings.add(binding);
+				for (int i = 0; i < resultSize; i++)
+					if (indexes[i] >= individuals.size() - 1)
+						indexes[i] = 0;
+					else
+					{
+						indexes[i]++;
+						break;
+					}
+			}
 		}
 		return bindings;
 	}

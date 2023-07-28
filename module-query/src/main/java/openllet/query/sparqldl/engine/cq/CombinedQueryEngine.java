@@ -40,7 +40,6 @@ import openllet.core.utils.CandidateSet;
 import openllet.core.utils.DisjointSet;
 import openllet.core.utils.Timer;
 import openllet.query.sparqldl.engine.QueryExec;
-import openllet.query.sparqldl.model.Query;
 import openllet.query.sparqldl.model.results.QueryResult;
 import openllet.query.sparqldl.model.results.QueryResultImpl;
 import openllet.query.sparqldl.model.results.ResultBinding;
