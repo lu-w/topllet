@@ -40,7 +40,7 @@ public class KnowledgeBaseLoader
     @Nullable
     public OntologyDiff getDiffToLastKB()
     {
-        _logger.fine("Difference between KBs only supported by incremental loader.");
+        _logger.finest("Difference between KBs only supported by incremental loader.");
         return null;
     }
 
