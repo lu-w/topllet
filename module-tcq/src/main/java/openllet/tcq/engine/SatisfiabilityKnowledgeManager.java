@@ -1,11 +1,8 @@
 package openllet.tcq.engine;
 
-import openllet.aterm.ATermAppl;
 import openllet.core.KnowledgeBase;
 import openllet.core.utils.Bool;
-import openllet.query.sparqldl.engine.QueryBindingCandidateGenerator;
 import openllet.query.sparqldl.engine.QueryExec;
-import openllet.query.sparqldl.engine.QueryResultBasedBindingCandidateGenerator;
 import openllet.query.sparqldl.engine.cncq.AbstractCNCQQueryEngine;
 import openllet.query.sparqldl.engine.cncq.CNCQQueryEngineSimple;
 import openllet.query.sparqldl.engine.cq.QueryEngine;
@@ -43,17 +40,17 @@ public class SatisfiabilityKnowledgeManager
 
     protected static class SatisfiabilityStats
     {
-        private final Map<Integer, Map<CNCQQuery, Double>> _ratioOfExcludedBindings = new HashMap<>();
+        private final Map<Integer, Map<CNCQQuery, Double>> _percentagesOfIncludedBindings = new HashMap<>();
 
-        protected void informAboutBindingExclusion(int timePoint, CNCQQuery query, double ratioOfExcludedBindings)
+        protected void informAboutBindingInclusion(int timePoint, CNCQQuery query, double ratioOfIncludedBindings)
         {
-            if (!_ratioOfExcludedBindings.containsKey(timePoint))
-                _ratioOfExcludedBindings.put(timePoint, new HashMap<>());
-            Map<CNCQQuery, Double> map = _ratioOfExcludedBindings.get(timePoint);
+            if (!_percentagesOfIncludedBindings.containsKey(timePoint))
+                _percentagesOfIncludedBindings.put(timePoint, new HashMap<>());
+            Map<CNCQQuery, Double> map = _percentagesOfIncludedBindings.get(timePoint);
             if (!map.containsKey(query))
-                map.put(query, ratioOfExcludedBindings);
+                map.put(query, 100 * ratioOfIncludedBindings);
             else
-                _logger.warning("Did not overwrite prior result with " + ratioOfExcludedBindings +
+                _logger.warning("Did not overwrite prior result with " + ratioOfIncludedBindings +
                         " when collecting statistics.");
         }
 
@@ -63,15 +60,15 @@ public class SatisfiabilityKnowledgeManager
             StringBuilder res = new StringBuilder("Already gathered satisfiability knowledge from CQ engine:\n");
             // avg. over CNCQ sat. for each time point
             List<Double> avgs = new ArrayList<>();
-            for (Integer t : _ratioOfExcludedBindings.keySet())
+            for (Integer t : _percentagesOfIncludedBindings.keySet())
             {
-                Map<CNCQQuery, Double> map = _ratioOfExcludedBindings.get(t);
+                Map<CNCQQuery, Double> map = _percentagesOfIncludedBindings.get(t);
                 double avgSat = map.values().stream().mapToDouble(val -> val).average().orElse(0.0);
                 avgs.add(avgSat);
-                res.append(String.format("t=" + t + ": %.2f\n", 100 * avgSat));
+                res.append(String.format("t=" + t + ": %.6f\n", avgSat));
             }
             double avgSat = avgs.stream().mapToDouble(val -> val).average().orElse(0.0);
-            res.append(String.format("total: %.2f", 100 * avgSat));
+            res.append(String.format("total: %.6f", avgSat));
             return res.toString();
         }
     }
@@ -183,7 +180,6 @@ public class SatisfiabilityKnowledgeManager
                 query.setNegation(false);
             }
         }
-        // TODO PLANNED OPTIMIZATION: propagate knowledge to all time points in which it also holds
     }
 
     private void execConjunctiveQueryEngine(ConjunctiveQuery query, int timePoint)
@@ -231,7 +227,8 @@ public class SatisfiabilityKnowledgeManager
         int restrictToSize = restrictSatToBindings != null ? restrictSatToBindings.size() : 0;
         double restrictToRatio = (double) restrictToSize / certainSatKnowledge.getMaxSize();
         double certainKnowledgeRatio = (double) certainKnowledgeSize / certainSatKnowledge.getMaxSize();
-        // copy() is expensive - we need to avoid it if possible
+        // copy() is expensive - we need to avoid it if possible. Also, retain/removeAll is expensive - we only do so
+        //  if we gain substantial exclusion possibility from it (threshold: 5%).
         boolean restrictedSatBindingsInRestrictTo = false;
         double minRatio = 0.05;
         if (restrictToRatio > minRatio || certainKnowledgeRatio > minRatio)
@@ -251,12 +248,11 @@ public class SatisfiabilityKnowledgeManager
         }
         else
             restrictTo = _globallyIncludeBindings;
-        // TODO fix stats for evaluation
-        /*double maxSize = excludeForQuery.getMaxSize();
-        double excludedBindingsSize = 1;
+        double maxSize = restrictTo.getMaxSize();
+        double restrictToStatsSize = 0;
         if (maxSize > 0)
-            excludedBindingsSize = (double) excludeForQuery.size() / excludeForQuery.getMaxSize();
-        _stats.informAboutBindingExclusion(timePoint, query, excludedBindingsSize);*/
+            restrictToStatsSize = (double) restrictTo.size() / restrictTo.getMaxSize();
+        _stats.informAboutBindingInclusion(timePoint, query, restrictToStatsSize);
         if (!restrictTo.isEmpty())
         {
             QueryResult result = _cncqEngine.exec(query, null, restrictTo);
@@ -289,7 +285,7 @@ public class SatisfiabilityKnowledgeManager
                 execCNCQQueryEngine(query, timePoint, knowledgeOnQuery, restrictSatToBindings);
             }
             else if (!useUnderapproximatingSemantics)
-                _stats.informAboutBindingExclusion(timePoint, query, 1);
+                _stats.informAboutBindingInclusion(timePoint, query, 0);
             _logger.finer("Retrieving satisfiability knowledge on " + query);
             return knowledgeOnQuery.getCertainSatisfiabilityKnowledge(timePoint, restrictSatToBindings);
         }

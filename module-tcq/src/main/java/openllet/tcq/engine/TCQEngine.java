@@ -67,7 +67,7 @@ public class TCQEngine extends AbstractQueryEngine<TemporalConjunctiveQuery>
                 timeFirstRun = _timer.getTotal();
                 _logger.fine("CQ semantics DFA check took " + timeFirstRun + " ms");
             }
-            _logger.fine(String.format("CQ semantics DFA check returned %.2f %% (",
+            _logger.fine(String.format("CQ semantics DFA check returned %.6f %% (",
                     (double) 100 * (satResult.get(true).size() + satResult.get(false).size()) /
                             satResult.get(true).getMaxSize())
                     + satResult.get(true).size() +  " satisfiable and " + satResult.get(false).size() +
@@ -83,7 +83,7 @@ public class TCQEngine extends AbstractQueryEngine<TemporalConjunctiveQuery>
             _logger.fine(_edgeChecker.getSatisfiabilityKnowledgeManager().getStats());
             if (_timer != null)
                 _logger.fine("Full semantics DFA check took " + (_timer.getTotal() - timeFirstRun) +  " ms");
-            _logger.fine(String.format("Full semantics DFA check returned %.2f %% (",
+            _logger.fine(String.format("Full semantics DFA check returned %.6f %% (",
                     (double) 100 * (satResult.get(true).size() + satResult.get(false).size()) /
                             satResult.get(true).getMaxSize())
                     + satResult.get(true).size() +  " satisfiable and " + satResult.get(false).size() +
@@ -92,7 +92,7 @@ public class TCQEngine extends AbstractQueryEngine<TemporalConjunctiveQuery>
         double cqResultRatio = 100.0;
         if (satResult.get(false).size() > 0)
             cqResultRatio = 100.0 * ((double) cqResultNumber / satResult.get(false).size());
-        _logger.fine(String.format("CQ semantics check returned a definite answer on %.2f %% of the entailed" +
+        _logger.fine(String.format("CQ semantics check returned a definite answer on %.6f %% of the entailed" +
                 " bindings", cqResultRatio));
         satResult.get(false).explicate();
         return satResult.get(false);
