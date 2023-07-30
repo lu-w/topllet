@@ -3,8 +3,10 @@ package openllet.query.sparqldl.engine.ucq;
 import openllet.core.OpenlletOptions;
 import openllet.core.utils.Bool;
 import openllet.query.sparqldl.engine.QueryBindingCandidateGenerator;
+import openllet.query.sparqldl.engine.QueryExec;
 import openllet.query.sparqldl.engine.QueryResultBasedBindingCandidateGenerator;
 import openllet.query.sparqldl.engine.cq.CombinedQueryEngine;
+import openllet.query.sparqldl.model.cq.ConjunctiveQuery;
 import openllet.query.sparqldl.model.results.MultiQueryResults;
 import openllet.query.sparqldl.model.results.QueryResult;
 import openllet.query.sparqldl.model.results.QueryResultImpl;
@@ -51,8 +53,21 @@ public class UnionQueryEngineSimple extends AbstractUnionQueryEngine
     protected QueryResult execABoxQuery(UnionQuery q, QueryResult excludeBindings, QueryResult restrictToBindings)
             throws IOException, InterruptedException
     {
-        if (q.getQueries().size() == 1)
+        if (q.getQueries().size() == 0)
+            return new QueryResultImpl(q);
+        else if (q.getQueries().size() == 1)
             return new CombinedQueryEngine().exec(q.getQueries().get(0));
+        else if (OpenlletOptions.UCQ_ENGINE_USE_UNDERAPPROXIMATING_SEMANTICS)
+        {
+            int s1 = restrictToBindings.size();
+            QueryExec<ConjunctiveQuery> cqEngine = new CombinedQueryEngine();
+            QueryResult disjunctAnswers = cqEngine.exec(q.getQueries().get(0));
+            for (ConjunctiveQuery disjunct : q.getQueries().subList(1, q.getQueries().size()))
+                disjunctAnswers.addAll(cqEngine.exec(disjunct));
+            QueryResult missingAnswers = disjunctAnswers.invert();
+            restrictToBindings.addAll(missingAnswers);
+            System.out.println(((double) (restrictToBindings.size() - s1) / restrictToBindings.getMaxSize()) * 100);
+        }
         return switch (_bindingTime)
         {
             case BEFORE_CNF -> execABoxQueryBindingBeforeCNF(q, excludeBindings, restrictToBindings);
