@@ -10,7 +10,7 @@ import openllet.query.sparqldl.model.results.QueryResult;
 import openllet.query.sparqldl.model.results.QueryResultImpl;
 import openllet.shared.tools.Log;
 import openllet.tcq.model.query.TemporalConjunctiveQuery;
-import org.semanticweb.owlapi.model.OWLAxiom;
+import org.semanticweb.owlapi.model.*;
 
 import java.util.*;
 import java.util.logging.Logger;
@@ -170,7 +170,12 @@ public class SatisfiabilityKnowledge
     protected static Collection<ATerm> getClassesAndRolesFromAxiom(OWLAxiom axiom)
     {
         Collection<ATerm> classesAndRoles = new HashSet<>();
-        // TODO implement -> how to get from OWLAPI to ATerm? ATermUtil.makeVar()?
+        for (OWLClass cls : axiom.getClassesInSignature())
+            classesAndRoles.add(ATermUtils.makeTermAppl(cls.getIRI().toString()));
+        for (OWLDataProperty dProp : axiom.getDataPropertiesInSignature())
+            classesAndRoles.add(ATermUtils.makeTermAppl(dProp.getIRI().toString()));
+        for (OWLObjectProperty oProp : axiom.getObjectPropertiesInSignature())
+            classesAndRoles.add(ATermUtils.makeTermAppl(oProp.getIRI().toString()));
         return classesAndRoles;
     }
 }
