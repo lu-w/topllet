@@ -1,5 +1,7 @@
 package openllet.tcq.model.kb;
 
+import openllet.aterm.ATerm;
+import openllet.aterm.ATermAppl;
 import openllet.core.KnowledgeBase;
 import openllet.core.OpenlletOptions;
 import openllet.core.utils.Timer;
@@ -8,8 +10,12 @@ import openllet.modularity.OntologyDiff;
 import openllet.shared.tools.Log;
 import openllet.tcq.model.kb.loader.IncrementalKnowledgeBaseLoader;
 import openllet.tcq.model.kb.loader.KnowledgeBaseLoader;
+import org.jgrapht.graph.DefaultEdge;
+import org.jgrapht.graph.DefaultUndirectedGraph;
+import org.jgrapht.alg.connectivity.ConnectivityInspector;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.io.FileNotFoundException;
 import java.util.*;
@@ -25,6 +31,7 @@ public class FileBasedTemporalKnowledgeBaseImpl extends ArrayList<KnowledgeBase>
     private int _curKbIndex = -1;
     private final String _catalogFile;
     private final Timer _timer;
+    private DefaultUndirectedGraph<ATerm, DefaultEdge> _axiomGraph;
 
     public FileBasedTemporalKnowledgeBaseImpl(Iterable<String> files)
     {
@@ -148,5 +155,31 @@ public class FileBasedTemporalKnowledgeBaseImpl extends ArrayList<KnowledgeBase>
             _loader = new KnowledgeBaseLoader(_timer);
         if (_catalogFile != null)
             _loader.addCatalog(_catalogFile);
+    }
+
+    @Nonnull
+    @Override
+    public DefaultUndirectedGraph<ATerm, DefaultEdge> computeAxiomGraph()
+    {
+        if (_axiomGraph == null)
+        {
+            if (size() > 0)
+                _axiomGraph = get(0).getTBox().computeAxiomGraph();
+            else
+                _axiomGraph = new DefaultUndirectedGraph<>(DefaultEdge.class);
+        }
+        return _axiomGraph;
+    }
+
+    @Override
+    public Collection<ATerm> getConnectedClassesAndRolesInAxiomGraph(Collection<ATerm> classesAndRoles)
+    {
+        ConnectivityInspector<ATerm, DefaultEdge> conInspector = new ConnectivityInspector<>(computeAxiomGraph());
+        Collection<ATerm> connected = new HashSet<>();
+        for (ATerm classOrRole : classesAndRoles)
+            // Classes or roles not contain in the graph are not used in any axiom, therefore we just ignore them.
+            if (_axiomGraph.containsVertex(classOrRole))
+                connected.addAll(conInspector.connectedSetOf(classOrRole));
+        return connected;
     }
 }

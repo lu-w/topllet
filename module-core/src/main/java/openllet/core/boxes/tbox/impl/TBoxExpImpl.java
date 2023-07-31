@@ -23,6 +23,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import openllet.aterm.AFun;
+import openllet.aterm.ATerm;
 import openllet.aterm.ATermAppl;
 import openllet.aterm.ATermList;
 import openllet.core.KnowledgeBase;
@@ -33,6 +34,8 @@ import openllet.core.utils.CollectionUtils;
 import openllet.core.utils.MultiMapUtils;
 import openllet.core.utils.iterator.MultiIterator;
 import openllet.shared.tools.Log;
+import org.jgrapht.graph.DefaultEdge;
+import org.jgrapht.graph.DefaultUndirectedGraph;
 
 /**
  * <p>
@@ -545,6 +548,35 @@ public class TBoxExpImpl implements TBox
 		_Tg.absorb();
 		_Tg.internalize();
 		_Tu.normalize();
+	}
+
+	@Override
+	public DefaultUndirectedGraph<ATerm, DefaultEdge> computeAxiomGraph()
+	{
+		return computeAxiomGraph(_tboxAssertedAxioms);
+	}
+
+	public static DefaultUndirectedGraph<ATerm, DefaultEdge> computeAxiomGraph(Collection<ATermAppl> tboxAssertedAxioms)
+	{
+		DefaultUndirectedGraph<ATerm, DefaultEdge> graph = new DefaultUndirectedGraph<>(DefaultEdge.class);
+		for (ATermAppl axiom : tboxAssertedAxioms)
+		{
+			Collection<ATermAppl> primitives = new HashSet<>();
+			for (ATerm arg : axiom.getArguments())
+				if (arg instanceof ATermAppl argAppl)
+					primitives.addAll(ATermUtils.findPrimitives(argAppl, true));
+			for (ATerm arg1 : primitives)
+			{
+				graph.addVertex(arg1);
+				for (ATerm arg2 : primitives)
+				{
+					graph.addVertex(arg2);
+					if (!arg1.equals(arg2))
+						graph.addEdge(arg1, arg2);
+				}
+			}
+		}
+		return graph;
 	}
 
 	@Override

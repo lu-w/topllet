@@ -1,5 +1,8 @@
 package openllet.tcq.engine;
 
+import openllet.aterm.ATerm;
+import openllet.aterm.ATermAppl;
+import openllet.core.utils.ATermUtils;
 import openllet.core.utils.Bool;
 import openllet.modularity.OntologyDiff;
 import openllet.query.sparqldl.model.cncq.CNCQQuery;
@@ -7,6 +10,7 @@ import openllet.query.sparqldl.model.results.QueryResult;
 import openllet.query.sparqldl.model.results.QueryResultImpl;
 import openllet.shared.tools.Log;
 import openllet.tcq.model.query.TemporalConjunctiveQuery;
+import org.semanticweb.owlapi.model.OWLAxiom;
 
 import java.util.*;
 import java.util.logging.Logger;
@@ -18,6 +22,7 @@ public class SatisfiabilityKnowledge
 {
     public static final Logger _logger = Log.getLogger(SatisfiabilityKnowledge.class);
     private final CNCQQuery _cncq;
+    private final Collection<ATerm> _relevantTBoxClassesAndRoles;
     private final TemporalConjunctiveQuery _tcq;
     private final Map<Integer, QueryResult> _satisfiableBindings = new HashMap<>();
     private final Map<Integer, QueryResult> _unsatisfiableBindings = new HashMap<>();
@@ -27,6 +32,8 @@ public class SatisfiabilityKnowledge
     {
         _cncq = query;
         _tcq = tcq;
+        _relevantTBoxClassesAndRoles = _tcq.getTemporalKB().getConnectedClassesAndRolesInAxiomGraph(
+                _cncq.getClassesAndRoles());
     }
 
     public CNCQQuery getQuery()
@@ -147,12 +154,23 @@ public class SatisfiabilityKnowledge
 
     protected boolean isSatisfiabilityTransferableUnderDifference(OntologyDiff diff)
     {
-        if (diff == null)
+        if (diff == null || _relevantTBoxClassesAndRoles == null)
             return false;
         else
         {
-            // TODO implement
-            return false;
+            boolean transferable = true;
+            for (OWLAxiom ax : diff.getAdditions())
+                transferable &= Collections.disjoint(_relevantTBoxClassesAndRoles, getClassesAndRolesFromAxiom(ax));
+            for (OWLAxiom ax : diff.getDeletions())
+                transferable &= Collections.disjoint(_relevantTBoxClassesAndRoles, getClassesAndRolesFromAxiom(ax));
+            return transferable;
         }
+    }
+
+    protected static Collection<ATerm> getClassesAndRolesFromAxiom(OWLAxiom axiom)
+    {
+        Collection<ATerm> classesAndRoles = new HashSet<>();
+        // TODO implement -> how to get from OWLAPI to ATerm? ATermUtil.makeVar()?
+        return classesAndRoles;
     }
 }

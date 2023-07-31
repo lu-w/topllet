@@ -72,6 +72,8 @@ import openllet.core.utils.iterator.IteratorUtils;
 import openllet.core.utils.iterator.MultiIterator;
 import openllet.core.utils.iterator.MultiListIterator;
 import openllet.shared.tools.Log;
+import org.jgrapht.graph.DefaultEdge;
+import org.jgrapht.graph.DefaultUndirectedGraph;
 
 /**
  * TBox implementation that keeps track of explanations and allows flexible absorption algorithms.
@@ -1100,5 +1102,11 @@ public class TBoxImpl implements TBox
 	public void prepare()
 	{
 		// nothing to do
+	}
+
+	@Override
+	public DefaultUndirectedGraph<ATerm, DefaultEdge> computeAxiomGraph()
+	{
+		return TBoxExpImpl.computeAxiomGraph(_tboxAssertedAxioms);
 	}
 }

@@ -1,5 +1,6 @@
 package openllet.query.sparqldl.model;
 
+import openllet.aterm.ATerm;
 import openllet.aterm.ATermAppl;
 import openllet.core.KnowledgeBase;
 import openllet.core.utils.ATermUtils;
@@ -166,5 +167,13 @@ abstract public class AbstractCompositeQuery<SubQueryType extends Query<SubQuery
             hasOnlyClassesOrRolesInKB &= query.hasOnlyClassesOrPropertiesInKB();
         }
         return hasOnlyClassesOrRolesInKB;
+    }
+
+    public Collection<ATerm> getClassesAndRoles()
+    {
+        Collection<ATerm> classesAndRoles = new HashSet<>();
+        for (Query<SubQueryType> q : _queries)
+            classesAndRoles.addAll(q.getClassesAndRoles());
+        return classesAndRoles;
     }
 }

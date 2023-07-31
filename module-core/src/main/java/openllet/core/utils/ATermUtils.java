@@ -1562,7 +1562,16 @@ public class ATermUtils
 	{
 		final Set<ATermAppl> primitives = new HashSet<>();
 
-		findPrimitives(term, primitives, false, false);
+		findPrimitives(term, primitives, false, false, false);
+		return primitives;
+	}
+
+	public static Set<ATermAppl> findPrimitives(final ATermAppl term, final boolean considerRoles)
+	{
+		final Set<ATermAppl> primitives = new HashSet<>();
+
+		findPrimitives(term, primitives, false, false, considerRoles);
+
 		return primitives;
 	}
 
@@ -1570,17 +1579,22 @@ public class ATermUtils
 	{
 		final Set<ATermAppl> primitives = new HashSet<>();
 
-		findPrimitives(term, primitives, skipRestrictions, skipTopLevel);
+		findPrimitives(term, primitives, skipRestrictions, skipTopLevel, false);
 
 		return primitives;
 	}
 
 	public static void findPrimitives(final ATermAppl term, final Set<ATermAppl> primitives)
 	{
-		findPrimitives(term, primitives, false, false);
+		findPrimitives(term, primitives, false, false, false);
 	}
 
 	public static void findPrimitives(final ATermAppl term, final Set<ATermAppl> primitives, final boolean skipRestrictions, final boolean skipTopLevel)
+	{
+		findPrimitives(term, primitives, skipRestrictions, skipTopLevel, false);
+	}
+
+	public static void findPrimitives(final ATermAppl term, final Set<ATermAppl> primitives, final boolean skipRestrictions, final boolean skipTopLevel, final boolean considerRoles)
 	{
 		final AFun fun = term.getAFun();
 
@@ -1596,7 +1610,7 @@ public class ATermUtils
 				{
 					final ATermAppl arg = (ATermAppl) term.getArgument(0);
 					if (!isPrimitive(arg) || !skipTopLevel)
-						findPrimitives(arg, primitives, skipRestrictions, false);
+						findPrimitives(arg, primitives, skipRestrictions, false, considerRoles);
 				}
 				else
 					if (ANDFUN.equals(fun) || ORFUN.equals(fun))
@@ -1606,7 +1620,7 @@ public class ATermUtils
 						{
 							final ATermAppl arg = (ATermAppl) list.getFirst();
 							if (!isNegatedPrimitive(arg) || !skipTopLevel)
-								findPrimitives(arg, primitives, skipRestrictions, false);
+								findPrimitives(arg, primitives, skipRestrictions, false, considerRoles);
 							list = list.getNext();
 						}
 					}
@@ -1614,14 +1628,24 @@ public class ATermUtils
 						if (!skipRestrictions)
 							if (ALLFUN.equals(fun) || SOMEFUN.equals(fun))
 							{
-								final ATermAppl arg = (ATermAppl) term.getArgument(1);
-								findPrimitives(arg, primitives, skipRestrictions, false);
+								if (considerRoles)
+								{
+									final ATermAppl arg0 = (ATermAppl) term.getArgument(0);
+									findPrimitives(arg0, primitives, skipRestrictions, false, considerRoles);
+								}
+								final ATermAppl arg1 = (ATermAppl) term.getArgument(1);
+								findPrimitives(arg1, primitives, skipRestrictions, false, considerRoles);
 							}
 							else
 								if (MAXFUN.equals(fun) || MINFUN.equals(fun) || CARDFUN.equals(fun))
 								{
-									final ATermAppl arg = (ATermAppl) term.getArgument(2);
-									findPrimitives(arg, primitives, skipRestrictions, false);
+									if (considerRoles)
+									{
+										final ATermAppl arg0 = (ATermAppl) term.getArgument(0);
+										findPrimitives(arg0, primitives, skipRestrictions, false, considerRoles);
+									}
+									final ATermAppl arg2 = (ATermAppl) term.getArgument(2);
+									findPrimitives(arg2, primitives, skipRestrictions, false, considerRoles);
 								}
 								else
 									throw new InternalReasonerException("Unknown concept type: " + term);

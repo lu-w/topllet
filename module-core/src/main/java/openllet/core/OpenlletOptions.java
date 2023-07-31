@@ -474,6 +474,12 @@ public class OpenlletOptions
 	 */
 	public static boolean TCQ_ENGINE_USE_CQ_ENGINE = true;
 
+	/**
+	 * Allows the TCQ engine to transfer (un)satisfiability results over time points, if possible, without re-checking
+	 * the CNCQ.
+	 */
+	public static boolean TCQ_ENGINE_TEMPORAL_CNCQ_TRANSFER = true;
+
 	static
 	{
 		final String configFile = System.getProperty("openllet.configuration");
@@ -686,6 +692,8 @@ public class OpenlletOptions
 		TCQ_ENGINE_USE_INCREMENTAL_LOADING = getBooleanProperty(newOptions, "TCQ_ENGINE_USE_INCREMENTAL_LOADING", TCQ_ENGINE_USE_INCREMENTAL_LOADING, oldOptions);
 
 		TCQ_ENGINE_USE_CQ_ENGINE = getBooleanProperty(newOptions, "TCQ_ENGINE_USE_CQ_ENGINE", TCQ_ENGINE_USE_CQ_ENGINE, oldOptions);
+
+		TCQ_ENGINE_TEMPORAL_CNCQ_TRANSFER = getBooleanProperty(newOptions, "TCQ_ENGINE_USE_CQ_ENGINE", TCQ_ENGINE_TEMPORAL_CNCQ_TRANSFER, oldOptions);
 
 		return oldOptions;
 	}

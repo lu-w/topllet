@@ -1,5 +1,6 @@
 package openllet.query.sparqldl.model;
 
+import openllet.aterm.ATerm;
 import openllet.aterm.ATermAppl;
 import openllet.core.KnowledgeBase;
 import openllet.core.exceptions.InternalReasonerException;
@@ -374,5 +375,19 @@ public abstract class AbstractAtomQuery<QueryType extends AtomQuery<QueryType>> 
             }
         }
         return hasOnlyClassesOrRolesInKB;
+    }
+
+    public Collection<ATerm> getClassesAndRoles()
+    {
+        Collection<ATerm> classesAndRolles = new HashSet<>();
+        for (QueryAtom atom : getAtoms())
+        {
+            switch (atom.getPredicate())
+            {
+                case Type -> classesAndRolles.add(atom.getArguments().get(1));
+                case PropertyValue -> classesAndRolles.add(atom.getArguments().get(1));
+            }
+        }
+        return classesAndRolles;
     }
 }

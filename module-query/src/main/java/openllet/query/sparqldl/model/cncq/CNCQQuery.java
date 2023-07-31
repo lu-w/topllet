@@ -5,6 +5,7 @@ import openllet.query.sparqldl.model.CompositeQuery;
 import openllet.query.sparqldl.model.cq.ConjunctiveQuery;
 import openllet.query.sparqldl.model.results.ResultBinding;
 
+import java.util.Collection;
 import java.util.List;
 
 public interface CNCQQuery extends CompositeQuery<ConjunctiveQuery, CNCQQuery>

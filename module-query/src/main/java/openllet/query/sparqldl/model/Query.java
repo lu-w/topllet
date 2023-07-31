@@ -1,15 +1,13 @@
 package openllet.query.sparqldl.model;
 
+import openllet.aterm.ATerm;
 import openllet.aterm.ATermAppl;
 import openllet.core.KnowledgeBase;
 import openllet.query.sparqldl.model.cq.Filter;
 import openllet.query.sparqldl.model.cq.QueryParameters;
 import openllet.query.sparqldl.model.results.ResultBinding;
 
-import java.util.EnumMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public interface Query<QueryType extends Query<QueryType>>
 {
@@ -224,4 +222,9 @@ public interface Query<QueryType extends Query<QueryType>>
      */
     @Override
     boolean equals(Object other);
+
+    /**
+     * @return A new collection of all classes or roles used in the query.
+     */
+    Collection<ATerm> getClassesAndRoles();
 }
