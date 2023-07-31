@@ -76,6 +76,8 @@ public class TCQEngine extends AbstractQueryEngine<TemporalConjunctiveQuery>
         // SECOND RUN - USE CNCQ ENGINE BASED ON RESULTS OF CQ ENGINE
         if (excludeResults == null || !excludeResults.isComplete())
         {
+            if (OpenlletOptions.TCQ_ENGINE_USE_INCREMENTAL_LOADING)
+                q.getTemporalKB().resetLoader();
             _edgeChecker.excludeBindings(excludeResults);
             _edgeChecker.setUnderapproximatingSemantics(false);
             _logger.fine("Trying full blown semantics check on DFA");

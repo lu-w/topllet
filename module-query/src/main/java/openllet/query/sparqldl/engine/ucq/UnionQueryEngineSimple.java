@@ -59,14 +59,13 @@ public class UnionQueryEngineSimple extends AbstractUnionQueryEngine
             return new CombinedQueryEngine().exec(q.getQueries().get(0));
         else if (OpenlletOptions.UCQ_ENGINE_USE_UNDERAPPROXIMATING_SEMANTICS)
         {
-            int s1 = restrictToBindings.size();
             QueryExec<ConjunctiveQuery> cqEngine = new CombinedQueryEngine();
             QueryResult disjunctAnswers = cqEngine.exec(q.getQueries().get(0));
             for (ConjunctiveQuery disjunct : q.getQueries().subList(1, q.getQueries().size()))
                 disjunctAnswers.addAll(cqEngine.exec(disjunct));
             QueryResult missingAnswers = disjunctAnswers.invert();
-            restrictToBindings.addAll(missingAnswers);
-            System.out.println(((double) (restrictToBindings.size() - s1) / restrictToBindings.getMaxSize()) * 100);
+            if (restrictToBindings != null)
+                restrictToBindings.addAll(missingAnswers);
         }
         return switch (_bindingTime)
         {

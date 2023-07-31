@@ -51,7 +51,7 @@ public class KnowledgeBaseLoader
         OWLOntology ont = loadOntology(fileName);
         OpenlletReasoner reasoner = OpenlletReasonerFactory.getInstance().createReasoner(ont);
         _timer.stop();
-        _logger.fine("Loaded " + fileName);
+        System.out.println("Loaded " + fileName);
         return reasoner.getKB();
     }
 

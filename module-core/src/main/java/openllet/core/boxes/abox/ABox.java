@@ -190,6 +190,15 @@ public interface ABox extends Logging
 	 */
 	boolean removeNode(final ATermAppl x);
 
+	/**
+	 * Remove the given node from the node map which maps names to nodes. Also removes the node from the node list.
+	 * Does not remove the node from other nodes' edge list. TODO Lukas: check if this holds up
+	 *
+	 * @param x is a node.
+	 * @return true if the removal occurred
+	 */
+	boolean removeNodeEntirely(final ATermAppl x);
+
 	boolean removePropertyValue(final ATermAppl p, final ATermAppl i1, final ATermAppl i2);
 
 	void removeType(final ATermAppl x, ATermAppl c);

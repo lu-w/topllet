@@ -20,4 +20,10 @@ public class InMemoryTemporalKnowledgeBaseImpl extends ArrayList<KnowledgeBase> 
         _logger.fine("In memory temporal knowledge base does not support difference operation");
         return null;
     }
+
+    @Override
+    public void resetLoader()
+    {
+        _logger.fine("In memory temporal knowledge base does not have to re-load");
+    }
 }

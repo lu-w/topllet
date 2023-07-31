@@ -14,4 +14,9 @@ public interface TemporalKnowledgeBase extends List<KnowledgeBase>
 
     @Nullable
     OntologyDiff getDiffToLastKB();
+
+    /**
+     * Resets the loader of this temporal knowledge base (which may trigger a re-load).
+     */
+    void resetLoader();
 }

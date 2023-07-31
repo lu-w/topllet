@@ -20,9 +20,11 @@ public class FileBasedTemporalKnowledgeBaseImpl extends ArrayList<KnowledgeBase>
     public static final Logger _logger = Log.getLogger(FileBasedTemporalKnowledgeBaseImpl.class);
 
     private final List<String> _files;
-    private final KnowledgeBaseLoader _loader;
+    private KnowledgeBaseLoader _loader;
     private KnowledgeBase _curKb;
     private int _curKbIndex = -1;
+    private final String _catalogFile;
+    private final Timer _timer;
 
     public FileBasedTemporalKnowledgeBaseImpl(Iterable<String> files)
     {
@@ -36,13 +38,10 @@ public class FileBasedTemporalKnowledgeBaseImpl extends ArrayList<KnowledgeBase>
 
     public FileBasedTemporalKnowledgeBaseImpl(Iterable<String> files, String catalogFile, Timer timer)
     {
+        _catalogFile = catalogFile;
+        _timer = timer;
         _files = IteratorUtils.toList(files.iterator());
-        if (OpenlletOptions.TCQ_ENGINE_USE_INCREMENTAL_LOADING)
-            _loader = new IncrementalKnowledgeBaseLoader(timer);
-        else
-            _loader = new KnowledgeBaseLoader(timer);
-        if (catalogFile != null)
-            _loader.addCatalog(catalogFile);
+        resetLoader();
     }
 
     @Override
@@ -138,5 +137,16 @@ public class FileBasedTemporalKnowledgeBaseImpl extends ArrayList<KnowledgeBase>
     public OntologyDiff getDiffToLastKB()
     {
         return _loader.getDiffToLastKB();
+    }
+
+    @Override
+    public void resetLoader()
+    {
+        if (OpenlletOptions.TCQ_ENGINE_USE_INCREMENTAL_LOADING)
+            _loader = new IncrementalKnowledgeBaseLoader(_timer);
+        else
+            _loader = new KnowledgeBaseLoader(_timer);
+        if (_catalogFile != null)
+            _loader.addCatalog(_catalogFile);
     }
 }

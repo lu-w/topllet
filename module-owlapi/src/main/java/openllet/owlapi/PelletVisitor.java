@@ -24,6 +24,8 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 
+import openllet.core.datatypes.exceptions.InvalidLiteralException;
+import openllet.core.datatypes.exceptions.UnrecognizedDatatypeException;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLAnnotation;
 import org.semanticweb.owlapi.model.OWLAnnotationAssertionAxiom;
@@ -1316,7 +1318,25 @@ public class PelletVisitor implements OWLObjectVisitor
 		if (_addAxioms)
 			_kb.addPropertyValue(pred, subj, obj);
 		else
+		{
 			_kb.removePropertyValue(pred, subj, obj);
+			// To not "spam" the ABox with unused literals, we also remove any literal that has no incoming edge anymore
+			if (ATermUtils.isLiteral(obj))
+				try
+				{
+					ATermAppl lit = _kb.getABox().getDatatypeReasoner().getCanonicalRepresentation(obj);
+					if (_kb.getABox().getInEdges(lit).size() == 0 && _kb.getABox().getOutEdges(lit).size() == 0)
+					{
+						boolean suc = _kb.getABox().removeNodeEntirely(lit);
+						if (!suc)
+							_logger.warning("Can not remove literal " + lit);
+					}
+				}
+				catch (InvalidLiteralException | UnrecognizedDatatypeException e)
+				{
+					_logger.warning("Can not get representation of literal " + obj);
+				}
+		}
 	}
 
 	@Override

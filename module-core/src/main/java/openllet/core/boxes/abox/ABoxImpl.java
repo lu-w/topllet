@@ -1761,6 +1761,33 @@ public class ABoxImpl implements ABox
 	}
 
 	@Override
+	public boolean removeNodeEntirely(final ATermAppl x)
+	{
+		// Removes all edges containing x if x is an individual
+		Individual ind = getIndividual(x);
+		if (ind != null)
+		{
+			for (Edge e : ind.getInEdges())
+				removePropertyValue(e.getRole().getName(), e.getFromName(), e.getToName());
+			for (Edge e : ind.getOutEdges())
+				removePropertyValue(e.getRole().getName(), e.getFromName(), e.getToName());
+			for (Node n : _nodes.values())
+			{
+				List<Edge> toRemove = new ArrayList<>();
+				for (Edge e : n.getInEdges())
+					if (ind.getTerm().equals(e.getFrom().getTerm()))
+						toRemove.add(e);
+				for (Edge e : toRemove)
+					n.removeInEdge(e);
+			}
+		}
+		// Removes x from the _nodeList and _nodes
+		boolean suc = _nodeList.remove(x);
+		suc &= removeNode(x);
+		return suc;
+	}
+
+	@Override
 	public boolean removePropertyValue(final ATermAppl p, final ATermAppl i1, final ATermAppl i2)
 	{
 		if (null == p || null == i1 || null == i2)

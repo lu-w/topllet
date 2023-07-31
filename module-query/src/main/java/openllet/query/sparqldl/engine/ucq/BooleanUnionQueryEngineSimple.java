@@ -73,16 +73,12 @@ public class BooleanUnionQueryEngineSimple extends AbstractBooleanUnionQueryEngi
     @Override
     protected boolean execBooleanABoxQuery(UnionQuery q) throws IOException, InterruptedException
     {
-        // 0. ONLY USE BOOLEAN UCQ ENGINE IF REALLY REQUIRED
-        if (q.getQueries().size() == 1)
-            return !new CombinedQueryEngine().exec(q.getQueries().get(0)).isEmpty();
-
-        // 1. PRELIMINARY CONSISTENCY CHECK
-        q.getKB().ensureConsistency();
-
-        // 2. TRY TO USE STANDARD CQ ENGINE
+        // 1. TRY TO USE STANDARD CQ ENGINE
         if (OpenlletOptions.UCQ_ENGINE_USE_STANDARD_CQ_ENGINE_IF_POSSIBLE && q.getQueries().size() == 1)
             return execUnderapproximatingSemanticsBoolean(q);
+
+        // 2. PRELIMINARY CONSISTENCY CHECK
+        q.getKB().ensureConsistency();
 
         // 3. TRY UNDER-APPROXIMATING SEMANTICS
         if (OpenlletOptions.UCQ_ENGINE_USE_UNDERAPPROXIMATING_SEMANTICS)
