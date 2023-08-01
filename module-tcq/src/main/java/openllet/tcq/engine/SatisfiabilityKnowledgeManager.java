@@ -74,7 +74,7 @@ public class SatisfiabilityKnowledgeManager
         }
     }
 
-    private SubQuerySelectionStrategy _strategy = SubQuerySelectionStrategy.AMAP;
+    private SubQuerySelectionStrategy _strategy = SubQuerySelectionStrategy.LIGHTWEIGHT;
     private final TemporalConjunctiveQuery _tcq;
     private final List<SatisfiabilityKnowledge> _knowledges = new ArrayList<>();
     private final AbstractCNCQQueryEngine _cncqEngine = new CNCQQueryEngineSimple();
