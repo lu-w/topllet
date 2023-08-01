@@ -160,9 +160,18 @@ public class SatisfiabilityKnowledge
         {
             boolean transferable = true;
             for (OWLAxiom ax : diff.getAdditions())
-                transferable &= Collections.disjoint(_relevantTBoxClassesAndRoles, getClassesAndRolesFromAxiom(ax));
-            for (OWLAxiom ax : diff.getDeletions())
-                transferable &= Collections.disjoint(_relevantTBoxClassesAndRoles, getClassesAndRolesFromAxiom(ax));
+            {
+                transferable = Collections.disjoint(_relevantTBoxClassesAndRoles, getClassesAndRolesFromAxiom(ax));
+                if (!transferable)
+                    break;
+            }
+            if (transferable)
+                for (OWLAxiom ax : diff.getDeletions())
+                {
+                    transferable = Collections.disjoint(_relevantTBoxClassesAndRoles, getClassesAndRolesFromAxiom(ax));
+                    if (!transferable)
+                        break;
+                }
             return transferable;
         }
     }

@@ -1,7 +1,6 @@
 package openllet.tcq.model.kb;
 
 import openllet.aterm.ATerm;
-import openllet.aterm.ATermAppl;
 import openllet.core.KnowledgeBase;
 import openllet.core.OpenlletOptions;
 import openllet.core.utils.Timer;
@@ -10,9 +9,11 @@ import openllet.modularity.OntologyDiff;
 import openllet.shared.tools.Log;
 import openllet.tcq.model.kb.loader.IncrementalKnowledgeBaseLoader;
 import openllet.tcq.model.kb.loader.KnowledgeBaseLoader;
+import org.jgrapht.graph.DefaultDirectedGraph;
 import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.graph.DefaultUndirectedGraph;
 import org.jgrapht.alg.connectivity.ConnectivityInspector;
+import org.jgrapht.traverse.BreadthFirstIterator;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 
 import javax.annotation.Nonnull;
@@ -31,7 +32,7 @@ public class FileBasedTemporalKnowledgeBaseImpl extends ArrayList<KnowledgeBase>
     private int _curKbIndex = -1;
     private final String _catalogFile;
     private final Timer _timer;
-    private DefaultUndirectedGraph<ATerm, DefaultEdge> _axiomGraph;
+    private DefaultDirectedGraph<ATerm, DefaultEdge> _axiomGraph;
 
     public FileBasedTemporalKnowledgeBaseImpl(Iterable<String> files)
     {
@@ -159,14 +160,14 @@ public class FileBasedTemporalKnowledgeBaseImpl extends ArrayList<KnowledgeBase>
 
     @Nonnull
     @Override
-    public DefaultUndirectedGraph<ATerm, DefaultEdge> computeAxiomGraph()
+    public DefaultDirectedGraph<ATerm, DefaultEdge> computeAxiomGraph()
     {
         if (_axiomGraph == null)
         {
             if (size() > 0)
                 _axiomGraph = get(0).getTBox().computeAxiomGraph();
             else
-                _axiomGraph = new DefaultUndirectedGraph<>(DefaultEdge.class);
+                _axiomGraph = new DefaultDirectedGraph<>(DefaultEdge.class);
         }
         return _axiomGraph;
     }
@@ -174,12 +175,27 @@ public class FileBasedTemporalKnowledgeBaseImpl extends ArrayList<KnowledgeBase>
     @Override
     public Collection<ATerm> getConnectedClassesAndRolesInAxiomGraph(Collection<ATerm> classesAndRoles)
     {
-        ConnectivityInspector<ATerm, DefaultEdge> conInspector = new ConnectivityInspector<>(computeAxiomGraph());
+        computeAxiomGraph();
         Collection<ATerm> connected = new HashSet<>();
         for (ATerm classOrRole : classesAndRoles)
             // Classes or roles not contain in the graph are not used in any axiom, therefore we just ignore them.
             if (_axiomGraph.containsVertex(classOrRole))
-                connected.addAll(conInspector.connectedSetOf(classOrRole));
+                for (ATerm vertex : _axiomGraph.vertexSet())
+                {
+                    Collection<ATerm> reach = computeReachableSetDirected(_axiomGraph, vertex);
+                    if (reach.contains(classOrRole))
+                        connected.add(vertex);
+                }
         return connected;
+    }
+
+    protected static Collection<ATerm> computeReachableSetDirected(DefaultDirectedGraph<ATerm, DefaultEdge> graph, ATerm node)
+    {
+        Collection<ATerm> reach = new HashSet<>();
+        BreadthFirstIterator<ATerm, DefaultEdge> it = new BreadthFirstIterator<>(graph, node);
+        reach.add(node);
+        while (it.hasNext())
+            reach.add(it.next());
+        return reach;
     }
 }

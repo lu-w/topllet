@@ -38,8 +38,8 @@ import java.util.stream.Stream;
 import openllet.aterm.ATerm;
 import openllet.aterm.ATermAppl;
 import openllet.core.boxes.tbox.impl.Unfolding;
+import org.jgrapht.graph.DefaultDirectedGraph;
 import org.jgrapht.graph.DefaultEdge;
-import org.jgrapht.graph.DefaultUndirectedGraph;
 
 public interface TBox
 {
@@ -155,5 +155,5 @@ public interface TBox
 	 */
 	void prepare();
 
-	DefaultUndirectedGraph<ATerm, DefaultEdge> computeAxiomGraph();
+	DefaultDirectedGraph<ATerm, DefaultEdge> computeAxiomGraph();
 }

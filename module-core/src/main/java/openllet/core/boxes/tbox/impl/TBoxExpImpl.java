@@ -34,6 +34,7 @@ import openllet.core.utils.CollectionUtils;
 import openllet.core.utils.MultiMapUtils;
 import openllet.core.utils.iterator.MultiIterator;
 import openllet.shared.tools.Log;
+import org.jgrapht.graph.DefaultDirectedGraph;
 import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.graph.DefaultUndirectedGraph;
 
@@ -551,32 +552,55 @@ public class TBoxExpImpl implements TBox
 	}
 
 	@Override
-	public DefaultUndirectedGraph<ATerm, DefaultEdge> computeAxiomGraph()
+	public DefaultDirectedGraph<ATerm, DefaultEdge> computeAxiomGraph()
 	{
 		return computeAxiomGraph(_tboxAssertedAxioms);
 	}
 
-	public static DefaultUndirectedGraph<ATerm, DefaultEdge> computeAxiomGraph(Collection<ATermAppl> tboxAssertedAxioms)
+	public static DefaultDirectedGraph<ATerm, DefaultEdge> computeAxiomGraph(Collection<ATermAppl> tboxAssertedAxioms)
 	{
-		DefaultUndirectedGraph<ATerm, DefaultEdge> graph = new DefaultUndirectedGraph<>(DefaultEdge.class);
+		DefaultDirectedGraph<ATerm, DefaultEdge> graph = new DefaultDirectedGraph<>(DefaultEdge.class);
 		for (ATermAppl axiom : tboxAssertedAxioms)
 		{
-			Collection<ATermAppl> primitives = new HashSet<>();
-			for (ATerm arg : axiom.getArguments())
-				if (arg instanceof ATermAppl argAppl)
-					primitives.addAll(ATermUtils.findPrimitives(argAppl, true));
-			for (ATerm arg1 : primitives)
+			// Non-recursive subsumption relation -> directed edge
+			if (axiom.getAFun().equals(ATermUtils.SUBFUN) && axiom.getArgument(0).getChildCount() == 0)
 			{
+				ATerm arg1 = axiom.getArgument(0);
+				ATerm arg2 = axiom.getArgument(1);
 				graph.addVertex(arg1);
-				for (ATerm arg2 : primitives)
+				graph.addVertex(arg2);
+				// TODO find primitives in arg2; add directed edge from arg1 to all prim(arg2) and maybe undir. between all arg2??
+				graph.addEdge(arg1, arg2);
+			}
+			// Else, undirected edge
+			else
+			{
+				Collection<ATermAppl> primitives = findPrimitives(axiom);
+				for (ATerm arg1 : primitives)
 				{
-					graph.addVertex(arg2);
-					if (!arg1.equals(arg2))
-						graph.addEdge(arg1, arg2);
+					graph.addVertex(arg1);
+					for (ATerm arg2 : primitives)
+					{
+						graph.addVertex(arg2);
+						if (!arg1.equals(arg2))
+						{
+							graph.addEdge(arg1, arg2);
+							graph.addEdge(arg2, arg1);
+						}
+					}
 				}
 			}
 		}
 		return graph;
+	}
+
+	private static Collection<ATermAppl> findPrimitives(ATermAppl axiom)
+	{
+		Collection<ATermAppl> primitives = new HashSet<>();
+		for (ATerm arg : axiom.getArguments())
+			if (arg instanceof ATermAppl argAppl)
+				primitives.addAll(ATermUtils.findPrimitives(argAppl, true));
+		return primitives;
 	}
 
 	@Override

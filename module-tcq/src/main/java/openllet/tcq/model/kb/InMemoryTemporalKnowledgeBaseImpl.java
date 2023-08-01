@@ -5,6 +5,7 @@ import openllet.aterm.ATermAppl;
 import openllet.core.KnowledgeBase;
 import openllet.modularity.OntologyDiff;
 import openllet.shared.tools.Log;
+import org.jgrapht.graph.DefaultDirectedGraph;
 import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.graph.DefaultUndirectedGraph;
 
@@ -35,7 +36,7 @@ public class InMemoryTemporalKnowledgeBaseImpl extends ArrayList<KnowledgeBase> 
 
     @Nullable
     @Override
-    public DefaultUndirectedGraph<ATerm, DefaultEdge> computeAxiomGraph()
+    public DefaultDirectedGraph<ATerm, DefaultEdge> computeAxiomGraph()
     {
         _logger.fine("In memory temporal knowledge does not support incremental temporal querying");
         return null;

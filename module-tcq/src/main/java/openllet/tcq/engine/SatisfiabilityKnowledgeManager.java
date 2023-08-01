@@ -1,6 +1,7 @@
 package openllet.tcq.engine;
 
 import openllet.core.KnowledgeBase;
+import openllet.core.OpenlletOptions;
 import openllet.core.utils.Bool;
 import openllet.query.sparqldl.engine.QueryExec;
 import openllet.query.sparqldl.engine.cncq.AbstractCNCQQueryEngine;
@@ -121,7 +122,7 @@ public class SatisfiabilityKnowledgeManager
     public SatisfiabilityKnowledge transferAndGetKnowledgeOnQuery(CNCQQuery query, int timePoint)
     {
         SatisfiabilityKnowledge knowledge = getKnowledgeOnQuery(query);
-        if (knowledge != null)
+        if (OpenlletOptions.TCQ_ENGINE_TEMPORAL_CNCQ_TRANSFER && knowledge != null)
             knowledge.transferKnowledgeFromPreviousStepTo(timePoint);
         return knowledge;
     }

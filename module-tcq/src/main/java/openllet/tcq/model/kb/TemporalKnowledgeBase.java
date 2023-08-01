@@ -3,6 +3,7 @@ package openllet.tcq.model.kb;
 import openllet.aterm.ATerm;
 import openllet.core.KnowledgeBase;
 import openllet.modularity.OntologyDiff;
+import org.jgrapht.graph.DefaultDirectedGraph;
 import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.graph.DefaultUndirectedGraph;
 
@@ -26,7 +27,7 @@ public interface TemporalKnowledgeBase extends List<KnowledgeBase>
     void resetLoader();
 
     @Nullable
-    DefaultUndirectedGraph<ATerm, DefaultEdge> computeAxiomGraph();
+    DefaultDirectedGraph<ATerm, DefaultEdge> computeAxiomGraph();
 
     @Nullable
     Collection<ATerm> getConnectedClassesAndRolesInAxiomGraph(Collection<ATerm> classesAndRoles);
