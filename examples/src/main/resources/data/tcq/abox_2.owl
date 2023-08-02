@@ -1,12 +1,12 @@
 <?xml version="1.0"?>
-<rdf:RDF xmlns="http://www.semanticweb.org/mtcq/example/2#"
-     xml:base="http://www.semanticweb.org/mtcq/example/2"
+<rdf:RDF xmlns="http://www.semanticweb.org/mtcq/example/abox#"
+     xml:base="http://www.semanticweb.org/mtcq/example/abox"
      xmlns:owl="http://www.w3.org/2002/07/owl#"
      xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
      xmlns:xml="http://www.w3.org/XML/1998/namespace"
      xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
      xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#">
-    <owl:Ontology rdf:about="http://www.semanticweb.org/mtcq/example/2">
+    <owl:Ontology rdf:about="http://www.semanticweb.org/mtcq/example/abox">
         <owl:imports rdf:resource="http://www.semanticweb.org/mtcq/example"/>
     </owl:Ontology>
     
@@ -25,7 +25,7 @@
 
     <!-- http://www.semanticweb.org/mtcq/example/2#a -->
 
-    <owl:NamedIndividual rdf:about="http://www.semanticweb.org/mtcq/example/2#a">
+    <owl:NamedIndividual rdf:about="http://www.semanticweb.org/mtcq/example/abox#a">
         <rdf:type rdf:resource="http://www.semanticweb.org/mtcq/example#A"/>
     </owl:NamedIndividual>
     
@@ -33,7 +33,7 @@
 
     <!-- http://www.semanticweb.org/mtcq/example/2#b -->
 
-    <owl:NamedIndividual rdf:about="http://www.semanticweb.org/mtcq/example/2#b">
+    <owl:NamedIndividual rdf:about="http://www.semanticweb.org/mtcq/example/abox#b">
         <rdf:type rdf:resource="http://www.semanticweb.org/mtcq/example#C"/>
     </owl:NamedIndividual>
 </rdf:RDF>
