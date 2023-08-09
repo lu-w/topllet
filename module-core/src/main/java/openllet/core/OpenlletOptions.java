@@ -478,7 +478,7 @@ public class OpenlletOptions
 	 * Allows the TCQ engine to transfer (un)satisfiability results over time points, if possible, without re-checking
 	 * the CNCQ.
 	 */
-	public static boolean TCQ_ENGINE_TEMPORAL_CNCQ_TRANSFER = true;
+	public static boolean TCQ_ENGINE_TEMPORAL_CNCQ_TRANSFER = false;
 
 	static
 	{

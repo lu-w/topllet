@@ -1230,7 +1230,7 @@ public class Individual extends Node implements CachedNode
 		final boolean removed = _outEdges.removeEdge(edge);
 
 		if (!removed)
-			throw new InternalReasonerException("Trying to remove a non-existing edge " + edge);
+			_logger.warning("Trying to remove a non-existing edge " + edge);
 
 		return true;
 	}
