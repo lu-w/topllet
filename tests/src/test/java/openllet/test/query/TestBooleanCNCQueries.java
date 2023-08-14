@@ -222,8 +222,6 @@ public class TestBooleanCNCQueries extends AbstractQueryTest
     @Test
     public void testUndistVarOnlyInObjectProperty()
     {
-        // PropertyValue(?_undist_y0, listedCourse, Publication3) , Type(UndergraduateStudent416, Chair) , Type(?_undist_y0, GraduateCourse).
-        // TODO Lukas: test case for undist var at pos. 1 of a property
         individuals(_a, _b);
         classes(_A, _B, _C);
         objectProperties(_r);

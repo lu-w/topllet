@@ -306,7 +306,6 @@ public class OpenlletTemporalQuery extends OpenlletCmdApp
             {
                 final ATermAppl result = binding.getValue(resultVar);
                 // format the result
-                // TODO Lukas: consider partial results here correctly...
                 if (result != null)
                 {
                     String bindingString = result.toString();
@@ -329,7 +328,7 @@ public class OpenlletTemporalQuery extends OpenlletCmdApp
 
     private void printXMLQueryResults()
     {
-        // TODO
+        // TODO implement XML query result for openllet-tcq
         System.out.println("XML query result output not implemented yet");
     }
 
@@ -342,6 +341,6 @@ public class OpenlletTemporalQuery extends OpenlletCmdApp
             System.out.println("*/ ");
         }
         System.out.println("JSON query result output not implemented yet");
-        // TODO
+        // TODO implement JSON query result for openllet-tcq
     }
 }

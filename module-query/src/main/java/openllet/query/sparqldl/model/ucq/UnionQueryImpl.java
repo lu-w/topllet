@@ -131,7 +131,6 @@ public class UnionQueryImpl extends AbstractCompositeQuery<ConjunctiveQuery, Uni
     @Override
     public CNFQuery toCNF()
     {
-        // TODO Lukas: Check if this is query is already in CNF, if so, return a copy of this
         List<DisjunctiveQuery> cnf = toCNFRec(this);
         CNFQuery cnfQuery = new CNFQueryImpl(this.getKB(), this.isDistinct());
         cnfQuery.setQueries(cnf);
@@ -164,7 +163,6 @@ public class UnionQueryImpl extends AbstractCompositeQuery<ConjunctiveQuery, Uni
     @Override
     public UnionQuery rollUp(boolean stopRollingOnDistVars)
     {
-        // TODO Lukas: If |atoms| == 1, do nothing here and return a copy of this
         // We can not roll up if we have nothing to roll up to.
         assert(!getDistVars().isEmpty() || !getConstants().isEmpty() || !getUndistVars().isEmpty());
         UnionQuery rolledUpUnionQuery = new UnionQueryImpl(this);

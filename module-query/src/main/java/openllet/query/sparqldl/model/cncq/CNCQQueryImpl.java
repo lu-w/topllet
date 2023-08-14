@@ -35,7 +35,7 @@ public class CNCQQueryImpl extends AbstractCompositeQuery<ConjunctiveQuery, CNCQ
     @Override
     public List<CNCQQuery> split()
     {
-        // TODO Lukas: implement - if splitting makes sense for CNCQQueries
+        // TODO: implement splitting for CNCQQueries and adapt CNCQEngine to handle splitting queries
         return List.of(this);
     }
 

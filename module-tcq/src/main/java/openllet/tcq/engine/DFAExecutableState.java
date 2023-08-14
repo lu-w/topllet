@@ -175,7 +175,8 @@ public class DFAExecutableState
                 Map<Bool, QueryResult> edgeResult = _edgeChecker.checkEdge(edge, _timePoint, _kb,
                         restrictSatToBindings);
                 edgeResults.put(edge, edgeResult);
-                // TODO: isEdgeCompletelyChecked not absolute but wrt. sat bindings of current state (no need to check more) (does not work with underapprox. semantics mode) - is it worth the cost?
+                // TODO: isEdgeCompletelyChecked not absolute but wrt. sat bindings of current state
+                //  (no need to check more, but does not work with underapprox. semantics mode) - is it worth the cost?
                 fullyCheckedAllEdges &= _edgeChecker.isEdgeCompletelyChecked(edge, _timePoint);
                 DFAExecutableState newState = new DFAExecutableState(_dfa, _tcq, edge.getToState(), _timePoint + 1,
                         _edgeChecker, _timer);

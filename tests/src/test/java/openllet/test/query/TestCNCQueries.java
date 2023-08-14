@@ -365,6 +365,4 @@ public class TestCNCQueries extends AbstractQueryTest
             }
         );
     }
-
-    // TODO Lukas: Add query tests based on the CNCQProfiler's random query test generator
 }

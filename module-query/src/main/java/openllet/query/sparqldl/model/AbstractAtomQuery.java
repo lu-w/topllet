@@ -349,7 +349,7 @@ public abstract class AbstractAtomQuery<QueryType extends AtomQuery<QueryType>> 
                 }
 
                 sb.append(indent);
-                sb.append(a.toString()); // TODO qNameProvider
+                sb.append(a.toString());
             }
             if (!"".equals(getQueryPrefix()))
                 sb.append(")");

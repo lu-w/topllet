@@ -167,7 +167,7 @@ public class TestBooleanUnionQueries extends AbstractQueryTest
         _kb.addType(_a, _A);
         _kb.addType(_b, _B);
 
-        // _kb.addSubClass(_A, or(_B, _C)); // TODO Lukas: this leads to SEVERE warning: Invalid _clash dependency
+        // _kb.addSubClass(_A, or(_B, _C)); // TODO: this leads to SEVERE warning: Invalid _clash dependency
 
         UnionQuery ucq1 = unionQuery(query(TypeAtom(x, _A)),
                                      query(TypeAtom(x, _B)));

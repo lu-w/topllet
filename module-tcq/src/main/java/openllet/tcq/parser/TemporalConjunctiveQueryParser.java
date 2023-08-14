@@ -23,7 +23,6 @@ public class TemporalConjunctiveQueryParser
 
     static public TemporalConjunctiveQuery parse(String input, TemporalKnowledgeBase kb) throws ParseException
     {
-        // TODO handle # in comments, e.g., # c1 # c2
         // Removes comments
         Pattern commentLine = Pattern.compile("(?m)(^#.*$)");
         Matcher commentLineMatcher = commentLine.matcher(input);

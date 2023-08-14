@@ -126,7 +126,6 @@ public class SatisfiabilityKnowledge
             OntologyDiff diff = _tcq.getTemporalKB().getDiffToLastKB();
             if (isSatisfiabilityTransferableUnderDifference(diff))
             {
-                // TODO is copy() needed?
                 informAboutSatisfiability(satKnowledge, true, timePoint);
                 informAboutSatisfiability(unsatKnowledge, false, timePoint);
             }

@@ -141,8 +141,6 @@ public class SemiBooleanCNCQEngineSimple extends AbstractSemiBooleanCNCQEngine
                 res = _ucqEngine.exec(ucq, excludeBindings, restrictToBindings);
                 if (res instanceof MultiQueryResults mqr)
                     res = mqr.toQueryResultImpl(query);
-                // TODO do res.setQuery(query) - because the UCQ Engine will set the UCQ as the result's query.
-                //  this is rather cosmetic...
             }
             res = res.invert();
             if (!query.getResultVars().isEmpty())

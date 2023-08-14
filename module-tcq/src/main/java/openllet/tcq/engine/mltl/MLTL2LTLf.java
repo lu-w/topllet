@@ -8,8 +8,8 @@ public class MLTL2LTLf
 {
     static public String convert(String mltlFormula) throws InterruptedException, IOException, ParseException
     {
+        final String command = "mltl2ltl";
         String ltlfFormula = "";
-        String command = "mltl2ltl";
         String error = "";
 
         try
@@ -24,7 +24,7 @@ public class MLTL2LTLf
             throw new IOException("Can not execute " + command + " - is the '" + command +
                     "' executable in your PATH?");
         }
-        if (error.length() > 0)
+        if (!error.isEmpty())
         {
             String errorMessage = error.replace("[\n\r]", " ");
             if (error.contains("lark.exceptions.Unexpected"))

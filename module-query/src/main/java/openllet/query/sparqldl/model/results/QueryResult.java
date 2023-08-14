@@ -81,7 +81,16 @@ public interface QueryResult extends Iterable<ResultBinding>
 	 */
 	int size();
 
-	// TODO
+	/**
+	 * Constructs a new QueryResult which is the same as this query result, but is restricted to the given list of
+	 * variables. If this query result contains all bindings that are fully representative of a partial binding w.r.t.
+	 * the given variables, it will be included in the result. For example, if we have individuals a and b, bindings
+	 * x->a, y->a and x->a, y->b, and we restrict to x, the resulting query result will have x->a as its binding.
+	 * Note: This can *not* be used to expand to a list of variables - only to remove from the current variables.
+	 *
+	 * @param vars The variables to restrict this query result to.
+	 * @return A new, copied QueryResult with the variable restriction applied.
+	 */
 	QueryResult restrictToVariables(List<ATermAppl> vars);
 
 	/**

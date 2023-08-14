@@ -33,7 +33,7 @@ public class MLTL2DFA
         File file = File.createTempFile("mltl2dfa-", "");
         String tmpFile = file.getPath();
         file.delete();
-        String command = "lydia";
+        final String command = "lydia";
         String error = "";
         String[] commandString = new String[]{command, "-l", "ltlf", "-i", ltlfFormula, "-p", "-g", tmpFile};
         try
@@ -47,7 +47,7 @@ public class MLTL2DFA
             throw new IOException("Can not execute " + command + " - is the '" + command +
                     "' executable in your PATH?");
         }
-        if (error.length() > 0)
+        if (!error.isEmpty())
             throw new ParseException("Lydia error: " + error.replaceAll("[\r\n]", " "));
 
         tmpFile += ".dot";

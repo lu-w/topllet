@@ -1495,8 +1495,6 @@ public class ABoxImpl implements ABox
 
 		final boolean consistent = !abox.isClosed();
 
-		// TODO Lukas: we probably can not use caching for |ics| > 1 since we do not know *which* axiom was satisfied
-		//  but maybe we can do caching for the whole list... but is this actually useful?
 		if (ics.size() == 1)
 			if (x != null && ics.get(0).second != null && cacheModel)
 				cache(abox.getIndividual(x), ics.get(0).second, consistent);
@@ -1524,7 +1522,8 @@ public class ABoxImpl implements ABox
 			_logger.fine("Clash: " + abox.getClash().detailedString());
 			if (_doExplanation && OpenlletOptions.USE_TRACING)
 			{
-				if (ics.size() == 1) // TODO Lukas: can / should we identify missing axioms sets for |ics| > 1?
+				// Explanations currently not supported for more than one individual-class combination.
+				if (ics.size() == 1)
 				{
 					Collection<ATermAppl> individuals = ics.get(0).first;
 					if (conceptSatisfiability)

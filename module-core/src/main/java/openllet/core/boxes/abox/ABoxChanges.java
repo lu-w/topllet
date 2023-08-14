@@ -106,8 +106,6 @@ public class ABoxChanges
         }
     }
 
-    // TODO Lukas: may want to think about using C subseteq TOP instead of creating fresh individuals. However, this
-    //  requires rolling up the positive part of the CNCQ.
     public static class FreshIndChange extends ABoxChange
     {
         private ATermAppl _ind = null;

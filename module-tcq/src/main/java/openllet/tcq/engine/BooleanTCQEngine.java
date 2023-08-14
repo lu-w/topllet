@@ -58,7 +58,7 @@ public class BooleanTCQEngine extends AbstractBooleanQueryEngine<TemporalConjunc
             states.add(initState);
         _logger.finer("Starting in states " + states);
         int numLetter = 0;
-        if (states.size() > 0)
+        if (!states.isEmpty())
         {
             boolean trappedInAcceptingSink = false;
             Set<Integer> eventuallyReachableStates = new HashSet<>();
@@ -112,8 +112,6 @@ public class BooleanTCQEngine extends AbstractBooleanQueryEngine<TemporalConjunc
                     // if we are not in a sink and have some CNCQ to check, we find the successor states
                     for (Edge edge : edges)
                     {
-                        // TODO find good order in which new states are examined -
-                        //  trivial ones first (ie. those that are sinks)
                         _logger.finer("\t\tChecking edge " + edge + " to state " + edge.getToState());
                         if (!newStates.contains(edge.getToState()))
                         {

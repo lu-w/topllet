@@ -15,8 +15,6 @@ public interface TemporalKnowledgeBase extends List<KnowledgeBase>
 {
     // Remark: right now, we require all individuals to be present already in the first knowledge base (otherwise, the
     // query may wrongly interpret atom arguments as answer variables and not as individuals.
-    // TODO may add a getIndividuals() here
-    // TODO check that all KBs have the same TBox when loading
 
     @Nullable
     OntologyDiff getDiffToLastKB();
