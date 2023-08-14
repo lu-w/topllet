@@ -3,7 +3,7 @@
 ## Openllet Temporal Query
 
 This is a fork of Openllet v2.6.6 containing support for answering temporal queries.
-For more information on the Temporal Query component, navigate to the `module-tcq` folder which contains a `README.md`.
+For more information on the Temporal Query component, please refer to [this readme](module-tcq/README.md).
 For example, information on the input languages is located there.
 
 ## Installation
