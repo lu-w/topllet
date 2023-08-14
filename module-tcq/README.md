@@ -58,6 +58,9 @@ Answer variables are preceeded by a `?`.
 If you want to refer to a certain individual, just use the individual's name (`t:a` in the example).
 If you specify a non-`?`-preceeded, non-individual variable in some query atom, it is interpreted as an existentially quantified (also called undistinguished) variable.
 
+You can add comments by `# my comment`.
+For inline comments, note that the `#` needs to be succeeded by a whitespace (i.e., `#mycomment` is not a valid comment).
+
 ### Temporal Knowledge Bases
 
 Temporal knowledge bases are modeled simply as a list of standard OWL2 files.
