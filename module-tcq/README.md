@@ -93,5 +93,5 @@ Even more granular control can be applied by setting a `logging.properties`, as 
 
 ## Algorithms
 
-If you wish to comprehend the implementation, the `TCQEngine` class in `src/main/java/openllet/tcq/engine` is a good starting point.
+If you wish to comprehend the implementation, the `TCQEngine` class in [`src/main/java/openllet/tcq/engine/TCQEngine.java`](src/main/java/openllet/tcq/engine/TCQEngine.java) is a good starting point.
 From there, the relevant steps are documented.
