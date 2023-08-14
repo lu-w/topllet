@@ -71,6 +71,8 @@ abox_1.owl
 abox_2.owl
 ```
 
+Any line starting with `#` is ignored.
+
 We assume a certain shape of the listed OWL2 files:
 
 1. each OWL2 file contains exactly the same individuals with the same names (and ontology IRI for those),
