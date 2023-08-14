@@ -51,12 +51,12 @@ Firstly, it allows for additional operators bounded by non-negative integers `a`
 
 Secondly, instead of Boolean formulae over atomic propositions, you can specify Conjunctive Queries (CQs).
 An example CQ is `(t:A(?x) ^ t:C(?y) ^ t:A(t:a))`.
-CQs always need to be enclosed by brackets.
-You can use all concepts and roles existing in the given ontology, using the appropriate prefix.
+CQs always need to be enclosed by brackets and the single conjuncts (called query atoms) are joined by the `^` operator.
+For the query atoms, you can use all concepts and roles existing in the given ontology, using the appropriate prefix, preceeded by a bracketed name (in case of a concept) or a tuple of names (in case of a role).
+These names are either answer variables, individuals, or existentially quantified variables.
 Answer variables are preceeded by a `?`.
 If you want to refer to a certain individual, just use the individual's name (`t:a` in the example).
-If you specify a non-`?`-preceeded, non-individual variable in some query atom, 
-it is interpreted as an existentially quantified (also called undistinguished) variable.
+If you specify a non-`?`-preceeded, non-individual variable in some query atom, it is interpreted as an existentially quantified (also called undistinguished) variable.
 
 ### Temporal Knowledge Bases
 
