@@ -1,13 +1,11 @@
 package openllet.tcq.model.query;
 
-import openllet.core.KnowledgeBase;
 import openllet.query.sparqldl.model.CompositeQuery;
 import openllet.query.sparqldl.model.cq.ConjunctiveQuery;
 import openllet.tcq.model.kb.TemporalKnowledgeBase;
 
 import java.util.Collection;
 import java.util.Map;
-import java.util.Set;
 
 public interface TemporalConjunctiveQuery extends CompositeQuery<ConjunctiveQuery, TemporalConjunctiveQuery>
 {

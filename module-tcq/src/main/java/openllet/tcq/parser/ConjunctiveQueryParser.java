@@ -11,10 +11,22 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.logging.Logger;
 
+/**
+ * A parser for simple conjunctive queries.
+ * Allows for classes and roles, as well as individuals, undistinguished and answer variables.
+ */
 public class ConjunctiveQueryParser
 {
     public static final Logger _logger = Log.getLogger(ConjunctiveQueryParser.class);
 
+    /**
+     * Helper method to convert a string to either an individual, a answer variable, or a undistinguished variable.
+     * Adds the appropriate result to the given CQ.
+     * @param indString String representing the name of the given variable / individual.
+     * @param cq The CQ to add the variable / individual to.
+     * @return The ATermAppl representing the variable / individual.
+     * @throws ParseException If conflicting information on variables / individuals is present in the CQ.
+     */
     static private ATermAppl toIndividual(String indString, ConjunctiveQuery cq) throws ParseException
     {
         indString = indString.trim();
@@ -39,9 +51,16 @@ public class ConjunctiveQueryParser
         return ind;
     }
 
+    /**
+     * Parses the given CQ string to an Openllet ConjunctiveQuery a la "C(a) ^ r(a,?b)"
+     * @param input The sting to parse.
+     * @param kb The knowledge base containing roles and concepts used in the CQ.
+     * @return The parsed CQ.
+     * @throws ParseException If conflicting information on variables / individuals is present in the CQ, or the string
+     * does not adhere to a valid CQ syntax.
+     */
     static public ConjunctiveQuery parse(String input, KnowledgeBase kb) throws ParseException
     {
-        // Parsing of CNCQ a la "C(a) ^ r(a,b)"
         ConjunctiveQuery cq = new ConjunctiveQueryImpl(kb, true);
         for (String atom : input.split("\\^"))
         {

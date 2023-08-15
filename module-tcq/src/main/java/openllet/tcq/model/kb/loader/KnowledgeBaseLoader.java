@@ -19,6 +19,9 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.logging.Logger;
 
+/**
+ * Standard loader to load knowledge bases from files. Allows to set Oasis XML catalogs.
+ */
 public class KnowledgeBaseLoader
 {
     public static final Logger _logger = Log.getLogger(KnowledgeBaseLoader.class);

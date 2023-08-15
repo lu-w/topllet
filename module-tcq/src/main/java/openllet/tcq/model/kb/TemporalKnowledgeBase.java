@@ -5,17 +5,23 @@ import openllet.core.KnowledgeBase;
 import openllet.modularity.OntologyDiff;
 import org.jgrapht.graph.DefaultDirectedGraph;
 import org.jgrapht.graph.DefaultEdge;
-import org.jgrapht.graph.DefaultUndirectedGraph;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.List;
 
+/**
+ * A temporal knowledge base is just a list of atemporal knowledge bases that follow some assumptions:
+ * 1. each KB contains exactly the same individuals with the same names (and ontology IRI for those),
+ * 2. all of these individuals are already present in the first KB, and
+ * 3. all KBs in the list import exactly the same ontologies (especially, the shared TBox).
+ * If these assumptions are not met, correctness can not be guaranteed.
+ */
 public interface TemporalKnowledgeBase extends List<KnowledgeBase>
 {
-    // Remark: right now, we require all individuals to be present already in the first knowledge base (otherwise, the
-    // query may wrongly interpret atom arguments as answer variables and not as individuals.
-
+    /**
+     * @return The difference from the last accessed KB to the KB accessed before that.
+     */
     @Nullable
     OntologyDiff getDiffToLastKB();
 

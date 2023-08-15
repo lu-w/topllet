@@ -11,8 +11,6 @@ import openllet.tcq.model.kb.loader.IncrementalKnowledgeBaseLoader;
 import openllet.tcq.model.kb.loader.KnowledgeBaseLoader;
 import org.jgrapht.graph.DefaultDirectedGraph;
 import org.jgrapht.graph.DefaultEdge;
-import org.jgrapht.graph.DefaultUndirectedGraph;
-import org.jgrapht.alg.connectivity.ConnectivityInspector;
 import org.jgrapht.traverse.BreadthFirstIterator;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 
@@ -22,6 +20,12 @@ import java.io.FileNotFoundException;
 import java.util.*;
 import java.util.logging.Logger;
 
+/**
+ * An implementation of the TemporalKnowledgeBase based on files. This means that on-demand the current KB is loaded
+ * from a file. Once a new KB is loaded, the old one is discarded, keeping only on KB at a time in memory.
+ * This also implies that some functionality is not supported by this kind of implementation.
+ * A file based TKB uses a loader to load the KBs from the files.
+ */
 public class FileBasedTemporalKnowledgeBaseImpl extends ArrayList<KnowledgeBase> implements TemporalKnowledgeBase
 {
     public static final Logger _logger = Log.getLogger(FileBasedTemporalKnowledgeBaseImpl.class);

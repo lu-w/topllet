@@ -9,7 +9,6 @@ import openllet.shared.tools.Log;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyChange;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
-import org.semanticweb.owlapi.model.OWLOntologyStorageException;
 
 import javax.annotation.Nullable;
 import java.io.*;
@@ -17,6 +16,10 @@ import java.util.Collection;
 import java.util.LinkedList;
 import java.util.logging.Logger;
 
+/**
+ * Incrementally load the knowledge base based on the previously loaded knowledge base. This is based on the
+ * OntologyDiff.diffOntologies of OWLAPI and the standard KnowledgeBaseLoader.
+ */
 public class IncrementalKnowledgeBaseLoader extends KnowledgeBaseLoader
 {
     public static final Logger _logger = Log.getLogger(IncrementalKnowledgeBaseLoader.class);

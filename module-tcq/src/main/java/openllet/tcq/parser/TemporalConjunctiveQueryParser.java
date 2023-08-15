@@ -13,6 +13,11 @@ import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/**
+ * A parser for temporal conjunctive queries.
+ * It extracts the CQs used in the TCQ and builds a propositional abstraction for them.
+ * CQs are expected to be bracketed for easier parsing. It uses the ConjunctiveQueryParser for parsing the single CQs.
+ */
 public class TemporalConjunctiveQueryParser
 {
     public static final Logger _logger = Log.getLogger(TemporalConjunctiveQueryParser.class);
@@ -21,6 +26,13 @@ public class TemporalConjunctiveQueryParser
             "X[!]", "last", "end", "first", "start", "R", "V", "M", "->", "<->", "^", "&", "!", "|", "0", "1", "2", "3",
             "4", "5", "6", "7", "8", "9", ",", "true", "false", "tt", "ff"};
 
+    /**
+     * Parses the given string as a TCQ over the given knowledge base.
+     * @param input The string to parse.
+     * @param kb The knowledge base containing roles and concepts used in the CQs.
+     * @return The parsed TCQ containing the propositional abstraction and the CQs.
+     * @throws ParseException If the input was not a valid TCQ string.
+     */
     static public TemporalConjunctiveQuery parse(String input, TemporalKnowledgeBase kb) throws ParseException
     {
         // Removes comments
@@ -58,7 +70,7 @@ public class TemporalConjunctiveQueryParser
         TemporalConjunctiveQuery parsedTcq = new TemporalConjunctiveQueryImpl(tcq, kb, true);
         final PropositionFactory propositionFactory = new PropositionFactory();
 
-        while (tcq.replaceAll("[\\s)]", "").length() > 0)
+        while (!tcq.replaceAll("[\\s)]", "").isEmpty())
         {
             String remainder = tcq;
             int curIndex = 0;
@@ -67,7 +79,7 @@ public class TemporalConjunctiveQueryParser
             while (tokenFound)
             {
                 tokenFound = false;
-                if (remainder.length() > 0 && Character.isWhitespace(remainder.charAt(0)))
+                if (!remainder.isEmpty() && Character.isWhitespace(remainder.charAt(0)))
                 {
                     remainder = remainder.substring(1);
                     curIndex += 1;

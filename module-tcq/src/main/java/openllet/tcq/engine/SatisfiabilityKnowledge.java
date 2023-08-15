@@ -1,7 +1,6 @@
 package openllet.tcq.engine;
 
 import openllet.aterm.ATerm;
-import openllet.aterm.ATermAppl;
 import openllet.core.utils.ATermUtils;
 import openllet.core.utils.Bool;
 import openllet.modularity.OntologyDiff;

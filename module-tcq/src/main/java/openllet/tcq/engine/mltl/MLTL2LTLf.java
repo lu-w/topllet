@@ -4,6 +4,10 @@ import openllet.tcq.parser.ParseException;
 import org.apache.commons.io.IOUtils;
 import java.io.IOException;
 
+/**
+ * Converter from an MLTL string to an LTLf string based on the mltl2ltl command line tool.
+ * Calls the tool using IOUtils.
+ */
 public class MLTL2LTLf
 {
     static public String convert(String mltlFormula) throws InterruptedException, IOException, ParseException

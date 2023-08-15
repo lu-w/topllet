@@ -14,6 +14,10 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.logging.Logger;
 
+/**
+ * A simple implementation of the TemporalKnowledgeBase interface. Mainly used for testing. Note that loading all
+ * KBs in memory can be highly inefficient for large use cases.
+ */
 public class InMemoryTemporalKnowledgeBaseImpl extends ArrayList<KnowledgeBase> implements TemporalKnowledgeBase
 {
     public static final Logger _logger = Log.getLogger(InMemoryTemporalKnowledgeBaseImpl.class);
