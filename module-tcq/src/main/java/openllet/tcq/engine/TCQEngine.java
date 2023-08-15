@@ -36,7 +36,7 @@ public class TCQEngine extends AbstractQueryEngine<TemporalConjunctiveQuery>
     }
 
     /**
-     * Answer the given query on its temporal knowledge base.
+     * Answers the given query on its temporal knowledge base.
      * @param q The query to answer
      * @return The set of certain answers
      * @throws IOException If CLI interaction with Lydia or MLTL2LTLf was not possible
@@ -113,7 +113,7 @@ public class TCQEngine extends AbstractQueryEngine<TemporalConjunctiveQuery>
     }
 
     /**
-     * Answer the given query on its temporal knowledge base.
+     * Answers the given query on its temporal knowledge base.
      * @param q The query to answer
      * @param excludeBindings ignored
      * @return The set of certain answers
@@ -151,16 +151,20 @@ public class TCQEngine extends AbstractQueryEngine<TemporalConjunctiveQuery>
 
         // Main loop - execute DFA states until nothing can be fired anymore
         // Note that implicitly, we perform a breadth-first search.
+        // We iterate as long as there is a state with a time point <= n
         while(states.hasExecutableState())
         {
             DFAExecutableState execState = states.get(0);
             if (execState != null)
             {
                 _logger.finer("Executing state " + execState.getDFAState() + " @ t = " + execState.getTimePoint());
+                // We execute the selected state, which creates a list of new states to consider.
                 for (DFAExecutableState newState : execState.execute())
                 {
                     _logger.finer("Adding/merging state " + newState.getDFAState() + " @ t = "
                             + newState.getTimePoint());
+                    // Those states are then merged or added to the already existing states. Merge needs to happen in
+                    // case the time point and state combination is already represented. Then, bindings are merged.
                     states.mergeOrAdd(newState);
                 }
             }

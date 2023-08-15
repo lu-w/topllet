@@ -16,6 +16,13 @@ import java.io.IOException;
 import java.util.*;
 import java.util.logging.Logger;
 
+/**
+ * Central class in the satisfiability check for TCQs. It represents triples of a DFA state, time point, and
+ * (un)satisfiability knowledge.
+ * An executable state can be executed, i.e., according to its current DFA state, all edges are checked and a new set of
+ * states are created that represented the propagated (un)satisfiability information from the current state to these new
+ * states.
+ */
 public class DFAExecutableState
 {
     public static final Logger _logger = Log.getLogger(DFAExecutableState.class);
@@ -63,16 +70,22 @@ public class DFAExecutableState
     }
 
     /**
+     * Constructs a new executable state.
      *
-     * @param dfa
-     * @param tcq
-     * @param dfaState
-     * @param satBindings if null, we interpret this as all bindings are satisfiable (useful for initial state)
-     * @param unsatBindings if null, we interpret this as no binding unsatisfiable (useful for initial state)
-     * @param timePoint
-     * @param edgeChecker
-     * @param isInitial
-     * @param timer
+     * @param dfa The DFA which corresponds to the given TCQ.
+     * @param tcq The TCQ for which the satisfiability check is performed.
+     * @param dfaState The DFA state in which this executable state is located.
+     * @param satBindings If null, we interpret this as all bindings are satisfiable (useful for initial state).
+     *                    Otherwise, contains information on the satisfiable bindings in the current state
+     *                    (possibly incomplete).
+     * @param unsatBindings If null, we interpret this as no binding unsatisfiable (useful for initial state)
+     *                      Otherwise, contains information on the satisfiable bindings in the current state (possibly
+     *                      incomplete).
+     * @param timePoint The time point at which the executable state is located.
+     * @param edgeChecker A point to the edge checker to use. To re-use as much information as much information as
+     *                    possible, executable states share their edge checker.
+     * @param isInitial True iff. the current state represents the initial state.
+     * @param timer A timer for performance measurements (can be null).
      */
     DFAExecutableState(DFA dfa, TemporalConjunctiveQuery tcq, int dfaState, QueryResult satBindings,
                        QueryResult unsatBindings, int timePoint, EdgeConstraintChecker edgeChecker, boolean isInitial,
@@ -98,12 +111,22 @@ public class DFAExecutableState
         _isInitial = isInitial;
     }
 
+    /**
+     * Sets the satisfiable bindings of this state (does not add - it overwrites).
+     * Note that this does not copy over - expect possible manipulations of the given query result later on!
+     * @param satBindings Information on the satisfiable bindings in this state.
+     */
     protected void setSatBindings(QueryResult satBindings)
     {
         if (satBindings != null)
             _satBindings = satBindings;
     }
 
+    /**
+     * Adds unsatisfiable bindings to this state (does not overwrite - it adds).
+     * Note that this performs a copy - you can safely pass a pointer here without worrying about side effects.
+     * @param unsatBindings The unsatisfiable bindings to add to this state.
+     */
     protected void addUnsatBindings(QueryResult unsatBindings)
     {
         if (_unsatBindings == null && unsatBindings != null)
@@ -112,41 +135,72 @@ public class DFAExecutableState
             _unsatBindings.addAll(unsatBindings);
     }
 
+    /**
+     * @return A pointer to the satisfiable bindings of this state (note: use this carefully!)
+     */
     public QueryResult getSatBindings()
     {
         return _satBindings;
     }
 
+    /**
+     * @return A pointer to the unsatisfiable bindings of this state (note: use this carefully!)
+     */
     public QueryResult getUnsatBindings()
     {
         return _unsatBindings;
     }
 
+    /**
+     * @return The time point this state represents.
+     */
     public int getTimePoint()
     {
         return _timePoint;
     }
 
+    /**
+     * @return True iff. this state can be executed, i.e., it is below the maximum time point and has unchcked binding
+     * candidates.
+     */
     public boolean canExecute()
     {
         return _timePoint < _maxTimePoint && hasUncheckedBindingCandidates() && _kb != null;
     }
 
+    /**
+     * This information is created during execution of the state. It is then cached.
+     * @return True iff. this state's satisfiability and unsatisfiability knowledge does not cover all possible
+     * bindings.
+     */
     private boolean hasUncheckedBindingCandidates()
     {
         return _hasUncheckedBindingCandidates;
     }
 
+    /**
+     * @return The atemporal knowledge base that this state had to check against.
+     */
     public KnowledgeBase getKB()
     {
         return _kb;
     }
 
+    /**
+     * @return The DFA state in which this state is located.
+     */
     public int getDFAState()
     {
         return _dfaState;
     }
 
+    /**
+     * Execute this state, i.e., it checks all edges of the current state and propagates (un)satisfiability knowledge
+     * according to the (un)satisfiability of the CNCQs on the edges. Thus, a new collection of new states is created.
+     * @return The new collection of states after execution.
+     * @throws IOException If CNCQ query engine encountered an IO exception.
+     * @throws InterruptedException If CNCQ query engine was interrupted.
+     */
     public Collection<DFAExecutableState> execute() throws IOException, InterruptedException
     {
         Collection<DFAExecutableState> newExecutableStates = new ArrayList<>();
@@ -156,6 +210,8 @@ public class DFAExecutableState
         else if (!_isInitial)
             // We can not infer satisfiability if prior state has no information about its satisfiability.
             restrictSatToBindings = new QueryResultImpl(_tcq);
+
+        // Sinks are handled efficiently by just propagating all information directly.
         if (isInSink())
         {
             DFAExecutableState newState = new DFAExecutableState(_dfa, _tcq, _dfaState, _timePoint + 1,
@@ -164,19 +220,21 @@ public class DFAExecutableState
             newState.addUnsatBindings(_unsatBindings);
             newExecutableStates.add(newState);
         }
+        // Check if we can execute this state, then check all edges and create appropriate successor states.
         else if (canExecute())
         {
             boolean fullyCheckedAllEdges = true;
             List<Edge> edges = _dfa.getEdges(_dfaState);
             Map<ResultBinding, Integer> bindingsUnsatCount = new HashMap<>();
             Map<Edge, Map<Bool, QueryResult>> edgeResults = new HashMap<>();
+            // Checks each edge, i.e., finds (un)satisfiable bindings for the union of the CNCQs on the edge.
             for (Edge edge : edges)
             {
                 Map<Bool, QueryResult> edgeResult = _edgeChecker.checkEdge(edge, _timePoint, _kb,
                         restrictSatToBindings);
                 edgeResults.put(edge, edgeResult);
-                // TODO: isEdgeCompletelyChecked not absolute but wrt. sat bindings of current state
-                //  (no need to check more, but does not work with underapprox. semantics mode) - is it worth the cost?
+                // TODO: isEdgeCompletelyChecked can be computed not absolute but w.r.t. sat bindings of current state.
+                //  No need to check more, but does not work with underapprox. semantics mode - is it worth the cost?
                 fullyCheckedAllEdges &= _edgeChecker.isEdgeCompletelyChecked(edge, _timePoint);
                 DFAExecutableState newState = new DFAExecutableState(_dfa, _tcq, edge.getToState(), _timePoint + 1,
                         _edgeChecker, _timer);
@@ -250,12 +308,23 @@ public class DFAExecutableState
         return newExecutableStates;
     }
 
+    /**
+     * @return True iff. the current DFA state is a sink
+     */
     private boolean isInSink()
     {
         List<Edge> edges = _dfa.getEdges(_dfaState);
         return edges.size() == 1 && edges.get(0).getFromState() == edges.get(0).getToState();
     }
 
+    /**
+     * Merges a given other state into this state, i.e., it adds all satisfiable bindings of the other state to this
+     * state and takes the intersection of the unsatisfiable bindings of both states.
+     * Also updates unsatisfiability information, if the given state introduces new satisfiability information on some
+     * binding.
+     * Updates this state in-place.
+     * @param toMerge A DFAExecutableState that refers to exactly the same time point and DFA state.
+     */
     public void merge(DFAExecutableState toMerge)
     {
         assert(getTimePoint() == toMerge.getTimePoint() && getDFAState() == toMerge.getDFAState());
