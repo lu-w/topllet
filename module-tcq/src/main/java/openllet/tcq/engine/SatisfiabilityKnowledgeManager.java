@@ -19,13 +19,14 @@ import openllet.tcq.model.automaton.DFA;
 import openllet.tcq.model.automaton.Edge;
 import openllet.tcq.model.query.TemporalConjunctiveQuery;
 
+import javax.annotation.Nullable;
 import java.io.IOException;
 import java.util.*;
 import java.util.logging.Logger;
 import java.util.stream.IntStream;
 
 /**
- * Manages the satisfiability knowledge for all queries and time points.
+ * Manages the satisfiability knowledge for all CNCQs and time points.
  * Due to its global scope, it can propagate satisfiability information around, e.g. connecting satisfiability of a
  * query with the unsatisfiability of its negation.
  * It can also propagate knowledge around based on similarities of ABoxes to certain time points.
@@ -39,6 +40,9 @@ public class SatisfiabilityKnowledgeManager
         LIGHTWEIGHT, AMAP
     }
 
+    /**
+     * This class is only used for statistics for benchmarking.
+     */
     protected static class SatisfiabilityStats
     {
         private final Map<Integer, Map<CNCQQuery, Double>> _percentagesOfIncludedBindings = new HashMap<>();
@@ -83,6 +87,11 @@ public class SatisfiabilityKnowledgeManager
     private QueryResult _globallyIncludeBindings;
     private final SatisfiabilityStats _stats = new SatisfiabilityStats();
 
+    /**
+     * Constructs a new satisfiability knowledge manager for the given query and DFA.
+     * @param query The query to manage satisfiability information for.
+     * @param dfa The DFA corresponding to the query.
+     */
     public SatisfiabilityKnowledgeManager(TemporalConjunctiveQuery query, DFA dfa)
     {
         _tcq = query;
@@ -110,6 +119,10 @@ public class SatisfiabilityKnowledgeManager
         _strategy = strategy;
     }
 
+    /**
+     * Informs the manager to not generate satisfiability results for the given excluded bindings.
+     * @param excludedBindings The bindings to exclude. Can be null.
+     */
     public void setGloballyExcludedBindings(QueryResult excludedBindings)
     {
         if (excludedBindings != null)
@@ -119,6 +132,14 @@ public class SatisfiabilityKnowledgeManager
         }
     }
 
+    /**
+     * Fetches the knowledge the manager currently has for the given CNCQ at the time point. For this, it possibly
+     * transfers knowledge from the previous time point to the given time point, if
+     * `OpenlletOptions.TCQ_ENGINE_TEMPORAL_CNCQ_TRANSFER` is true.
+     * @param query The CNCQ to get the knowledge for.
+     * @param timePoint Time point to get the knowledge for.
+     * @return The satisfiability knowledge for the given CNCQ and time point.
+     */
     public SatisfiabilityKnowledge transferAndGetKnowledgeOnQuery(CNCQQuery query, int timePoint)
     {
         SatisfiabilityKnowledge knowledge = getKnowledgeOnQuery(query);
@@ -127,7 +148,11 @@ public class SatisfiabilityKnowledgeManager
         return knowledge;
     }
 
-    public SatisfiabilityKnowledge getKnowledgeOnQuery(CNCQQuery query)
+    /**
+     * @param query The CNCQ to get the knowledge for.
+     * @return The satisfiability knowledge the manager currently has on the given CNCQ. Can be null if there is none.
+     */
+    public @Nullable SatisfiabilityKnowledge getKnowledgeOnQuery(CNCQQuery query)
     {
         for (SatisfiabilityKnowledge knowledge : _knowledges)
             if (knowledge.getQuery() == query)
@@ -135,6 +160,13 @@ public class SatisfiabilityKnowledgeManager
         return null;
     }
 
+    /**
+     * Given a CNCQ, this function extracts the CQs that are checked by the manager if in underapproximating mode, based
+     * on the SubQuerySelectionStrategy. If Lightweight, it extracts all negative sub-CQs and the CQ representing the
+     * conjunction of all positive sub-CQs. If AMAP, all positive sub-CQs are included as well.
+     * @param query The CNCQ to extract CQs from.
+     * @return A collection of CQs extracted from the CNCQ.
+     */
     private Collection<ConjunctiveQuery> getCandidatesForCheckingUnderapproximatingSemantics(CNCQQuery query)
     {
         Set<ConjunctiveQuery> candidates = new HashSet<>();
@@ -157,12 +189,19 @@ public class SatisfiabilityKnowledgeManager
         return candidates;
     }
 
+    /**
+     * Propagates the entailed result for a CQ to the CNCQs that are managed by this manager. Thus, it modifies the
+     * entries of the _knowledges list to contain new information on (un)satisfiability.
+     * @param query The CQ for which the entailed result was gained.
+     * @param entailedResult The certain answers to the given query.
+     * @param timePoint The time point for which the result was computed.
+     */
     private void propagateKnowledge(ConjunctiveQuery query, QueryResult entailedResult, int timePoint)
     {
-        // implements "transferability" from CQ entailment to CNCQ satisfiability
+        // Implements "transferability" from CQ entailment to CNCQ satisfiability.
         for (SatisfiabilityKnowledge knowledge : _knowledges)
         {
-            if (knowledge.getQuery().getNegativeQueries().size() == 0)
+            if (knowledge.getQuery().getNegativeQueries().isEmpty())
             {
                 if ((knowledge.getQuery().getPositiveQueries().size() == 1 &&
                         knowledge.getQuery().getPositiveQueries().contains(query)) ||
@@ -171,11 +210,11 @@ public class SatisfiabilityKnowledgeManager
             }
             else
             {
-                query.setNegation(true); // temporarily setting negation to true to allow to find it in negative queries
+                query.setNegation(true); // Temporarily sets negation to true to allow to find it in negative queries.
                 if (knowledge.getQuery().getNegativeQueries().contains(query))
                     knowledge.informAboutSatisfiability(entailedResult.copy(), false, timePoint);
                 if ((knowledge.getQuery().getNegativeQueries().size() == 1 &&
-                        knowledge.getQuery().getPositiveQueries().size() == 0 &&
+                        knowledge.getQuery().getPositiveQueries().isEmpty() &&
                         knowledge.getQuery().getNegativeQueries().contains(query)))
                     knowledge.informAboutSatisfiability(entailedResult.invert(), true, timePoint);
                 query.setNegation(false);
@@ -183,6 +222,14 @@ public class SatisfiabilityKnowledgeManager
         }
     }
 
+    /**
+     * A wrapper around Openllet's conjunctive query engine. Executes the query for the knowledge base at the given time
+     * point and propagates the gained knowledge within this knowledge manager.
+     * @param query The CQ to answer.
+     * @param timePoint The time point for which the query is executed.
+     * @throws IOException If CQ engine encountered an IO exception.
+     * @throws InterruptedException If CQ engine was interrupted.
+     */
     private void execConjunctiveQueryEngine(ConjunctiveQuery query, int timePoint)
             throws IOException, InterruptedException
     {
@@ -208,6 +255,15 @@ public class SatisfiabilityKnowledgeManager
         }
     }
 
+    /**
+     * Helper function to transform a MultiQueryResults (possibly returned by the CQ engine) to a standard
+     * QueryResultImpl, as we can only perform relevant computations on QueryResultImpl. In this case, it creates a
+     * completely new query result.
+     * Note that this explicates the cross-product. Outputs the input result if it is already a QueryResultImpl.
+     * @param result The query result to convert.
+     * @param origQuery The query of the query result to convert.
+     * @return A QueryResult that is guaranteed to be a QueryResultImpl.
+     */
     private QueryResult toQueryResult(QueryResult result, Query<?> origQuery)
     {
         QueryResult usableResult;
@@ -218,6 +274,16 @@ public class SatisfiabilityKnowledgeManager
         return usableResult;
     }
 
+    /**
+     * A wrapper around the CNCQ engine. Executes the query for the knowledge base at the given time point and
+     * propagates the gained knowledge within this knowledge manager.
+     * @param query The CNCQ to answer.
+     * @param timePoint The time point for which the query is executed.
+     * @param knowledgeOnQuery Already gathered knowledge on the CNCQ from a possible previous run with the CQ engine.
+     * @param restrictSatToBindings If not null, satisfiability results are restricted to this set of bindings
+     * @throws IOException If CNCQ query engine encountered an IO exception.
+     * @throws InterruptedException If CNCQ query engine was interrupted.
+     */
     private void execCNCQQueryEngine(CNCQQuery query, int timePoint, SatisfiabilityKnowledge knowledgeOnQuery,
                                      QueryResult restrictSatToBindings) throws IOException, InterruptedException
     {
@@ -265,6 +331,19 @@ public class SatisfiabilityKnowledgeManager
         knowledgeOnQuery.setComplete(timePoint);
     }
 
+    /**
+     * This is the main entry point to the satisfiability knowledge manager.
+     * Computes and returns the satisfiable answers of the given query w.r.t. the givne knowledge base.
+     * @param query The CNCQ to compute satisfiability for.
+     * @param timePoint The time point from which the given knowledge base is.
+     * @param kb The knowledge base to compute satisfiable answers for.
+     * @param useUnderapproximatingSemantics If true, uses only the CQ engine to compute answers.
+     * @param restrictSatToBindings Restricts satisfiable answers to the given set of bindings, if not null.
+     * @return A query result for satisfiable and unsatisfiable knowledge, as a mapping from true (satisfiable) and
+     * false (unsatisfiable) to a query result.
+     * @throws IOException If CNCQ query engine encountered an IO exception.
+     * @throws InterruptedException If CNCQ query engine was interrupted.
+     */
     public Map<Bool, QueryResult> computeSatisfiableBindings(CNCQQuery query, int timePoint, KnowledgeBase kb,
                                                              boolean useUnderapproximatingSemantics,
                                                              QueryResult restrictSatToBindings)
@@ -274,17 +353,20 @@ public class SatisfiabilityKnowledgeManager
         SatisfiabilityKnowledge knowledgeOnQuery = transferAndGetKnowledgeOnQuery(query, timePoint);
         if (knowledgeOnQuery != null)
         {
+            // Case 1: We use the CQ engine only and have not checked the CNCQ previously.
             if (useUnderapproximatingSemantics && knowledgeOnQuery.isEmpty(timePoint))
             {
                 _logger.finer("Calling CQ engine for " + query);
                 for (ConjunctiveQuery subQuery : getCandidatesForCheckingUnderapproximatingSemantics(query))
                     execConjunctiveQueryEngine(subQuery, timePoint);
             }
+            // Case 2: We use full semantics and have not yet complete knowledge on the CNCQ.
             else if (!useUnderapproximatingSemantics && !knowledgeOnQuery.isComplete(timePoint))
             {
                 _logger.finer("Calling CNCQ engine for " + query);
                 execCNCQQueryEngine(query, timePoint, knowledgeOnQuery, restrictSatToBindings);
             }
+            // Case 3: We use full semantics but have complete knowledge (-> only updates statistics).
             else if (!useUnderapproximatingSemantics)
                 _stats.informAboutBindingInclusion(timePoint, query, 0);
             _logger.finer("Retrieving satisfiability knowledge on " + query);
@@ -294,6 +376,9 @@ public class SatisfiabilityKnowledgeManager
             throw new RuntimeException("Knowledge on query " + query + " has not been initialized");
     }
 
+    /**
+     * @return Statistics on the manager's performance, for evaluation.
+     */
     public String getStats()
     {
         return _stats.toString();
