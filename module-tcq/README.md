@@ -73,6 +73,8 @@ abox_2.owl
 
 Any line starting with `#` is ignored.
 
+### OWL2 files
+
 We assume a certain shape of the listed OWL2 files:
 
 1. each OWL2 file contains exactly the same individuals with the same names (and ontology IRI for those),
@@ -80,6 +82,11 @@ We assume a certain shape of the listed OWL2 files:
 3. all OWL2 files in the list import exactly the same ontologies (especially, the shared TBox).
 
 Right now, we do not store information on the actual time stamps of the temporal data.
+
+### Catalog files
+
+In contrast to the upstream version, `openllet temporal-query` allows to add OASIS XML catalog files.
+For this, use the `-c catalog.xml` option.
 
 ## Output
 
