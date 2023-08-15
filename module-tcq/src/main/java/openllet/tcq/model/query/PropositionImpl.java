@@ -1,5 +1,7 @@
 package openllet.tcq.model.query;
 
+import javax.annotation.Nonnull;
+
 /**
  * Standard implementation of propositions based on an internal string and integer representation.
  */
@@ -26,7 +28,7 @@ public class PropositionImpl implements Proposition
     }
 
     @Override
-    public int compareTo(Proposition other)
+    public int compareTo(@Nonnull Proposition other)
     {
         return Integer.compare(_integerRepr, other.getIntegerRepresentation());
     }

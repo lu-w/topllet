@@ -1,5 +1,7 @@
 package openllet.tcq.model.query;
 
+import javax.annotation.Nonnull;
+
 /**
  * A proposition is an atomic element in the atomic conjunctions of the propositional abstraction of a TCQ.
  */
@@ -23,5 +25,5 @@ public interface Proposition extends Comparable<Proposition>
      * greater than the other proposition.
      */
     @Override
-    int compareTo(Proposition other);
+    int compareTo(@Nonnull Proposition other);
 }

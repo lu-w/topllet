@@ -20,7 +20,7 @@ public class TemporalConjunctiveQueryImpl extends AbstractCompositeQuery<Conjunc
 {
     public static final Logger _logger = Log.getLogger(TemporalConjunctiveQueryImpl.class);
 
-    private TemporalKnowledgeBase _temporalKb;
+    private final TemporalKnowledgeBase _temporalKb;
     private final Map<Proposition, ConjunctiveQuery> _propAbs = new TreeMap<>();
     private String _propAbsTcq;
     private final String _tcq;

@@ -115,25 +115,25 @@ public class FileBasedTemporalKnowledgeBaseImpl extends ArrayList<KnowledgeBase>
     }
 
     @Override
-    public boolean addAll(Collection<? extends KnowledgeBase> collection)
+    public boolean addAll(@Nonnull Collection<? extends KnowledgeBase> collection)
     {
         throw new RuntimeException("Manipulation of file based temporal knowledge base not possible");
     }
 
     @Override
-    public boolean addAll(int i, Collection<? extends KnowledgeBase> collection)
+    public boolean addAll(int i, @Nonnull Collection<? extends KnowledgeBase> collection)
     {
         throw new RuntimeException("Manipulation of file based temporal knowledge base not possible");
     }
 
     @Override
-    public boolean removeAll(Collection<?> collection)
+    public boolean removeAll(@Nonnull Collection<?> collection)
     {
         throw new RuntimeException("Manipulation of file based temporal knowledge base not possible");
     }
 
     @Override
-    public boolean retainAll(Collection<?> collection)
+    public boolean retainAll(@Nonnull Collection<?> collection)
     {
         throw new RuntimeException("Manipulation of file based temporal knowledge base not possible");
     }
