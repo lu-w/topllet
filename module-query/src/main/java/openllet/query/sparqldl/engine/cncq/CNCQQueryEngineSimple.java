@@ -1,6 +1,5 @@
 package openllet.query.sparqldl.engine.cncq;
 
-import openllet.aterm.ATermAppl;
 import openllet.core.utils.Bool;
 import openllet.query.sparqldl.engine.QueryBindingCandidateGenerator;
 import openllet.query.sparqldl.engine.QueryResultBasedBindingCandidateGenerator;

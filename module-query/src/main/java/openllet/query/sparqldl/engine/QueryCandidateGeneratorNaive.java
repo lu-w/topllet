@@ -3,7 +3,6 @@ package openllet.query.sparqldl.engine;
 import openllet.aterm.ATermAppl;
 import openllet.query.sparqldl.model.Query;
 import openllet.query.sparqldl.model.results.QueryResult;
-import openllet.query.sparqldl.model.results.QueryResultImpl;
 import openllet.query.sparqldl.model.results.ResultBinding;
 import openllet.query.sparqldl.model.results.ResultBindingImpl;
 
@@ -11,7 +10,12 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
-// Note: This generator is inefficient for large _excludeBindings.
+
+/**
+ * A query candidate generator based on explicitly iterating over all bindings and checking whether they are excluded.
+ * Note: This generator is inefficient for large _excludeBindings.
+ */
+@Deprecated
 public class QueryCandidateGeneratorNaive extends QueryBindingCandidateGenerator
 {
     List<ATermAppl> _vars;
@@ -22,7 +26,7 @@ public class QueryCandidateGeneratorNaive extends QueryBindingCandidateGenerator
         super(query);
         _vars = query.getResultVars();
         _inds = query.getKB().getIndividuals().stream().toList();
-        assert(_inds.size() > 0);
+        assert(!_inds.isEmpty());
     }
 
     public QueryCandidateGeneratorNaive(List<ATermAppl> individuals, List<ATermAppl> resultVars)

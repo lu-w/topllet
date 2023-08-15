@@ -7,6 +7,10 @@ import openllet.query.sparqldl.model.results.QueryResult;
 
 import java.io.IOException;
 
+/**
+ * Central interface for query engines.
+ * @param <QueryType> The class of queries that are answered by this engine.
+ */
 public interface QueryExec<QueryType extends Query<QueryType>>
 {
     /**

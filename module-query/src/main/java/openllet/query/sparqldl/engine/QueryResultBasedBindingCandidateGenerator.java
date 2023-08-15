@@ -7,6 +7,10 @@ import openllet.query.sparqldl.model.results.ResultBinding;
 
 import java.util.Iterator;
 
+/**
+ * A generator for query bindings based on iterating over query results. More efficient replacement for
+ * QueryCandidateGeneratorNaive.
+ */
 public class QueryResultBasedBindingCandidateGenerator extends QueryBindingCandidateGenerator
 {
     public QueryResultBasedBindingCandidateGenerator(Query<?> query)

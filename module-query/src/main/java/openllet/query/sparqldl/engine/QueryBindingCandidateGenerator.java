@@ -12,6 +12,11 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
+/**
+ * Allows to iterate over bindings when searching for certain answers.
+ * Also implements a back-channel that the generator is informed about results from the query engine, which can be used
+ * for possible performance improvements.
+ */
 public abstract class QueryBindingCandidateGenerator implements Iterable<ResultBinding>
 {
     protected Query<?> _query;
