@@ -10,6 +10,10 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 
+/**
+ * Extends the AutomataLib DFA with functionality required for checking satisfiability of TCQs.
+ * Specifically, it allows to handle edges differently, since we need to store unions of CNCQs for each edge.
+ */
 public class DFA extends CompactDFA<String>
 {
     private final List<Edge> _edges = new ArrayList<>();

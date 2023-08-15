@@ -1,5 +1,8 @@
 package openllet.tcq.model.query;
 
+/**
+ * Standard implementation of propositions based on an internal string and integer representation.
+ */
 public class PropositionImpl implements Proposition
 {
     private final String _prop;

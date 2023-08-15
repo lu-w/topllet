@@ -1,19 +1,26 @@
 package openllet.tcq.model.query;
 
 import openllet.query.sparqldl.model.cq.ConjunctiveQuery;
-import openllet.tcq.parser.ConjunctiveQueryParser;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 
+/**
+ * Global factory for creating propositions to re-use propositions for already encountered CQs.
+ */
 public class PropositionFactory
 {
-    private Map<ConjunctiveQuery, Proposition> _alreadyCreated = new HashMap<>();
+    private final Map<ConjunctiveQuery, Proposition> _alreadyCreated = new HashMap<>();
     int curPropLength = 1;
     int curChar = 0;
     final char[] chars = "abcdefghijklmnopqrstuvwxyz".toCharArray();
 
+    /**
+     * Creas a proposition for the given query. In case there was already a proposition constructed for the same query,
+     * it returns this proposition.
+     * @param query The query to construct the proposition for.
+     * @return A proposition for the query.
+     */
     public Proposition create(ConjunctiveQuery query)
     {
         if (_alreadyCreated.containsKey(query))

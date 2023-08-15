@@ -11,6 +11,10 @@ import openllet.tcq.model.kb.FileBasedTemporalKnowledgeBaseImpl;
 import java.util.*;
 import java.util.logging.Logger;
 
+/**
+ * Standard implementation of a temporal conjunctive query.
+ * Note that some functionality of the Query interface is not accessible due to operating partially on unparsed strings.
+ */
 public class TemporalConjunctiveQueryImpl extends AbstractCompositeQuery<ConjunctiveQuery, TemporalConjunctiveQuery>
         implements TemporalConjunctiveQuery
 {
@@ -42,12 +46,6 @@ public class TemporalConjunctiveQueryImpl extends AbstractCompositeQuery<Conjunc
     }
 
     @Override
-    public void addConjunctiveQuery(Proposition proposition, ConjunctiveQuery query)
-    {
-        addConjunctiveQuery(proposition, query, null);
-    }
-
-    @Override
     public void addConjunctiveQuery(Proposition proposition, ConjunctiveQuery query, String queryString)
     {
         super.addQuery(query);
@@ -66,12 +64,6 @@ public class TemporalConjunctiveQueryImpl extends AbstractCompositeQuery<Conjunc
     public TemporalKnowledgeBase getTemporalKB()
     {
         return _temporalKb;
-    }
-
-    @Override
-    public void setTemporalKB(TemporalKnowledgeBase temporalKb)
-    {
-        _temporalKb = temporalKb;
     }
 
     @Override
