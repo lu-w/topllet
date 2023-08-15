@@ -1,8 +1,6 @@
 package openllet.tcq.engine;
 
 import openllet.core.OpenlletOptions;
-import openllet.core.utils.Bool;
-import openllet.core.utils.Timer;
 import openllet.query.sparqldl.engine.AbstractQueryEngine;
 import openllet.query.sparqldl.engine.QueryExec;
 import openllet.query.sparqldl.model.results.QueryResult;
@@ -18,6 +16,13 @@ import java.io.IOException;
 import java.util.*;
 import java.util.logging.Logger;
 
+/**
+ * Query engine for answering non-Boolean metric temporal conjunctive queries.
+ * It basically steps through the FA corresponding to the given formula and propagates (un)satisfiability knowledge
+ * along the breadth-first state traversal.
+ * As an optimization, it uses CQ answering in a pre-processing run to efficiently generate (partial)
+ * (un)satisfiability knowledge.
+ */
 public class TCQEngine extends AbstractQueryEngine<TemporalConjunctiveQuery>
         implements QueryExec<TemporalConjunctiveQuery>
 {
@@ -30,6 +35,13 @@ public class TCQEngine extends AbstractQueryEngine<TemporalConjunctiveQuery>
         _booleanEngine = null; // Enforces this engine also as the Boolean engine.
     }
 
+    /**
+     * Answer the given query on its temporal knowledge base.
+     * @param q The query to answer
+     * @return The set of certain answers
+     * @throws IOException If CLI interaction with Lydia or MLTL2LTLf was not possible
+     * @throws InterruptedException If CLI interaction with Lydia or MLTL2LTLf was interrupted
+     */
     @Override
     protected QueryResult execABoxQuery(TemporalConjunctiveQuery q)
             throws IOException, InterruptedException
@@ -92,7 +104,7 @@ public class TCQEngine extends AbstractQueryEngine<TemporalConjunctiveQuery>
                     " unsatisfiable bindings out of " + satResult.get(true).getMaxSize() + " bindings)");
         }
         double cqResultRatio = 100.0;
-        if (satResult.get(false).size() > 0)
+        if (!satResult.get(false).isEmpty())
             cqResultRatio = 100.0 * ((double) cqResultNumber / satResult.get(false).size());
         _logger.fine(String.format("CQ semantics check returned a definite answer on %.6f %% of the entailed" +
                 " bindings", cqResultRatio));
@@ -100,6 +112,14 @@ public class TCQEngine extends AbstractQueryEngine<TemporalConjunctiveQuery>
         return satResult.get(false);
     }
 
+    /**
+     * Answer the given query on its temporal knowledge base.
+     * @param q The query to answer
+     * @param excludeBindings ignored
+     * @return The set of certain answers
+     * @throws IOException If CLI interaction with Lydia or MLTL2LTLf was not possible
+     * @throws InterruptedException If CLI interaction with Lydia or MLTL2LTLf was interrupted
+     */
     @Override
     protected QueryResult execABoxQuery(TemporalConjunctiveQuery q, QueryResult excludeBindings,
                                         QueryResult restrictToBindings) throws IOException, InterruptedException
@@ -108,11 +128,14 @@ public class TCQEngine extends AbstractQueryEngine<TemporalConjunctiveQuery>
     }
 
     /**
-     * TODO
-     * @param dfa
-     * @param tcq
-     * @return Guaranteed satisfiability information, i.e. true -> final state has been reached, false -> it is certain
+     * Implements the satisfiability check for a TCQ that is represented by the given automaton. It represents the core
+     * (i.e., Algorithm 1 in the supplementary paper) of the answering process.
+     * @param dfa The automaton representing the TCQ.
+     * @param tcq The TCQ to check satisfiability for.
+     * @return Guaranteed satisfiability information, i.e., true -> final state has been reached, false -> it is certain
      *  that no final state can be reached
+     * @throws IOException If CLI interaction with Lydia or MLTL2LTLf was not possible
+     * @throws InterruptedException If CLI interaction with Lydia or MLTL2LTLf was interrupted
      */
     private Map<Boolean, QueryResult> _checkDFASatisfiability(DFA dfa, TemporalConjunctiveQuery tcq,
                                                               Map<Boolean, QueryResult> knownResults)
@@ -127,6 +150,7 @@ public class TCQEngine extends AbstractQueryEngine<TemporalConjunctiveQuery>
         _logger.finer("Starting in state " + states);
 
         // Main loop - execute DFA states until nothing can be fired anymore
+        // Note that implicitly, we perform a breadth-first search.
         while(states.hasExecutableState())
         {
             DFAExecutableState execState = states.get(0);
@@ -146,11 +170,22 @@ public class TCQEngine extends AbstractQueryEngine<TemporalConjunctiveQuery>
         return assembleFinalResult(dfa, tcq, states, knownResults);
     }
 
+    /**
+     * Assembles the final result after the satisfiability check on the DFA is finished. Handles both the case of having
+     * the under-approximating semantics and the full-semantics check beforehand.
+     * @param dfa The DFA that corresponds to the given TCQ
+     * @param tcq The TCQ that has been checked for satisfiability
+     * @param states The states at time point n+1 that can not be executed anymore
+     * @param knownResults Possible results from a prior iteration that are already known. Can be null.
+     * @return A map from true to all bindings that are satisfiable and false to all bindings that are unsatisfiable
+     */
     private Map<Boolean, QueryResult> assembleFinalResult(DFA dfa, TemporalConjunctiveQuery tcq,
                                                           DFAExecutableStates states,
                                                           Map<Boolean, QueryResult> knownResults)
     {
         _logger.fine("Assembling final result of DFA check");
+
+        // Initializes result to be returned later, depending on previously known results
         Map<Boolean, QueryResult> result = new HashMap<>();
         if (knownResults == null)
         {
@@ -163,8 +198,9 @@ public class TCQEngine extends AbstractQueryEngine<TemporalConjunctiveQuery>
             result.put(true, knownResults.get(true));
         }
 
-        if (states.size() > 0)
+        if (!states.isEmpty())
         {
+            // Case 1: Under-approximating run (we need to consider unsatisfiability information)
             if (_edgeChecker.isUnderapproximatingSemantics())
             {
                 int n = tcq.getTemporalKB().size();
@@ -197,6 +233,7 @@ public class TCQEngine extends AbstractQueryEngine<TemporalConjunctiveQuery>
                 if (unsatForAllFinalStates != null)
                     result.get(false).addAll(unsatForAllFinalStates);
             }
+            // Case 2: Full-semantics run (satisfiability information is sufficient to derive acceptance)
             else
             {
                 // Finds all satisfiable bindings from some non-final state (potential candidates for rejection)

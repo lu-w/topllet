@@ -20,6 +20,10 @@ import java.util.List;
 import java.util.Set;
 import java.util.logging.Logger;
 
+/**
+ * This query engine is deprecated - the non-Boolean TCQ engine handles the Boolean case as well, as it is more
+ * efficient.
+ */
 @Deprecated
 public class BooleanTCQEngine extends AbstractBooleanQueryEngine<TemporalConjunctiveQuery>
         implements QueryExec<TemporalConjunctiveQuery>
