@@ -8,7 +8,7 @@ It outputs a list of answers, i.e., mappings from individuals to the query's ans
 
 The temporal query functionality of `openllet` is executed like this:
 
-`openllet temporal-query -q query.tcq aboxes.kbs`
+`openllet temporal-query -c catalog-v001.xml -q simple.tcq abox.kbs`
 
 The example files can be found in `../examples/src/main/resources/data/tcq`.
 Just navigate to the folder and execute `openllet temporal-query` for a quick demo.
@@ -17,10 +17,11 @@ We now explain what both inputs are.
 
 ## Inputs
 
-As seen above, `openllet temporal-query` takes two inputs:
+As seen above, `openllet temporal-query` takes three inputs:
 
 1. A query
 2. A temporal knowledge base
+3. A catalog file
 
 ### Temporal Conjunctive Queries
 
@@ -90,10 +91,10 @@ We assume a certain shape of the listed OWL2 files:
 
 Right now, we do not store information on the actual time stamps of the temporal data.
 
-#### Catalog files
+### Catalog files
 
-In contrast to the upstream version, `openllet temporal-query` allows to add OASIS XML catalog files.
-For this, use the `-c catalog.xml` option.
+In contrast to the upstream version, `openllet temporal-query` allows to add OASIS XML catalog files to resolve e.g. local imports.
+For this, use the `-c catalog-v001.xml` option.
 
 ## Output
 
