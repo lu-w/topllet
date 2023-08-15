@@ -61,6 +61,13 @@ If you specify a non-`?`-preceeded, non-individual variable in some query atom, 
 You can add comments by `# my comment`.
 For inline comments, note that the `#` needs to be succeeded by a whitespace (i.e., `#mycomment` is not a valid comment).
 
+#### Assumptions
+
+Right now, the tool checks only temporal queries whose CQs are
+
+1. rooted, i.e., each existentially quantified variable is connected via some chain of roles to an answer variable or individual
+2. tree-shaped, i.e., the induced query graph is acyclic w.r.t. the existentially quantified variables and each node has at most one incoming edge
+
 ### Temporal Knowledge Bases
 
 Temporal knowledge bases are modeled simply as a list of standard OWL2 files.
@@ -73,7 +80,7 @@ abox_2.owl
 
 Any line starting with `#` is ignored.
 
-### OWL2 files
+#### Assumptions
 
 We assume a certain shape of the listed OWL2 files:
 
@@ -83,7 +90,7 @@ We assume a certain shape of the listed OWL2 files:
 
 Right now, we do not store information on the actual time stamps of the temporal data.
 
-### Catalog files
+#### Catalog files
 
 In contrast to the upstream version, `openllet temporal-query` allows to add OASIS XML catalog files.
 For this, use the `-c catalog.xml` option.
