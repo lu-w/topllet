@@ -85,7 +85,7 @@ public class TCQEngine extends AbstractQueryEngine<TemporalConjunctiveQuery>
                     + satResult.get(true).size() +  " satisfiable and " + satResult.get(false).size() +
                     " unsatisfiable bindings out of " + satResult.get(true).getMaxSize() + " bindings)");
         }
-        // SECOND RUN - USE CNCQ ENGINE BASED ON RESULTS OF CQ ENGINE
+        // SECOND RUN - USE BCQ ENGINE BASED ON RESULTS OF CQ ENGINE
         if (excludeResults == null || !excludeResults.isComplete())
         {
             if (OpenlletOptions.TCQ_ENGINE_USE_INCREMENTAL_LOADING)

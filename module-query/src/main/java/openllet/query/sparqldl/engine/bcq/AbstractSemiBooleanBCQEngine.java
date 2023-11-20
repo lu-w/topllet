@@ -1,12 +1,12 @@
-package openllet.query.sparqldl.engine.cncq;
+package openllet.query.sparqldl.engine.bcq;
 
-import openllet.query.sparqldl.model.cncq.CNCQQuery;
+import openllet.query.sparqldl.model.bcq.BCQQuery;
 import openllet.query.sparqldl.model.cq.ConjunctiveQuery;
 
-public abstract class AbstractSemiBooleanCNCQEngine extends AbstractCNCQQueryEngine
+public abstract class AbstractSemiBooleanBCQEngine extends AbstractBCQQueryEngine
 {
     @Override
-    public boolean supports(CNCQQuery q)
+    public boolean supports(BCQQuery q)
     {
         boolean booleanPosPart = true;
         for (ConjunctiveQuery sq : q.getPositiveQueries())

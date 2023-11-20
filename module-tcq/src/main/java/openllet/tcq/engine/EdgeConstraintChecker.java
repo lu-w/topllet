@@ -2,7 +2,7 @@ package openllet.tcq.engine;
 
 import openllet.core.KnowledgeBase;
 import openllet.core.utils.Bool;
-import openllet.query.sparqldl.model.cncq.CNCQQuery;
+import openllet.query.sparqldl.model.bcq.BCQQuery;
 import openllet.query.sparqldl.model.results.QueryResult;
 import openllet.shared.tools.Log;
 import openllet.tcq.model.automaton.DFA;
@@ -14,20 +14,20 @@ import java.util.*;
 import java.util.logging.Logger;
 
 /**
- * Checks a so-called edge constraint, i.e., a union of CNCQs occurring on the edge of a DFA. Checking means that a set
+ * Checks a so-called edge constraint, i.e., a union of BCQs occurring on the edge of a DFA. Checking means that a set
  * of answers is assembled that satisfy resp. not satisfy the given edge, using `checkEdge`.
  * Internally, it relies on the SatisfiabilityKnowledgeManager to perform checking and caching of satisfiability of
- * CNCQs.
+ * BCQs.
  */
 public class EdgeConstraintChecker
 {
     public static final Logger _logger = Log.getLogger(EdgeConstraintChecker.class);
-    private final SatisfiabilityKnowledgeManager _cncqSatManager;
+    private final SatisfiabilityKnowledgeManager _bcqSatManager;
     private boolean _useUnderapproximatingSemantics = true;
 
     public EdgeConstraintChecker(TemporalConjunctiveQuery tcq, DFA dfa)
     {
-        _cncqSatManager = new SatisfiabilityKnowledgeManager(tcq, dfa);
+        _bcqSatManager = new SatisfiabilityKnowledgeManager(tcq, dfa);
     }
 
     /**
@@ -52,7 +52,7 @@ public class EdgeConstraintChecker
      */
     public SatisfiabilityKnowledgeManager getSatisfiabilityKnowledgeManager()
     {
-        return _cncqSatManager;
+        return _bcqSatManager;
     }
 
     /**
@@ -61,7 +61,7 @@ public class EdgeConstraintChecker
      */
     public void excludeBindings(QueryResult bindings)
     {
-        _cncqSatManager.setGloballyExcludedBindings(bindings);
+        _bcqSatManager.setGloballyExcludedBindings(bindings);
     }
 
     /**
@@ -71,10 +71,10 @@ public class EdgeConstraintChecker
      */
     public boolean isEdgeCompletelyChecked(Edge edge, int timePoint)
     {
-        boolean allCncqsChecked = true;
-        for (CNCQQuery cncq : edge.getCNCQs())
-            allCncqsChecked &= _cncqSatManager.getKnowledgeOnQuery(cncq).isComplete(timePoint);
-        return allCncqsChecked;
+        boolean allBcqsChecked = true;
+        for (BCQQuery bcq : edge.getBCQs())
+            allBcqsChecked &= _bcqSatManager.getKnowledgeOnQuery(bcq).isComplete(timePoint);
+        return allBcqsChecked;
     }
 
     public Map<Bool, QueryResult> checkEdge(Edge edge, int timePoint, KnowledgeBase kb)
@@ -91,35 +91,35 @@ public class EdgeConstraintChecker
      * @param restrictSatToBindings If not null, satisfiability results are restricted to this set of bindings
      * @return A query result for satisfiable and unsatisfiable knowledge, as a mapping from true (satisfiable) and
      * false (unsatisfiable) to a query result.
-     * @throws IOException If CNCQ query engine encountered an IO exception.
-     * @throws InterruptedException If CNCQ query engine was interrupted.
+     * @throws IOException If BCQ query engine encountered an IO exception.
+     * @throws InterruptedException If BCQ query engine was interrupted.
      */
     public Map<Bool, QueryResult> checkEdge(Edge edge, int timePoint, KnowledgeBase kb,
                                             QueryResult restrictSatToBindings)
             throws IOException, InterruptedException
     {
         Map<Bool, QueryResult> result = new HashMap<>();
-        List<CNCQQuery> cncqs = edge.getCNCQs();
-        boolean firstCncq = true;
+        List<BCQQuery> bcqs = edge.getBCQs();
+        boolean firstBcq = true;
         _logger.finer("Checking DFA edge " + edge);
-        // Iterates over all CNCQs on the edge and combines their results.
-        for (CNCQQuery cncq : cncqs)
+        // Iterates over all BCQs on the edge and combines their results.
+        for (BCQQuery bcq : bcqs)
         {
-            // Check CNCQ on the edge by using the CNCQ satisfiability manager (which allows caching of results).
-            Map<Bool, QueryResult> cncqResult = _cncqSatManager.computeSatisfiableBindings(cncq, timePoint, kb,
+            // Check BCQ on the edge by using the BCQ satisfiability manager (which allows caching of results).
+            Map<Bool, QueryResult> bcqResult = _bcqSatManager.computeSatisfiableBindings(bcq, timePoint, kb,
                     _useUnderapproximatingSemantics, restrictSatToBindings);
-            if (firstCncq)
+            if (firstBcq)
             {
-                result.put(Bool.TRUE, cncqResult.get(Bool.TRUE));
-                result.put(Bool.FALSE, cncqResult.get(Bool.FALSE));
-                firstCncq = false;
+                result.put(Bool.TRUE, bcqResult.get(Bool.TRUE));
+                result.put(Bool.FALSE, bcqResult.get(Bool.FALSE));
+                firstBcq = false;
             }
-            // If we have multiple CNCQs on the edge, we take the union for satisfiability results, and intersection for
+            // If we have multiple BCQs on the edge, we take the union for satisfiability results, and intersection for
             // unsatisfiability results.
             else
             {
-                result.get(Bool.TRUE).addAll(cncqResult.get(Bool.TRUE), restrictSatToBindings);
-                result.get(Bool.FALSE).retainAll(cncqResult.get(Bool.FALSE));
+                result.get(Bool.TRUE).addAll(bcqResult.get(Bool.TRUE), restrictSatToBindings);
+                result.get(Bool.FALSE).retainAll(bcqResult.get(Bool.FALSE));
             }
             // Early escape possible (only for satisfiable bindings)
             if (result.get(Bool.TRUE).size() >= result.get(Bool.TRUE).getMaxSize())

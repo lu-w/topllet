@@ -3,8 +3,8 @@ package openllet.tcq.engine;
 import openllet.core.KnowledgeBase;
 import openllet.query.sparqldl.engine.AbstractBooleanQueryEngine;
 import openllet.query.sparqldl.engine.QueryExec;
-import openllet.query.sparqldl.engine.cncq.CNCQQueryEngineSimple;
-import openllet.query.sparqldl.model.cncq.CNCQQuery;
+import openllet.query.sparqldl.engine.bcq.BCQQueryEngineSimple;
+import openllet.query.sparqldl.model.bcq.BCQQuery;
 import openllet.shared.tools.Log;
 import openllet.tcq.engine.automaton.MLTL2DFA;
 import openllet.tcq.model.automaton.DFA;
@@ -30,7 +30,7 @@ public class BooleanTCQEngine extends AbstractBooleanQueryEngine<TemporalConjunc
 {
     public static final Logger _logger = Log.getLogger(BooleanTCQEngine.class);
 
-    private final QueryExec<CNCQQuery> _cncqQueryEngine = new CNCQQueryEngineSimple();
+    private final QueryExec<BCQQuery> _bcqQueryEngine = new BCQQueryEngineSimple();
 
     @Override
     protected boolean execBooleanABoxQuery(TemporalConjunctiveQuery q) throws IOException, InterruptedException
@@ -55,7 +55,7 @@ public class BooleanTCQEngine extends AbstractBooleanQueryEngine<TemporalConjunc
     private boolean _checkDFASatisfiability(DFA dfa, TemporalConjunctiveQuery tcq) throws IOException,
             InterruptedException
     {
-        Timer cncqTimer = new Timer();
+        Timer bcqTimer = new Timer();
         Integer initState = dfa.getInitialState();
         Set<Integer> states = new HashSet<>();
         if (initState != null)
@@ -82,9 +82,9 @@ public class BooleanTCQEngine extends AbstractBooleanQueryEngine<TemporalConjunc
                     List<Edge> edges = dfa.getEdges(state);
                     if (edges.size() == 1)
                     {
-                        List<CNCQQuery> cncqs = edges.get(0).getCNCQs();
+                        List<BCQQuery> bcqs = edges.get(0).getBCQs();
                         int toState = edges.get(0).getToState();
-                        if (cncqs.size() == 1 && cncqs.get(0).isEmpty())
+                        if (bcqs.size() == 1 && bcqs.get(0).isEmpty())
                         {
                             // check if we are in a sink (i.e. state - X -> state)
                             if (toState == state)
@@ -105,7 +105,7 @@ public class BooleanTCQEngine extends AbstractBooleanQueryEngine<TemporalConjunc
                                     continue;
                                 }
                             }
-                            // check if we need to a CNCQ check at all for this edge
+                            // check if we need to a BCQ check at all for this edge
                             else
                             {
                                 newStates.add(toState);
@@ -113,37 +113,37 @@ public class BooleanTCQEngine extends AbstractBooleanQueryEngine<TemporalConjunc
                             }
                         }
                     }
-                    // if we are not in a sink and have some CNCQ to check, we find the successor states
+                    // if we are not in a sink and have some BCQ to check, we find the successor states
                     for (Edge edge : edges)
                     {
                         _logger.finer("\t\tChecking edge " + edge + " to state " + edge.getToState());
                         if (!newStates.contains(edge.getToState()))
                         {
                             boolean edgeSat = false;
-                            for (CNCQQuery cncq : edge.getCNCQs())
+                            for (BCQQuery bcq : edge.getBCQs())
                             {
-                                _logger.finer("\t\t\tChecking CNCQ " + cncq);
-                                if (!cncq.isEmpty())
+                                _logger.finer("\t\t\tChecking BCQ " + bcq);
+                                if (!bcq.isEmpty())
                                 {
-                                    cncq.setKB(letter);
-                                    cncqTimer.start();
-                                    boolean querySat = !_cncqQueryEngine.exec(cncq).isEmpty();
-                                    cncqTimer.stop();
+                                    bcq.setKB(letter);
+                                    bcqTimer.start();
+                                    boolean querySat = !_bcqQueryEngine.exec(bcq).isEmpty();
+                                    bcqTimer.stop();
                                     if (querySat)
                                     {
                                         newStates.add(edge.getToState());
                                         edgeSat = true;
-                                        _logger.finer("\t\t\tCNCQ is satisfiable!");
+                                        _logger.finer("\t\t\tBCQ is satisfiable!");
                                         break;
                                     }
                                     else
-                                        _logger.finer("\t\t\tCNCQ unsatisfiable!");
+                                        _logger.finer("\t\t\tBCQ unsatisfiable!");
                                 }
                                 else
                                 {
                                     newStates.add(edge.getToState());
                                     edgeSat = true;
-                                    _logger.finer("\t\t\tCNCQ empty, therefore trivially satisfied");
+                                    _logger.finer("\t\t\tBCQ empty, therefore trivially satisfied");
                                     break;
                                 }
                             }
@@ -168,8 +168,8 @@ public class BooleanTCQEngine extends AbstractBooleanQueryEngine<TemporalConjunc
                         (isAccepting ? "accepting" : "not accepting"));
             else
                 _logger.fine("DFA accepts the ABoxes due to being trapped in an accepting sink");
-            _logger.fine("Checked a total of " + cncqTimer.getCount() + " CNCQ queries, which took " +
-                    cncqTimer.getTotal() + " ms");
+            _logger.fine("Checked a total of " + bcqTimer.getCount() + " BCQ queries, which took " +
+                    bcqTimer.getTotal() + " ms");
             return isAccepting;
         }
         else

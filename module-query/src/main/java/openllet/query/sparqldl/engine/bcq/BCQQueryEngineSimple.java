@@ -1,31 +1,31 @@
-package openllet.query.sparqldl.engine.cncq;
+package openllet.query.sparqldl.engine.bcq;
 
 import openllet.core.utils.Bool;
 import openllet.query.sparqldl.engine.QueryBindingCandidateGenerator;
 import openllet.query.sparqldl.engine.QueryResultBasedBindingCandidateGenerator;
-import openllet.query.sparqldl.model.cncq.CNCQQuery;
+import openllet.query.sparqldl.model.bcq.BCQQuery;
 import openllet.query.sparqldl.model.results.*;
 
 import java.io.IOException;
 import java.util.logging.Level;
 
-public class CNCQQueryEngineSimple extends AbstractCNCQQueryEngine
+public class BCQQueryEngineSimple extends AbstractBCQQueryEngine
 {
-    private AbstractSemiBooleanCNCQEngine _semiBooleanEngine;
+    private AbstractSemiBooleanBCQEngine _semiBooleanEngine;
 
-    public CNCQQueryEngineSimple()
+    public BCQQueryEngineSimple()
     {
         super();
-        this._semiBooleanEngine = new SemiBooleanCNCQEngineSimple();
+        this._semiBooleanEngine = new SemiBooleanBCQEngineSimple();
     }
 
-    public void setBooleanEngine(AbstractSemiBooleanCNCQEngine booleanEngine)
+    public void setBooleanEngine(AbstractSemiBooleanBCQEngine booleanEngine)
     {
         this._semiBooleanEngine = booleanEngine;
     }
 
     @Override
-    protected QueryResult execABoxQuery(CNCQQuery q, QueryResult excludeBindings, QueryResult restrictToBindings)
+    protected QueryResult execABoxQuery(BCQQuery q, QueryResult excludeBindings, QueryResult restrictToBindings)
             throws IOException, InterruptedException
     {
         QueryResult result;
@@ -44,11 +44,11 @@ public class CNCQQueryEngineSimple extends AbstractCNCQQueryEngine
             {
                 if (_logger.isLoggable(Level.FINE))
                     _logger.fine("Trying candidate binding for positive part: " + candidateBinding);
-                CNCQQuery partiallyBoundQuery = q.apply(candidateBinding);
+                BCQQuery partiallyBoundQuery = q.apply(candidateBinding);
                 QueryResult partialResult = _semiBooleanEngine.exec(partiallyBoundQuery, excludeBindings,
                         restrictToBindings);
                 if (_logger.isLoggable(Level.FINE))
-                    _logger.fine("Boolean CNCQ engine returned: " + (partialResult.isEmpty() ? "false" : "true"));
+                    _logger.fine("Boolean BCQ engine returned: " + (partialResult.isEmpty() ? "false" : "true"));
                 // We may have gotten n > 0 bindings from the semi-Boolean engine, create a copy and merge curr. binding
                 for (ResultBinding binding : partialResult)
                 {
@@ -65,7 +65,7 @@ public class CNCQQueryEngineSimple extends AbstractCNCQQueryEngine
     }
 
     @Override
-    public QueryResult exec(CNCQQuery query, QueryResult excludeBindings, QueryResult restrictToBindings)
+    public QueryResult exec(BCQQuery query, QueryResult excludeBindings, QueryResult restrictToBindings)
             throws IOException, InterruptedException
     {
         return execABoxQuery(query, excludeBindings, restrictToBindings);

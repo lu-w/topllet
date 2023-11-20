@@ -1,4 +1,4 @@
-package openllet.query.sparqldl.model.cncq;
+package openllet.query.sparqldl.model.bcq;
 
 import openllet.aterm.ATermAppl;
 import openllet.core.KnowledgeBase;
@@ -11,17 +11,17 @@ import openllet.query.sparqldl.model.results.ResultBinding;
 
 import java.util.*;
 
-public class CNCQQueryImpl extends AbstractCompositeQuery<ConjunctiveQuery, CNCQQuery> implements CNCQQuery
+public class BCQQueryImpl extends AbstractCompositeQuery<ConjunctiveQuery, BCQQuery> implements BCQQuery
 {
     List<ConjunctiveQuery> _positiveQueries = new ArrayList<>();
     List<ConjunctiveQuery> _negativeQueries = new ArrayList<>();
 
-    public CNCQQueryImpl(KnowledgeBase kb, boolean distinct)
+    public BCQQueryImpl(KnowledgeBase kb, boolean distinct)
     {
         super(kb, distinct);
     }
 
-    public CNCQQueryImpl(Query<?> q)
+    public BCQQueryImpl(Query<?> q)
     {
         super(q);
     }
@@ -33,9 +33,9 @@ public class CNCQQueryImpl extends AbstractCompositeQuery<ConjunctiveQuery, CNCQ
     }
 
     @Override
-    public List<CNCQQuery> split()
+    public List<BCQQuery> split()
     {
-        // TODO: implement splitting for CNCQQueries and adapt CNCQEngine to handle splitting queries
+        // TODO: implement splitting for BCQQueries and adapt BCQEngine to handle splitting queries
         return List.of(this);
     }
 
@@ -91,9 +91,9 @@ public class CNCQQueryImpl extends AbstractCompositeQuery<ConjunctiveQuery, CNCQ
     }
 
     @Override
-    public CNCQQuery apply(final ResultBinding binding)
+    public BCQQuery apply(final ResultBinding binding)
     {
-        final CNCQQuery query = copy();
+        final BCQQuery query = copy();
         for (ATermAppl var : binding.getAllVariables())
             query.removeDistVar(var);
         query.setNegativeQueries(new ArrayList<>());
@@ -107,9 +107,9 @@ public class CNCQQueryImpl extends AbstractCompositeQuery<ConjunctiveQuery, CNCQ
     }
 
     @Override
-    public CNCQQuery copy()
+    public BCQQuery copy()
     {
-        CNCQQuery copy = new CNCQQueryImpl(this);
+        BCQQuery copy = new BCQQueryImpl(this);
         for (ConjunctiveQuery q : getPositiveQueries())
             copy.addPositiveQuery(q.copy());
         for (ConjunctiveQuery q : getNegativeQueries())
@@ -167,8 +167,8 @@ public class CNCQQueryImpl extends AbstractCompositeQuery<ConjunctiveQuery, CNCQ
         return unconstrainedVars;
     }
 
-    public CNCQQuery createQuery(KnowledgeBase kb, boolean isDistinct)
+    public BCQQuery createQuery(KnowledgeBase kb, boolean isDistinct)
     {
-        return new CNCQQueryImpl(kb, isDistinct);
+        return new BCQQueryImpl(kb, isDistinct);
     }
 }

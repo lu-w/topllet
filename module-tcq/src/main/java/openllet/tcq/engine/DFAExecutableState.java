@@ -3,7 +3,7 @@ package openllet.tcq.engine;
 import openllet.core.KnowledgeBase;
 import openllet.core.utils.Bool;
 import openllet.core.utils.Timer;
-import openllet.query.sparqldl.model.cncq.CNCQQuery;
+import openllet.query.sparqldl.model.bcq.BCQQuery;
 import openllet.query.sparqldl.model.results.QueryResult;
 import openllet.query.sparqldl.model.results.QueryResultImpl;
 import openllet.query.sparqldl.model.results.ResultBinding;
@@ -196,10 +196,10 @@ public class DFAExecutableState
 
     /**
      * Execute this state, i.e., it checks all edges of the current state and propagates (un)satisfiability knowledge
-     * according to the (un)satisfiability of the CNCQs on the edges. Thus, a new collection of new states is created.
+     * according to the (un)satisfiability of the BCQs on the edges. Thus, a new collection of new states is created.
      * @return The new collection of states after execution.
-     * @throws IOException If CNCQ query engine encountered an IO exception.
-     * @throws InterruptedException If CNCQ query engine was interrupted.
+     * @throws IOException If BCQ query engine encountered an IO exception.
+     * @throws InterruptedException If BCQ query engine was interrupted.
      */
     public Collection<DFAExecutableState> execute() throws IOException, InterruptedException
     {
@@ -227,7 +227,7 @@ public class DFAExecutableState
             List<Edge> edges = _dfa.getEdges(_dfaState);
             Map<ResultBinding, Integer> bindingsUnsatCount = new HashMap<>();
             Map<Edge, Map<Bool, QueryResult>> edgeResults = new HashMap<>();
-            // Checks each edge, i.e., finds (un)satisfiable bindings for the union of the CNCQs on the edge.
+            // Checks each edge, i.e., finds (un)satisfiable bindings for the union of the BCQs on the edge.
             for (Edge edge : edges)
             {
                 Map<Bool, QueryResult> edgeResult = _edgeChecker.checkEdge(edge, _timePoint, _kb,
@@ -263,7 +263,7 @@ public class DFAExecutableState
 
             // This is an optimization:
             // Iterates through all bindings that have an unsatisfiability count for |Edges|-1. For those, we know that
-            // the missing edge *has* to be satisfiable. We add this to the new states and inform the CNCQ sat. manager.
+            // the missing edge *has* to be satisfiable. We add this to the new states and inform the BCQ sat. manager.
             for (ResultBinding binding : bindingsUnsatCount.keySet())
                 if (bindingsUnsatCount.get(binding) == edges.size() - 1 &&
                         (restrictSatToBindings == null || restrictSatToBindings.contains(binding)))
@@ -271,11 +271,11 @@ public class DFAExecutableState
                         if (!edgeResults.get(edge).get(Bool.TRUE).contains(binding) &&
                                 !edgeResults.get(edge).get(Bool.FALSE).contains(binding))
                         {
-                            for (CNCQQuery cncq : edge.getCNCQs())
+                            for (BCQQuery bcq : edge.getBCQs())
                             {
-                                QueryResult satResult = new QueryResultImpl(cncq);
+                                QueryResult satResult = new QueryResultImpl(bcq);
                                 satResult.add(binding);
-                                _edgeChecker.getSatisfiabilityKnowledgeManager().getKnowledgeOnQuery(cncq).
+                                _edgeChecker.getSatisfiabilityKnowledgeManager().getKnowledgeOnQuery(bcq).
                                         informAboutSatisfiability(satResult, true, _timePoint);
                                 for (DFAExecutableState newState : newExecutableStates)
                                     if (edge.getToState() == newState._dfaState)

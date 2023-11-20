@@ -1,9 +1,8 @@
 package openllet.test.query;
 
 import openllet.aterm.ATermAppl;
-import openllet.core.boxes.abox.ABox;
 import openllet.core.exceptions.InconsistentOntologyException;
-import openllet.query.sparqldl.model.cncq.CNCQQuery;
+import openllet.query.sparqldl.model.bcq.BCQQuery;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
@@ -13,7 +12,7 @@ import static openllet.core.utils.TermFactory.*;
 import static openllet.query.sparqldl.model.cq.QueryAtomFactory.PropertyValueAtom;
 import static openllet.query.sparqldl.model.cq.QueryAtomFactory.TypeAtom;
 
-public class TestCNCQueries extends AbstractQueryTest
+public class TestBCQueries extends AbstractQueryTest
 {
     private void setupKB1()
     {
@@ -34,7 +33,7 @@ public class TestCNCQueries extends AbstractQueryTest
     public void testSimpleQueries1()
     {
         setupKB1();
-        CNCQQuery cncqq1 = cncqQuery(
+        BCQQuery bcqq1 = bcqQuery(
             select(x, y, z),
             where(
                 query(TypeAtom(x, _B), PropertyValueAtom(x, _r, y)),
@@ -42,82 +41,82 @@ public class TestCNCQueries extends AbstractQueryTest
             )
         );
         List<List<ATermAppl>> res = allResults(List.of(_a, _b, _c), 3, false);
-        testQuery(cncqq1, res);
+        testQuery(bcqq1, res);
     }
 
     @Test
     public void testSimpleQueries2()
     {
         setupKB1();
-        CNCQQuery cncqq = cncqQuery(
+        BCQQuery bcqq = bcqQuery(
             select(x),
             where(
                 query(TypeAtom(_a, _C), PropertyValueAtom(_a, _r, x))
             )
         );
-        testQuery(cncqq);
+        testQuery(bcqq);
     }
 
     @Test
     public void testSimpleQueries3()
     {
         setupKB1();
-        CNCQQuery cncqq = cncqQuery(
+        BCQQuery bcqq = bcqQuery(
             select(x),
             where(
                 query(TypeAtom(x, _C))
             )
         );
-        testQuery(cncqq, new ATermAppl[][] { {_b}, {_c} });
+        testQuery(bcqq, new ATermAppl[][] { {_b}, {_c} });
     }
 
     @Test
     public void testSimpleQueries4()
     {
         setupKB1();
-        CNCQQuery cncqq = cncqQuery(
+        BCQQuery bcqq = bcqQuery(
             select(x, y),
             where(
                 query(TypeAtom(x, _C)),
                 negatedQuery(PropertyValueAtom(x, _r, y))
             )
         );
-        testQuery(cncqq, new ATermAppl[][] { {_b, _a}, {_b, _b}, {_b, _c}, {_c, _a}, {_c, _b}, {_c, _c} });
+        testQuery(bcqq, new ATermAppl[][] { {_b, _a}, {_b, _b}, {_b, _c}, {_c, _a}, {_c, _b}, {_c, _c} });
     }
 
     @Test
     public void testSimpleQueries5()
     {
         setupKB1();
-        CNCQQuery cncqq = cncqQuery(
+        BCQQuery bcqq = bcqQuery(
             select(x),
             where(
                 query(TypeAtom(x, _A)),
                 negatedQuery(TypeAtom(x, _C), PropertyValueAtom(x, _r, _b))
             )
         );
-        testQuery(cncqq, new ATermAppl[][] { {_a}, {_c} });
+        testQuery(bcqq, new ATermAppl[][] { {_a}, {_c} });
     }
 
     @Test
     public void testVarOnlyInNegativePart()
     {
         setupKB1();
-        CNCQQuery cncqq = cncqQuery(
+        BCQQuery bcqq = bcqQuery(
                 select(x, y),
                 where(
                         query(TypeAtom(x, _A)),
                         negatedQuery(TypeAtom(y, _C), PropertyValueAtom(y, _r, _b))
                 )
         );
-        testQuery(cncqq, new ATermAppl[][] { {_a, _a}, {_a, _b}, {_a, _c}, {_c, _a}, {_c, _b}, {_c, _c} });
+        testQuery(bcqq, new ATermAppl[][] { {_a, _a}, {_a, _b}, {_a, _c}, {_c, _a}, {_c, _b}, {_c, _c} });
     }
 
     @Test
     public void testMultipleNegations1()
     {
         setupKB1();
-        CNCQQuery cncqq = cncqQuery(
+        BCQQuery bcqq = bcqQuery(
             select(x),
             where(
                 query(TypeAtom(x, _A)),
@@ -126,14 +125,14 @@ public class TestCNCQueries extends AbstractQueryTest
                 negatedQuery(TypeAtom(x, not(_D)), PropertyValueAtom(x, _r, _b))
             )
         );
-        testQuery(cncqq, new ATermAppl[][] { {_c} });
+        testQuery(bcqq, new ATermAppl[][] { {_c} });
     }
 
     @Test
     public void testMultipleNegations2()
     {
         setupKB1();
-        CNCQQuery cncqq = cncqQuery(
+        BCQQuery bcqq = bcqQuery(
             select(x, y),
             where(
                 query(TypeAtom(x, _A)),
@@ -144,14 +143,14 @@ public class TestCNCQueries extends AbstractQueryTest
                 negatedQuery(TypeAtom(y, _D))
             )
         );
-        testQuery(cncqq, new ATermAppl[][] { {_c, _a}, {_c, _c} });
+        testQuery(bcqq, new ATermAppl[][] { {_c, _a}, {_c, _c} });
     }
 
     @Test
     public void testMultipleNegations3()
     {
         setupKB1();
-        CNCQQuery cncqq = cncqQuery(
+        BCQQuery bcqq = bcqQuery(
                 select(x, y, z),
                 where(
                         query(TypeAtom(z, _E)),
@@ -163,7 +162,7 @@ public class TestCNCQueries extends AbstractQueryTest
                         negatedQuery(TypeAtom(y, _D))
                 )
         );
-        testQuery(cncqq, new ATermAppl[][] { {_c, _a, _a}, {_c, _c, _a}, {_c, _a, _b}, {_c, _c, _b}, {_c, _a, _c},
+        testQuery(bcqq, new ATermAppl[][] { {_c, _a, _a}, {_c, _c, _a}, {_c, _a, _b}, {_c, _c, _b}, {_c, _a, _c},
                 {_c, _c, _c} });
     }
 
@@ -171,7 +170,7 @@ public class TestCNCQueries extends AbstractQueryTest
     public void testUnconstrainedResultVar()
     {
         setupKB1();
-        CNCQQuery cncqq = cncqQuery(
+        BCQQuery bcqq = bcqQuery(
                 select(x, y, z),
                 where(
                         query(TypeAtom(x, _A)),
@@ -182,7 +181,7 @@ public class TestCNCQueries extends AbstractQueryTest
                         negatedQuery(TypeAtom(y, _D))
                 )
         );
-        testQuery(cncqq, new ATermAppl[][] { {_c, _a, _a}, {_c, _c, _a}, {_c, _a, _b}, {_c, _c, _b}, {_c, _a, _c},
+        testQuery(bcqq, new ATermAppl[][] { {_c, _a, _a}, {_c, _c, _a}, {_c, _a, _b}, {_c, _c, _b}, {_c, _a, _c},
                 {_c, _c, _c} });
     }
 
@@ -190,21 +189,21 @@ public class TestCNCQueries extends AbstractQueryTest
     public void testUndistVars1()
     {
         setupKB1();
-        CNCQQuery cncqq = cncqQuery(
+        BCQQuery bcqq = bcqQuery(
             select(x),
             where(
                 query(TypeAtom(x, _A)),
                 negatedQuery(TypeAtom(x, _C), PropertyValueAtom(x, _r, y))
             )
         );
-        testQuery(cncqq, new ATermAppl[][] { {_a}, {_c} });
+        testQuery(bcqq, new ATermAppl[][] { {_a}, {_c} });
     }
 
     @Test
     public void testUndistVars2()
     {
         setupKB1();
-        CNCQQuery cncqq = cncqQuery(
+        BCQQuery bcqq = bcqQuery(
             select(x, y),
             where(
                 query(TypeAtom(x, _A)),
@@ -215,7 +214,7 @@ public class TestCNCQueries extends AbstractQueryTest
                 negatedQuery(TypeAtom(y, _D))
             )
         );
-        testQuery(cncqq, new ATermAppl[][] { {_c, _a}, {_c, _c} });
+        testQuery(bcqq, new ATermAppl[][] { {_c, _a}, {_c, _c} });
     }
 
     @Test
@@ -229,14 +228,14 @@ public class TestCNCQueries extends AbstractQueryTest
         _kb.addType(_c, not(_A));
         _kb.addEquivalentClass(_A, value(_a));
 
-        CNCQQuery cncqq = cncqQuery(
+        BCQQuery bcqq = bcqQuery(
             select(x),
             where(
                 query(TypeAtom(x, _A)),
                 query(TypeAtom(y, _A))
             )
         );
-        testQuery(cncqq, new ATermAppl[][] { {_a} });
+        testQuery(bcqq, new ATermAppl[][] { {_a} });
     }
 
     @Test
@@ -246,13 +245,13 @@ public class TestCNCQueries extends AbstractQueryTest
         classes(_A, _B);
         _kb.addType(_a, or(_A, not(_A)));
 
-        CNCQQuery cncqq = cncqQuery(select(x), where(query(TypeAtom(x, _B))));
+        BCQQuery bcqq = bcqQuery(select(x), where(query(TypeAtom(x, _B))));
 
-        testQuery(cncqq, new ATermAppl[][] { {_a}, {_b} });
+        testQuery(bcqq, new ATermAppl[][] { {_a}, {_b} });
 
         _kb.addType(_b, not(_B));
 
-        testQuery(cncqq, new ATermAppl[][] { {_a} });
+        testQuery(bcqq, new ATermAppl[][] { {_a} });
     }
 
 
@@ -263,16 +262,16 @@ public class TestCNCQueries extends AbstractQueryTest
         classes(_A, _B);
         _kb.addType(_a, and(_A, not(_A)));
 
-        CNCQQuery cncqq = cncqQuery(select(x), where(query(TypeAtom(x, _B))));
+        BCQQuery bcqq = bcqQuery(select(x), where(query(TypeAtom(x, _B))));
 
-        assertThrows(InconsistentOntologyException.class, () -> testQuery(cncqq));
+        assertThrows(InconsistentOntologyException.class, () -> testQuery(bcqq));
     }
 
     @Test
     public void testMultipleExecsOnSameKB()
     {
         setupKB1();
-        CNCQQuery cncqq1 = cncqQuery(
+        BCQQuery bcqq1 = bcqQuery(
                 select(x),
                 where(
                         query(TypeAtom(x, _B), PropertyValueAtom(x, _r, y)),
@@ -284,17 +283,17 @@ public class TestCNCQueries extends AbstractQueryTest
         int prpCount = _kb.getProperties().size();
         int ndsCount = _kb.getABox().size();
         List<List<ATermAppl>> res = List.of(List.of(_a), List.of(_b), List.of(_c));
-        testQuery(cncqq1, res);
+        testQuery(bcqq1, res);
         assertEquals(_kb.getIndividualsCount(), indCount);
         assertEquals(_kb.getClasses().size(), clsCount);
         assertEquals(_kb.getProperties().size(), prpCount);
         assertEquals(_kb.getABox().size(), ndsCount + 1); // one anon node is created by the reasoner due to exist
-        testQuery(cncqq1, res);
+        testQuery(bcqq1, res);
         assertEquals(_kb.getIndividualsCount(), indCount);
         assertEquals(_kb.getClasses().size(), clsCount);
         assertEquals(_kb.getProperties().size(), prpCount);
         assertEquals(_kb.getABox().size(), ndsCount + 1);
-        testQuery(cncqq1, res);
+        testQuery(bcqq1, res);
         assertEquals(_kb.getIndividualsCount(), indCount);
         assertEquals(_kb.getClasses().size(), clsCount);
         assertEquals(_kb.getProperties().size(), prpCount);
@@ -322,7 +321,7 @@ public class TestCNCQueries extends AbstractQueryTest
         _kb.addType(oedipus, Patricide);
         _kb.addType(thersandros, not(Patricide));
 
-        CNCQQuery cncqq1 = cncqQuery(
+        BCQQuery bcqq1 = bcqQuery(
             select(x, y, x1, y1),
             where(
                 negatedQuery(TypeAtom(x, Patricide), PropertyValueAtom(iokaste, hasChild, x),
@@ -331,14 +330,14 @@ public class TestCNCQueries extends AbstractQueryTest
                     TypeAtom(y1, not(Patricide)), PropertyValueAtom(x1, hasChild, y1))
             )
         );
-        CNCQQuery cncqq2 = cncqQuery(
+        BCQQuery bcqq2 = bcqQuery(
             select(x, y),
             where(
                 negatedQuery(TypeAtom(x, Patricide), PropertyValueAtom(iokaste, hasChild, x),
                     TypeAtom(y, not(Patricide)), PropertyValueAtom(x, hasChild, y))
             )
         );
-        CNCQQuery cncqq3 = cncqQuery(
+        BCQQuery bcqq3 = bcqQuery(
             select(x, y),
             where(
                 query(TypeAtom(x, Patricide), PropertyValueAtom(iokaste, hasChild, x),
@@ -355,9 +354,9 @@ public class TestCNCQueries extends AbstractQueryTest
             )
         );
 
-        testQuery(cncqq1, res1);
-        testQuery(cncqq2, allResults(List.of(oedipus, iokaste, polyneikes, thersandros), 2, false));
-        testQuery(cncqq3, new ATermAppl[][]
+        testQuery(bcqq1, res1);
+        testQuery(bcqq2, allResults(List.of(oedipus, iokaste, polyneikes, thersandros), 2, false));
+        testQuery(bcqq3, new ATermAppl[][]
             {
                 {oedipus, thersandros},
                 {iokaste, thersandros},

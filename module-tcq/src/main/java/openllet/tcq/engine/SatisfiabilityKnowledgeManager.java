@@ -4,11 +4,11 @@ import openllet.core.KnowledgeBase;
 import openllet.core.OpenlletOptions;
 import openllet.core.utils.Bool;
 import openllet.query.sparqldl.engine.QueryExec;
-import openllet.query.sparqldl.engine.cncq.AbstractCNCQQueryEngine;
-import openllet.query.sparqldl.engine.cncq.CNCQQueryEngineSimple;
+import openllet.query.sparqldl.engine.bcq.AbstractBCQQueryEngine;
+import openllet.query.sparqldl.engine.bcq.BCQQueryEngineSimple;
 import openllet.query.sparqldl.engine.cq.QueryEngine;
 import openllet.query.sparqldl.model.Query;
-import openllet.query.sparqldl.model.cncq.CNCQQuery;
+import openllet.query.sparqldl.model.bcq.BCQQuery;
 import openllet.query.sparqldl.model.cq.ConjunctiveQuery;
 import openllet.query.sparqldl.model.results.MultiQueryResults;
 import openllet.query.sparqldl.model.results.QueryResult;
@@ -26,7 +26,7 @@ import java.util.logging.Logger;
 import java.util.stream.IntStream;
 
 /**
- * Manages the satisfiability knowledge for all CNCQs and time points.
+ * Manages the satisfiability knowledge for all BCQs and time points.
  * Due to its global scope, it can propagate satisfiability information around, e.g. connecting satisfiability of a
  * query with the unsatisfiability of its negation.
  * It can also propagate knowledge around based on similarities of ABoxes to certain time points.
@@ -45,13 +45,13 @@ public class SatisfiabilityKnowledgeManager
      */
     protected static class SatisfiabilityStats
     {
-        private final Map<Integer, Map<CNCQQuery, Double>> _percentagesOfIncludedBindings = new HashMap<>();
+        private final Map<Integer, Map<BCQQuery, Double>> _percentagesOfIncludedBindings = new HashMap<>();
 
-        protected void informAboutBindingInclusion(int timePoint, CNCQQuery query, double ratioOfIncludedBindings)
+        protected void informAboutBindingInclusion(int timePoint, BCQQuery query, double ratioOfIncludedBindings)
         {
             if (!_percentagesOfIncludedBindings.containsKey(timePoint))
                 _percentagesOfIncludedBindings.put(timePoint, new HashMap<>());
-            Map<CNCQQuery, Double> map = _percentagesOfIncludedBindings.get(timePoint);
+            Map<BCQQuery, Double> map = _percentagesOfIncludedBindings.get(timePoint);
             if (!map.containsKey(query))
                 map.put(query, 100 * ratioOfIncludedBindings);
             else
@@ -63,11 +63,11 @@ public class SatisfiabilityKnowledgeManager
         public String toString()
         {
             StringBuilder res = new StringBuilder("Already gathered satisfiability knowledge from CQ engine:\n");
-            // avg. over CNCQ sat. for each time point
+            // avg. over BCQ sat. for each time point
             List<Double> avgs = new ArrayList<>();
             for (Integer t : _percentagesOfIncludedBindings.keySet())
             {
-                Map<CNCQQuery, Double> map = _percentagesOfIncludedBindings.get(t);
+                Map<BCQQuery, Double> map = _percentagesOfIncludedBindings.get(t);
                 double avgSat = map.values().stream().mapToDouble(val -> val).average().orElse(0.0);
                 avgs.add(avgSat);
                 res.append(String.format("t=" + t + ": %.6f\n", avgSat));
@@ -81,7 +81,7 @@ public class SatisfiabilityKnowledgeManager
     private SubQuerySelectionStrategy _strategy = SubQuerySelectionStrategy.LIGHTWEIGHT;
     private final TemporalConjunctiveQuery _tcq;
     private final List<SatisfiabilityKnowledge> _knowledges = new ArrayList<>();
-    private final AbstractCNCQQueryEngine _cncqEngine = new CNCQQueryEngineSimple();
+    private final AbstractBCQQueryEngine _bcqEngine = new BCQQueryEngineSimple();
     private final QueryExec<ConjunctiveQuery> _cqEngine = new QueryEngine();
     private final Map<Integer, List<ConjunctiveQuery>> _cqCache = new HashMap<>();
     private QueryResult _globallyIncludeBindings;
@@ -98,12 +98,12 @@ public class SatisfiabilityKnowledgeManager
         _globallyIncludeBindings = new QueryResultImpl(query).invert();
         for (int state: dfa.getStates())
             for (Edge edge : dfa.getEdges(state))
-                for (CNCQQuery cncq : edge.getCNCQs())
+                for (BCQQuery bcq : edge.getBCQs())
                 {
-                    SatisfiabilityKnowledge newKnowledge = new SatisfiabilityKnowledge(cncq, _tcq);
-                    if (cncq.isEmpty())
+                    SatisfiabilityKnowledge newKnowledge = new SatisfiabilityKnowledge(bcq, _tcq);
+                    if (bcq.isEmpty())
                     {
-                        QueryResult allBindings = new QueryResultImpl(cncq).invert();
+                        QueryResult allBindings = new QueryResultImpl(bcq).invert();
                         newKnowledge.informAboutSatisfiability(allBindings, true,
                                 IntStream.rangeClosed(0, query.getTemporalKB().size()).boxed().toList());
                         for (int i = 0; i < query.getTemporalKB().size(); i++)
@@ -133,26 +133,26 @@ public class SatisfiabilityKnowledgeManager
     }
 
     /**
-     * Fetches the knowledge the manager currently has for the given CNCQ at the time point. For this, it possibly
+     * Fetches the knowledge the manager currently has for the given BCQ at the time point. For this, it possibly
      * transfers knowledge from the previous time point to the given time point, if
-     * `OpenlletOptions.TCQ_ENGINE_TEMPORAL_CNCQ_TRANSFER` is true.
-     * @param query The CNCQ to get the knowledge for.
+     * `OpenlletOptions.TCQ_ENGINE_TEMPORAL_BCQ_TRANSFER` is true.
+     * @param query The BCQ to get the knowledge for.
      * @param timePoint Time point to get the knowledge for.
-     * @return The satisfiability knowledge for the given CNCQ and time point.
+     * @return The satisfiability knowledge for the given BCQ and time point.
      */
-    public SatisfiabilityKnowledge transferAndGetKnowledgeOnQuery(CNCQQuery query, int timePoint)
+    public SatisfiabilityKnowledge transferAndGetKnowledgeOnQuery(BCQQuery query, int timePoint)
     {
         SatisfiabilityKnowledge knowledge = getKnowledgeOnQuery(query);
-        if (OpenlletOptions.TCQ_ENGINE_TEMPORAL_CNCQ_TRANSFER && knowledge != null)
+        if (OpenlletOptions.TCQ_ENGINE_TEMPORAL_BCQ_TRANSFER && knowledge != null)
             knowledge.transferKnowledgeFromPreviousStepTo(timePoint);
         return knowledge;
     }
 
     /**
-     * @param query The CNCQ to get the knowledge for.
-     * @return The satisfiability knowledge the manager currently has on the given CNCQ. Can be null if there is none.
+     * @param query The BCQ to get the knowledge for.
+     * @return The satisfiability knowledge the manager currently has on the given BCQ. Can be null if there is none.
      */
-    public @Nullable SatisfiabilityKnowledge getKnowledgeOnQuery(CNCQQuery query)
+    public @Nullable SatisfiabilityKnowledge getKnowledgeOnQuery(BCQQuery query)
     {
         for (SatisfiabilityKnowledge knowledge : _knowledges)
             if (knowledge.getQuery() == query)
@@ -161,13 +161,13 @@ public class SatisfiabilityKnowledgeManager
     }
 
     /**
-     * Given a CNCQ, this function extracts the CQs that are checked by the manager if in underapproximating mode, based
+     * Given a BCQ, this function extracts the CQs that are checked by the manager if in underapproximating mode, based
      * on the SubQuerySelectionStrategy. If Lightweight, it extracts all negative sub-CQs and the CQ representing the
      * conjunction of all positive sub-CQs. If AMAP, all positive sub-CQs are included as well.
-     * @param query The CNCQ to extract CQs from.
-     * @return A collection of CQs extracted from the CNCQ.
+     * @param query The BCQ to extract CQs from.
+     * @return A collection of CQs extracted from the BCQ.
      */
-    private Collection<ConjunctiveQuery> getCandidatesForCheckingUnderapproximatingSemantics(CNCQQuery query)
+    private Collection<ConjunctiveQuery> getCandidatesForCheckingUnderapproximatingSemantics(BCQQuery query)
     {
         Set<ConjunctiveQuery> candidates = new HashSet<>();
         if (!query.getPositiveQueries().isEmpty())
@@ -190,7 +190,7 @@ public class SatisfiabilityKnowledgeManager
     }
 
     /**
-     * Propagates the entailed result for a CQ to the CNCQs that are managed by this manager. Thus, it modifies the
+     * Propagates the entailed result for a CQ to the BCQs that are managed by this manager. Thus, it modifies the
      * entries of the _knowledges list to contain new information on (un)satisfiability.
      * @param query The CQ for which the entailed result was gained.
      * @param entailedResult The certain answers to the given query.
@@ -198,7 +198,7 @@ public class SatisfiabilityKnowledgeManager
      */
     private void propagateKnowledge(ConjunctiveQuery query, QueryResult entailedResult, int timePoint)
     {
-        // Implements "transferability" from CQ entailment to CNCQ satisfiability.
+        // Implements "transferability" from CQ entailment to BCQ satisfiability.
         for (SatisfiabilityKnowledge knowledge : _knowledges)
         {
             if (knowledge.getQuery().getNegativeQueries().isEmpty())
@@ -275,16 +275,16 @@ public class SatisfiabilityKnowledgeManager
     }
 
     /**
-     * A wrapper around the CNCQ engine. Executes the query for the knowledge base at the given time point and
+     * A wrapper around the BCQ engine. Executes the query for the knowledge base at the given time point and
      * propagates the gained knowledge within this knowledge manager.
-     * @param query The CNCQ to answer.
+     * @param query The BCQ to answer.
      * @param timePoint The time point for which the query is executed.
-     * @param knowledgeOnQuery Already gathered knowledge on the CNCQ from a possible previous run with the CQ engine.
+     * @param knowledgeOnQuery Already gathered knowledge on the BCQ from a possible previous run with the CQ engine.
      * @param restrictSatToBindings If not null, satisfiability results are restricted to this set of bindings
-     * @throws IOException If CNCQ query engine encountered an IO exception.
-     * @throws InterruptedException If CNCQ query engine was interrupted.
+     * @throws IOException If BCQ query engine encountered an IO exception.
+     * @throws InterruptedException If BCQ query engine was interrupted.
      */
-    private void execCNCQQueryEngine(CNCQQuery query, int timePoint, SatisfiabilityKnowledge knowledgeOnQuery,
+    private void execBCQQueryEngine(BCQQuery query, int timePoint, SatisfiabilityKnowledge knowledgeOnQuery,
                                      QueryResult restrictSatToBindings) throws IOException, InterruptedException
     {
         QueryResult restrictTo;
@@ -322,7 +322,7 @@ public class SatisfiabilityKnowledgeManager
         _stats.informAboutBindingInclusion(timePoint, query, restrictToStatsSize);
         if (!restrictTo.isEmpty())
         {
-            QueryResult result = _cncqEngine.exec(query, null, restrictTo);
+            QueryResult result = _bcqEngine.exec(query, null, restrictTo);
             if (!restrictedSatBindingsInRestrictTo)
                 result.retainAll(restrictSatToBindings);
             knowledgeOnQuery.informAboutSatisfiability(result, true, timePoint);
@@ -334,17 +334,17 @@ public class SatisfiabilityKnowledgeManager
     /**
      * This is the main entry point to the satisfiability knowledge manager.
      * Computes and returns the satisfiable answers of the given query w.r.t. the givne knowledge base.
-     * @param query The CNCQ to compute satisfiability for.
+     * @param query The BCQ to compute satisfiability for.
      * @param timePoint The time point from which the given knowledge base is.
      * @param kb The knowledge base to compute satisfiable answers for.
      * @param useUnderapproximatingSemantics If true, uses only the CQ engine to compute answers.
      * @param restrictSatToBindings Restricts satisfiable answers to the given set of bindings, if not null.
      * @return A query result for satisfiable and unsatisfiable knowledge, as a mapping from true (satisfiable) and
      * false (unsatisfiable) to a query result.
-     * @throws IOException If CNCQ query engine encountered an IO exception.
-     * @throws InterruptedException If CNCQ query engine was interrupted.
+     * @throws IOException If BCQ query engine encountered an IO exception.
+     * @throws InterruptedException If BCQ query engine was interrupted.
      */
-    public Map<Bool, QueryResult> computeSatisfiableBindings(CNCQQuery query, int timePoint, KnowledgeBase kb,
+    public Map<Bool, QueryResult> computeSatisfiableBindings(BCQQuery query, int timePoint, KnowledgeBase kb,
                                                              boolean useUnderapproximatingSemantics,
                                                              QueryResult restrictSatToBindings)
             throws IOException, InterruptedException
@@ -353,18 +353,18 @@ public class SatisfiabilityKnowledgeManager
         SatisfiabilityKnowledge knowledgeOnQuery = transferAndGetKnowledgeOnQuery(query, timePoint);
         if (knowledgeOnQuery != null)
         {
-            // Case 1: We use the CQ engine only and have not checked the CNCQ previously.
+            // Case 1: We use the CQ engine only and have not checked the BCQ previously.
             if (useUnderapproximatingSemantics && knowledgeOnQuery.isEmpty(timePoint))
             {
                 _logger.finer("Calling CQ engine for " + query);
                 for (ConjunctiveQuery subQuery : getCandidatesForCheckingUnderapproximatingSemantics(query))
                     execConjunctiveQueryEngine(subQuery, timePoint);
             }
-            // Case 2: We use full semantics and have not yet complete knowledge on the CNCQ.
+            // Case 2: We use full semantics and have not yet complete knowledge on the BCQ.
             else if (!useUnderapproximatingSemantics && !knowledgeOnQuery.isComplete(timePoint))
             {
-                _logger.finer("Calling CNCQ engine for " + query);
-                execCNCQQueryEngine(query, timePoint, knowledgeOnQuery, restrictSatToBindings);
+                _logger.finer("Calling BCQ engine for " + query);
+                execBCQQueryEngine(query, timePoint, knowledgeOnQuery, restrictSatToBindings);
             }
             // Case 3: We use full semantics but have complete knowledge (-> only updates statistics).
             else if (!useUnderapproximatingSemantics)

@@ -1,8 +1,8 @@
 package openllet.tcq.model.automaton;
 
 import openllet.core.KnowledgeBase;
-import openllet.query.sparqldl.model.cncq.CNCQQuery;
-import openllet.query.sparqldl.model.cncq.CNCQQueryImpl;
+import openllet.query.sparqldl.model.bcq.BCQQuery;
+import openllet.query.sparqldl.model.bcq.BCQQueryImpl;
 import openllet.query.sparqldl.model.cq.ConjunctiveQuery;
 import openllet.tcq.model.query.Proposition;
 import openllet.tcq.model.query.TemporalConjunctiveQuery;
@@ -10,7 +10,7 @@ import openllet.tcq.model.query.TemporalConjunctiveQuery;
 import java.util.*;
 
 /**
- * Represents an edge in the DFA. An edge consists of a union (list) of CNCQs, and a predecessor and successor state.
+ * Represents an edge in the DFA. An edge consists of a union (list) of BCQs, and a predecessor and successor state.
  */
 public class Edge
 {
@@ -18,7 +18,7 @@ public class Edge
     private final String _label;
     private final int _from;
     private final int _to;
-    private List<CNCQQuery> _cncqs = null;
+    private List<BCQQuery> _bcqs = null;
 
     Edge(String label, int fromState, int toState, TemporalConjunctiveQuery tcq)
     {
@@ -29,48 +29,48 @@ public class Edge
     }
 
     /**
-     * Constructs the CNCQs based on the symbolic representation of the edge from the dot file.
+     * Constructs the BCQs based on the symbolic representation of the edge from the dot file.
      * That is, it implements a parser for the vector representation and checks the propsitional abstraction of the TCQ
-     * to fetch the appropriate CQ. The CNCQ is built according to the Boolean combination (i.e., adding negations
+     * to fetch the appropriate CQ. The BCQ is built according to the Boolean combination (i.e., adding negations
      * appropriately).
-     * @return A list of CNCQs for the edge.
+     * @return A list of BCQs for the edge.
      */
-    public List<CNCQQuery> getCNCQs()
+    public List<BCQQuery> getBCQs()
     {
         if (_tcq == null)
         {
             return new ArrayList<>();
         }
-        else if (_cncqs == null && !_label.isEmpty())
+        else if (_bcqs == null && !_label.isEmpty())
         {
             Map<Proposition, ConjunctiveQuery> propositionalAbstraction = _tcq.getPropositionalAbstraction();
             KnowledgeBase defaultKb = !_tcq.getTemporalKB().isEmpty() ? _tcq.getTemporalKB().get(0) : null;
-            _cncqs = new ArrayList<>();
+            _bcqs = new ArrayList<>();
             String[] lines = _label.split("\\\\n");
             if (lines.length > 0)
             {
-                int _numOfCNCQs = lines[0].split(" ").length;
-                for (int curCNCQIndex = 0; curCNCQIndex < _numOfCNCQs; curCNCQIndex++)
+                int _numOfBCQs = lines[0].split(" ").length;
+                for (int curBCQIndex = 0; curBCQIndex < _numOfBCQs; curBCQIndex++)
                 {
-                    CNCQQuery cncq = new CNCQQueryImpl(defaultKb, true);
+                    BCQQuery bcq = new BCQQueryImpl(defaultKb, true);
                     for(int curPropositionIndex = 0; curPropositionIndex < lines.length; curPropositionIndex++)
                     {
                         String line = lines[curPropositionIndex];
-                        String val = line.split("[ ,]")[curCNCQIndex];
+                        String val = line.split("[ ,]")[curBCQIndex];
                         if ("1".equals(val))
-                            cncq.addPositiveQuery(
+                            bcq.addPositiveQuery(
                                     propositionalAbstraction.values().stream().toList().get(curPropositionIndex).
                                             copy());
                         else if ("0".equals(val))
-                            cncq.addNegativeQuery(
+                            bcq.addNegativeQuery(
                                     propositionalAbstraction.values().stream().toList().get(curPropositionIndex).
                                             copy());
                     }
-                    _cncqs.add(cncq);
+                    _bcqs.add(bcq);
                 }
             }
         }
-        return _cncqs;
+        return _bcqs;
     }
 
     public int getToState()
@@ -86,9 +86,9 @@ public class Edge
     @Override
     public String toString()
     {
-        if (_cncqs == null)
+        if (_bcqs == null)
             return _label;
         else
-            return _cncqs.toString();
+            return _bcqs.toString();
     }
 }

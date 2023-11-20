@@ -1,14 +1,14 @@
 package openllet.test.query;
 
 import openllet.aterm.ATermAppl;
-import openllet.query.sparqldl.model.cncq.CNCQQuery;
+import openllet.query.sparqldl.model.bcq.BCQQuery;
 import org.junit.Test;
 
 import static openllet.core.utils.TermFactory.*;
 import static openllet.query.sparqldl.model.cq.QueryAtomFactory.PropertyValueAtom;
 import static openllet.query.sparqldl.model.cq.QueryAtomFactory.TypeAtom;
 
-public class TestBooleanCNCQueries extends AbstractQueryTest
+public class TestBooleanBCQQueries extends AbstractQueryTest
 {
     private void setupKB1()
     {
@@ -29,119 +29,119 @@ public class TestBooleanCNCQueries extends AbstractQueryTest
     public void testSimpleBooleanQueries1()
     {
         setupKB1();
-        CNCQQuery cncqq1 = cncqQuery(
+        BCQQuery bcqq1 = bcqQuery(
                 query(TypeAtom(_a, _B), PropertyValueAtom(_a, _r, _b)),
                 negatedQuery(TypeAtom(_a, _C), PropertyValueAtom(_a, _r, _b))
         );
-        testQuery(cncqq1, true);
+        testQuery(bcqq1, true);
     }
 
     @Test
     public void testSimpleBooleanQueries2()
     {
         setupKB1();
-        CNCQQuery cncqq = cncqQuery(
+        BCQQuery bcqq = bcqQuery(
                 query(TypeAtom(_a, _B)),
                 negatedQuery(PropertyValueAtom(_a, _p, x))
         );
-        testQuery(cncqq, false);
+        testQuery(bcqq, false);
     }
 
     @Test
     public void testSimpleBooleanQueries3()
     {
         setupKB1();
-        CNCQQuery cncqq = cncqQuery(
+        BCQQuery bcqq = bcqQuery(
                 query(TypeAtom(_a, _C)),
                 negatedQuery(TypeAtom(_a, _B), PropertyValueAtom(_a, _r, _b))
         );
-        testQuery(cncqq, false);
+        testQuery(bcqq, false);
     }
 
     @Test
     public void testSimpleBooleanQueries4()
     {
         setupKB1();
-        CNCQQuery cncqq = cncqQuery(
+        BCQQuery bcqq = bcqQuery(
                 query(TypeAtom(_a, _E)),
                 negatedQuery(TypeAtom(_b, _E), PropertyValueAtom(_b, _r, _c))
         );
-        testQuery(cncqq, true);
+        testQuery(bcqq, true);
     }
 
     @Test
     public void testSimpleBooleanQueries5()
     {
         setupKB1();
-        CNCQQuery cncqq = cncqQuery(
+        BCQQuery bcqq = bcqQuery(
                 query(TypeAtom(_a, _E))
         );
-        testQuery(cncqq, true);
+        testQuery(bcqq, true);
     }
 
     @Test
     public void testSimpleBooleanQueries6()
     {
         setupKB1();
-        CNCQQuery cncqq = cncqQuery(
+        BCQQuery bcqq = bcqQuery(
                 negatedQuery(TypeAtom(_a, _E))
         );
-        testQuery(cncqq, true);
+        testQuery(bcqq, true);
     }
 
     @Test
     public void testSimpleBooleanQueries7()
     {
         setupKB1();
-        CNCQQuery cncqq = cncqQuery(
+        BCQQuery bcqq = bcqQuery(
                 negatedQuery(TypeAtom(_a, _B))
         );
-        testQuery(cncqq, false);
+        testQuery(bcqq, false);
     }
 
     @Test
     public void testSimpleQueries8()
     {
         setupKB1();
-        CNCQQuery cncqq = cncqQuery(
+        BCQQuery bcqq = bcqQuery(
                 select(),
                 where(
                         query(TypeAtom(_a, _C))
                 )
         );
-        testQuery(cncqq, false);
+        testQuery(bcqq, false);
     }
 
     @Test
     public void testUndistVarQueries1()
     {
         setupKB1();
-        CNCQQuery cncqq = cncqQuery(
+        BCQQuery bcqq = bcqQuery(
                 query(TypeAtom(x, _B), PropertyValueAtom(x, _r, y)),
                 negatedQuery(TypeAtom(x1, _C), PropertyValueAtom(x1, _r, y1))
         );
-        testQuery(cncqq, true);
+        testQuery(bcqq, true);
     }
 
     @Test
     public void testUndistVarQueries2()
     {
         setupKB1();
-        CNCQQuery cncqq = cncqQuery(
+        BCQQuery bcqq = bcqQuery(
                 query(TypeAtom(x, _C), PropertyValueAtom(x, _r, y)),
                 negatedQuery(TypeAtom(x1, _C), PropertyValueAtom(x1, _r, y1))
         );
-        testQuery(cncqq, false);
+        testQuery(bcqq, false);
     }
     @Test
     public void testUndistVarQueries3()
     {
         setupKB1();
-        CNCQQuery cncqq = cncqQuery(
+        BCQQuery bcqq = bcqQuery(
                 query(TypeAtom(x, _B), PropertyValueAtom(x, _r, y)),
                 negatedQuery(TypeAtom(x1, _C), PropertyValueAtom(x1, _r, y1))
         );
-        testQuery(cncqq, true);
+        testQuery(bcqq, true);
     }
 
     @Test
@@ -165,42 +165,42 @@ public class TestBooleanCNCQueries extends AbstractQueryTest
         _kb.addType(oedipus, Patricide);
         _kb.addType(thersandros, not(Patricide));
 
-        CNCQQuery cncqq1 = cncqQuery(
+        BCQQuery bcqq1 = bcqQuery(
                 negatedQuery(TypeAtom(oedipus, Patricide), PropertyValueAtom(iokaste, hasChild, oedipus),
                         TypeAtom(polyneikes, not(Patricide)), PropertyValueAtom(oedipus, hasChild, polyneikes)),
                 negatedQuery(TypeAtom(polyneikes, Patricide), PropertyValueAtom(iokaste, hasChild, polyneikes),
                         TypeAtom(thersandros, not(Patricide)), PropertyValueAtom(polyneikes, hasChild, thersandros))
         );
-        CNCQQuery cncqq2 = cncqQuery(
+        BCQQuery bcqq2 = bcqQuery(
                 query(TypeAtom(oedipus, Patricide), PropertyValueAtom(iokaste, hasChild, oedipus),
                         TypeAtom(polyneikes, not(Patricide)), PropertyValueAtom(oedipus, hasChild, polyneikes)),
                 negatedQuery(TypeAtom(polyneikes, Patricide), PropertyValueAtom(iokaste, hasChild, polyneikes),
                         TypeAtom(thersandros, not(Patricide)), PropertyValueAtom(polyneikes, hasChild, thersandros))
         );
-        CNCQQuery cncqq3 = cncqQuery(
+        BCQQuery bcqq3 = bcqQuery(
                 query(TypeAtom(oedipus, Patricide), PropertyValueAtom(iokaste, hasChild, oedipus),
                         TypeAtom(polyneikes, not(Patricide)), PropertyValueAtom(oedipus, hasChild, polyneikes))
         );
-        CNCQQuery cncqq4 = cncqQuery(
+        BCQQuery bcqq4 = bcqQuery(
                 query(TypeAtom(oedipus, Patricide), PropertyValueAtom(iokaste, hasChild, oedipus),
                         TypeAtom(polyneikes, not(Patricide)), PropertyValueAtom(oedipus, hasChild, polyneikes)),
                 negatedQuery(PropertyValueAtom(iokaste, hasChild, polyneikes))
         );
-        // Interesting case: both sub-queries of cncqq1 are satisfiable, but cncqq1 itself is not satisfiable.
-        CNCQQuery cncqq5 = cncqQuery(
+        // Interesting case: both sub-queries of bcqq1 are satisfiable, but bcqq1 itself is not satisfiable.
+        BCQQuery bcqq5 = bcqQuery(
                 negatedQuery(TypeAtom(oedipus, Patricide), PropertyValueAtom(iokaste, hasChild, oedipus),
                         TypeAtom(polyneikes, not(Patricide)), PropertyValueAtom(oedipus, hasChild, polyneikes))
         );
-        CNCQQuery cncqq6 = cncqQuery(
+        BCQQuery bcqq6 = bcqQuery(
                 negatedQuery(TypeAtom(polyneikes, Patricide), PropertyValueAtom(iokaste, hasChild, polyneikes),
                         TypeAtom(thersandros, not(Patricide)), PropertyValueAtom(polyneikes, hasChild, thersandros))
         );
-        testQuery(cncqq1, false);
-        testQuery(cncqq2, true);
-        testQuery(cncqq3, true);
-        testQuery(cncqq4, false);
-        testQuery(cncqq5, true);
-        testQuery(cncqq6, true);
+        testQuery(bcqq1, false);
+        testQuery(bcqq2, true);
+        testQuery(bcqq3, true);
+        testQuery(bcqq4, false);
+        testQuery(bcqq5, true);
+        testQuery(bcqq6, true);
     }
 
     @Test
@@ -210,13 +210,13 @@ public class TestBooleanCNCQueries extends AbstractQueryTest
         classes(_A, _B);
         _kb.addType(_a, or(_A, not(_A)));
 
-        CNCQQuery cncqq = cncqQuery(query(TypeAtom(_b, _B)));
+        BCQQuery bcqq = bcqQuery(query(TypeAtom(_b, _B)));
 
-        testQuery(cncqq, true);
+        testQuery(bcqq, true);
 
         _kb.addType(_b, not(_B));
 
-        testQuery(cncqq, false);
+        testQuery(bcqq, false);
     }
 
     @Test
@@ -227,8 +227,8 @@ public class TestBooleanCNCQueries extends AbstractQueryTest
         objectProperties(_r);
         _kb.addType(_a, _A);
 
-        CNCQQuery cncqq = cncqQuery(query(PropertyValueAtom(x, _r, _a), TypeAtom(_b, _B), TypeAtom(x, _C)));
+        BCQQuery bcqq = bcqQuery(query(PropertyValueAtom(x, _r, _a), TypeAtom(_b, _B), TypeAtom(x, _C)));
 
-        testQuery(cncqq, true);
+        testQuery(bcqq, true);
     }
 }

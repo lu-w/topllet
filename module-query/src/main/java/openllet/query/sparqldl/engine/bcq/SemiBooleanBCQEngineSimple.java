@@ -1,4 +1,4 @@
-package openllet.query.sparqldl.engine.cncq;
+package openllet.query.sparqldl.engine.bcq;
 
 import openllet.aterm.ATermAppl;
 import openllet.core.OpenlletOptions;
@@ -6,7 +6,7 @@ import openllet.core.boxes.abox.ABoxChanges;
 import openllet.query.sparqldl.engine.cq.CombinedQueryEngine;
 import openllet.query.sparqldl.engine.ucq.UnionQueryEngineSimple;
 import openllet.query.sparqldl.model.AtomQuery;
-import openllet.query.sparqldl.model.cncq.CNCQQuery;
+import openllet.query.sparqldl.model.bcq.BCQQuery;
 import openllet.query.sparqldl.model.cq.ConjunctiveQuery;
 import openllet.query.sparqldl.model.cq.QueryAtom;
 import openllet.query.sparqldl.model.results.*;
@@ -17,25 +17,25 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-public class SemiBooleanCNCQEngineSimple extends AbstractSemiBooleanCNCQEngine
+public class SemiBooleanBCQEngineSimple extends AbstractSemiBooleanBCQEngine
 {
     private UnionQueryEngineSimple _ucqEngine = new UnionQueryEngineSimple();
     private Map<ATermAppl, ATermAppl> _queryVarsToFreshInds = new HashMap<>();
     private ABoxChanges _changes;
 
-    public SemiBooleanCNCQEngineSimple()
+    public SemiBooleanBCQEngineSimple()
     {
         super();
     }
 
-    public SemiBooleanCNCQEngineSimple(UnionQueryEngineSimple ucqEngine)
+    public SemiBooleanBCQEngineSimple(UnionQueryEngineSimple ucqEngine)
     {
         this();
         _ucqEngine = ucqEngine;
     }
 
     @Override
-    protected QueryResult execABoxQuery(CNCQQuery q, QueryResult excludeBindings, QueryResult restrictToBindings)
+    protected QueryResult execABoxQuery(BCQQuery q, QueryResult excludeBindings, QueryResult restrictToBindings)
             throws IOException, InterruptedException
     {
         QueryResult satResult = new QueryResultImpl(q);
@@ -44,7 +44,7 @@ public class SemiBooleanCNCQEngineSimple extends AbstractSemiBooleanCNCQEngine
         q.getKB().ensureConsistency();
 
         // If there are 0 negated subqueries in q, we can check for entailment: if q is entailed, then it is satisfiable
-        if (OpenlletOptions.CNCQ_ENGINE_USE_CQ_ENTAILMENT_AS_SUFFICIENT_CONDITION && q.getNegativeQueries().size() == 0)
+        if (OpenlletOptions.BCQ_ENGINE_USE_CQ_ENTAILMENT_AS_SUFFICIENT_CONDITION && q.getNegativeQueries().size() == 0)
         {
             boolean isEntailed = true;
             for (ConjunctiveQuery cq : q.getPositiveQueries())
@@ -63,7 +63,7 @@ public class SemiBooleanCNCQEngineSimple extends AbstractSemiBooleanCNCQEngine
         ConjunctiveQuery positiveQuery = q.mergePositiveQueries();
 
         // 2. SPLIT & ROLL-UP POSITIVE QUERIES (OPTIONAL)
-        if (OpenlletOptions.CNCQ_ENGINE_ROLL_UP_POSITIVE_PART_BEFORE_CHECKING)
+        if (OpenlletOptions.BCQ_ENGINE_ROLL_UP_POSITIVE_PART_BEFORE_CHECKING)
             positiveQuery = positiveQuery.splitAndRollUp(false);
 
         // 3. PUT POSITIVE ATOMS IN A-BOX
@@ -118,7 +118,7 @@ public class SemiBooleanCNCQEngineSimple extends AbstractSemiBooleanCNCQEngine
         return res;
     }
 
-    private QueryResult computeSatisfiableBindings(CNCQQuery query, QueryResult excludeBindings,
+    private QueryResult computeSatisfiableBindings(BCQQuery query, QueryResult excludeBindings,
                                                    QueryResult restrictToBindings)
             throws IOException, InterruptedException
     {
@@ -151,7 +151,7 @@ public class SemiBooleanCNCQEngineSimple extends AbstractSemiBooleanCNCQEngine
                 res.retainAll(restrictToBindings);
             }
         }
-        // If ABox is inconsistent, we have put a positive atom from the CNCQ to the KB that lead to inconsistency
+        // If ABox is inconsistent, we have put a positive atom from the BCQ to the KB that lead to inconsistency
         //  -> the query is not entailed and we return the empty query result.
         return res;
     }

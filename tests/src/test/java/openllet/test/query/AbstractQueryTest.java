@@ -8,12 +8,12 @@ package openllet.test.query;
 
 import openllet.aterm.ATermAppl;
 import openllet.core.utils.ATermUtils;
-import openllet.query.sparqldl.engine.cncq.CNCQQueryEngineSimple;
+import openllet.query.sparqldl.engine.bcq.BCQQueryEngineSimple;
 import openllet.query.sparqldl.engine.cq.QueryEngine;
 import openllet.query.sparqldl.engine.ucq.UnionQueryEngineSimple;
 import openllet.query.sparqldl.model.*;
-import openllet.query.sparqldl.model.cncq.CNCQQuery;
-import openllet.query.sparqldl.model.cncq.CNCQQueryImpl;
+import openllet.query.sparqldl.model.bcq.BCQQuery;
+import openllet.query.sparqldl.model.bcq.BCQQueryImpl;
 import openllet.query.sparqldl.model.results.QueryResult;
 import openllet.query.sparqldl.model.results.ResultBinding;
 import openllet.query.sparqldl.model.ucq.*;
@@ -202,14 +202,14 @@ public abstract class AbstractQueryTest extends AbstractKBTests
 		return cQuery(CNFQueryImpl.class, vars, queries);
 	}
 
-	protected CNCQQuery cncqQuery(final ConjunctiveQuery... queries)
+	protected BCQQuery bcqQuery(final ConjunctiveQuery... queries)
 	{
-		return cQuery(CNCQQueryImpl.class, queries);
+		return cQuery(BCQQueryImpl.class, queries);
 	}
 
-	protected CNCQQuery cncqQuery(final ATermAppl[] vars, final ConjunctiveQuery[] queries)
+	protected BCQQuery bcqQuery(final ATermAppl[] vars, final ConjunctiveQuery[] queries)
 	{
-		return cQuery(CNCQQueryImpl.class, vars, queries);
+		return cQuery(BCQQueryImpl.class, vars, queries);
 	}
 
 	/**
@@ -226,8 +226,8 @@ public abstract class AbstractQueryTest extends AbstractKBTests
 			else if (query instanceof UnionQuery)
 				result = new UnionQueryEngineSimple(UnionQueryEngineSimple.BindingTime.AFTER_CNF).
 						exec((UnionQuery) query);
-			else if (query instanceof CNCQQuery)
-				result = new CNCQQueryEngineSimple().exec((CNCQQuery) query);
+			else if (query instanceof BCQQuery)
+				result = new BCQQueryEngineSimple().exec((BCQQuery) query);
 			else if (query instanceof TemporalConjunctiveQuery)
 				result = new TCQEngine().exec((TemporalConjunctiveQuery) query);
 			else

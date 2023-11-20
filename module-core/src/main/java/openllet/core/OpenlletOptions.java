@@ -451,16 +451,16 @@ public class OpenlletOptions
 	public static boolean UCQ_ENGINE_USE_STANDARD_CQ_ENGINE_IF_POSSIBLE = false;
 
 	/**
-	 * The CNCQ Engine can either put all atoms of the positive queries into the ABox, or it can roll them up before it
+	 * The BCQ Engine can either put all atoms of the positive queries into the ABox, or it can roll them up before it
 	 * does so.
 	 */
-	public static boolean CNCQ_ENGINE_ROLL_UP_POSITIVE_PART_BEFORE_CHECKING = false;
+	public static boolean BCQ_ENGINE_ROLL_UP_POSITIVE_PART_BEFORE_CHECKING = false;
 
 	/**
-	 * When checking a CNCQ with no negated queries for satisfiability, the CNCQ engine can call the standard CQ engine
-	 * first. If the CQ is entailed, then the CNCQ is satisfiable as well.
+	 * When checking a BCQ with no negated queries for satisfiability, the BCQ engine can call the standard CQ engine
+	 * first. If the CQ is entailed, then the BCQ is satisfiable as well.
 	 */
-	public static boolean CNCQ_ENGINE_USE_CQ_ENTAILMENT_AS_SUFFICIENT_CONDITION = false;
+	public static boolean BCQ_ENGINE_USE_CQ_ENTAILMENT_AS_SUFFICIENT_CONDITION = false;
 
 	/**
 	 * The TCQ Engine can update its current ABox on the fly by incrementally changing the DL axioms. This may increase
@@ -469,16 +469,16 @@ public class OpenlletOptions
 	public static boolean TCQ_ENGINE_USE_INCREMENTAL_LOADING = false;
 
 	/**
-	 * Enables a prior run of the TCQ engine using the CQ engine instead of the CNCQ engine. This can lead to vast
+	 * Enables a prior run of the TCQ engine using the CQ engine instead of the BCQ engine. This can lead to vast
 	 * performance improvements.
 	 */
 	public static boolean TCQ_ENGINE_USE_CQ_ENGINE = true;
 
 	/**
 	 * Allows the TCQ engine to transfer (un)satisfiability results over time points, if possible, without re-checking
-	 * the CNCQ.
+	 * the BCQ.
 	 */
-	public static boolean TCQ_ENGINE_TEMPORAL_CNCQ_TRANSFER = false;
+	public static boolean TCQ_ENGINE_TEMPORAL_BCQ_TRANSFER = false;
 
 	static
 	{
@@ -685,15 +685,15 @@ public class OpenlletOptions
 
 		UCQ_ENGINE_USE_STANDARD_CQ_ENGINE_IF_POSSIBLE = getBooleanProperty(newOptions, "UCQ_ENGINE_USE_STANDARD_CQ_ENGINE_IF_POSSIBLE", UCQ_ENGINE_USE_STANDARD_CQ_ENGINE_IF_POSSIBLE, oldOptions);
 
-		CNCQ_ENGINE_ROLL_UP_POSITIVE_PART_BEFORE_CHECKING = getBooleanProperty(newOptions, "CNCQ_ENGINE_ROLL_UP_POSITIVE_PART_BEFORE_CHECKING", CNCQ_ENGINE_ROLL_UP_POSITIVE_PART_BEFORE_CHECKING, oldOptions);
+		BCQ_ENGINE_ROLL_UP_POSITIVE_PART_BEFORE_CHECKING = getBooleanProperty(newOptions, "BCQ_ENGINE_ROLL_UP_POSITIVE_PART_BEFORE_CHECKING", BCQ_ENGINE_ROLL_UP_POSITIVE_PART_BEFORE_CHECKING, oldOptions);
 
-		CNCQ_ENGINE_USE_CQ_ENTAILMENT_AS_SUFFICIENT_CONDITION = getBooleanProperty(newOptions, "CNCQ_ENGINE_USE_CQ_ENTAILMENT_AS_SUFFICIENT_CONDITION", CNCQ_ENGINE_USE_CQ_ENTAILMENT_AS_SUFFICIENT_CONDITION, oldOptions);
+		BCQ_ENGINE_USE_CQ_ENTAILMENT_AS_SUFFICIENT_CONDITION = getBooleanProperty(newOptions, "BCQ_ENGINE_USE_CQ_ENTAILMENT_AS_SUFFICIENT_CONDITION", BCQ_ENGINE_USE_CQ_ENTAILMENT_AS_SUFFICIENT_CONDITION, oldOptions);
 
 		TCQ_ENGINE_USE_INCREMENTAL_LOADING = getBooleanProperty(newOptions, "TCQ_ENGINE_USE_INCREMENTAL_LOADING", TCQ_ENGINE_USE_INCREMENTAL_LOADING, oldOptions);
 
 		TCQ_ENGINE_USE_CQ_ENGINE = getBooleanProperty(newOptions, "TCQ_ENGINE_USE_CQ_ENGINE", TCQ_ENGINE_USE_CQ_ENGINE, oldOptions);
 
-		TCQ_ENGINE_TEMPORAL_CNCQ_TRANSFER = getBooleanProperty(newOptions, "TCQ_ENGINE_USE_CQ_ENGINE", TCQ_ENGINE_TEMPORAL_CNCQ_TRANSFER, oldOptions);
+		TCQ_ENGINE_TEMPORAL_BCQ_TRANSFER = getBooleanProperty(newOptions, "TCQ_ENGINE_USE_CQ_ENGINE", TCQ_ENGINE_TEMPORAL_BCQ_TRANSFER, oldOptions);
 
 		return oldOptions;
 	}

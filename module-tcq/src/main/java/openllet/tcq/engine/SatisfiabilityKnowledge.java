@@ -4,7 +4,7 @@ import openllet.aterm.ATerm;
 import openllet.core.utils.ATermUtils;
 import openllet.core.utils.Bool;
 import openllet.modularity.OntologyDiff;
-import openllet.query.sparqldl.model.cncq.CNCQQuery;
+import openllet.query.sparqldl.model.bcq.BCQQuery;
 import openllet.query.sparqldl.model.results.QueryResult;
 import openllet.query.sparqldl.model.results.QueryResultImpl;
 import openllet.shared.tools.Log;
@@ -15,13 +15,13 @@ import java.util.*;
 import java.util.logging.Logger;
 
 /**
- * Stores satisfiability and unsatisfiability information of an arbitrary CNCQ w.r.t. different time points.
+ * Stores satisfiability and unsatisfiability information of an arbitrary BCQ w.r.t. different time points.
  * This knowledge is updated by the satisfiability knowledge manager, which globally manages all knowledge.
  */
 public class SatisfiabilityKnowledge
 {
     public static final Logger _logger = Log.getLogger(SatisfiabilityKnowledge.class);
-    private final CNCQQuery _cncq;
+    private final BCQQuery _bcq;
     private final Collection<ATerm> _relevantTBoxClassesAndRoles;
     private final TemporalConjunctiveQuery _tcq;
     private final Map<Integer, QueryResult> _satisfiableBindings = new HashMap<>();
@@ -29,29 +29,29 @@ public class SatisfiabilityKnowledge
     private final List<Integer> _isComplete = new ArrayList<>();
 
     /**
-     * Creates a new satisfiability knowledge data storage object for the given CNCQ, which is used when checking
+     * Creates a new satisfiability knowledge data storage object for the given BCQ, which is used when checking
      * satisfiability of the given TCQ.
-     * @param query The CNCQ to store knowledge on.
-     * @param tcq The TCQ from whose DFA the CNCQ originates.
+     * @param query The BCQ to store knowledge on.
+     * @param tcq The TCQ from whose DFA the BCQ originates.
      */
-    public SatisfiabilityKnowledge(CNCQQuery query, TemporalConjunctiveQuery tcq)
+    public SatisfiabilityKnowledge(BCQQuery query, TemporalConjunctiveQuery tcq)
     {
-        _cncq = query;
+        _bcq = query;
         _tcq = tcq;
         _relevantTBoxClassesAndRoles = _tcq.getTemporalKB().getConnectedClassesAndRolesInAxiomGraph(
-                _cncq.getClassesAndRoles());
+                _bcq.getClassesAndRoles());
     }
 
     /**
-     * @return A pointer to the CNCQ that is managed.
+     * @return A pointer to the BCQ that is managed.
      */
-    public CNCQQuery getQuery()
+    public BCQQuery getQuery()
     {
-        return _cncq;
+        return _bcq;
     }
 
     /**
-     * If externally some knowledge on the satisfiability of the CNCQ was gained, this informs the existing knowledge
+     * If externally some knowledge on the satisfiability of the BCQ was gained, this informs the existing knowledge
      * about it s.t. it can be incorporated.
      * @param bindings The new knowledge.
      * @param satisfiability Whether the knowledge is on unsatisfiability (true) or satisfiability (false).
@@ -63,7 +63,7 @@ public class SatisfiabilityKnowledge
     }
 
     /**
-     * If externally some knowledge on the satisfiability of the CNCQ was gained, this informs the existing knowledge
+     * If externally some knowledge on the satisfiability of the BCQ was gained, this informs the existing knowledge
      * about it s.t. it can be incorporated.
      * @param bindings The new knowledge.
      * @param satisfiability Whether the knowledge is on unsatisfiability (true) or satisfiability (false).
@@ -74,7 +74,7 @@ public class SatisfiabilityKnowledge
     {
         // The information may have been gained from an impartial query check (e.g. A(?x) when the overall TCQ
         // works over ?x and ?y. Therefore, we expand the query result to all variables of the TCQ.
-        _logger.finer(_cncq + " is informed about satisfiability (" + satisfiability + ")");
+        _logger.finer(_bcq + " is informed about satisfiability (" + satisfiability + ")");
         if (!bindings.getResultVars().equals(_tcq.getResultVars()))
             bindings.expandToAllVariables(_tcq.getResultVars());
         bindings.explicate();
@@ -116,11 +116,11 @@ public class SatisfiabilityKnowledge
         if (_satisfiableBindings.containsKey(timePoint))
             knowledge.put(Bool.TRUE, filterBindings(_satisfiableBindings.get(timePoint), restrictSatToBindings));
         else
-            knowledge.put(Bool.TRUE, new QueryResultImpl(_cncq));
+            knowledge.put(Bool.TRUE, new QueryResultImpl(_bcq));
         if (_unsatisfiableBindings.containsKey(timePoint))
             knowledge.put(Bool.FALSE, _unsatisfiableBindings.get(timePoint));
         else
-            knowledge.put(Bool.FALSE, new QueryResultImpl(_cncq));
+            knowledge.put(Bool.FALSE, new QueryResultImpl(_bcq));
         return knowledge;
     }
 
@@ -183,7 +183,7 @@ public class SatisfiabilityKnowledge
         return _isComplete.contains(timePoint) ||
                 (getCertainSatisfiabilityKnowledge(timePoint).get(Bool.FALSE).size() +
                 getCertainSatisfiabilityKnowledge(timePoint).get(Bool.TRUE).size() ==
-                new QueryResultImpl(_cncq).getMaxSize());
+                new QueryResultImpl(_bcq).getMaxSize());
     }
 
     /**

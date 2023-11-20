@@ -6,16 +6,16 @@ import openllet.core.utils.ATermUtils;
 import openllet.core.utils.Timer;
 import openllet.owlapi.OWLAPILoader;
 import openllet.query.sparqldl.engine.QueryExec;
-import openllet.query.sparqldl.engine.cncq.CNCQQueryEngineSimple;
+import openllet.query.sparqldl.engine.bcq.BCQQueryEngineSimple;
 import openllet.query.sparqldl.model.Query;
-import openllet.query.sparqldl.model.cncq.CNCQQueryImpl;
+import openllet.query.sparqldl.model.bcq.BCQQueryImpl;
 import openllet.query.sparqldl.model.cq.*;
 import openllet.query.sparqldl.model.results.QueryResult;
 import openllet.query.sparqldl.model.results.QueryResultImpl;
 import org.apache.commons.cli.*;
 
 import openllet.core.KnowledgeBase;
-import openllet.query.sparqldl.model.cncq.CNCQQuery;
+import openllet.query.sparqldl.model.bcq.BCQQuery;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -23,7 +23,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Random;
 
-public class ProfileCNCQQuery
+public class ProfileBCQQuery
 {
     private final KnowledgeBase _kb;
     private final List<ATermAppl> _inds;
@@ -35,7 +35,7 @@ public class ProfileCNCQQuery
     private Random _random;
     private static final boolean _USE_INDIVIDUALS_IN_ATOMS = true;
 
-    public ProfileCNCQQuery(KnowledgeBase kb)
+    public ProfileBCQQuery(KnowledgeBase kb)
     {
         System.out.println("Expressivity: " + kb.getExpressivity());
         _kb = kb;
@@ -98,9 +98,9 @@ public class ProfileCNCQQuery
         return atom;
     }
 
-    public CNCQQuery createRandomCNCQQuery(int atoms, int distVars, int undistVars)
+    public BCQQuery createRandomBCQQuery(int atoms, int distVars, int undistVars)
     {
-        CNCQQuery q = new CNCQQueryImpl(_kb, false);
+        BCQQuery q = new BCQQueryImpl(_kb, false);
         int numNegativeAtoms = _random.ints(1, 0, atoms + 1).findFirst().getAsInt();
         int numNegatedSubQueries = numNegativeAtoms;
         if (numNegativeAtoms > 0)
@@ -146,23 +146,23 @@ public class ProfileCNCQQuery
         return q;
     }
 
-    public List<CNCQQuery> createRandomCNCQQueries(int atoms, int distVars, int undistVars, int numQueries, int seed)
+    public List<BCQQuery> createRandomBCQQueries(int atoms, int distVars, int undistVars, int numQueries, int seed)
     {
-        List<CNCQQuery> queries = new ArrayList<>();
+        List<BCQQuery> queries = new ArrayList<>();
         for (int i = 0; i < numQueries; i++)
         {
             _random = new Random(seed + i);
-            queries.add(createRandomCNCQQuery(atoms, distVars, undistVars));
+            queries.add(createRandomBCQQuery(atoms, distVars, undistVars));
         }
         return queries;
     }
 
-    public void profile(List<CNCQQuery> queries)
+    public void profile(List<BCQQuery> queries)
     {
-        QueryExec<CNCQQuery> eng = new CNCQQueryEngineSimple();
+        QueryExec<BCQQuery> eng = new BCQQueryEngineSimple();
         Timer t = new Timer();
         t.start();
-        for (CNCQQuery q : queries)
+        for (BCQQuery q : queries)
         {
             System.out.println("Executing:");
             System.out.println(q);
@@ -229,7 +229,7 @@ public class ProfileCNCQQuery
         catch (ParseException e)
         {
             System.out.println(e.getMessage());
-            formatter.printHelp("CNCQ Profiler", options);
+            formatter.printHelp("BCQ Profiler", options);
 
             System.exit(1);
         }
@@ -243,8 +243,8 @@ public class ProfileCNCQQuery
 
         try
         {
-            final ProfileCNCQQuery profiler = new ProfileCNCQQuery(readKB(kbPath));
-            final List<CNCQQuery> queries = profiler.createRandomCNCQQueries(av, dv, uv, qv, sv);
+            final ProfileBCQQuery profiler = new ProfileBCQQuery(readKB(kbPath));
+            final List<BCQQuery> queries = profiler.createRandomBCQQueries(av, dv, uv, qv, sv);
             profiler.profile(queries);
         }
         catch (final Throwable t)
