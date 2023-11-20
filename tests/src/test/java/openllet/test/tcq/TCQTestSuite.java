@@ -11,7 +11,7 @@ import org.junit.runners.Suite;
 @RunWith(Suite.class)
 @Suite.SuiteClasses({ CQParserTest.class, TCQParserTest.class, TestMLTL2DFA.class, TestMLTL2LTL.class,
         TestBooleanTCQEngine.class, TestTCQEngine.class, QueryResultTest.class, TestCNCQueries.class,
-        TestBooleanCNCQueries.class, TestUnionQueries.class, TestBooleanUnionQueries.class})
+        TestBooleanCNCQueries.class, TestUnionQueries.class, TestBooleanUnionQueries.class, TKBLoaderTest.class})
 public class TCQTestSuite
 {
     public static junit.framework.Test suite()

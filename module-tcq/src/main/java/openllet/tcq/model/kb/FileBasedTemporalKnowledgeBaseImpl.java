@@ -1,6 +1,7 @@
 package openllet.tcq.model.kb;
 
 import openllet.aterm.ATerm;
+import openllet.aterm.ATermAppl;
 import openllet.core.KnowledgeBase;
 import openllet.core.OpenlletOptions;
 import openllet.core.utils.Timer;
@@ -9,6 +10,8 @@ import openllet.modularity.OntologyDiff;
 import openllet.shared.tools.Log;
 import openllet.tcq.model.kb.loader.IncrementalKnowledgeBaseLoader;
 import openllet.tcq.model.kb.loader.KnowledgeBaseLoader;
+import org.apache.jena.atlas.io.IO;
+import org.apache.jena.base.Sys;
 import org.jgrapht.graph.DefaultDirectedGraph;
 import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.traverse.BreadthFirstIterator;
@@ -16,7 +19,10 @@ import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.io.File;
 import java.io.FileNotFoundException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.logging.Logger;
 
@@ -37,6 +43,30 @@ public class FileBasedTemporalKnowledgeBaseImpl extends ArrayList<KnowledgeBase>
     private final String _catalogFile;
     private final Timer _timer;
     private DefaultDirectedGraph<ATerm, DefaultEdge> _axiomGraph;
+    private Set<ATermAppl> _prevInds = null;
+
+    static public List<String> parseKBSFile(String kbsFile) throws FileNotFoundException
+    {
+        if (new File(kbsFile).exists())
+        {
+            List<String> inputFiles = new ArrayList<>();
+            for (String line : IO.readWholeFileAsUTF8(kbsFile).lines().toList())
+                if (!line.startsWith("#") && !line.isEmpty())
+                {
+                    String inputFile = line.strip();
+                    if (!new File(inputFile).exists())
+                    {
+                        Path p = Paths.get(kbsFile);
+                        // tries folder of .kbs file first
+                        inputFile = Paths.get(p.getParent().toString(), inputFile).toString();
+                    }
+                    inputFiles.add(inputFile);
+                }
+            return inputFiles;
+        }
+        else
+            throw new FileNotFoundException("File " + kbsFile + " does not exist");
+    }
 
     public FileBasedTemporalKnowledgeBaseImpl(Iterable<String> files)
     {
@@ -64,6 +94,21 @@ public class FileBasedTemporalKnowledgeBaseImpl extends ArrayList<KnowledgeBase>
             {
                 _curKb = _loader.load(_files.get(index));
                 _curKbIndex = index;
+                if (_prevInds == null)
+                    _prevInds = _curKb.getIndividuals();
+                else if (_curKb != null && !_curKb.getIndividuals().equals(_prevInds))
+                {
+                    Set<ATermAppl> mis1 = new HashSet<>(_prevInds);
+                    Set<ATermAppl> mis2 = new HashSet<>(_curKb.getIndividuals());
+                    mis1.removeAll(_curKb.getIndividuals());
+                    mis2.removeAll(_prevInds);
+                    throw new RuntimeException("Individuals of ABox base at time " + index + " and " +
+                            "previously loaded one do not match." +
+                            (!mis2.isEmpty() ? " " + mis2.size() +
+                                    " individuals present in new ABox but not in previous: " + mis2 + "." : "") +
+                            (!mis1.isEmpty() ? " " + mis1.size() +
+                                    " individuals present in previous ABox but not in new: " + mis1 + "." : ""));
+                }
             }
             catch (OWLOntologyCreationException | FileNotFoundException e)
             {

@@ -1,0 +1,3 @@
+PREFIX t: <http://www.semanticweb.org/mtcq/example#>
+
+G(t:A(?x)) & F(t:C(?y))

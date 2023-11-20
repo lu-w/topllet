@@ -21,6 +21,7 @@ import org.apache.jena.query.*;
 import org.apache.jena.shared.NotFoundException;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
@@ -122,31 +123,16 @@ public class OpenlletTemporalQuery extends OpenlletCmdApp
         catalogFile = s;
     }
 
-    private List<String> parseInputFilesFromFile(String inputFile)
+    protected List<String> parseInputFilesFromFile(String inputFile)
     {
-        if (new File(inputFile).exists())
-            try
-            {
-                List<String> inputFiles = new ArrayList<>();
-                for (String line : IO.readWholeFileAsUTF8(inputFile).lines().toList())
-                    if (!line.startsWith("#"))
-                        inputFiles.add(line);
-                if (!isListOfInputFiles(inputFiles))
-                    // returns the original input file if unsuccessful
-                    inputFiles = List.of(inputFile);
-                return inputFiles;
-            }
-            catch (final NotFoundException | QueryParseException e)
-            {
-                throw new OpenlletCmdException(e);
-            }
-        else
-            throw new OpenlletCmdException("File " + inputFile + " does not exist");
-    }
-
-    private boolean isListOfInputFiles(List<String> inputFiles)
-    {
-        return new File(inputFiles.get(0)).exists();
+        try
+        {
+            return FileBasedTemporalKnowledgeBaseImpl.parseKBSFile(inputFile);
+        }
+        catch (final FileNotFoundException e)
+        {
+            throw new OpenlletCmdException(e);
+        }
     }
 
     @Override
