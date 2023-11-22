@@ -8,7 +8,7 @@
 	</parent>
         
 	<artifactId>openllet-mtcq</artifactId>
-	<name>Openllet :: Temporal Conjunctive Query</name>
+	<name>Openllet :: Metric Temporal Conjunctive Query</name>
 	<dependencies>
 		<dependency>
 			<groupId>${project.groupId}</groupId>

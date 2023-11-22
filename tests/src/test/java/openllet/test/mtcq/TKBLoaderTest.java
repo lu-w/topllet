@@ -2,7 +2,6 @@ package openllet.test.mtcq;
 
 import openllet.mtcq.model.kb.FileBasedTemporalKnowledgeBaseImpl;
 import org.junit.Test;
-import org.semanticweb.owlapi.model.UnloadableImportException;
 
 import java.io.FileNotFoundException;
 import java.util.List;
@@ -42,8 +41,6 @@ public class TKBLoaderTest extends AbstractMTCQTest
     {
         List<String> kbs = FileBasedTemporalKnowledgeBaseImpl.parseKBSFile("test/data/mtcq/abox.kbs");
         assertEquals(2, kbs.size());
-        FileBasedTemporalKnowledgeBaseImpl fkbsNoImport = new FileBasedTemporalKnowledgeBaseImpl(kbs);
-        assertThrows(UnloadableImportException.class, () -> fkbsNoImport.get(0));
         FileBasedTemporalKnowledgeBaseImpl fkbs = new FileBasedTemporalKnowledgeBaseImpl(kbs,
                 "test/data/mtcq/catalog-v001.xml");
         assertEquals(2, fkbs.get(0).getIndividualsCount());
@@ -60,4 +57,16 @@ public class TKBLoaderTest extends AbstractMTCQTest
         assertEquals(fkbs.get(1).getIndividualsCount(), 2);
         assertThrows(RuntimeException.class, () -> fkbs.get(2));
     }
+
+    @Test
+    public void testImportWrongTBox() throws FileNotFoundException
+    {
+        List<String> kbs = FileBasedTemporalKnowledgeBaseImpl.parseKBSFile("test/data/mtcq/abox_wrong_tbox.kbs");
+        assertEquals(2, kbs.size());
+        FileBasedTemporalKnowledgeBaseImpl fkbs = new FileBasedTemporalKnowledgeBaseImpl(kbs,
+                "test/data/mtcq/catalog-v001.xml");
+        System.out.println(fkbs.get(0));
+        assertThrows(IndexOutOfBoundsException.class, () -> fkbs.get(1));
+    }
+
 }

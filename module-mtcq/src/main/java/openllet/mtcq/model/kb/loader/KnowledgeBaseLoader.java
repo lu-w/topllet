@@ -28,6 +28,7 @@ public class KnowledgeBaseLoader
     protected static final String _defaultCatalogFileName = "catalog-v001.xml";
     protected Set<OWLOntologyIRIMapper> _catalogs = new HashSet<>();
     protected Timer _timer = new Timer("ontology loading");
+    private Set<OWLOntology> _prevImports = null;
 
     public KnowledgeBaseLoader()
     {
@@ -54,6 +55,11 @@ public class KnowledgeBaseLoader
         OpenlletReasoner reasoner = OpenlletReasonerFactory.getInstance().createReasoner(ont);
         _timer.stop();
         _logger.fine("Loaded " + fileName);
+        if (_prevImports != null && !_prevImports.equals(ont.getImports()))
+            throw new OWLOntologyCreationException("Temporal knowledge base loaded an ABox that does not has the " +
+                    "same imports as the previously loaded ABox.");
+        else
+            _prevImports = ont.getImports();
         return reasoner.getKB();
     }
 

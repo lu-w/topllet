@@ -11,7 +11,6 @@ import openllet.shared.tools.Log;
 import openllet.mtcq.model.kb.loader.IncrementalKnowledgeBaseLoader;
 import openllet.mtcq.model.kb.loader.KnowledgeBaseLoader;
 import org.apache.jena.atlas.io.IO;
-import org.apache.jena.base.Sys;
 import org.jgrapht.graph.DefaultDirectedGraph;
 import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.traverse.BreadthFirstIterator;
