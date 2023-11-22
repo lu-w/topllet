@@ -65,8 +65,17 @@ public class TKBLoaderTest extends AbstractMTCQTest
         assertEquals(2, kbs.size());
         FileBasedTemporalKnowledgeBaseImpl fkbs = new FileBasedTemporalKnowledgeBaseImpl(kbs,
                 "test/data/mtcq/catalog-v001.xml");
-        System.out.println(fkbs.get(0));
-        assertThrows(IndexOutOfBoundsException.class, () -> fkbs.get(1));
+        fkbs.get(0);
+        assertThrows(RuntimeException.class, () -> fkbs.get(1));
     }
 
+    @Test
+    public void testWrongExpressivity() throws FileNotFoundException
+    {
+        List<String> kbs = FileBasedTemporalKnowledgeBaseImpl.parseKBSFile("test/data/mtcq/abox_wrong_express.kbs");
+        assertEquals(2, kbs.size());
+        FileBasedTemporalKnowledgeBaseImpl fkbs = new FileBasedTemporalKnowledgeBaseImpl(kbs,
+                "test/data/mtcq/catalog-v001.xml");
+        assertThrows(RuntimeException.class, () -> fkbs.get(0));
+    }
 }

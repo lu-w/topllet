@@ -4,5 +4,7 @@
         <uri id="Automatically generated entry, Timestamp=1690972532811" name="http://www.semanticweb.org/mtcq/example/1" uri="abox_1.owl"/>
         <uri id="Automatically generated entry, Timestamp=1690972532811" name="http://www.semanticweb.org/mtcq/example/2" uri="abox_2.owl"/>
         <uri id="Automatically generated entry, Timestamp=1690972532811" name="http://www.semanticweb.org/mtcq/example" uri="tbox.owl"/>
+        <uri id="Automatically generated entry, Timestamp=1690972532811" name="http://www.semanticweb.org/mtcq/example_wrong_express" uri="tbox_wrong_express.owl"/>
+        <uri id="Automatically generated entry, Timestamp=1690972532811" name="http://www.semanticweb.org/mtcq/example_wrong_tbox" uri="tbox_wrong.owl"/>
     </group>
 </catalog>

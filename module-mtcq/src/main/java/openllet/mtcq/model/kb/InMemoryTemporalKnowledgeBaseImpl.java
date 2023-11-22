@@ -59,7 +59,7 @@ public class InMemoryTemporalKnowledgeBaseImpl extends ArrayList<KnowledgeBase> 
         if (this.size() > 0 && kb != null)
         {
             KnowledgeBase prevKb = this.get(this.size() - 1);
-            if(!kb.getIndividuals().equals(prevKb.getIndividuals()))
+            if (!kb.getIndividuals().equals(prevKb.getIndividuals()))
             {
                 Set<ATermAppl> mis1 = new HashSet<>(prevKb.getIndividuals());
                 Set<ATermAppl> mis2 = new HashSet<>(kb.getIndividuals());
@@ -71,6 +71,10 @@ public class InMemoryTemporalKnowledgeBaseImpl extends ArrayList<KnowledgeBase> 
                                 " individuals present in new ABox but not in previous: " + mis2 + "." : "") +
                         (!mis1.isEmpty() ? " " + mis1.size() +
                                 " individuals present in previous ABox but not in new: " + mis1 + "." : ""));
+            }
+            if (kb.getExpressivity().hasNominal())
+            {
+                throw new RuntimeException("Nominals are not allowed in components TKBs.");
             }
         }
         return super.add(kb);

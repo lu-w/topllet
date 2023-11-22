@@ -11,6 +11,7 @@ import openllet.shared.tools.Log;
 import openllet.mtcq.model.kb.loader.IncrementalKnowledgeBaseLoader;
 import openllet.mtcq.model.kb.loader.KnowledgeBaseLoader;
 import org.apache.jena.atlas.io.IO;
+import org.apache.jena.base.Sys;
 import org.jgrapht.graph.DefaultDirectedGraph;
 import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.traverse.BreadthFirstIterator;
@@ -93,7 +94,7 @@ public class FileBasedTemporalKnowledgeBaseImpl extends ArrayList<KnowledgeBase>
             {
                 _curKb = _loader.load(_files.get(index));
                 _curKbIndex = index;
-                if (_prevInds == null)
+                if (_curKb != null && _prevInds == null)
                     _prevInds = _curKb.getIndividuals();
                 else if (_curKb != null && !_curKb.getIndividuals().equals(_prevInds))
                 {
@@ -108,10 +109,14 @@ public class FileBasedTemporalKnowledgeBaseImpl extends ArrayList<KnowledgeBase>
                             (!mis1.isEmpty() ? " " + mis1.size() +
                                     " individuals present in previous ABox but not in new: " + mis1 + "." : ""));
                 }
+                if (_curKb != null && _curKb.getExpressivity().hasNominal())
+                {
+                    throw new RuntimeException("Nominals are not allowed in components TKBs.");
+                }
             }
             catch (OWLOntologyCreationException | FileNotFoundException e)
             {
-                throw new IndexOutOfBoundsException(e.toString());
+                throw new RuntimeException(e.toString());
             }
         return _curKb;
     }
