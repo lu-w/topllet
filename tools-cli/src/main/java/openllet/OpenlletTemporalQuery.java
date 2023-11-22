@@ -9,12 +9,12 @@ import openllet.core.utils.Timer;
 import openllet.query.sparqldl.engine.QueryExec;
 import openllet.query.sparqldl.model.results.QueryResult;
 import openllet.query.sparqldl.model.results.ResultBinding;
-import openllet.tcq.engine.TCQEngine;
-import openllet.tcq.model.kb.TemporalKnowledgeBase;
-import openllet.tcq.model.kb.FileBasedTemporalKnowledgeBaseImpl;
-import openllet.tcq.model.query.TemporalConjunctiveQuery;
-import openllet.tcq.parser.ParseException;
-import openllet.tcq.parser.TemporalConjunctiveQueryParser;
+import openllet.mtcq.engine.MTCQEngine;
+import openllet.mtcq.model.kb.TemporalKnowledgeBase;
+import openllet.mtcq.model.kb.FileBasedTemporalKnowledgeBaseImpl;
+import openllet.mtcq.model.query.MetricTemporalConjunctiveQuery;
+import openllet.mtcq.parser.ParseException;
+import openllet.mtcq.parser.MetricTemporalConjunctiveQueryParser;
 import org.apache.jena.atlas.RuntimeIOException;
 import org.apache.jena.atlas.io.IO;
 import org.apache.jena.query.*;
@@ -40,9 +40,9 @@ public class OpenlletTemporalQuery extends OpenlletCmdApp
     private String catalogFile;
     private QueryResult queryResults;
     private String queryString;
-    private TemporalConjunctiveQuery query;
+    private MetricTemporalConjunctiveQuery query;
     private TemporalKnowledgeBase kb;
-    private final QueryExec<TemporalConjunctiveQuery> queryEngine = new TCQEngine();
+    private final QueryExec<MetricTemporalConjunctiveQuery> queryEngine = new MTCQEngine();
     private OutputFormat outputFormat = OutputFormat.TABULAR;
 
     private enum OutputFormat
@@ -214,7 +214,7 @@ public class OpenlletTemporalQuery extends OpenlletCmdApp
             startTask("parsing query file");
 
             queryString = Files.readString(Paths.get(queryFile));
-            query = TemporalConjunctiveQueryParser.parse(queryString, kb);
+            query = MetricTemporalConjunctiveQueryParser.parse(queryString, kb);
 
             finishTask("parsing query file");
 
@@ -314,7 +314,7 @@ public class OpenlletTemporalQuery extends OpenlletCmdApp
 
     private void printXMLQueryResults()
     {
-        // TODO implement XML query result for openllet-tcq
+        // TODO implement XML query result for openllet-mtcq
         System.out.println("XML query result output not implemented yet");
     }
 
@@ -327,6 +327,6 @@ public class OpenlletTemporalQuery extends OpenlletCmdApp
             System.out.println("*/ ");
         }
         System.out.println("JSON query result output not implemented yet");
-        // TODO implement JSON query result for openllet-tcq
+        // TODO implement JSON query result for openllet-mtcq
     }
 }

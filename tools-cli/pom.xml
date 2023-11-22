@@ -40,7 +40,7 @@
 		</dependency>
         <dependency>
             <groupId>com.github.galigator.openllet</groupId>
-            <artifactId>openllet-tcq</artifactId>
+            <artifactId>openllet-mtcq</artifactId>
             <version>2.6.6-SNAPSHOT</version>
             <scope>compile</scope>
         </dependency>

@@ -20,7 +20,7 @@
     <module>module-shared</module>
     <module>module-core</module>
     <module>module-query</module>
-    <module>module-tcq</module>
+    <module>module-mtcq</module>
     <module>module-owlapi</module>
     <module>module-jena</module>
     <module>module-explanation</module>

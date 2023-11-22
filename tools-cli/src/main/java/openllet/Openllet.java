@@ -134,7 +134,7 @@ public class Openllet
 
 		buf.append("\n");
 		buf.append("Openllet is an OWL2 ontology (DL)reasoner.\n");
-		buf.append("This is the Openllet-TCQ variant, which is able to check temporal conjunctive queries.\n");
+		buf.append("This is the Openllet-MTCQ variant, which is able to check temporal conjunctive queries.\n");
 		buf.append("For more information, see https://www.w3.org/TR/owl2-profiles/");
 
 		System.out.println(buf);

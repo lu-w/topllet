@@ -3,7 +3,7 @@
 ## Openllet Temporal Query
 
 This is a fork of Openllet v2.6.6 containing support for answering temporal queries.
-For more information on the Temporal Query component, please refer to [this readme](module-tcq/README.md).
+For more information on the Temporal Query component, please refer to [this readme](module-mtcq/README.md).
 For example, information on the input languages is located there.
 
 ## Installation
@@ -55,13 +55,13 @@ If you do not have Docker, you can also build Lydia from the source, as document
 ## Running Openllet Temporal Query on an example
 
 We provide a very small introductory example.
-For this, navigate into the examples directory: `cd openllet/examples/src/main/resources/data/tcq`
-and call `openllet temporal-query -c catalog-v001.xml -q simple.tcq abox.kbs`.
+For this, navigate into the examples directory: `cd openllet/examples/src/main/resources/data/mtcq`
+and call `openllet temporal-query -c catalog-v001.xml -q simple.mtcq abox.kbs`.
 
 ## Running Openllet Temporal Query on the test cases
 
 We also provide a suite of test cases.
-To run those, call `mvn -pl tests test -Dtest=TCQTestSuite` from the `openllet` directory.
+To run those, call `mvn -pl tests test -Dtest=MTCQTestSuite` from the `openllet` directory.
 
 ## Logging
 

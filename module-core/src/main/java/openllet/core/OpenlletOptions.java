@@ -463,22 +463,22 @@ public class OpenlletOptions
 	public static boolean BCQ_ENGINE_USE_CQ_ENTAILMENT_AS_SUFFICIENT_CONDITION = false;
 
 	/**
-	 * The TCQ Engine can update its current ABox on the fly by incrementally changing the DL axioms. This may increase
+	 * The MTCQ Engine can update its current ABox on the fly by incrementally changing the DL axioms. This may increase
 	 * performance as the reasoner can re-use prior reasoning results.
 	 */
-	public static boolean TCQ_ENGINE_USE_INCREMENTAL_LOADING = false;
+	public static boolean MTCQ_ENGINE_USE_INCREMENTAL_LOADING = false;
 
 	/**
-	 * Enables a prior run of the TCQ engine using the CQ engine instead of the BCQ engine. This can lead to vast
+	 * Enables a prior run of the MTCQ engine using the CQ engine instead of the BCQ engine. This can lead to vast
 	 * performance improvements.
 	 */
-	public static boolean TCQ_ENGINE_USE_CQ_ENGINE = true;
+	public static boolean MTCQ_ENGINE_USE_CQ_ENGINE = true;
 
 	/**
-	 * Allows the TCQ engine to transfer (un)satisfiability results over time points, if possible, without re-checking
+	 * Allows the MTCQ engine to transfer (un)satisfiability results over time points, if possible, without re-checking
 	 * the BCQ.
 	 */
-	public static boolean TCQ_ENGINE_TEMPORAL_BCQ_TRANSFER = false;
+	public static boolean MTCQ_ENGINE_TEMPORAL_BCQ_TRANSFER = false;
 
 	static
 	{
@@ -689,11 +689,11 @@ public class OpenlletOptions
 
 		BCQ_ENGINE_USE_CQ_ENTAILMENT_AS_SUFFICIENT_CONDITION = getBooleanProperty(newOptions, "BCQ_ENGINE_USE_CQ_ENTAILMENT_AS_SUFFICIENT_CONDITION", BCQ_ENGINE_USE_CQ_ENTAILMENT_AS_SUFFICIENT_CONDITION, oldOptions);
 
-		TCQ_ENGINE_USE_INCREMENTAL_LOADING = getBooleanProperty(newOptions, "TCQ_ENGINE_USE_INCREMENTAL_LOADING", TCQ_ENGINE_USE_INCREMENTAL_LOADING, oldOptions);
+		MTCQ_ENGINE_USE_INCREMENTAL_LOADING = getBooleanProperty(newOptions, "MTCQ_ENGINE_USE_INCREMENTAL_LOADING", MTCQ_ENGINE_USE_INCREMENTAL_LOADING, oldOptions);
 
-		TCQ_ENGINE_USE_CQ_ENGINE = getBooleanProperty(newOptions, "TCQ_ENGINE_USE_CQ_ENGINE", TCQ_ENGINE_USE_CQ_ENGINE, oldOptions);
+		MTCQ_ENGINE_USE_CQ_ENGINE = getBooleanProperty(newOptions, "MTCQ_ENGINE_USE_CQ_ENGINE", MTCQ_ENGINE_USE_CQ_ENGINE, oldOptions);
 
-		TCQ_ENGINE_TEMPORAL_BCQ_TRANSFER = getBooleanProperty(newOptions, "TCQ_ENGINE_USE_CQ_ENGINE", TCQ_ENGINE_TEMPORAL_BCQ_TRANSFER, oldOptions);
+		MTCQ_ENGINE_TEMPORAL_BCQ_TRANSFER = getBooleanProperty(newOptions, "MTCQ_ENGINE_USE_CQ_ENGINE", MTCQ_ENGINE_TEMPORAL_BCQ_TRANSFER, oldOptions);
 
 		return oldOptions;
 	}
