@@ -1,0 +1,30 @@
+Prefix(:=<http://mtcq/example2/data#>)
+Prefix(owl:=<http://www.w3.org/2002/07/owl#>)
+Prefix(rdf:=<http://www.w3.org/1999/02/22-rdf-syntax-ns#>)
+Prefix(xml:=<http://www.w3.org/XML/1998/namespace>)
+Prefix(xsd:=<http://www.w3.org/2001/XMLSchema#>)
+Prefix(rdfs:=<http://www.w3.org/2000/01/rdf-schema#>)
+
+
+Ontology(<http://mtcq/example2/data>
+Import(<http://mtcq/example2>)
+
+Declaration(NamedIndividual(:r0))
+Declaration(NamedIndividual(:r1))
+
+
+############################
+#   Named Individuals
+############################
+
+# Individual: :r1 (:r1)
+
+ClassAssertion(<http://mtcq/example2#A> :r1)
+
+# Individual: :r0 (:r0)
+
+ClassAssertion(<http://mtcq/example2#A> :r0)
+
+ObjectPropertyAssertion(<http://mtcq/example2#r> :r1 :r0)
+
+)

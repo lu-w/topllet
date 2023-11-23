@@ -30,7 +30,7 @@ public class BCQQueryEngineSimple extends AbstractBCQQueryEngine
     {
         QueryResult result;
 
-        if (q.getPositiveQueries().size() == 0)
+        if (q.getPositiveQueries().isEmpty())
             result = _semiBooleanEngine.exec(q, excludeBindings, restrictToBindings);
         else
         {

@@ -1,9 +1,16 @@
 package openllet.test.mtcq;
 
 import openllet.aterm.ATermAppl;
+import openllet.core.KnowledgeBase;
+import openllet.core.OpenlletOptions;
+import openllet.mtcq.engine.MTCQEngine;
 import org.junit.Test;
 
 import java.util.List;
+import java.util.logging.Level;
+
+import static openllet.core.utils.TermFactory.or;
+import static openllet.core.utils.TermFactory.term;
 
 public class TestMTCQEngine extends AbstractMTCQTest
 {
@@ -66,6 +73,47 @@ public class TestMTCQEngine extends AbstractMTCQTest
     {
         simpleTKB();
         testQuery("F(A(?x))",  new ATermAppl[][] { { _a } });
+    }
+
+    @Test
+    public void testSimpleQuery8()
+    {
+        // TODO debug (works when CQ engine is disabled)
+        OpenlletOptions.MTCQ_ENGINE_USE_CQ_ENGINE = true;
+        fillSimpleTKB(1);
+        subClass(_B, or(_C, _D));
+        for (KnowledgeBase kb : _tkb)
+        {
+            kb.addType(_a, _A);
+            kb.addType(_b, _B);
+            kb.addPropertyValue(_r, _a, _b);
+        }
+        testQuery("G((A(?x)) & ((C(?y)) | (D(?y))))",  new ATermAppl[][] { { _a, _b } });
+    }
+
+    @Test
+    public void testSimpleQuery9()
+    {
+        timeSteps(1);
+
+        ATermAppl cA = term("http://example#A");
+        ATermAppl r = term("http://example#r");
+        ATermAppl a = term("http://example/data#a");
+        ATermAppl b = term("http://example/data#b");
+        _tkb.get(0).addClass(cA);
+        _tkb.get(0).addIndividual(a);
+        _tkb.get(0).addIndividual(b);
+        _tkb.get(0).addObjectProperty(r);
+
+        for (KnowledgeBase kb : _tkb)
+        {
+            kb.addType(a, cA);
+            kb.addType(b, cA);
+            kb.addPropertyValue(r, a, b);
+        }
+
+        testQuery("G(http://example#A(?x) ^ http://example#A(?y) ^ http://example#r(?y,?x))",
+                new ATermAppl[][] { { b, a } });
     }
 
     @Test
