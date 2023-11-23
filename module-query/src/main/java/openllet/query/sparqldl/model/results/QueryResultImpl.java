@@ -376,6 +376,7 @@ public class QueryResultImpl implements QueryResult
 		else if (size() > 0)
 		{
 			invBindings = QueryResult.allBindings(_resultVars, _query.getKB().getIndividuals(), isDistinct());
+			explicate();
 			for (ResultBinding binding : _bindings)
 				invBindings.remove(binding);
 		}
@@ -497,7 +498,7 @@ public class QueryResultImpl implements QueryResult
 		{
 			if (!toRetain.getResultVars().equals(_resultVars))
 				_resultVars.addAll(toRetain.getResultVars());
-			if (toRetain.size() == 0)
+			if (toRetain.isEmpty())
 				empty();
 			else if (!equals(toRetain) && !toRetain.isComplete())
 			{
