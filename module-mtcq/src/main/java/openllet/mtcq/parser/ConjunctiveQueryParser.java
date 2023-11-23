@@ -133,7 +133,7 @@ public class ConjunctiveQueryParser
             }
             catch (URISyntaxException e)
             {
-                if (!uri.matches("[a-zA-Z0-9_-]"))
+                if (!uri.isEmpty() && !uri.matches("[a-zA-Z0-9_-]"))
                     throw new ParseException("Invalid URI: " + uri);
             }
     }
