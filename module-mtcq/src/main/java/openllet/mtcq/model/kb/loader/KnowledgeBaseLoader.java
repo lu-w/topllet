@@ -84,8 +84,8 @@ public class KnowledgeBaseLoader
     {
         OWLOntologyManager man = OWLManager.createOWLOntologyManager();
         OWLOntologyLoaderConfiguration config = man.getOntologyLoaderConfiguration();
-        config = config.setMissingImportHandlingStrategy(MissingImportHandlingStrategy.SILENT);
-        man.setOntologyLoaderConfiguration(config);
+        //config = config.setMissingImportHandlingStrategy(MissingImportHandlingStrategy.SILENT);
+        //man.setOntologyLoaderConfiguration(config);
         man.setIRIMappers(_catalogs);
         String catalogFileString = new File(fileName).getParent() + "/" + _defaultCatalogFileName;
         File catalogFile = new File(catalogFileString);
