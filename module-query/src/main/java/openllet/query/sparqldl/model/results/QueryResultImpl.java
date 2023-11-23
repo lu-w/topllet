@@ -261,7 +261,7 @@ public class QueryResultImpl implements QueryResult
 	protected Collection<ResultBinding> explicate(ResultBinding binding)
 	{
 		Set<ResultBinding> explicatedBindings;
-		if (_resultVars.size() > 0)
+		if (!_resultVars.isEmpty())
 		{
 			if (binding.getAllVariables().size() == _resultVars.size())
 				explicatedBindings = Set.of(binding);
@@ -303,10 +303,11 @@ public class QueryResultImpl implements QueryResult
 	}
 
 	/**
+	 * TODO
 	 * Assumes bindings.getAllVariables() to be a subset of or equal to variables.
-	 * @param binding
-	 * @param variables
-	 * @return
+	 * @param binding TODO
+	 * @param variables TODO
+	 * @return TODO
 	 */
 	protected Collection<ATermAppl> getUnspecifiedVariablesInBinding(ResultBinding binding, List<ATermAppl> variables)
 	{
@@ -370,7 +371,7 @@ public class QueryResultImpl implements QueryResult
 		else
 			invBindings = new ArrayList<>();
 		// If we have a Boolean result, and no binding in the result (i.e., the result is False), we just return True
-		if (_resultVars.size() == 0 && _bindings.size() == 0)
+		if (_resultVars.isEmpty() && _bindings.isEmpty())
 			invBindings.add(new ResultBindingImpl());
 		// If this result contains all possible bindings anyhow, we skip this and just return the empty result
 		else if (size() > 0)
@@ -423,7 +424,7 @@ public class QueryResultImpl implements QueryResult
 	@Override
 	public void addAll(QueryResult toAdd, QueryResult restrictToBindings)
 	{
-		if (toAdd != null && toAdd.size() > 0)
+		if (toAdd != null && !toAdd.isEmpty())
 		{
 			Iterable<ResultBinding> toAddExplicated;
 			if (toAdd.containsPartialBindings())
@@ -457,7 +458,7 @@ public class QueryResultImpl implements QueryResult
 	@Override
 	public void removeAll(QueryResult toRemove)
 	{
-		if (toRemove != null && toRemove.size() > 0)
+		if (toRemove != null && !toRemove.isEmpty())
 		{
 			Iterable<ResultBinding> toRemoveExplicated;
 			if (toRemove.containsPartialBindings())

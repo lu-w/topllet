@@ -158,7 +158,7 @@ public interface QueryResult extends Iterable<ResultBinding>
 												 boolean distinct)
 	{
 		Collection<ResultBinding> bindings = new HashSet<>();
-		if (variables.size() > 0)
+		if (!variables.isEmpty())
 		{
 			// https://stackoverflow.com/a/40101377/4145563
 			List<ATermAppl> varList = variables.stream().toList();
