@@ -191,9 +191,19 @@ public class MTCQEngine extends AbstractQueryEngine<MetricTemporalConjunctiveQue
 
         // Initializes result to be returned later, depending on previously known results
         Map<Boolean, QueryResult> result = new HashMap<>();
-        if (knownResults == null)
+        if (knownResults == null || (knownResults.get(false) == null && knownResults.get(true) == null))
         {
             result.put(false, new QueryResultImpl(mtcq));
+            result.put(true, new QueryResultImpl(mtcq));
+        }
+        else if (knownResults.get(false) == null && knownResults.get(true) != null)
+        {
+            result.put(false, new QueryResultImpl(mtcq));
+            result.put(true, knownResults.get(true));
+        }
+        else if (knownResults.get(true) == null && knownResults.get(false) != null)
+        {
+            result.put(false, knownResults.get(false));
             result.put(true, new QueryResultImpl(mtcq));
         }
         else
