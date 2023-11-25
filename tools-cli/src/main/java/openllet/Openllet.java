@@ -45,7 +45,6 @@ public class Openllet
 		COMMANDS.put("unsat", new OpenlletUnsatisfiable());
 		COMMANDS.put("explain", new OpenlletExplain());
 		COMMANDS.put("query", new OpenlletQuery());
-		COMMANDS.put("temporal-query", new OpenlletTemporalQuery());
 		COMMANDS.put("modularity", new OpenlletModularity());
 		COMMANDS.put("trans-tree", new OpenlletTransTree());
 		COMMANDS.put("extract", new OpenlletExtractInferences());

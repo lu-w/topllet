@@ -2,7 +2,6 @@ package openllet;
 
 import openllet.aterm.ATermAppl;
 import openllet.core.KnowledgeBase;
-import openllet.core.OpenlletOptions;
 import openllet.core.exceptions.InconsistentOntologyException;
 import openllet.core.output.TableData;
 import openllet.core.utils.Timer;
@@ -16,15 +15,12 @@ import openllet.mtcq.model.query.MetricTemporalConjunctiveQuery;
 import openllet.mtcq.parser.ParseException;
 import openllet.mtcq.parser.MetricTemporalConjunctiveQueryParser;
 import org.apache.jena.atlas.RuntimeIOException;
-import org.apache.jena.atlas.io.IO;
 import org.apache.jena.query.*;
 import org.apache.jena.shared.NotFoundException;
 
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.StringWriter;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -50,16 +46,19 @@ public class OpenlletTemporalQuery extends OpenlletCmdApp
         TABULAR, XML, JSON
     }
 
+    // TODO: remove input format from options (maybe a posteriori remove()?)
+    // TODO: what about ignore imports in options?
+
     @Override
     public String getAppId()
     {
-        return "OpenlletTemporalQuery: Temporal Conjunctive Query Engine";
+        return "Topplet: An Engine for Answering Metric Temporal Conjunctive Queries";
     }
 
     @Override
     public String getAppCmd()
     {
-        return "openllet temporal-query " + getMandatoryOptions() + "[options] <file URI>...";
+        return "topllet " + getMandatoryOptions() + "[options] <QUERY> <TKB>";
     }
 
     @Override
@@ -67,42 +66,13 @@ public class OpenlletTemporalQuery extends OpenlletCmdApp
     {
         final OpenlletCmdOptions options = getGlobalOptions();
 
-        OpenlletCmdOption option = new OpenlletCmdOption("query-file");
-        option.setShortOption("q");
-        option.setType("<file URI>");
-        option.setDescription("Read the temporal conjunctive query from the given file");
-        option.setIsMandatory(true);
-        option.setArg(REQUIRED);
-        options.add(option);
-
-        option = new OpenlletCmdOption("output-format");
-        option.setShortOption("o");
-        option.setType("Tabular | XML | JSON");
-        option.setDescription("Format of result set (SELECT queries)");
-        option.setDefaultValue("Tabular");
-        option.setIsMandatory(false);
-        option.setArg(REQUIRED);
-        options.add(option);
-
-        option = new OpenlletCmdOption("catalog");
-        option.setShortOption("c");
-        option.setType("<file URI>");
-        option.setDescription("An OASIS XML catalog file to resolve URIs.");
-        option.setArg(REQUIRED);
-        option.setIsMandatory(false);
-        options.add(option);
-
-        option = new OpenlletCmdOption("bnode");
-        option.setDescription("Treat bnodes in the query as undistinguished variables. Undistinguished " +
-                "variables can match individuals whose existence is inferred by the " +
-                "reasoner, e.g. due to a someValuesFrom restriction.");
-        option.setDefaultValue(false);
-        option.setIsMandatory(false);
-        option.setArg(NONE);
-        options.add(option);
-
-        options.add(getIgnoreImportsOption());
-        options.add(getInputFormatOption());
+        final OpenlletCmdOption catalogOption = new OpenlletCmdOption("catalog");
+        catalogOption.setShortOption("c");
+        catalogOption.setType("catalog file");
+        catalogOption.setDescription("An OASIS XML catalog file to resolve URIs.");
+        catalogOption.setArg(OPTIONAL);
+        catalogOption.setIsMandatory(false);
+        options.add(catalogOption);
 
         return options;
     }
@@ -110,12 +80,18 @@ public class OpenlletTemporalQuery extends OpenlletCmdApp
     @Override
     public void parseArgs(final String[] args)
     {
-        super.parseArgs(args);
-
-        setQueryFile(_options.getOption("query-file").getValueAsString());
+        // Handles direct call from topllet CLI and not from openllet temporal-query by adding temporal-query as arg
+        if (!"temporal-query".equals(args[0]))
+        {
+            String[] newArgs = new String[args.length + 1];
+            newArgs[0] = "temporal-query";
+            System.arraycopy(args, 0, newArgs, 1, args.length);
+            super.parseArgs(newArgs);
+        }
+        else
+            super.parseArgs(args);
         setCatalogFile(_options.getOption("catalog").getValueAsString());
-        setOutputFormat(_options.getOption("output-format").getValueAsString());
-        OpenlletOptions.TREAT_ALL_VARS_DISTINGUISHED = !_options.getOption("bnode").getValueAsBoolean();
+        setOutputFormat("Tabular"); // Currently, no other output format is supported, so no option for it.
     }
 
     private void setCatalogFile(final String s)
@@ -172,9 +148,14 @@ public class OpenlletTemporalQuery extends OpenlletCmdApp
         try
         {
             List<String> inputFiles = Arrays.asList(getInputFiles());
-            if (inputFiles.size() == 1)
+            if (inputFiles.size() == 2)
+            {
+                setQueryFile(inputFiles.get(0));
                 // tries to parse from input files. if unsuccessful, the original input file is returned.
-                inputFiles = parseInputFilesFromFile(inputFiles.get(0));
+                inputFiles = parseInputFilesFromFile(inputFiles.get(1));
+            }
+            else
+                throw new OpenlletCmdException("Expected two required input arguments. Received " + inputFiles.size());
             kb = new FileBasedTemporalKnowledgeBaseImpl(inputFiles, catalogFile, timer);
             try
             {
@@ -192,7 +173,7 @@ public class OpenlletTemporalQuery extends OpenlletCmdApp
             }
             catch (Exception e)
             {
-                throw new OpenlletCmdException(e);
+                throw new OpenlletCmdException(e.getMessage());
             }
 
         }

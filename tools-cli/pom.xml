@@ -65,6 +65,10 @@
 							<mainClass>openllet.Openllet</mainClass>
 							<id>openllet</id>
 						</program>
+						<program>
+							<mainClass>openllet.Topllet</mainClass>
+							<id>topllet</id>
+						</program>
 					</programs>
 					<assembleDirectory>${project.build.directory}/openlletcli</assembleDirectory>
 					<repositoryName>lib</repositoryName>

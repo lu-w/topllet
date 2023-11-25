@@ -8,9 +8,6 @@
 
 package openllet;
 
-import static openllet.OpenlletCmdOptionArg.NONE;
-import static openllet.OpenlletCmdOptionArg.REQUIRED;
-
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.StringWriter;
@@ -39,6 +36,8 @@ import openllet.jena.JenaLoader;
 import openllet.owlapi.OWLAPILoader;
 import openllet.shared.tools.Log;
 import openllet.shared.tools.Logging;
+
+import static openllet.OpenlletCmdOptionArg.*;
 
 /**
  * <p>
@@ -190,7 +189,7 @@ public abstract class OpenlletCmdApp implements Logging
 		configOption.setDescription("Use the selected configuration file");
 		configOption.setIsMandatory(false);
 		configOption.setType("configuration file");
-		configOption.setArg(REQUIRED);
+		configOption.setArg(OPTIONAL);
 		options.add(configOption);
 
 		return options;
@@ -360,6 +359,7 @@ public abstract class OpenlletCmdApp implements Logging
 
 			final OpenlletCmdOptionArg optionArg = option.getArg();
 			final boolean nextIsArg = args.length > i + 1 && args[i + 1].charAt(0) != '-';
+
 			switch (optionArg)
 			{
 				case NONE:
