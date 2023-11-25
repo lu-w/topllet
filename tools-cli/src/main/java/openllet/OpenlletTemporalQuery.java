@@ -69,7 +69,7 @@ public class OpenlletTemporalQuery extends OpenlletCmdApp
         final OpenlletCmdOption catalogOption = new OpenlletCmdOption("catalog");
         catalogOption.setShortOption("c");
         catalogOption.setType("catalog file");
-        catalogOption.setDescription("An OASIS XML catalog file to resolve URIs.");
+        catalogOption.setDescription("An OASIS XML catalog file to resolve URIs");
         catalogOption.setArg(OPTIONAL);
         catalogOption.setIsMandatory(false);
         options.add(catalogOption);

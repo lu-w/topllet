@@ -178,7 +178,7 @@ public abstract class OpenlletCmdApp implements Logging
 
 		final OpenlletCmdOption verboseOption = new OpenlletCmdOption("verbose");
 		verboseOption.setShortOption("v");
-		verboseOption.setDescription("Print full stack trace for errors.");
+		verboseOption.setDescription("Print full stack trace for errors");
 		verboseOption.setDefaultValue(false);
 		verboseOption.setIsMandatory(false);
 		verboseOption.setArg(NONE);
