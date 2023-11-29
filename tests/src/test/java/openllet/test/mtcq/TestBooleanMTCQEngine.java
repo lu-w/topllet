@@ -54,9 +54,9 @@ public class TestBooleanMTCQEngine extends AbstractMTCQTest
     {
         complexTKB();
         // a query engine with a naive implementation of semantics will return "not entailed"
-        assertQueryEntailed("!G(C(a) ^ r(a,b))");
+        assertQueryEntailed("!G(C(a) & r(a,b))");
         // this is due to the axiom "C subclass of not(some(r, TOP))". B does not have such a constraint, therefore:
-        assertQueryNotEntailed("!G(B(a) ^ r(a,b))");
+        assertQueryNotEntailed("!G(B(a) & r(a,b))");
     }
 
     @Test
@@ -77,7 +77,7 @@ public class TestBooleanMTCQEngine extends AbstractMTCQTest
         complexTKB();
         assertQueryEntailed("G_[0,9] (!(D(a)) | (E(b)))");
         assertQueryNotEntailed("G_[0,10] (!(D(a)) | (E(b)))");
-        assertQueryEntailed("F_<=3 !(C(a) ^ r(a,b))");
+        assertQueryEntailed("F_<=3 !(C(a) & r(a,b))");
         assertQueryEntailed("(!(D(a)) | (E(b))) U_[0,9] (q(c, b))");
         assertQueryNotEntailed("(!(D(a)) | (E(b))) U_[0,7] (q(c, b))");
     }
@@ -100,8 +100,8 @@ public class TestBooleanMTCQEngine extends AbstractMTCQTest
     public void testCyclesInUndistVars()
     {
         complexTKB();
-        assertThrows(UnsupportedOperationException.class, () -> testQuery("F(r(x,y) ^ p(y,z) ^ q(z,x))", false));
-        assertThrows(UnsupportedOperationException.class, () -> testQuery("F(r(x,y) ^ q(y,x))", false));
+        assertThrows(UnsupportedOperationException.class, () -> testQuery("F(r(x,y) & p(y,z) & q(z,x))", false));
+        assertThrows(UnsupportedOperationException.class, () -> testQuery("F(r(x,y) & q(y,x))", false));
         assertThrows(UnsupportedOperationException.class, () -> testQuery("F(r(x,y)) & F(p(y,x)) & F(q(z,x))", false));
         // TODO specify an example where there is a cycle in the MTCQ but not in the checked BCQs / UCQs
     }
@@ -110,7 +110,7 @@ public class TestBooleanMTCQEngine extends AbstractMTCQTest
     public void testRoleOrClassNotInKB()
     {
         simpleTKB();
-        assertThrows(AssertionError.class, () -> testQuery("F((r(x,y) ^ p(x,z) ^ q(z,x))", false));
-        assertThrows(AssertionError.class, () -> testQuery("F((F(x) ^ p(x,z))", false));
+        assertThrows(AssertionError.class, () -> testQuery("F((r(x,y) & p(x,z) & q(z,x))", false));
+        assertThrows(AssertionError.class, () -> testQuery("F((F(x) & p(x,z))", false));
     }
 }

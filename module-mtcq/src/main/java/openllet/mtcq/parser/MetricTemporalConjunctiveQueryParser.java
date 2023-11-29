@@ -23,7 +23,7 @@ public class MetricTemporalConjunctiveQueryParser
     public static final Logger _logger = Log.getLogger(MetricTemporalConjunctiveQueryParser.class);
 
     protected static final String[] validMLTLToken = {"F", "G", "U", "X", "_", "<", "=", "[", "]", "(", ")", "W",
-            "X[!]", "last", "end", "first", "start", "R", "V", "M", "->", "<->", "^", "&", "!", "|", "0", "1", "2", "3",
+            "X[!]", "last", "end", "first", "start", "R", "V", "M", "->", "<->", "&", "!", "|", "0", "1", "2", "3",
             "4", "5", "6", "7", "8", "9", ",", "true", "false", "tt", "ff"};
 
     /**

@@ -51,8 +51,8 @@ Firstly, it allows for additional operators bounded by non-negative integers `a`
 - `F_<=a x`
 
 Secondly, instead of Boolean formulae over atomic propositions, you can specify Conjunctive Queries (CQs).
-An example CQ is `(t:A(?x) ^ t:C(?y) ^ t:A(t:a))`.
-CQs always need to be enclosed by brackets and the single conjuncts (called query atoms) are joined by the `^` operator.
+An example CQ is `(t:A(?x) & t:C(?y) & t:A(t:a))`.
+CQs always need to be enclosed by brackets and the single conjuncts (called query atoms) are joined by the `&` operator.
 For the query atoms, you can use all concepts and roles existing in the given ontology, using the appropriate prefix, preceeded by a bracketed name (in case of a concept) or a tuple of names (in case of a role).
 These names are either answer variables, individuals, or existentially quantified variables.
 Answer variables are preceeded by a `?`.

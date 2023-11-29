@@ -19,7 +19,7 @@ public class TestFileBasedMTCQEngine extends AbstractMTCQTest
         testQuery("""
                         PREFIX : <http://mtcq/example2#>
 
-                        (:A(?x) ^ :A(?y))""",
+                        (:A(?x) & :A(?y))""",
                 new ATermAppl[][] {
                         {
                             term("http://mtcq/example2/data#r1"),
@@ -55,7 +55,7 @@ public class TestFileBasedMTCQEngine extends AbstractMTCQTest
         testQuery("""
                         PREFIX : <http://mtcq/example2#>
 
-                        (:A(?y) ^ :A(?x) ^ :r(?y,?x))""",
+                        (:A(?y) & :A(?x) & :r(?y,?x))""",
                 new ATermAppl[][] {
                         {
                                 term("http://mtcq/example2/data#r1"),
@@ -77,7 +77,7 @@ public class TestFileBasedMTCQEngine extends AbstractMTCQTest
         testQuery("""
                         PREFIX : <http://mtcq/example2#>
 
-                        (:A(?x) ^ :A(?y) ^ :r(?y,?x))""",
+                        (:A(?x) & :A(?y) & :r(?y,?x))""",
                 new ATermAppl[][] {
                         {
                                 term("http://mtcq/example2/data#r1"),

@@ -1,0 +1,75 @@
+Prefix(:=<http://mtcq/eval#>)
+Prefix(owl:=<http://www.w3.org/2002/07/owl#>)
+Prefix(rdf:=<http://www.w3.org/1999/02/22-rdf-syntax-ns#>)
+Prefix(xml:=<http://www.w3.org/XML/1998/namespace>)
+Prefix(xsd:=<http://www.w3.org/2001/XMLSchema#>)
+Prefix(rdfs:=<http://www.w3.org/2000/01/rdf-schema#>)
+
+
+Ontology(<http://mtcq/example>
+
+Declaration(Class(:System))
+Declaration(Class(:Bicycle))
+Declaration(Class(:Crossing))
+Declaration(Class(:Moped))
+Declaration(Class(:Road))
+Declaration(Class(:TwoWheeledVehicle))
+Declaration(Class(:Vehicle))
+Declaration(ObjectProperty(:connects))
+Declaration(ObjectProperty(:intersects))
+Declaration(ObjectProperty(:orthogonal))
+Declaration(ObjectProperty(:parallel))
+Declaration(ObjectProperty(:toTheLeftOf))
+Declaration(ObjectProperty(:toTheSideOf))
+############################
+#   Object Properties
+############################
+
+# Object Property: :connects (:connects)
+
+SubObjectPropertyOf(:connects owl:topObjectProperty)
+
+# Object Property: :intersects (:intersects)
+
+SubObjectPropertyOf(:intersects owl:topObjectProperty)
+
+# Object Property: :orthogonal (:orthogonal)
+
+SubObjectPropertyOf(:orthogonal owl:topObjectProperty)
+
+# Object Property: :parallel (:parallel)
+
+SubObjectPropertyOf(:parallel owl:topObjectProperty)
+
+# Object Property: :toTheLeftOf (:toTheLeftOf)
+
+SubObjectPropertyOf(:toTheLeftOf :toTheSideOf)
+
+# Object Property: :toTheSideOf (:toTheSideOf)
+
+SubObjectPropertyOf(:toTheSideOf owl:topObjectProperty)
+
+
+############################
+#   Classes
+############################
+
+# Class: :Bicycle (:Bicycle)
+
+SubClassOf(:Bicycle :Vehicle)
+
+# Class: :Crossing (:Crossing)
+
+EquivalentClasses(:Crossing ObjectMinCardinality(3 :connects :Road))
+
+# Class: :Moped (:Moped)
+
+SubClassOf(:Moped :Vehicle)
+
+# Class: :TwoWheeledVehicle (:TwoWheeledVehicle)
+
+SubClassOf(:TwoWheeledVehicle :Vehicle)
+SubClassOf(:TwoWheeledVehicle ObjectUnionOf(:Bicycle :Moped))
+
+
+)

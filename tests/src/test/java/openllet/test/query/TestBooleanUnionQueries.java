@@ -28,23 +28,23 @@ public class TestBooleanUnionQueries extends AbstractQueryTest
         _kb.addType(_b, _D);
         _kb.addPropertyValue(_r, _a, _b);
 
-        // UCQ 1: B(x) ^ r(x,b) v C(x) ^ r(x,b) -> is entailed but second disjunct can never be true
+        // UCQ 1: B(x) & r(x,b) v C(x) & r(x,b) -> is entailed but second disjunct can never be true
         UnionQuery ucq1 = unionQuery(query(TypeAtom(x, _B), PropertyValueAtom(x, _r, _b)),
                                      query(TypeAtom(y, _C), PropertyValueAtom(y, _r, _b)));
 
-        // UCQ 2: B(x) ^ p(x,b) v C(x) ^ r(x,b) -> not entailed
+        // UCQ 2: B(x) & p(x,b) v C(x) & r(x,b) -> not entailed
         UnionQuery ucq2 = unionQuery(query(TypeAtom(x, _B), PropertyValueAtom(x, _p, _b)),
                                      query(TypeAtom(y, _C), PropertyValueAtom(y, _r, _b)));
 
-        // UCQ 3: B(a) ^ r(a,x) v D(z) ^ r(y,z) -> entailed (both disjuncts)
+        // UCQ 3: B(a) & r(a,x) v D(z) & r(y,z) -> entailed (both disjuncts)
         UnionQuery ucq3 = unionQuery(query(TypeAtom(_a, _B), PropertyValueAtom(_a, _p, x)),
                                      query(TypeAtom(z, _D), PropertyValueAtom(y, _r, z)));
 
-        // UCQ 4: B(a) ^ r(a,x) v E(z) ^ r(y,z) -> entailed (only first disjunct)
+        // UCQ 4: B(a) & r(a,x) v E(z) & r(y,z) -> entailed (only first disjunct)
         UnionQuery ucq4 = unionQuery(query(TypeAtom(_a, _B), PropertyValueAtom(_a, _p, x)),
                                      query(TypeAtom(z, _E), PropertyValueAtom(y, _r, z)));
 
-        // UCQ 5: B(a) ^ r(a,x) ^ p(y,z) ^ D(y) v C(a) v B(a) ^ p(a,x) ^ r(a,y) ^ D(b) -> entailed
+        // UCQ 5: B(a) & r(a,x) & p(y,z) & D(y) v C(a) v B(a) & p(a,x) & r(a,y) & D(b) -> entailed
         UnionQuery ucq5 = unionQuery(
                 query(TypeAtom(_a, _B), PropertyValueAtom(_a, _r, x), PropertyValueAtom(y, _p, z), TypeAtom(y, _D)),
                 query(TypeAtom(_a, _C)),
@@ -52,7 +52,7 @@ public class TestBooleanUnionQueries extends AbstractQueryTest
                         _D))
         );
 
-        // UCQ 6: B(a) ^ r(a,x) ^ p(y,z) ^ D(y) v B(a) ^ p(a,x) ^ r(a,y) ^ D(b) -> entailed
+        // UCQ 6: B(a) & r(a,x) & p(y,z) & D(y) v B(a) & p(a,x) & r(a,y) & D(b) -> entailed
         UnionQuery ucq6 = unionQuery(
                 query(TypeAtom(_a, _B), PropertyValueAtom(_a, _r, x), PropertyValueAtom(y, _p, z), TypeAtom(y, _D)),
                 query(TypeAtom(_a, _B), PropertyValueAtom(_a, _p, x1), PropertyValueAtom(_a, _r, y1), TypeAtom(_b,

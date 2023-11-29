@@ -32,7 +32,7 @@ public class CQParserTest extends AbstractMTCQTest
     @Test
     public void testSimpleQuery()
     {
-        MetricTemporalConjunctiveQuery q = temporalQuery("(C(a) ^ D(b))");
+        MetricTemporalConjunctiveQuery q = temporalQuery("(C(a) & D(b))");
         assertEquals("!((a))", q.toNegatedPropositionalAbstractionString());
         assertEquals(1, q.getQueries().size());
         assertEquals(2, q.getQueries().get(0).getAtoms().size());
@@ -44,7 +44,7 @@ public class CQParserTest extends AbstractMTCQTest
     @Test
     public void testConjunctiveQuery1()
     {
-        MetricTemporalConjunctiveQuery q = temporalQuery("(C(a) ^ r(?x, y) ^ A(?x) ^ C(b) ^ p(y,a))");
+        MetricTemporalConjunctiveQuery q = temporalQuery("(C(a) & r(?x, y) & A(?x) & C(b) & p(y,a))");
         assertEquals("!((a))", q.toNegatedPropositionalAbstractionString());
         assertEquals(1, q.getQueries().size());
         assertEquals(5, q.getQueries().get(0).getAtoms().size());
@@ -68,7 +68,7 @@ public class CQParserTest extends AbstractMTCQTest
         String indStr = "http://_longIndividualNameWith.de/dom/#Weird$Characters-";
         ATermAppl ind = term(indStr);
         individuals(ind);
-        MetricTemporalConjunctiveQuery q = temporalQuery("(r(a, b) ^ A(" + indStr + ") ^ r(?x, y))");
+        MetricTemporalConjunctiveQuery q = temporalQuery("(r(a, b) & A(" + indStr + ") & r(?x, y))");
         assertEquals(1, q.getQueries().size());
         testCQ(q.getQueries().get(0), atoms(_a, _r, _b), atoms(ind, _A), atoms(x, _r, y));
     }
@@ -79,53 +79,53 @@ public class CQParserTest extends AbstractMTCQTest
         String indStr = "_longIndividualNameWith#Bad$Char acters";
         ATermAppl ind = term(indStr);
         individuals(ind);
-        assertThrows(ParseException.class, () -> uncheckedTemporalQuery("(r(a, b) ^ A(" + indStr + ") ^ r(?x, y))"));
+        assertThrows(ParseException.class, () -> uncheckedTemporalQuery("(r(a, b) & A(" + indStr + ") & r(?x, y))"));
     }
 
     @Test
     public void testWrongTokenInCQ()
     {
-        assertThrows(ParseException.class, () -> uncheckedTemporalQuery("(C(a) & C(b))"));
+        assertThrows(ParseException.class, () -> uncheckedTemporalQuery("(C(a) ^ C(b))"));
     }
 
     @Test
     public void testIndividualAsResultVariable()
     {
-        assertThrows(ParseException.class, () -> uncheckedTemporalQuery("(r(a,b) ^ C(?b))"));
+        assertThrows(ParseException.class, () -> uncheckedTemporalQuery("(r(a,b) & C(?b))"));
     }
 
     @Test
     public void testResultAndUndistVariableEquallyNamed()
     {
-        assertThrows(ParseException.class, () -> uncheckedTemporalQuery("(r(a,?x) ^ C(x))"));
+        assertThrows(ParseException.class, () -> uncheckedTemporalQuery("(r(a,?x) & C(x))"));
     }
 
     @Test
     public void testRoleNotInKB()
     {
-        assertThrows(ParseException.class, () -> uncheckedTemporalQuery("(m(a,b) ^ C(b))"));
+        assertThrows(ParseException.class, () -> uncheckedTemporalQuery("(m(a,b) & C(b))"));
     }
 
     @Test
     public void testClassNotInKB()
     {
-        assertThrows(ParseException.class, () -> uncheckedTemporalQuery("(r(a,b) ^ Z(b))"));
+        assertThrows(ParseException.class, () -> uncheckedTemporalQuery("(r(a,b) & Z(b))"));
     }
 
     @Test
     public void testTooManyCommasInCQ()
     {
-        assertThrows(ParseException.class, () -> uncheckedTemporalQuery("(r(a,b,c) ^ C(b))"));
-        assertThrows(ParseException.class, () -> uncheckedTemporalQuery("(C(a) ^ r(b,,))"));
+        assertThrows(ParseException.class, () -> uncheckedTemporalQuery("(r(a,b,c) & C(b))"));
+        assertThrows(ParseException.class, () -> uncheckedTemporalQuery("(C(a) & r(b,,))"));
     }
 
     @Test
     public void testTooManyBracketsInCQ()
     {
-        assertThrows(ParseException.class, () -> uncheckedTemporalQuery("(r((a,b) ^ C(b))"));
-        assertThrows(ParseException.class, () -> uncheckedTemporalQuery("(r(a,b ^ C(b))"));
-        assertThrows(ParseException.class, () -> uncheckedTemporalQuery("(r(a,b) ^ C(b)"));
-        assertThrows(ParseException.class, () -> uncheckedTemporalQuery("(r(a,b ^ Cb)))"));
-        assertThrows(ParseException.class, () -> uncheckedTemporalQuery("(ra,b ^ Cb)"));
+        assertThrows(ParseException.class, () -> uncheckedTemporalQuery("(r((a,b) & C(b))"));
+        assertThrows(ParseException.class, () -> uncheckedTemporalQuery("(r(a,b & C(b))"));
+        assertThrows(ParseException.class, () -> uncheckedTemporalQuery("(r(a,b) & C(b)"));
+        assertThrows(ParseException.class, () -> uncheckedTemporalQuery("(r(a,b & Cb)))"));
+        assertThrows(ParseException.class, () -> uncheckedTemporalQuery("(ra,b & Cb)"));
     }
 }

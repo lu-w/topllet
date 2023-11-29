@@ -1,0 +1,56 @@
+Prefix(:=<http://mtcq/eval/data#>)
+Prefix(owl:=<http://www.w3.org/2002/07/owl#>)
+Prefix(rdf:=<http://www.w3.org/1999/02/22-rdf-syntax-ns#>)
+Prefix(xml:=<http://www.w3.org/XML/1998/namespace>)
+Prefix(xsd:=<http://www.w3.org/2001/XMLSchema#>)
+Prefix(rdfs:=<http://www.w3.org/2000/01/rdf-schema#>)
+
+
+Ontology(<http://mtcq/eval/data>
+Import(<http://mtcq/eval>)
+
+Declaration(NamedIndividual(:c))
+Declaration(NamedIndividual(:r0))
+Declaration(NamedIndividual(:r1))
+Declaration(NamedIndividual(:r2))
+Declaration(NamedIndividual(:s))
+Declaration(NamedIndividual(:t))
+
+
+############################
+#   Named Individuals
+############################
+
+# Individual: :c (:c)
+
+ObjectPropertyAssertion(<http://mtcq/eval#connects> :c :r0)
+ObjectPropertyAssertion(<http://mtcq/eval#connects> :c :r1)
+ObjectPropertyAssertion(<http://mtcq/eval#connects> :c :r2)
+
+# Individual: :r0 (:r0)
+
+ClassAssertion(<http://mtcq/eval#Road> :r0)
+ObjectPropertyAssertion(<http://mtcq/eval#orthogonal> :r0 :r1)
+
+# Individual: :r1 (:r1)
+
+ClassAssertion(<http://mtcq/eval#Road> :r1)
+ObjectPropertyAssertion(<http://mtcq/eval#orthogonal> :r1 :r0)
+
+# Individual: :r2 (:r2)
+
+ClassAssertion(<http://mtcq/eval#Road> :r2)
+
+# Individual: :s (:s)
+
+ClassAssertion(<http://mtcq/eval#System> :s)
+ObjectPropertyAssertion(<http://mtcq/eval#intersects> :s :r0)
+
+# Individual: :t (:t)
+
+ClassAssertion(<http://mtcq/eval#TwoWheeledVehicle> :t)
+ObjectPropertyAssertion(<http://mtcq/eval#intersects> :t :c)
+
+
+DifferentIndividuals(:r0 :r1 :r2)
+)

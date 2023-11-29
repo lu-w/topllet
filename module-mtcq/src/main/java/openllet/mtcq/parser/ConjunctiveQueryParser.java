@@ -52,7 +52,7 @@ public class ConjunctiveQueryParser
     }
 
     /**
-     * Parses the given CQ string to an Openllet ConjunctiveQuery a la "C(a) ^ r(a,?b)"
+     * Parses the given CQ string to an Openllet ConjunctiveQuery a la "C(a) & r(a,?b)"
      * @param input The sting to parse.
      * @param kb The knowledge base containing roles and concepts used in the CQ.
      * @return The parsed CQ.
@@ -62,7 +62,7 @@ public class ConjunctiveQueryParser
     static public ConjunctiveQuery parse(String input, KnowledgeBase kb) throws ParseException
     {
         ConjunctiveQuery cq = new ConjunctiveQueryImpl(kb, true);
-        for (String atom : input.split("\\^"))
+        for (String atom : input.split("&"))
         {
             if (atom.contains("(") && atom.contains(")"))
             {
