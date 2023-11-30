@@ -1,0 +1,25 @@
+PREFIX : <http://mtcq/eval#>
+
+G
+(
+	(:System(?x) & :Vehicle(?y) & :Road(?r2) & :Road(?r1) & :orthogonal(?r2, ?r1))
+		&
+	((:Moped(?y)) | (:Bicycle(?y)))
+)
+	&
+(
+	# if at some point, x turns from r1 to r2 with y being parallel to it before
+	F
+	(
+		(:intersects(?x,?r1) & :toTheSideOf(?x,?y) & :parallel(?x,?y))
+			&
+		F_[0,20] (:intersects(?x,?r2))
+	)
+		->
+	# then, x has to be on r1 until y is on the crossing (giving right of way)
+	(
+		(:intersects(?x,?r1))
+			U
+		((:intersects(?y,c) & :Crossing(c) & :connects(c,?r1) & :connects(c,?r2)))
+	)
+)

@@ -1,0 +1,10 @@
+PREFIX l4: <http://purl.org/auto/l4_core#>
+PREFIX ph: <http://purl.org/auto/physics#>
+
+F (l4:Pedestrian(?x))
+
+
+&
+
+G (ph:is_in_front_of(unknown,?x))
+

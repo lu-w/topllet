@@ -1,0 +1,30 @@
+Prefix(:=<http://mtcq/auto/data#>)
+Prefix(owl:=<http://www.w3.org/2002/07/owl#>)
+Prefix(rdf:=<http://www.w3.org/1999/02/22-rdf-syntax-ns#>)
+Prefix(xml:=<http://www.w3.org/XML/1998/namespace>)
+Prefix(xsd:=<http://www.w3.org/2001/XMLSchema#>)
+Prefix(rdfs:=<http://www.w3.org/2000/01/rdf-schema#>)
+
+
+Ontology(<http://mtcq/auto/data>
+Import(<http://purl.org/auto/>)
+
+Declaration(NamedIndividual(:r0))
+Declaration(NamedIndividual(:r1))
+
+
+############################
+#   Named Individuals
+############################
+
+# Individual: :r1 (:r1)
+
+ClassAssertion(<http://purl.org/auto/l4_de#Passenger_Car> :r1)
+
+# Individual: :r0 (:r0)
+
+ClassAssertion(<http://purl.org/auto/l4_core#Pedestrian> :r0)
+
+ObjectPropertyAssertion(<http://purl.org/auto/physics#is_right_of> :r1 :r0)
+
+)

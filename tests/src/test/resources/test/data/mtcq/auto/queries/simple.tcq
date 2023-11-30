@@ -1,0 +1,4 @@
+PREFIX : <http://purl.org/auto/l4_core#>
+
+F (:Pedestrian(?x))
+

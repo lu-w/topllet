@@ -1,0 +1,25 @@
+PREFIX l4: <http://purl.org/auto/l4_core#>
+PREFIX l4d: <http://purl.org/auto/l4_de#>
+PREFIX ph: <http://purl.org/auto/physics#>
+
+F (l4:Pedestrian(?x))
+
+& 
+
+G (l4d:Passenger_Car(?pas))
+
+&
+
+(
+(ph:is_right_of(unknown,?x)) 
+
+&
+
+X[!]
+(
+(ph:is_left_of(?pas,?x)) & F_[1,10] 
+(
+ph:is_in_front_of(y,?x)
+)
+)
+)
