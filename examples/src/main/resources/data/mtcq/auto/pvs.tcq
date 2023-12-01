@@ -1,0 +1,22 @@
+# Passing of parking vehicles on two-lane roads
+
+PREFIX l1c: <http://purl.org/auto/l1_core#>
+PREFIX l1d: <http://purl.org/auto/l1_de#>
+PREFIX l4d: <http://purl.org/auto/l4_de#>
+PREFIX l4c: <http://purl.org/auto/l4_core#>
+PREFIX phy: <http://purl.org/auto/physics#>
+PREFIX geo: <http://www.opengis.net/ont/geosparql#>
+
+G (phy:Moving_Dynamical_Object(?x) & l4c:Vehicle(?x) & l1d:2_Lane_Road(r) & geo:sfIntersects(r,?x) & l4d:Parking_Vehicle(?y))
+	&
+F
+(
+	(phy:is_in_front_of(?y,?x))
+		&
+	X[!]
+	(
+		(phy:is_in_proximity(?x,?y) & phy:is_to_the_side_of(?y,?x))
+			U
+		(phy:is_behind(?y,?x))
+	)
+)

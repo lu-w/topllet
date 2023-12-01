@@ -1,0 +1,39 @@
+Prefix(:=<http://mtcq/auto/data#>)
+Prefix(owl:=<http://www.w3.org/2002/07/owl#>)
+Prefix(rdf:=<http://www.w3.org/1999/02/22-rdf-syntax-ns#>)
+Prefix(xml:=<http://www.w3.org/XML/1998/namespace>)
+Prefix(xsd:=<http://www.w3.org/2001/XMLSchema#>)
+Prefix(rdfs:=<http://www.w3.org/2000/01/rdf-schema#>)
+
+
+Ontology(<http://mtcq/auto/data>
+Import(<http://purl.org/auto/>)
+
+Declaration(NamedIndividual(:c))
+Declaration(NamedIndividual(:l1))
+Declaration(NamedIndividual(:l2))
+Declaration(NamedIndividual(:pv))
+Declaration(NamedIndividual(:r))
+Declaration(NamedIndividual(:v))
+
+ClassAssertion(<http://purl.org/auto/l2_de#Curb> :c)
+
+ClassAssertion(<http://purl.org/auto/l1_core#Driveable_Lane> :l1)
+
+ClassAssertion(<http://purl.org/auto/l1_core#Driveable_Lane> :l2)
+
+ClassAssertion(<http://purl.org/auto/l4_de#Passenger_Car> :pv)
+ObjectPropertyAssertion(<http://www.opengis.net/ont/geosparql#sfCrosses> :pv :c)
+DataPropertyAssertion(<http://purl.org/auto/physics#has_speed> :pv "0.0"^^xsd:decimal)
+ObjectPropertyAssertion(<http://purl.org/auto/physics#is_behind> :pv :v)
+
+ClassAssertion(<http://purl.org/auto/l1_core#Road> :r)
+ObjectPropertyAssertion(<http://purl.org/auto/l1_core#has_lane> :r :l1)
+ObjectPropertyAssertion(<http://purl.org/auto/l1_core#has_lane> :r :l2)
+ObjectPropertyAssertion(<http://www.opengis.net/ont/geosparql#sfIntersects> :r :v)
+
+ClassAssertion(<http://purl.org/auto/l4_de#Bus> :v)
+DataPropertyAssertion(<http://purl.org/auto/physics#has_speed> :v "5.1"^^xsd:decimal)
+
+DifferentIndividuals(:l1 :l2)
+)

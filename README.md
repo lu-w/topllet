@@ -12,6 +12,9 @@ Topllet is a fork of Openllet v2.6.6.
 	1. [Inputs](#inputs)
 	2. [Output](#output)
 3. [Even More Examples](#even-more-examples)
+	1. [Right of Way Example](#right-of-way-example)
+	2. [Automotive Urban Traffic Ontology Example](#automotive-urban-traffic-ontology-example)
+	3. [API Example](#api-example)
 4. [Details](#details)
 	1. [Tests](#tests)
 	2. [Logging](#logging)
@@ -65,10 +68,10 @@ If you do not have Docker, you can also build Lydia from the source, as document
 
 ## Usage
 
-For a simple example, navigate to `examples/src/main/resources/data/mtcq`.
+For a simple example, navigate to `examples/src/main/resources/data/mtcq/simple`.
 The tool is executed like this:
 
-`topllet -c catalog-v001.xml -q simple.mtcq abox.kbs`
+`topllet -c catalog-v001.xml simple.mtcq abox.kbs`
 
 ### Inputs
 
@@ -155,23 +158,51 @@ Even more granular control can be applied by setting a `logging.properties`, as 
 
 ## Even More Examples
 
-(TODO update)
+Besides the simple example from above, there are also more complex examples (in the domain of road traffic).
+For this, navigate into the examples directory: `cd examples/src/main/resources/data/mtcq`.
 
-We provide a very small introductory example.
-For this, navigate into the examples directory: `cd examples/src/main/resources/data/mtcq`
-and call `topllet -c catalog-v001.xml -q simple.mtcq abox.kbs`.
+### Right of Way Example
+
+The example models an intersection situation with two-wheelers. The corresponding query asks for systems not granting right of way to those two-wheelers.
+
+We have two versions of this example, one where the right of way is granted ('good'), and one where it is not ('bad').
+
+For the 'good' example, call:
+ `topllet -c right_of_way/catalog-v001.xml right_of_way/row.tcq right_of_way/good/aboxes.kbs`.
+The output is one answer tuple, indicating that right of way was granted.
+
+For the 'bad' example, call:
+ `topllet -c right_of_way/catalog-v001.xml right_of_way/row.tcq right_of_way/bad/aboxes.kbs`.
+The output shows no results, indicating that right of way was not granted.
+
+### Automotive Urban Traffic Ontology Example
+
+You can also use highly complex ontologies.
+An example of such an ontology is the [Automotive Urban Traffic Ontology](https://github.com/lu-w/auto).
+This ontology contains, among others, axioms on parking vehicles, two-lane roads, and dynamical objects.
+The example thus asks for vehicles that pass parking vehicles on a two-lane road in the data based on some rudimentary physical and geometrical information.
+
+To run this example, call:
+ `topllet -c auto/tbox/catalog-v001.xml auto/pvs.tcq auto/abox/aboxes.kbs`.
+The output is one answer, indicating that the vehicle passed some parking vehicle.
+
+### API Example
+
+`topllet` also offers a Java API. To integrate `topllet` into your project, ... (TODO)
+
+An example API usage is given in `examples/src/main/java/openllet/examples/MTCQExample.java` (TODO).
 
 ## Details
 
 ### Tests
 
-We also provide a suite of test cases.
+We provide a suite of test cases for MTCQ answering.
 To run those, call `mvn -pl tests test -Dtest=MTCQTestSuite` from this folder.
 
 ### Logging
 
 In contrast to the upstream version of `openllet`, this version allows a fine-tuned control over logging.
-For this, instead of running the `topllet` from `tools-cli/target/openlletcli/bin/topllet`, use
+For this, instead of directly running `topllet`, use
 `export JAVA_OPTS="-Djava.util.logging.config.file=path/to/logging.properties"; topllet`.
 
 ### Algorithms
