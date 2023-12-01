@@ -2,7 +2,6 @@ package openllet.test.mtcq;
 
 import openllet.aterm.ATermAppl;
 import openllet.mtcq.model.kb.FileBasedTemporalKnowledgeBaseImpl;
-import openllet.mtcq.parser.MetricTemporalConjunctiveQueryParser;
 import org.junit.Test;
 
 import java.io.FileNotFoundException;

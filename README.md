@@ -190,9 +190,8 @@ The output is one answer, indicating that the vehicle passed some parking vehicl
 
 ### API Example
 
-`topllet` also offers a Java API. To integrate `topllet` into your project, ... (TODO)
-
-An example API usage is given in `examples/src/main/java/openllet/examples/MTCQExample.java` (TODO).
+`topllet` also offers a Java API. 
+An example API usage is given in `examples/src/main/java/openllet/examples/MTCQExample.java`.
 
 ## Details
 
