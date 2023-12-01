@@ -3,6 +3,20 @@
 Topllet is a Description Logic reasoner for answering Metric Temporal Conjunctive Queries over OWL2-based Temporal Knowledge Bases.
 Topllet is a fork of Openllet v2.6.6.
 
+## Table of Contents
+
+1. [Installation](#installation)
+	a. [Prerequisites](#prerequisites)
+	b. [Step-by-Step Instructions](#step-by-step-instructions)
+2. [Usage](#usage)
+	a. [Inputs](#inputs)
+	b. [Output](#output)
+3. [Even More Examples](#even-more-examples)
+4. [Details](#details)
+	a. [Tests](#tests)
+	b. [Logging](#logging)
+	c. [Algorithms](#algorithms)
+
 ## Installation
 
 The installation is tested on UNIX-systems.
@@ -23,9 +37,9 @@ For the optional Docker dependency, follow the [official instructions](https://d
 After installation, you need to start the Docker daemon using `sudo systemctl start docker`.
 Later, we will use `docker run` without root rights, therefore, please add your user to the `docker` group as per the [documentation](https://docs.docker.com/engine/install/linux-postinstall).
 
-### Step-by-step instructions
+### Step-by-Step Instructions
 
-We first install the dependencies MLTL2LTLf and Lydia.
+We first have to install the dependencies MLTL2LTLf and Lydia.
 
 #### Installing MLTL2LTLf
 
@@ -51,7 +65,7 @@ If you do not have Docker, you can also build Lydia from the source, as document
 
 ## Usage
 
-For a simple example, navigate to `../examples/src/main/resources/data/mtcq`.
+For a simple example, navigate to `examples/src/main/resources/data/mtcq`.
 The tool is executed like this:
 
 `topllet -c catalog-v001.xml -q simple.mtcq abox.kbs`
@@ -147,7 +161,9 @@ We provide a very small introductory example.
 For this, navigate into the examples directory: `cd examples/src/main/resources/data/mtcq`
 and call `topllet -c catalog-v001.xml -q simple.mtcq abox.kbs`.
 
-## Test Cases
+## Details
+
+### Tests
 
 We also provide a suite of test cases.
 To run those, call `mvn -pl tests test -Dtest=MTCQTestSuite` from this folder.
