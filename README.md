@@ -6,16 +6,16 @@ Topllet is a fork of Openllet v2.6.6.
 ## Table of Contents
 
 1. [Installation](#installation)
-	a. [Prerequisites](#prerequisites)
-	b. [Step-by-Step Instructions](#step-by-step-instructions)
+	1. [Prerequisites](#prerequisites)
+	2. [Step-by-Step Instructions](#step-by-step-instructions)
 2. [Usage](#usage)
-	a. [Inputs](#inputs)
-	b. [Output](#output)
+	1. [Inputs](#inputs)
+	2. [Output](#output)
 3. [Even More Examples](#even-more-examples)
 4. [Details](#details)
-	a. [Tests](#tests)
-	b. [Logging](#logging)
-	c. [Algorithms](#algorithms)
+	1. [Tests](#tests)
+	2. [Logging](#logging)
+	3. [Algorithms](#algorithms)
 
 ## Installation
 
