@@ -1,6 +1,6 @@
 # Topllet
 
-Topllet is a Description Logic reasoner for answering Metric Temporal Conjunctive Queries over OWL2-based Temporal Knowledge Bases.
+Topllet is an engine for answering Metric Temporal Conjunctive Queries over OWL2-based Temporal Knowledge Bases.
 Topllet is a fork of Openllet v2.6.6.
 
 ## Table of Contents
@@ -53,10 +53,10 @@ We first have to install the dependencies MLTL2LTLf and Lydia.
 
 #### Installing Lydia
 
-0. Navigate into an appropriate, persistent directory.
-1. Pull the Docker image: `docker pull whitemech/lydia:latest`
-2. Make an executable for Lydia: `mkdir -p bin && cd bin && echo "docker run --mount src=/tmp,target=/tmp,type=bind -v$(pwd):/home/default whitemech/lydia lydia \"\$@\"" > lydia && chmod +x lydia && echo "export PATH=$(pwd):$PATH" >> ~/.bashrc && source ~/.bashrc && cd ..`
-3. `lydia` should now be callable from your command line.
+1. Navigate into an appropriate, persistent directory.
+2. Pull the Docker image: `docker pull whitemech/lydia:latest`
+3. Make an executable for Lydia: `mkdir -p bin && cd bin && echo "docker run --mount src=/tmp,target=/tmp,type=bind -v$(pwd):/home/default whitemech/lydia lydia \"\$@\"" > lydia && chmod +x lydia && echo "export PATH=$(pwd):$PATH" >> ~/.bashrc && source ~/.bashrc && cd ..`
+4. `lydia` should now be callable from your command line.
 
 If you do not have Docker, you can also build Lydia from the source, as documented at https://github.com/whitemech/lydia.
 
@@ -72,6 +72,8 @@ For a simple example, navigate to `examples/src/main/resources/data/mtcq/simple`
 The tool is executed like this:
 
 `topllet -c catalog-v001.xml simple.mtcq abox.kbs`
+
+Type `topllet -h` for a help message.
 
 ### Inputs
 
@@ -108,7 +110,7 @@ Firstly, it allows for additional operators bounded by non-negative integers `a`
 - `G_<=a x`
 - `F_<=a x`
 
-Secondly, instead of Boolean formulae over atomic propositions, you can specify Conjunctive Queries (CQs).
+Secondly, instead of atomic propositions, you can specify Conjunctive Queries (CQs).
 An example CQ is `(t:A(?x) & t:C(?y) & t:A(t:a))`.
 CQs always need to be enclosed by brackets and the single conjuncts (called query atoms) are joined by the `&` operator.
 For the query atoms, you can use all concepts and roles existing in the given ontology, using the appropriate prefix, preceeded by a bracketed name (in case of a concept) or a tuple of names (in case of a role).
@@ -120,7 +122,7 @@ If you specify a non-`?`-preceeded, non-individual variable in some query atom, 
 You can add comments by `# my comment`.
 For inline comments, note that the `#` needs to be succeeded by a whitespace (i.e., `#mycomment` is not a valid comment).
 
-Right now, the tool checks only temporal queries whose CQs are tree-shaped, i.e., the induced query graph is acyclic w.r.t. the existentially quantified variables and each node has at most one incoming edge
+Right now, the tool checks only temporal queries whose CQs are tree-shaped, i.e., the induced query graph is acyclic w.r.t. the existentially quantified variables and each node has at most one incoming edge.
 
 #### 2. Temporal Knowledge Bases
 
@@ -197,11 +199,11 @@ An example API usage is given in `examples/src/main/java/openllet/examples/MTCQE
 ### Tests
 
 We provide a suite of test cases for MTCQ answering.
-To run those, call `mvn -pl tests test -Dtest=MTCQTestSuite` from this folder.
+To run the full suite, call `mvn -pl tests test -Dtest=MTCQTestSuite` from this folder.
 
 ### Logging
 
-In contrast to the upstream version of `openllet`, this version allows a fine-tuned control over logging.
+In contrast to the upstream version, this fork allows a fine-tuned control over logging.
 For this, instead of directly running `topllet`, use
 `export JAVA_OPTS="-Djava.util.logging.config.file=path/to/logging.properties"; topllet`.
 
