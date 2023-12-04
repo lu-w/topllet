@@ -6,8 +6,8 @@ Topllet is a fork of Openllet v2.6.6.
 ## Table of Contents
 
 1. [Installation](#installation)
-	1. [Prerequisites](#prerequisites)
-	2. [Step-by-Step Instructions](#step-by-step-instructions)
+	1. [Docker](#docker)
+	2. [From Scratch](#from-scratch)
 2. [Usage](#usage)
 	1. [Inputs](#inputs)
 	2. [Output](#output)
@@ -22,10 +22,24 @@ Topllet is a fork of Openllet v2.6.6.
 
 ## Installation
 
+### Docker
+
+The simplest way of running Topllet is using Docker.
+For this, navigate to the `docker` folder an run:
+
+1. `./build.sh` (to build the Docker image)
+2. `./run.sh help` (to run Topllet afterwards)
+
+Note that by default, the current folder is mounted into the Docker container. Therefore, all files referenced in the arguments of Topllet have to be located somewhere in the current working directory.
+
+You can also make `topllet` callable by adding it as an alias: Append `alias topllet="/home/lwesthofen/Dokumente/SCMs/PhD/openllet/docker/run.sh"` to your `~/.bashrc` and call `source ~/.bashrc`.
+
+### From Scratch
+ 
 The installation is tested on UNIX-systems.
 This installation assumes a Ubuntu system with `bash`, however, it will work analogously on other Linux distributions or shells.
 
-### Prerequisites
+#### Prerequisites
 
 We require the following software to be installed on your system:
 
@@ -40,18 +54,18 @@ For the optional Docker dependency, follow the [official instructions](https://d
 After installation, you need to start the Docker daemon using `sudo systemctl start docker`.
 Later, we will use `docker run` without root rights, therefore, please add your user to the `docker` group as per the [documentation](https://docs.docker.com/engine/install/linux-postinstall).
 
-### Step-by-Step Instructions
+#### Step-by-Step Instructions
 
 We first have to install the dependencies MLTL2LTLf and Lydia.
 
-#### Installing MLTL2LTLf
+##### Installing MLTL2LTLf
 
 1. Get a copy of MLTL2LTLf from https://github.com/lu-w/mltl2ltlf and navigate into the folder.
 2. Install via: `pip install .`
 3. The script may be installed to a location not in your `$PATH`. PIP warns you about that. If so, please add the path that pip outputs to your `$PATH` by calling `echo "export PATH=\"/path/pip/warned/you/about:$PATH\"" >> ~/.bashrc && source ~/.bashrc`.
 4. `mltl2ltlf` should now be callable from your command line.
 
-#### Installing Lydia
+##### Installing Lydia
 
 1. Navigate into an appropriate, persistent directory.
 2. Pull the Docker image: `docker pull whitemech/lydia:latest`
@@ -60,7 +74,7 @@ We first have to install the dependencies MLTL2LTLf and Lydia.
 
 If you do not have Docker, you can also build Lydia from the source, as documented at https://github.com/whitemech/lydia.
 
-#### Installing Topllet
+##### Installing Topllet
 
 1. Call `mvn -DskipTests install` from this directory.
 2. Add `topllet` to your `$PATH`, as the binary is now located in `tools-cli/target/openlletcli/bin`: Call `echo "export PATH=\"$(pwd)/tools-cli/target/openlletcli/bin:$PATH\"" >> ~/.bashrc && source ~/.bashrc`.
