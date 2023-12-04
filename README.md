@@ -160,12 +160,12 @@ Even more granular control can be applied by setting a `logging.properties`, as 
 
 ## Even More Examples
 
-Besides the simple example from above, there are also more complex examples (in the domain of road traffic).
+Besides the simple example from above, there are also more complex examples.
 For this, navigate into the examples directory: `cd examples/src/main/resources/data/mtcq`.
 
 ### Right of Way Example
 
-The example models an intersection situation with two-wheelers. The corresponding query asks for systems not granting right of way to those two-wheelers.
+The example is in the traffic domain and models an intersection situation with two-wheelers. The corresponding query asks for systems not granting right of way to those two-wheelers.
 
 We have two versions of this example, one where the right of way is granted ('good'), and one where it is not ('bad').
 
@@ -179,7 +179,7 @@ The output shows no results, indicating that right of way was not granted.
 
 ### Automotive Urban Traffic Ontology Example
 
-You can also use highly complex ontologies.
+You can also use highly complex ontologies for the traffic domain.
 An example of such an ontology is the [Automotive Urban Traffic Ontology](https://github.com/lu-w/auto).
 This ontology contains, among others, axioms on parking vehicles, two-lane roads, and dynamical objects.
 The example thus asks for vehicles that pass parking vehicles on a two-lane road in the data based on some rudimentary physical and geometrical information.
@@ -187,6 +187,22 @@ The example thus asks for vehicles that pass parking vehicles on a two-lane road
 To run this example, call:
  `topllet -c auto/tbox/catalog-v001.xml auto/pvs.tcq auto/abox/aboxes.kbs`.
 The output is one answer, indicating that the vehicle passed some parking vehicle.
+
+### Oedipus
+
+A classical example for the complexity of querying under Description Logics is the tale of Oedipus.
+Here, we have four events: 1) Iokaste having her son, Oedipus, 2) Oedipus killing his father and thus becoming a patricide, 3) Oedipus and Iokaste having a child, Polyneikes, and 4) Polyneikes also having a child, Thersandros.
+These four events are modeled in four ABoxes.
+
+We can now ask four any `x` having a child which is a patricide having again a child which is not a patricide.
+Globally in all ABoxes, there is no answer to this query.
+In the last ABox, however, it has an answer.
+
+Therefore, running `topllet -c oedipus/catalog-v001.xml oedipus/f.tcq oedipus/aboxes.kbs` yields Iokaste as the only answer, whereas `topllet -c oedipus/catalog-v001.xml oedipus/g.tcq oedipus/aboxes.kbs` returns no answer.
+
+However, if we replace the undistinguished variables in the query with answer variables (`topllet -c oedipus/catalog-v001.xml oedipus/f_anwer.tcq oedipus/aboxes.kbs`) the query has again no answers.
+This is due to the fact that the query is entailed by the union of two different classes of models: one where the undistinguished variables are Polyneikes nd Thersandros, and one where they are Oedipus and Polyneikes.
+A single answer can never satisfy this query, highlighting the difference between undistinguished and answer variables in an open-world setting.
 
 ### API Example
 
