@@ -60,12 +60,16 @@ public class FileBasedTemporalKnowledgeBaseImpl extends ArrayList<KnowledgeBase>
                         // tries folder of .kbs file first
                         inputFile = Paths.get(p.getParent().toString(), inputFile).toString();
                     }
-                    inputFiles.add(inputFile);
+                    File file = new File(inputFile);
+                    if (file.exists())
+                        inputFiles.add(inputFile);
+                    else
+                        throw new FileNotFoundException("ABox file " + inputFile + " does not exist");
                 }
             return inputFiles;
         }
         else
-            throw new FileNotFoundException("File " + kbsFile + " does not exist");
+            throw new FileNotFoundException("TKB file " + kbsFile + " does not exist");
     }
 
     public FileBasedTemporalKnowledgeBaseImpl(Iterable<String> files)

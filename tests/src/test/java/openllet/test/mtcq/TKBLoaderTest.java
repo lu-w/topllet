@@ -73,15 +73,10 @@ public class TKBLoaderTest extends AbstractMTCQTest
     }
 
     @Test
-    public void testABoxNotExisting() throws FileNotFoundException
+    public void testABoxNotExisting()
     {
-        List<String> kbs = FileBasedTemporalKnowledgeBaseImpl.parseKBSFile("test/data/mtcq/loading/abox_not_exist.kbs");
-        assertEquals(2, kbs.size());
-        FileBasedTemporalKnowledgeBaseImpl fkbs = new FileBasedTemporalKnowledgeBaseImpl(kbs,
-                "test/data/mtcq/loading/catalog-v001.xml");
-        assertEquals(2, fkbs.size());
-        assertEquals(2, fkbs.get(0).getIndividualsCount());
-        assertThrows(RuntimeException.class, () -> fkbs.get(1));
+        assertThrows(FileNotFoundException.class,
+                () -> FileBasedTemporalKnowledgeBaseImpl.parseKBSFile("test/data/mtcq/loading/abox_not_exist.kbs"));
     }
 
     @Test
