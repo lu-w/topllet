@@ -207,17 +207,17 @@ The output is one answer, indicating that the vehicle passed some parking vehicl
 ### Oedipus
 
 A classical example for the complexity of querying under Description Logics is the tale of Oedipus.
-Here, we have four events: 1) Iokaste having her son, Oedipus, 2) Oedipus killing his father and thus becoming a patricide, 3) Oedipus and Iokaste having a child, Polyneikes, and 4) Polyneikes also having a child, Thersandros.
+Here, we have four events: 1) Iokaste having her son, Oedipus, 2) Oedipus killing his father and thus becoming a patricide, 3) Oedipus and Iokaste having a child, Polyneikes, and 4) Polyneikes also having a child, Thersandros, which is no patricide.
 These four events are modeled in four ABoxes.
 
-We can now ask four any `x` having a child which is a patricide having again a child which is not a patricide.
+We can now ask for any `x` having a child which is a patricide having again a child which is not a patricide.
 Globally in all ABoxes, there is no answer to this query.
 In the last ABox, however, it has an answer.
 
 Therefore, running `topllet -c oedipus/catalog-v001.xml oedipus/f.tcq oedipus/aboxes.kbs` yields Iokaste as the only answer, whereas `topllet -c oedipus/catalog-v001.xml oedipus/g.tcq oedipus/aboxes.kbs` returns no answer.
 
 However, if we replace the undistinguished variables in the query with answer variables (`topllet -c oedipus/catalog-v001.xml oedipus/f_anwer.tcq oedipus/aboxes.kbs`) the query has again no answers.
-This is due to the fact that the query is entailed by the union of two different classes of models: one where the undistinguished variables are Polyneikes nd Thersandros, and one where they are Oedipus and Polyneikes.
+This is due to the fact that the query is entailed by the union of two different classes of models: one where the undistinguished variables are Polyneikes and Thersandros, and one where they are Oedipus and Polyneikes.
 A single answer can never satisfy this query, highlighting the difference between undistinguished and answer variables in an open-world setting.
 
 ### API Example
