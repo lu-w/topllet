@@ -1,3 +1,0 @@
-PREFIX : <http://mtcq/example2#>
-
-                        (:A(?y) & :A(?x))
