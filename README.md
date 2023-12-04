@@ -172,9 +172,6 @@ Note that, when answering the given query, the implementation assumes `x != y` f
 This means that if `x` is answered by the individual `a`, `y` can not be mapped to `a` anymore.
 This behavior can be changed by adding the `-e` flag.
 
-Use the `-v` flag to get some more feedback during computation.
-Even more granular control can be applied by setting a `logging.properties`, as explained in the top-level `README.md`.
-
 ## Even More Examples
 
 Besides the simple example from above, there are also more complex examples.
