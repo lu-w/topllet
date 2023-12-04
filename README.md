@@ -22,10 +22,17 @@ Topllet is a fork of Openllet v2.6.6.
 
 ## Installation
 
+The installation is tested on UNIX-systems.
+
 ### Docker
 
 The simplest way of running Topllet is using Docker.
-For this, navigate to the `docker` folder an run:
+First, make sure you have Docker set up correctly.
+Follow the [official instructions](https://docs.docker.com/engine/install/ubuntu/#install-using-the-repository) to install Docker.
+After installation, you need to start the Docker daemon using `sudo systemctl start docker`.
+Later, we will use `docker run` without root rights, therefore, please add your user to the `docker` group as per the [documentation](https://docs.docker.com/engine/install/linux-postinstall).
+
+Navigate to the `docker` folder an run:
 
 1. `./build.sh` (to build the Docker image)
 2. `./run.sh help` (to run Topllet afterwards)
@@ -36,7 +43,6 @@ You can also make `topllet` callable by adding it as an alias: Call `echo "alias
 
 ### From Scratch
  
-The installation is tested on UNIX-systems.
 This installation assumes a Ubuntu system with `bash`, however, it will work analogously on other Linux distributions or shells.
 
 #### Prerequisites
@@ -46,13 +52,9 @@ We require the following software to be installed on your system:
 - Java version >= 17 (you can check your version with `java --version`)
 - Maven (fitting to the Java version, you can check your version with `mvn --version`)
 - Python 3 with PIP
-- Docker (optional, if Lydia shall not be compiled from source)
+- Docker (optional, if Lydia shall not be compiled from source - instructions to install and set up Docker are given above)
 
 To install Python, PIP, Java, and Maven, call `sudo apt-get update && sudo apt-get install python3 python3-pip openjdk-17-jdk maven`.
-
-For the optional Docker dependency, follow the [official instructions](https://docs.docker.com/engine/install/ubuntu/#install-using-the-repository) to install Docker.
-After installation, you need to start the Docker daemon using `sudo systemctl start docker`.
-Later, we will use `docker run` without root rights, therefore, please add your user to the `docker` group as per the [documentation](https://docs.docker.com/engine/install/linux-postinstall).
 
 #### Step-by-Step Instructions
 
