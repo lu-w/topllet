@@ -169,4 +169,36 @@ public class TestFileBasedMTCQEngine extends AbstractMTCQTest
                 term("http://mtcq/auto/data#r1")
         } });
     }
+
+    @Test
+    public void testOedipus1() throws IOException
+    {
+        List<String> kb = FileBasedTemporalKnowledgeBaseImpl.parseKBSFile(
+                "test/data/mtcq/oedipus/aboxes.kbs");
+        _tkb = new FileBasedTemporalKnowledgeBaseImpl(kb, "test/data/mtcq/oedipus/catalog-v001.xml");
+        String query = Files.readString(Paths.get("test/data/mtcq/oedipus/f.tcq"));
+        testQuery(query, new ATermAppl[][] { {
+                term("http://mtcq/example/oedipus/data#iokaste"),
+        } });
+    }
+
+    @Test
+    public void testOedipus2() throws IOException
+    {
+        List<String> kb = FileBasedTemporalKnowledgeBaseImpl.parseKBSFile(
+                "test/data/mtcq/oedipus/aboxes.kbs");
+        _tkb = new FileBasedTemporalKnowledgeBaseImpl(kb, "test/data/mtcq/oedipus/catalog-v001.xml");
+        String query = Files.readString(Paths.get("test/data/mtcq/oedipus/g.tcq"));
+        testQuery(query);
+    }
+
+    @Test
+    public void testOedipus3() throws IOException
+    {
+        List<String> kb = FileBasedTemporalKnowledgeBaseImpl.parseKBSFile(
+                "test/data/mtcq/oedipus/aboxes.kbs");
+        _tkb = new FileBasedTemporalKnowledgeBaseImpl(kb, "test/data/mtcq/oedipus/catalog-v001.xml");
+        String query = Files.readString(Paths.get("test/data/mtcq/oedipus/f_answer.tcq"));
+        testQuery(query);
+    }
 }

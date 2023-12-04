@@ -1,0 +1,7 @@
+PREFIX t: <http://mtcq/example/oedipus#>
+
+F
+(
+	# only true for t=4
+	t:hasChild(?x, c1) & t:hasChild(c1, c2) & t:Patricide(c1) & t:NotPatricide(c2)
+)
