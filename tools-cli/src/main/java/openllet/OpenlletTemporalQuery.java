@@ -22,6 +22,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -209,15 +210,21 @@ public class OpenlletTemporalQuery extends OpenlletCmdApp
             verbose("Query file: " + queryFile);
             startTask("parsing query file");
 
-            queryString = Files.readString(Paths.get(queryFile));
-            query = MetricTemporalConjunctiveQueryParser.parse(queryString, kb, !equalAnswersAllowed);
+            Path queryFilePath = Paths.get(queryFile);
+            if (Files.exists(queryFilePath))
+            {
+                queryString = Files.readString(queryFilePath);
+                query = MetricTemporalConjunctiveQueryParser.parse(queryString, kb, !equalAnswersAllowed);
 
-            finishTask("parsing query file");
+                finishTask("parsing query file");
 
-            verbose("Query: ");
-            verbose("-----------------------------------------------------");
-            verbose(queryString.trim());
-            verbose("-----------------------------------------------------");
+                verbose("Query: ");
+                verbose("-----------------------------------------------------");
+                verbose(queryString.trim());
+                verbose("-----------------------------------------------------");
+            }
+            else
+                throw new OpenlletCmdException(new FileNotFoundException(queryFile));
         }
         catch (final IOException | NotFoundException | RuntimeIOException | QueryParseException | ParseException e)
         {
