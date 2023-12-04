@@ -32,7 +32,7 @@ For this, navigate to the `docker` folder an run:
 
 Note that by default, the current folder is mounted into the Docker container. Therefore, all files referenced in the arguments of Topllet have to be located somewhere in the current working directory.
 
-You can also make `topllet` callable by adding it as an alias: Append `alias topllet="/home/lwesthofen/Dokumente/SCMs/PhD/openllet/docker/run.sh"` to your `~/.bashrc` and call `source ~/.bashrc`.
+You can also make `topllet` callable by adding it as an alias: Call `echo "alias topllet=\"$(pwd)/run.sh\"" >> ~/.bashrc && source ~/.bashrc`.
 
 ### From Scratch
  
