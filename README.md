@@ -170,8 +170,9 @@ Query results (i.e., the certain answers) are displayed to the user after the ex
 
 Note that, when answering the given query, the implementation assumes `x != y` for all answer variables `x` and `y`, as this seems to be the more natural behavior by default.
 This means that if `x` is answered by the individual `a`, `y` can not be mapped to `a` anymore.
+This behavior can be changed by adding the `-e` flag.
 
-Use the `-v` option to get some more feedback during computation.
+Use the `-v` flag to get some more feedback during computation.
 Even more granular control can be applied by setting a `logging.properties`, as explained in the top-level `README.md`.
 
 ## Even More Examples

@@ -34,6 +34,7 @@ public class OpenlletTemporalQuery extends OpenlletCmdApp
 {
     private String queryFile;
     private String catalogFile;
+    private boolean equalAnswersAllowed;
     private QueryResult queryResults;
     private String queryString;
     private MetricTemporalConjunctiveQuery query;
@@ -70,9 +71,17 @@ public class OpenlletTemporalQuery extends OpenlletCmdApp
         catalogOption.setShortOption("c");
         catalogOption.setType("catalog file");
         catalogOption.setDescription("An OASIS XML catalog file to resolve URIs");
-        catalogOption.setArg(OPTIONAL);
+        catalogOption.setArg(REQUIRED);
         catalogOption.setIsMandatory(false);
         options.add(catalogOption);
+
+        final OpenlletCmdOption distinctOption = new OpenlletCmdOption("equal");
+        distinctOption.setShortOption("e");
+        distinctOption.setDescription("Whether different variables of a generated answer can be mapped to the same " +
+                "(equal) individual");
+        distinctOption.setArg(NONE);
+        distinctOption.setIsMandatory(false);
+        options.add(distinctOption);
 
         return options;
     }
@@ -91,12 +100,18 @@ public class OpenlletTemporalQuery extends OpenlletCmdApp
         else
             super.parseArgs(args);
         setCatalogFile(_options.getOption("catalog").getValueAsString());
+        setEqualAnswers(_options.getOption("equal").getValueAsBoolean());
         setOutputFormat("Tabular"); // Currently, no other output format is supported, so no option for it.
     }
 
     private void setCatalogFile(final String s)
     {
         catalogFile = s;
+    }
+
+    private void setEqualAnswers(Boolean e)
+    {
+        equalAnswersAllowed = e;
     }
 
     protected List<String> parseInputFilesFromFile(String inputFile)
@@ -195,7 +210,7 @@ public class OpenlletTemporalQuery extends OpenlletCmdApp
             startTask("parsing query file");
 
             queryString = Files.readString(Paths.get(queryFile));
-            query = MetricTemporalConjunctiveQueryParser.parse(queryString, kb);
+            query = MetricTemporalConjunctiveQueryParser.parse(queryString, kb, !equalAnswersAllowed);
 
             finishTask("parsing query file");
 
