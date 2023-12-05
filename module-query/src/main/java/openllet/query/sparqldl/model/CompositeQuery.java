@@ -6,7 +6,7 @@ public interface CompositeQuery<SubQueryType extends Query<? extends SubQueryTyp
         QueryType extends CompositeQuery<SubQueryType, QueryType>> extends Query<QueryType>
 {
     /**
-     * @return The list of queries that represents the composite query.
+     * @return An unmodifiable view of the queries that represents the composite query.
      */
     List<SubQueryType> getQueries();
 

@@ -26,7 +26,5 @@ import openllet.query.sparqldl.model.results.ResultBinding;
  */
 public interface Filter
 {
-
 	boolean accept(final ResultBinding binding);
-
 }

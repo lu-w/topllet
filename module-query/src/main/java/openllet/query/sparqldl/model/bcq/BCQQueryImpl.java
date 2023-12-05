@@ -29,13 +29,12 @@ public class BCQQueryImpl extends AbstractCompositeQuery<ConjunctiveQuery, BCQQu
     @Override
     protected String getCompositeDelimiter()
     {
-        return "^";
+        return "&";
     }
 
     @Override
     public List<BCQQuery> split()
     {
-        // TODO: implement splitting for BCQQueries and adapt BCQEngine to handle splitting queries
         return List.of(this);
     }
 

@@ -202,7 +202,7 @@ public interface Query<QueryType extends Query<QueryType>>
 
     /**
      * Splits the query into disjoint parts.
-     * @return A list of disjoint queries
+     * @return A new list of disjoint queries.
      */
     List<QueryType> split();
 

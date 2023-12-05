@@ -27,7 +27,7 @@ abstract public class AbstractCompositeQuery<SubQueryType extends Query<SubQuery
     @Override
     public List<SubQueryType> getQueries()
     {
-        return _queries;
+        return Collections.unmodifiableList(_queries);
     }
 
     @Override

@@ -26,7 +26,7 @@ public class CNFQueryImpl extends AbstractCompositeQuery<DisjunctiveQuery, CNFQu
     @Override
     protected String getCompositeDelimiter()
     {
-        return "^";
+        return "&";
     }
 
     @Override
@@ -70,7 +70,7 @@ public class CNFQueryImpl extends AbstractCompositeQuery<DisjunctiveQuery, CNFQu
             resultToMerge.add(queryList);
         }
         // Disjunctive queries that do not belong to some equivalence set are ground -> put into their own class
-        if (queriesToAdd.size() > 0)
+        if (!queriesToAdd.isEmpty())
             resultToMerge.add(queriesToAdd);
 
         List<CNFQuery> result = new ArrayList<>();
