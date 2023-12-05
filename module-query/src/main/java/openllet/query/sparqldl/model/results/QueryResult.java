@@ -27,6 +27,14 @@ import openllet.query.sparqldl.model.Query;
 public interface QueryResult extends Iterable<ResultBinding>
 {
 	/**
+	 * Sets the query of this result.
+	 * Changes the variables over which the query result ranges as well.
+	 * Any subsequent iteration / operation of the result will then respect these new variables.
+	 * @param query the query to set
+	 */
+	void setQuery(final Query<?> query);
+
+	/**
 	 * Adds a new binding to the query result.
 	 *
 	 * @param binding to be added

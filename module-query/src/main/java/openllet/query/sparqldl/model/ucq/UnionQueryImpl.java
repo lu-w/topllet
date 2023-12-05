@@ -74,7 +74,7 @@ public class UnionQueryImpl extends AbstractCompositeQuery<ConjunctiveQuery, Uni
     private List<DisjunctiveQuery> toCNFRec(UnionQuery query)
     {
         // Safety check: no queries given
-        if (query.getQueries().size() == 0)
+        if (query.getQueries().isEmpty())
             return new ArrayList<>();
         // Base case: CNF(a_1 ^ ... ^ a_n) = a_1 ^ ... ^ a_n
         // Return a list of atoms (wrapped in a Query and again in a UnionQuery) to represent this conjunction.

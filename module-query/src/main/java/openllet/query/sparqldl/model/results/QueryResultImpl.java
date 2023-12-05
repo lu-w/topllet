@@ -12,6 +12,7 @@ import java.util.Map.Entry;
 import openllet.aterm.ATermAppl;
 import openllet.query.sparqldl.model.Query;
 import openllet.query.sparqldl.model.cq.QueryParameters;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 /**
  * <p>
@@ -31,8 +32,8 @@ public class QueryResultImpl implements QueryResult
 	private Collection<ResultBinding> _bindings;
 	private List<ResultBinding> _listForIterator;
 	private Set<ATermAppl> _resultVars;
-	private final Query<?> _query;
-	private final QueryParameters _parameters;
+	private Query<?> _query;
+	private QueryParameters _parameters;
 	private boolean _isInverted = false;
 	private Set<ATermAppl> _unmodifiableResultVars;
 	private int _containsPartialBinding = 0;
@@ -45,19 +46,21 @@ public class QueryResultImpl implements QueryResult
 
 	public QueryResultImpl(final Query<?> query, boolean isDistinct)
 	{
-		_query = query;
-		_parameters = query.getQueryParameters();
-		_resultVars = new HashSet<>(query.getResultVars());
-
+		setQuery(query);
 		if (isDistinct)
 			_bindings = new HashSet<>();
 		else
 			_bindings = new ArrayList<>();
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
+	public void setQuery(Query<?> query)
+	{
+		_query = query;
+		_resultVars = new HashSet<>(query.getResultVars());
+		_parameters = query.getQueryParameters();
+	}
+
 	@Override
 	public void add(final ResultBinding binding)
 	{
@@ -154,9 +157,6 @@ public class QueryResultImpl implements QueryResult
 		}
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public Collection<ATermAppl> getResultVars()
 	{
@@ -187,6 +187,8 @@ public class QueryResultImpl implements QueryResult
 	{
 		if (_isInverted)
 			performInversion();
+		if (containsPartialBindings())
+			expandToAllVariables(_resultVars);
 		if (_listForIterator == null)
 			_listForIterator = _bindings.stream().toList();
 		return _listForIterator.iterator();
@@ -234,10 +236,13 @@ public class QueryResultImpl implements QueryResult
 	}
 
 	@Override
+	@NonNull
 	public Iterator<ResultBinding> iterator()
 	{
 		if (_isInverted)
 			performInversion();
+		if (containsPartialBindings())
+			expandToAllVariables(_resultVars);
 		return _bindings.iterator();
 	}
 

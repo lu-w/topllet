@@ -35,7 +35,7 @@ Later, we will use `docker run` without root rights, therefore, please add your 
 Navigate to the `docker` folder an run:
 
 1. `./build.sh` (to build the Docker image)
-2. `./run.sh help` (to run Topllet afterwards)
+2. `./run.sh` (to run Topllet afterwards)
 
 Note that by default, the current folder is mounted into the Docker container. Therefore, all files referenced in the arguments of Topllet have to be located somewhere in the current working directory.
 
