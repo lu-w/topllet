@@ -33,44 +33,47 @@ public class Edge
      * That is, it implements a parser for the vector representation and checks the propsitional abstraction of the MTCQ
      * to fetch the appropriate CQ. The BCQ is built according to the Boolean combination (i.e., adding negations
      * appropriately).
-     * @return A list of BCQs for the edge.
+     * @return An unmodifiable view on the BCQs for the edge.
      */
     public List<BCQQuery> getBCQs()
     {
         if (_mtcq == null)
         {
-            return new ArrayList<>();
+            _bcqs = new ArrayList<>();
         }
-        else if (_bcqs == null && !_label.isEmpty())
+        if (_bcqs == null)
         {
             Map<Proposition, ConjunctiveQuery> propositionalAbstraction = _mtcq.getPropositionalAbstraction();
             KnowledgeBase defaultKb = !_mtcq.getTemporalKB().isEmpty() ? _mtcq.getTemporalKB().get(0) : null;
             _bcqs = new ArrayList<>();
-            String[] lines = _label.split("\\\\n");
-            if (lines.length > 0)
+            if (!_label.isEmpty())
             {
-                int _numOfBCQs = lines[0].split(" ").length;
-                for (int curBCQIndex = 0; curBCQIndex < _numOfBCQs; curBCQIndex++)
+                String[] lines = _label.split("\\\\n");
+                if (lines.length > 0)
                 {
-                    BCQQuery bcq = new BCQQueryImpl(defaultKb, true);
-                    for(int curPropositionIndex = 0; curPropositionIndex < lines.length; curPropositionIndex++)
+                    int _numOfBCQs = lines[0].split(" ").length;
+                    for (int curBCQIndex = 0; curBCQIndex < _numOfBCQs; curBCQIndex++)
                     {
-                        String line = lines[curPropositionIndex];
-                        String val = line.split("[ ,]")[curBCQIndex];
-                        if ("1".equals(val))
-                            bcq.addPositiveQuery(
-                                    propositionalAbstraction.values().stream().toList().get(curPropositionIndex).
-                                            copy());
-                        else if ("0".equals(val))
-                            bcq.addNegativeQuery(
-                                    propositionalAbstraction.values().stream().toList().get(curPropositionIndex).
-                                            copy());
+                        BCQQuery bcq = new BCQQueryImpl(defaultKb, true);
+                        for (int curPropositionIndex = 0; curPropositionIndex < lines.length; curPropositionIndex++)
+                        {
+                            String line = lines[curPropositionIndex];
+                            String val = line.split("[ ,]")[curBCQIndex];
+                            if ("1".equals(val))
+                                bcq.addPositiveQuery(
+                                        propositionalAbstraction.values().stream().toList().get(curPropositionIndex).
+                                                copy());
+                            else if ("0".equals(val))
+                                bcq.addNegativeQuery(
+                                        propositionalAbstraction.values().stream().toList().get(curPropositionIndex).
+                                                copy());
+                        }
+                        _bcqs.add(bcq);
                     }
-                    _bcqs.add(bcq);
                 }
             }
         }
-        return _bcqs;
+        return Collections.unmodifiableList(_bcqs);
     }
 
     public int getToState()

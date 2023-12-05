@@ -57,7 +57,7 @@ public class MetricTemporalConjunctiveQueryImpl extends AbstractCompositeQuery<C
     @Override
     public Map<Proposition, ConjunctiveQuery> getPropositionalAbstraction()
     {
-        return _propAbs;
+        return Collections.unmodifiableMap(_propAbs);
     }
 
     @Override

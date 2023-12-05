@@ -40,6 +40,10 @@ public class KnowledgeBaseLoader
             _timer = timer;
     }
 
+    /**
+     * Functionality for fetching differences between loaded knowledge bases. Note: works only with some loaders.
+     * @return A pointer to the difference of the currently loaded knowledge base to the previously loaded one.
+     */
     @Nullable
     public OntologyDiff getDiffToLastKB()
     {
@@ -47,6 +51,14 @@ public class KnowledgeBaseLoader
         return null;
     }
 
+    /**
+     * Loads a knowledge base from a given file path.
+     * @param fileName The path to the file to load the knowledge base from.
+     * @return The loaded knowledge base, newly created.
+     * @throws OWLOntologyCreationException If there are inconsistencies in the imports of the loaded knowledge base
+     *      to the imports of the previously loaded knowledge base.
+     * @throws FileNotFoundException If the given file does not exist.
+     */
     @Nullable
     public KnowledgeBase load(String fileName) throws OWLOntologyCreationException, FileNotFoundException
     {
@@ -63,6 +75,11 @@ public class KnowledgeBaseLoader
         return reasoner.getKB();
     }
 
+    /**
+     * Adds an OASIS XML catalog to the loader. After adding, any loading procedure will consider this catalog. Does
+     * not overwrite old catalogs, just adds new ones. Logs a warning if the catalog could not be loaded.
+     * @param catalogFileName The path to the OASIS XML catalog.
+     */
     public void addCatalog(String catalogFileName)
     {
         if (catalogFileName != null)
@@ -80,6 +97,13 @@ public class KnowledgeBaseLoader
         }
     }
 
+    /**
+     * Implements the loading procedure for OWL ontologies.
+     * @param fileName The path to the file to load the ontology from.
+     * @return The ontology that was loaded.
+     * @throws OWLOntologyCreationException If there was a problem in creating and loading the ontology.
+     * @throws FileNotFoundException If the given file does not exist.
+     */
     protected OWLOntology loadOntology(String fileName) throws OWLOntologyCreationException, FileNotFoundException
     {
         OWLOntologyManager man = OWLManager.createOWLOntologyManager();

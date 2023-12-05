@@ -21,7 +21,7 @@ public interface MetricTemporalConjunctiveQuery extends CompositeQuery<Conjuncti
     Collection<Proposition> getPropositionsInAbstraction();
 
     /**
-     * @return A pointer to the propositional abstraction used in this query.
+     * @return An unmodifiable view on the map representing the propositional abstraction used in this query.
      */
     Map<Proposition, ConjunctiveQuery> getPropositionalAbstraction();
 

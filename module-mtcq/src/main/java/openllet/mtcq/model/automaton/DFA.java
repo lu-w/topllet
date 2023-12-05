@@ -40,13 +40,20 @@ public class DFA extends CompactDFA<String>
         _mtcq = mtcq;
         _createEdges();
     }
-    
+
+    /**
+     * @param state The state to fetch its edges for
+     * @return A copy of the list of edges for the given state
+     */
     public List<Edge> getEdges(int state)
     {
         return _edges.stream().filter(x -> x.getFromState() == state).toList();
 
     }
 
+    /**
+     * Initializes the edges of this DFA.
+     */
     private void _createEdges()
     {
         for (int state : this.getStates())
@@ -60,6 +67,11 @@ public class DFA extends CompactDFA<String>
         }
     }
 
+    /**
+     * Searches for all states that are exactly reachable in a given amount of steps in this DFA.
+     * @param n The number of steps
+     * @return A new collection of Integers representing the reachable states.
+     */
     public Collection<Integer> getStatesReachableInNSteps(int n)
     {
         Collection<Integer> reachableStates = getInitialStates();
