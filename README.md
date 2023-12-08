@@ -14,7 +14,8 @@ Topllet is a fork of Openllet v2.6.6.
 3. [Even More Examples](#even-more-examples)
 	1. [Right of Way Example](#right-of-way-example)
 	2. [Automotive Urban Traffic Ontology Example](#automotive-urban-traffic-ontology-example)
-	3. [API Example](#api-example)
+	3. [Oedipus Example](#oedipus-example)
+	4. [API Example](#api-example)
 4. [Details](#details)
 	1. [Tests](#tests)
 	2. [Logging](#logging)
@@ -202,7 +203,7 @@ To run this example, call:
  `topllet -c auto/tbox/catalog-v001.xml auto/pvs.tcq auto/abox/aboxes.kbs`.
 The output is one answer, indicating that the vehicle passed some parking vehicle.
 
-### Oedipus
+### Oedipus Example
 
 A classical example for the complexity of querying under Description Logics is the tale of Oedipus.
 Here, we have four events: 1) Iokaste having her son, Oedipus, 2) Oedipus killing his father and thus becoming a patricide, 3) Oedipus and Iokaste having a child, Polyneikes, and 4) Polyneikes also having a child, Thersandros, which is no patricide.
