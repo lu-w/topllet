@@ -35,6 +35,21 @@ public class MetricTemporalConjunctiveQueryParser
      */
     static public MetricTemporalConjunctiveQuery parse(String input, TemporalKnowledgeBase kb) throws ParseException
     {
+        return parse(input, kb, true);
+    }
+
+    /**
+     * Parses the given string as a MTCQ over the given knowledge base.
+     * @param input The string to parse.
+     * @param kb The knowledge base containing roles and concepts used in the CQs.
+     * @param isDistinct whether the query has only answers who are distinct (the same individual can not be mapped to
+     *                   two different answer variables).
+     * @return The parsed MTCQ containing the propositional abstraction and the CQs.
+     * @throws ParseException If the input was not a valid MTCQ string.
+     */
+    static public MetricTemporalConjunctiveQuery parse(String input, TemporalKnowledgeBase kb, boolean isDistinct)
+            throws ParseException
+    {
         // Removes comments
         Pattern commentLine = Pattern.compile("(?m)(^#.*$)");
         Matcher commentLineMatcher = commentLine.matcher(input);
@@ -67,7 +82,7 @@ public class MetricTemporalConjunctiveQueryParser
         // Removes irrelevant line breaks and tabs / whitespaces
         mtcq = mtcq.replaceAll("(\r\n|\r|\n)[\t ]*", "").trim();
 
-        MetricTemporalConjunctiveQuery parsedMtcq = new MetricTemporalConjunctiveQueryImpl(mtcq, kb, true);
+        MetricTemporalConjunctiveQuery parsedMtcq = new MetricTemporalConjunctiveQueryImpl(mtcq, kb, isDistinct);
         final PropositionFactory propositionFactory = new PropositionFactory();
 
         while (!mtcq.replaceAll("[\\s)]", "").isEmpty())
@@ -128,7 +143,7 @@ public class MetricTemporalConjunctiveQueryParser
             int cqEnd = curIndex - 1;  // we do not want the closing bracket included in the CQ itself
             String cqString = mtcq.substring(cqBeg, cqEnd);
             mtcq = mtcq.substring(curIndex);
-            ConjunctiveQuery q = ConjunctiveQueryParser.parse(cqString, kb.get(0));
+            ConjunctiveQuery q = ConjunctiveQueryParser.parse(cqString, kb.get(0), isDistinct);
             if (!parsedMtcq.getConjunctiveQueries().contains(q))
             {
                 Proposition qProp = propositionFactory.create(q);

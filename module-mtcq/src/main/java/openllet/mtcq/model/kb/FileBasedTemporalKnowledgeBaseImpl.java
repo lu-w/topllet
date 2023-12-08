@@ -57,15 +57,20 @@ public class FileBasedTemporalKnowledgeBaseImpl extends ArrayList<KnowledgeBase>
                     if (!new File(inputFile).exists())
                     {
                         Path p = Paths.get(kbsFile);
-                        // tries folder of .kbs file first
-                        inputFile = Paths.get(p.getParent().toString(), inputFile).toString();
+                        if (p.getParent() != null)
+                            // tries folder of .kbs file first
+                            inputFile = Paths.get(p.getParent().toString(), inputFile).toString();
                     }
-                    inputFiles.add(inputFile);
+                    File file = new File(inputFile);
+                    if (file.exists())
+                        inputFiles.add(inputFile);
+                    else
+                        throw new FileNotFoundException(inputFile);
                 }
             return inputFiles;
         }
         else
-            throw new FileNotFoundException("File " + kbsFile + " does not exist");
+            throw new FileNotFoundException(kbsFile);
     }
 
     public FileBasedTemporalKnowledgeBaseImpl(Iterable<String> files)

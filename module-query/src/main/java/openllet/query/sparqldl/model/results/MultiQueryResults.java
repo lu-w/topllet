@@ -47,6 +47,13 @@ public class MultiQueryResults implements QueryResult
 			_size *= result.size();
 	}
 
+	@Override
+	public void setQuery(Query<?> query)
+	{
+		for (QueryResult queryResult : _queryResults)
+			queryResult.setQuery(query);
+	}
+
 	/**
 	 * {@inheritDoc}
 	 */

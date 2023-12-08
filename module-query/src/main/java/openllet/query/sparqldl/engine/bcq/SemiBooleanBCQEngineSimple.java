@@ -141,6 +141,7 @@ public class SemiBooleanBCQEngineSimple extends AbstractSemiBooleanBCQEngine
                 res = _ucqEngine.exec(ucq, excludeBindings, restrictToBindings);
                 if (res instanceof MultiQueryResults mqr)
                     res = mqr.toQueryResultImpl(query);
+                res.setQuery(query);  // res was originally for the UCQ, but we later use it for the BCQ
             }
             res = res.invert();
             if (!query.getResultVars().isEmpty())

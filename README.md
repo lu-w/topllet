@@ -6,8 +6,8 @@ Topllet is a fork of Openllet v2.6.6.
 ## Table of Contents
 
 1. [Installation](#installation)
-	1. [Prerequisites](#prerequisites)
-	2. [Step-by-Step Instructions](#step-by-step-instructions)
+	1. [Docker](#docker)
+	2. [From Scratch](#from-scratch)
 2. [Usage](#usage)
 	1. [Inputs](#inputs)
 	2. [Output](#output)
@@ -23,35 +23,51 @@ Topllet is a fork of Openllet v2.6.6.
 ## Installation
 
 The installation is tested on UNIX-systems.
+
+### Docker
+
+The simplest way of running Topllet is using Docker.
+First, make sure you have Docker set up correctly.
+Follow the [official instructions](https://docs.docker.com/engine/install/ubuntu/#install-using-the-repository) to install Docker.
+After installation, you need to start the Docker daemon using `sudo systemctl start docker`.
+Later, we will use `docker run` without root rights, therefore, please add your user to the `docker` group as per the [documentation](https://docs.docker.com/engine/install/linux-postinstall).
+
+Navigate to the `docker` folder an run:
+
+1. `./build.sh` (to build the Docker image)
+2. `./run.sh` (to run Topllet afterwards)
+
+Note that by default, the current folder is mounted into the Docker container. Therefore, all files referenced in the arguments of Topllet have to be located somewhere in the current working directory.
+
+You can also make `topllet` callable by adding it as an alias: Call `echo "alias topllet=\"$(pwd)/run.sh\"" >> ~/.bashrc && source ~/.bashrc`.
+
+### From Scratch
+ 
 This installation assumes a Ubuntu system with `bash`, however, it will work analogously on other Linux distributions or shells.
 
-### Prerequisites
+#### Prerequisites
 
 We require the following software to be installed on your system:
 
 - Java version >= 17 (you can check your version with `java --version`)
 - Maven (fitting to the Java version, you can check your version with `mvn --version`)
 - Python 3 with PIP
-- Docker (optional, if Lydia shall not be compiled from source)
+- Docker (optional, if Lydia shall not be compiled from source - instructions to install and set up Docker are given above)
 
 To install Python, PIP, Java, and Maven, call `sudo apt-get update && sudo apt-get install python3 python3-pip openjdk-17-jdk maven`.
 
-For the optional Docker dependency, follow the [official instructions](https://docs.docker.com/engine/install/ubuntu/#install-using-the-repository) to install Docker.
-After installation, you need to start the Docker daemon using `sudo systemctl start docker`.
-Later, we will use `docker run` without root rights, therefore, please add your user to the `docker` group as per the [documentation](https://docs.docker.com/engine/install/linux-postinstall).
-
-### Step-by-Step Instructions
+#### Step-by-Step Instructions
 
 We first have to install the dependencies MLTL2LTLf and Lydia.
 
-#### Installing MLTL2LTLf
+##### Installing MLTL2LTLf
 
 1. Get a copy of MLTL2LTLf from https://github.com/lu-w/mltl2ltlf and navigate into the folder.
 2. Install via: `pip install .`
 3. The script may be installed to a location not in your `$PATH`. PIP warns you about that. If so, please add the path that pip outputs to your `$PATH` by calling `echo "export PATH=\"/path/pip/warned/you/about:$PATH\"" >> ~/.bashrc && source ~/.bashrc`.
 4. `mltl2ltlf` should now be callable from your command line.
 
-#### Installing Lydia
+##### Installing Lydia
 
 1. Navigate into an appropriate, persistent directory.
 2. Pull the Docker image: `docker pull whitemech/lydia:latest`
@@ -60,7 +76,7 @@ We first have to install the dependencies MLTL2LTLf and Lydia.
 
 If you do not have Docker, you can also build Lydia from the source, as documented at https://github.com/whitemech/lydia.
 
-#### Installing Topllet
+##### Installing Topllet
 
 1. Call `mvn -DskipTests install` from this directory.
 2. Add `topllet` to your `$PATH`, as the binary is now located in `tools-cli/target/openlletcli/bin`: Call `echo "export PATH=\"$(pwd)/tools-cli/target/openlletcli/bin:$PATH\"" >> ~/.bashrc && source ~/.bashrc`.
@@ -154,18 +170,16 @@ Query results (i.e., the certain answers) are displayed to the user after the ex
 
 Note that, when answering the given query, the implementation assumes `x != y` for all answer variables `x` and `y`, as this seems to be the more natural behavior by default.
 This means that if `x` is answered by the individual `a`, `y` can not be mapped to `a` anymore.
-
-Use the `-v` option to get some more feedback during computation.
-Even more granular control can be applied by setting a `logging.properties`, as explained in the top-level `README.md`.
+This behavior can be changed by adding the `-e` flag.
 
 ## Even More Examples
 
-Besides the simple example from above, there are also more complex examples (in the domain of road traffic).
+Besides the simple example from above, there are also more complex examples.
 For this, navigate into the examples directory: `cd examples/src/main/resources/data/mtcq`.
 
 ### Right of Way Example
 
-The example models an intersection situation with two-wheelers. The corresponding query asks for systems not granting right of way to those two-wheelers.
+The example is in the traffic domain and models an intersection situation with two-wheelers. The corresponding query asks for systems not granting right of way to those two-wheelers.
 
 We have two versions of this example, one where the right of way is granted ('good'), and one where it is not ('bad').
 
@@ -179,7 +193,7 @@ The output shows no results, indicating that right of way was not granted.
 
 ### Automotive Urban Traffic Ontology Example
 
-You can also use highly complex ontologies.
+You can also use highly complex ontologies for the traffic domain.
 An example of such an ontology is the [Automotive Urban Traffic Ontology](https://github.com/lu-w/auto).
 This ontology contains, among others, axioms on parking vehicles, two-lane roads, and dynamical objects.
 The example thus asks for vehicles that pass parking vehicles on a two-lane road in the data based on some rudimentary physical and geometrical information.
@@ -187,6 +201,22 @@ The example thus asks for vehicles that pass parking vehicles on a two-lane road
 To run this example, call:
  `topllet -c auto/tbox/catalog-v001.xml auto/pvs.tcq auto/abox/aboxes.kbs`.
 The output is one answer, indicating that the vehicle passed some parking vehicle.
+
+### Oedipus
+
+A classical example for the complexity of querying under Description Logics is the tale of Oedipus.
+Here, we have four events: 1) Iokaste having her son, Oedipus, 2) Oedipus killing his father and thus becoming a patricide, 3) Oedipus and Iokaste having a child, Polyneikes, and 4) Polyneikes also having a child, Thersandros, which is no patricide.
+These four events are modeled in four ABoxes.
+
+We can now ask for any `x` having a child which is a patricide having again a child which is not a patricide.
+Globally in all ABoxes, there is no answer to this query.
+In the last ABox, however, it has an answer.
+
+Therefore, running `topllet -c oedipus/catalog-v001.xml oedipus/f.tcq oedipus/aboxes.kbs` yields Iokaste as the only answer, whereas `topllet -c oedipus/catalog-v001.xml oedipus/g.tcq oedipus/aboxes.kbs` returns no answer.
+
+However, if we replace the undistinguished variables in the query with answer variables (`topllet -c oedipus/catalog-v001.xml oedipus/f_anwer.tcq oedipus/aboxes.kbs`) the query has again no answers.
+This is due to the fact that the query is entailed by the union of two different classes of models: one where the undistinguished variables are Polyneikes and Thersandros, and one where they are Oedipus and Polyneikes.
+A single answer can never satisfy this query, highlighting the difference between undistinguished and answer variables in an open-world setting.
 
 ### API Example
 

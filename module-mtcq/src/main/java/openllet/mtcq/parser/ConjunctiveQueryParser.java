@@ -55,13 +55,15 @@ public class ConjunctiveQueryParser
      * Parses the given CQ string to an Openllet ConjunctiveQuery a la "C(a) & r(a,?b)"
      * @param input The sting to parse.
      * @param kb The knowledge base containing roles and concepts used in the CQ.
+     * @param isDistinct whether the query has only answers who are distinct (the same individual can not be mapped to
+     *                   two different answer variables).
      * @return The parsed CQ.
      * @throws ParseException If conflicting information on variables / individuals is present in the CQ, or the string
      * does not adhere to a valid CQ syntax.
      */
-    static public ConjunctiveQuery parse(String input, KnowledgeBase kb) throws ParseException
+    static public ConjunctiveQuery parse(String input, KnowledgeBase kb, boolean isDistinct) throws ParseException
     {
-        ConjunctiveQuery cq = new ConjunctiveQueryImpl(kb, true);
+        ConjunctiveQuery cq = new ConjunctiveQueryImpl(kb, isDistinct);
         for (String atom : input.split("&"))
         {
             if (atom.contains("(") && atom.contains(")"))

@@ -46,17 +46,17 @@ public interface BCQQuery extends CompositeQuery<ConjunctiveQuery, BCQQuery>
 
     /**
      * Merges all the positive queries into a single, newly copied query.
-     * @return a copy representing a single query of the positive subqueries of this query
+     * @return a new copy representing a single query of the positive subqueries of this query
      */
     ConjunctiveQuery mergePositiveQueries();
 
     /**
-     * @return a list of the result vars of the positive sub-queries
+     * @return a new list of the result vars of the positive sub-queries
      */
     List<ATermAppl> getPositiveResultVars();
 
     /**
-     * @return a list of the result vars  that are not present in both of the query parts.
+     * @return a new list of the result vars  that are not present in both of the query parts.
      */
     List<ATermAppl> getUnconstrainedResultVars();
 }

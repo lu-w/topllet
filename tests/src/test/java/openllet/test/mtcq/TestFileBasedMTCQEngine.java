@@ -66,6 +66,58 @@ public class TestFileBasedMTCQEngine extends AbstractMTCQTest
                         }});
     }
 
+    @Test
+    public void simpleTestEqualIndsAllowed() throws FileNotFoundException
+    {
+        List<String> kb = FileBasedTemporalKnowledgeBaseImpl.parseKBSFile("test/data/mtcq/simple_1/aboxes.kbs");
+        _tkb = new FileBasedTemporalKnowledgeBaseImpl(kb, "test/data/mtcq/simple_1/catalog-v001.xml");
+        testQuery("""
+                        PREFIX : <http://mtcq/example2#>
+
+                        (:A(?y) & :A(?x))""",
+                false,
+                new ATermAppl[][] {
+                        {
+                                term("http://mtcq/example2/data#r1"),
+                                term("http://mtcq/example2/data#r0")
+                        },
+                        {
+                                term("http://mtcq/example2/data#r0"),
+                                term("http://mtcq/example2/data#r0")
+                        },
+                        {
+                                term("http://mtcq/example2/data#r1"),
+                                term("http://mtcq/example2/data#r1")
+                        },
+                        {
+                                term("http://mtcq/example2/data#r0"),
+                                term("http://mtcq/example2/data#r1")
+                        }
+        });
+    }
+
+    @Test
+    public void simpleTestEqualIndsNotAllowed() throws FileNotFoundException
+    {
+        List<String> kb = FileBasedTemporalKnowledgeBaseImpl.parseKBSFile("test/data/mtcq/simple_1/aboxes.kbs");
+        _tkb = new FileBasedTemporalKnowledgeBaseImpl(kb, "test/data/mtcq/simple_1/catalog-v001.xml");
+        testQuery("""
+                        PREFIX : <http://mtcq/example2#>
+
+                        (:A(?y) & :A(?x))""",
+                true,
+                new ATermAppl[][] {
+                        {
+                                term("http://mtcq/example2/data#r1"),
+                                term("http://mtcq/example2/data#r0")
+                        },
+                        {
+                                term("http://mtcq/example2/data#r0"),
+                                term("http://mtcq/example2/data#r1")
+                        }
+                });
+    }
+
     //@Test
     public void simpleTest4() throws FileNotFoundException
     {
@@ -168,5 +220,37 @@ public class TestFileBasedMTCQEngine extends AbstractMTCQTest
                 term("http://mtcq/auto/data#r0"),
                 term("http://mtcq/auto/data#r1")
         } });
+    }
+
+    @Test
+    public void testOedipus1() throws IOException
+    {
+        List<String> kb = FileBasedTemporalKnowledgeBaseImpl.parseKBSFile(
+                "test/data/mtcq/oedipus/aboxes.kbs");
+        _tkb = new FileBasedTemporalKnowledgeBaseImpl(kb, "test/data/mtcq/oedipus/catalog-v001.xml");
+        String query = Files.readString(Paths.get("test/data/mtcq/oedipus/f.tcq"));
+        testQuery(query, new ATermAppl[][] { {
+                term("http://mtcq/example/oedipus/data#iokaste"),
+        } });
+    }
+
+    @Test
+    public void testOedipus2() throws IOException
+    {
+        List<String> kb = FileBasedTemporalKnowledgeBaseImpl.parseKBSFile(
+                "test/data/mtcq/oedipus/aboxes.kbs");
+        _tkb = new FileBasedTemporalKnowledgeBaseImpl(kb, "test/data/mtcq/oedipus/catalog-v001.xml");
+        String query = Files.readString(Paths.get("test/data/mtcq/oedipus/g.tcq"));
+        testQuery(query);
+    }
+
+    @Test
+    public void testOedipus3() throws IOException
+    {
+        List<String> kb = FileBasedTemporalKnowledgeBaseImpl.parseKBSFile(
+                "test/data/mtcq/oedipus/aboxes.kbs");
+        _tkb = new FileBasedTemporalKnowledgeBaseImpl(kb, "test/data/mtcq/oedipus/catalog-v001.xml");
+        String query = Files.readString(Paths.get("test/data/mtcq/oedipus/f_answer.tcq"));
+        testQuery(query);
     }
 }

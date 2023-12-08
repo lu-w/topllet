@@ -7,6 +7,9 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
+/**
+ * This class manages a set of executable states.
+ */
 public class DFAExecutableStates extends ArrayList<DFAExecutableState>
 {
     private final DFA _dfa;
@@ -16,6 +19,11 @@ public class DFAExecutableStates extends ArrayList<DFAExecutableState>
         _dfa = dfa;
     }
 
+    /**
+     * Merges the given state into this set of executable states by either merging it into an existing state, if
+     * possible, or adding it as a completely new one to the collection.
+     * @param toAdd The state to add.
+     */
     public void mergeOrAdd(DFAExecutableState toAdd)
     {
         DFAExecutableState mergeState = findSameState(toAdd);
@@ -33,6 +41,9 @@ public class DFAExecutableStates extends ArrayList<DFAExecutableState>
         return null;
     }
 
+    /**
+     * @return True iff. this state set contains a state that can be executed.
+     */
     public boolean hasExecutableState()
     {
         boolean existsExecutableState = false;
@@ -45,6 +56,10 @@ public class DFAExecutableStates extends ArrayList<DFAExecutableState>
         return existsExecutableState;
     }
 
+    /**
+     * @param n A time step.
+     * @return True iff. this state set covers the final states of the DFA completely.
+     */
     public boolean coversDFAFinalStatesCompletely(int n)
     {
         Collection<Integer> reachableStates = _dfa.getStatesReachableInNSteps(n);

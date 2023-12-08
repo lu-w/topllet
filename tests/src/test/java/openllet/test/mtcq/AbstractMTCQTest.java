@@ -104,10 +104,15 @@ public class AbstractMTCQTest extends AbstractQueryTest
 
     protected MetricTemporalConjunctiveQuery temporalQuery(String formula)
     {
+        return temporalQuery(formula, true);
+    }
+
+    protected MetricTemporalConjunctiveQuery temporalQuery(String formula, boolean distinct)
+    {
         MetricTemporalConjunctiveQuery mtcq = null;
         try
         {
-            mtcq = MetricTemporalConjunctiveQueryParser.parse(formula, _tkb);
+            mtcq = MetricTemporalConjunctiveQueryParser.parse(formula, _tkb, distinct);
         }
         catch (ParseException e)
         {
@@ -473,19 +478,34 @@ public class AbstractMTCQTest extends AbstractQueryTest
 
     protected void testQuery(String query, final boolean expected)
     {
-        MetricTemporalConjunctiveQuery mtcq = temporalQuery(query);
+        testQuery(query, true, expected);
+    }
+
+    protected void testQuery(String query, final boolean distinct, final boolean expected)
+    {
+        MetricTemporalConjunctiveQuery mtcq = temporalQuery(query, distinct);
         testQuery(mtcq, expected);
     }
 
     protected void testQuery(String query, final ATermAppl[]... values)
     {
-        MetricTemporalConjunctiveQuery mtcq = temporalQuery(query);
+        testQuery(query, true, values);
+    }
+
+    protected void testQuery(String query, final boolean distinct, final ATermAppl[]... values)
+    {
+        MetricTemporalConjunctiveQuery mtcq = temporalQuery(query, distinct);
         testQuery(mtcq, values);
     }
 
     protected void testQuery(String query, final List<List<ATermAppl>> values)
     {
-        MetricTemporalConjunctiveQuery mtcq = temporalQuery(query);
+        testQuery(query, true, values);
+    }
+
+    protected void testQuery(String query, final boolean distinct, final List<List<ATermAppl>> values)
+    {
+        MetricTemporalConjunctiveQuery mtcq = temporalQuery(query, distinct);
         testQuery(mtcq, values);
     }
 }

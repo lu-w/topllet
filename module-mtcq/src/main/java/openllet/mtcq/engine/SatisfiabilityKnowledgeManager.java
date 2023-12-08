@@ -138,9 +138,10 @@ public class SatisfiabilityKnowledgeManager
      * `OpenlletOptions.MTCQ_ENGINE_TEMPORAL_BCQ_TRANSFER` is true.
      * @param query The BCQ to get the knowledge for.
      * @param timePoint Time point to get the knowledge for.
-     * @return The satisfiability knowledge for the given BCQ and time point.
+     * @return A pointer to the satisfiability knowledge for the given BCQ and time point, null if there is no
+     *  knowledge.
      */
-    public SatisfiabilityKnowledge transferAndGetKnowledgeOnQuery(BCQQuery query, int timePoint)
+    public @Nullable SatisfiabilityKnowledge transferAndGetKnowledgeOnQuery(BCQQuery query, int timePoint)
     {
         SatisfiabilityKnowledge knowledge = getKnowledgeOnQuery(query);
         if (OpenlletOptions.MTCQ_ENGINE_TEMPORAL_BCQ_TRANSFER && knowledge != null)
@@ -150,7 +151,8 @@ public class SatisfiabilityKnowledgeManager
 
     /**
      * @param query The BCQ to get the knowledge for.
-     * @return The satisfiability knowledge the manager currently has on the given BCQ. Can be null if there is none.
+     * @return A pointer to the satisfiability knowledge the manager currently has on the given BCQ.
+     *  Can be null if there is none.
      */
     public @Nullable SatisfiabilityKnowledge getKnowledgeOnQuery(BCQQuery query)
     {
@@ -165,7 +167,7 @@ public class SatisfiabilityKnowledgeManager
      * on the SubQuerySelectionStrategy. If Lightweight, it extracts all negative sub-CQs and the CQ representing the
      * conjunction of all positive sub-CQs. If AMAP, all positive sub-CQs are included as well.
      * @param query The BCQ to extract CQs from.
-     * @return A collection of CQs extracted from the BCQ.
+     * @return A new collection of CQs extracted from the BCQ.
      */
     private Collection<ConjunctiveQuery> getCandidatesForCheckingUnderapproximatingSemantics(BCQQuery query)
     {
@@ -262,7 +264,7 @@ public class SatisfiabilityKnowledgeManager
      * Note that this explicates the cross-product. Outputs the input result if it is already a QueryResultImpl.
      * @param result The query result to convert.
      * @param origQuery The query of the query result to convert.
-     * @return A QueryResult that is guaranteed to be a QueryResultImpl.
+     * @return A QueryResult (that is guaranteed to be a QueryResultImpl).
      */
     private QueryResult toQueryResult(QueryResult result, Query<?> origQuery)
     {
@@ -339,8 +341,8 @@ public class SatisfiabilityKnowledgeManager
      * @param kb The knowledge base to compute satisfiable answers for.
      * @param useUnderapproximatingSemantics If true, uses only the CQ engine to compute answers.
      * @param restrictSatToBindings Restricts satisfiable answers to the given set of bindings, if not null.
-     * @return A query result for satisfiable and unsatisfiable knowledge, as a mapping from true (satisfiable) and
-     * false (unsatisfiable) to a query result.
+     * @return A pointer to the current query result for satisfiable and unsatisfiable knowledge, as a mapping from
+     * true (satisfiable) and false (unsatisfiable) to a query result.
      * @throws IOException If BCQ query engine encountered an IO exception.
      * @throws InterruptedException If BCQ query engine was interrupted.
      */

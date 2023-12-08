@@ -89,8 +89,8 @@ public class EdgeConstraintChecker
      * @param timePoint The time point we are located at
      * @param kb The atemporal knowledge base for the given time point
      * @param restrictSatToBindings If not null, satisfiability results are restricted to this set of bindings
-     * @return A query result for satisfiable and unsatisfiable knowledge, as a mapping from true (satisfiable) and
-     * false (unsatisfiable) to a query result.
+     * @return A pointer to a query result for satisfiable and unsatisfiable knowledge, as a mapping from true
+     * (satisfiable) and false (unsatisfiable) to a query result.
      * @throws IOException If BCQ query engine encountered an IO exception.
      * @throws InterruptedException If BCQ query engine was interrupted.
      */

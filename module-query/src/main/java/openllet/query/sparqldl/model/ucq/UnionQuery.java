@@ -8,7 +8,7 @@ public interface UnionQuery extends CompositeQuery<ConjunctiveQuery, UnionQuery>
     /**
      * Converts this union query to conjunctive normal form, i.e. of the form (a v ... v b) ^ ... ^ (c v ... v d).
      * Does not change this query.
-     * @return A list of union queries, where each conjunctive query of each union query contains only one atom.
+     * @return A new list of union queries, where each conjunctive query of each union query contains only one atom.
      */
     CNFQuery toCNF();
 

@@ -48,7 +48,7 @@ public interface AtomQuery<QueryType extends AtomQuery<QueryType>> extends Query
      *
      * @param predicate the predicate to search for
      * @param arguments arguments to search for
-     * @return query atoms in the order as they appear in the query
+     * @return a new list with the query atoms in the order as they appear in the query
      */
     List<QueryAtom> findAtoms(final QueryPredicate predicate, final ATermAppl... arguments);
 }

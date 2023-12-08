@@ -29,7 +29,6 @@ import openllet.query.sparqldl.model.results.ResultBinding;
  */
 public interface QueryAtom
 {
-
 	/**
 	 * Returns predicate of the query atom.
 	 *
