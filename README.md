@@ -3,6 +3,8 @@
 Topllet is an engine for answering Metric Temporal Conjunctive Queries over OWL2-based Temporal Knowledge Bases.
 Topllet is a fork of Openllet v2.6.6.
 
+> **``📝``**  This is an early version of Topllet, which is under active development. It is possible that you experience performance deficiencies with very large data inputs.
+
 ## Table of Contents
 
 1. [Installation](#installation)
