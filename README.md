@@ -241,5 +241,5 @@ For this, instead of directly running `topllet`, use
 
 ### Algorithms
 
-If you wish to comprehend the implementation, the `MTCQEngine` class in [`src/main/java/openllet/mtcq/engine/MTCQEngine.java`](src/main/java/openllet/mtcq/engine/MTCQEngine.java) is a good starting point.
+If you wish to comprehend the implementation, the `MTCQEngine` class in [`module-mtcq/src/main/java/openllet/mtcq/engine/MTCQEngine.java`](src/main/java/openllet/mtcq/engine/MTCQEngine.java) is a good starting point.
 From there, the relevant steps are documented.
