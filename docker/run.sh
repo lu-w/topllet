@@ -1,3 +1,3 @@
 #!/bin/bash
 
-docker run -v .:/home/default topllet "$@"
+docker run --rm -v .:/home/default topllet "$@"
