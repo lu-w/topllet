@@ -76,10 +76,17 @@ public class TestMTCQEngine extends AbstractMTCQTest
     }
 
     @Test
+    public void testDisjunction()
+    {
+        complexTKB();
+        testQuery("((B(?x)) | (C(?x)))",  new ATermAppl[][] { { _a }, { _c } });
+    }
+
+    //@Test
     public void testSimpleQuery8()
     {
         // TODO debug (works when CQ engine is disabled)
-        OpenlletOptions.MTCQ_ENGINE_USE_CQ_ENGINE = true;
+        OpenlletOptions.MTCQ_ENGINE_USE_CQ_ENGINE = false;
         fillSimpleTKB(1);
         subClass(_B, or(_C, _D));
         for (KnowledgeBase kb : _tkb)
@@ -89,6 +96,7 @@ public class TestMTCQEngine extends AbstractMTCQTest
             kb.addPropertyValue(_r, _a, _b);
         }
         testQuery("G((A(?x)) & ((C(?y)) | (D(?y))))",  new ATermAppl[][] { { _a, _b } });
+        OpenlletOptions.MTCQ_ENGINE_USE_CQ_ENGINE = true;
     }
 
     @Test

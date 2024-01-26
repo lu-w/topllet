@@ -44,7 +44,7 @@ public class SemiBooleanBCQEngineSimple extends AbstractSemiBooleanBCQEngine
         q.getKB().ensureConsistency();
 
         // If there are 0 negated subqueries in q, we can check for entailment: if q is entailed, then it is satisfiable
-        if (OpenlletOptions.BCQ_ENGINE_USE_CQ_ENTAILMENT_AS_SUFFICIENT_CONDITION && q.getNegativeQueries().size() == 0)
+        if (OpenlletOptions.BCQ_ENGINE_USE_CQ_ENTAILMENT_AS_SUFFICIENT_CONDITION && q.getNegativeQueries().isEmpty())
         {
             boolean isEntailed = true;
             for (ConjunctiveQuery cq : q.getPositiveQueries())

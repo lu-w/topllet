@@ -1,7 +1,11 @@
 package openllet.test.mtcq;
 
+import openllet.core.KnowledgeBase;
+import openllet.core.OpenlletOptions;
 import org.junit.Test;
 
+import static openllet.core.utils.TermFactory.not;
+import static openllet.core.utils.TermFactory.or;
 import static org.junit.Assert.assertThrows;
 
 public class TestBooleanMTCQEngine extends AbstractMTCQTest
@@ -18,6 +22,13 @@ public class TestBooleanMTCQEngine extends AbstractMTCQTest
     {
         simpleTKB();
         assertQueryNotEntailed("!G(A(a))");
+    }
+
+    @Test
+    public void testDisjunction()
+    {
+        complexTKB();
+        assertQueryEntailed("((B(a)) | (C(a)))");
     }
 
     @Test
