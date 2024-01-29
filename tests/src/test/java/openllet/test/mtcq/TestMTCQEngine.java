@@ -34,9 +34,9 @@ public class TestMTCQEngine extends AbstractMTCQTest
     {
         simpleTKB();
         testQuery("(A(?x)) U (B(?y))", new ATermAppl[][] { { _a, _b }, { _c, _b } });
-        //testQuery("((A(?x)) U (B(?y))) | F(C(?y))", new ATermAppl[][] { { _a, _b }, { _c, _b } });
-        //testQuery("((A(?x)) U (B(?y))) | X(C(?y))", new ATermAppl[][] { { _a, _b }, { _c, _b } });
-        //testQuery("((!(A(?x))) & (B(y))) | ((A(?x)) & (B(?y)))", new ATermAppl[][] { { _a, _b }, { _c, _b } });
+        testQuery("((A(?x)) U (B(?y))) | F(C(?y))", new ATermAppl[][] { { _a, _b }, { _c, _b } });
+        testQuery("((A(?x)) U (B(?y))) | X(C(?y))", new ATermAppl[][] { { _a, _b }, { _c, _b } });
+        testQuery("((!(A(?x))) & (B(?y))) | ((A(?x)) & (B(?y)))", new ATermAppl[][] { { _a, _b }, { _c, _b } });
     }
 
     @Test
