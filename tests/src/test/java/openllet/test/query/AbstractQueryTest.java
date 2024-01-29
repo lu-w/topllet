@@ -8,6 +8,7 @@ package openllet.test.query;
 
 import openllet.aterm.ATermAppl;
 import openllet.core.utils.ATermUtils;
+import openllet.mtcq.engine.MTCQEngineOptimized;
 import openllet.query.sparqldl.engine.bcq.BCQQueryEngineSimple;
 import openllet.query.sparqldl.engine.cq.QueryEngine;
 import openllet.query.sparqldl.engine.ucq.UnionQueryEngineSimple;
@@ -229,7 +230,8 @@ public abstract class AbstractQueryTest extends AbstractKBTests
 			else if (query instanceof BCQQuery)
 				result = new BCQQueryEngineSimple().exec((BCQQuery) query);
 			else if (query instanceof MetricTemporalConjunctiveQuery)
-				result = new MTCQEngine().exec((MetricTemporalConjunctiveQuery) query);
+				// TODO just for testing here.
+				result = new MTCQEngineOptimized().exec((MetricTemporalConjunctiveQuery) query);
 			else
 				fail("Unknown query type " + query.getClass());
 			if (result == null)

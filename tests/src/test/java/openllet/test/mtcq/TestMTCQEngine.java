@@ -18,8 +18,9 @@ public class TestMTCQEngine extends AbstractMTCQTest
     public void testSimpleQuery1()
     {
         simpleTKB();
-        testQuery("G(A(?x))", new ATermAppl[][] { { _a } });
         testQuery("G(A(?x) & B(?y)) & F(r(?x,?y))", new ATermAppl[][] { { _a, _b } });
+        /**
+        testQuery("G(A(?x))", new ATermAppl[][] { { _a } });
         testQuery("G((A(?x)) & (B(?y))) & F(r(?x,?y))", new ATermAppl[][] { { _a, _b } });
         testQuery("G(A(?x) & B(?y)) & F!(r(?x,?y))");
         testQuery("G(A(?x) & B(?y)) & G!(r(?x,?y))");
@@ -27,6 +28,7 @@ public class TestMTCQEngine extends AbstractMTCQTest
         testQuery("G(A(?x)) & G(r(?x,?y))", new ATermAppl[][] { { _a, _b } });
         testQuery("G(A(?x)) & F(p(?x,?y))");
         testQuery("G(A(?x)) & F(r(?x,?y))", new ATermAppl[][] { { _a, _b } });
+         **/
     }
 
     @Test

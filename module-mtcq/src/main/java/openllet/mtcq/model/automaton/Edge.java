@@ -6,6 +6,8 @@ import openllet.query.sparqldl.model.bcq.BCQQueryImpl;
 import openllet.query.sparqldl.model.cq.ConjunctiveQuery;
 import openllet.mtcq.model.query.Proposition;
 import openllet.mtcq.model.query.MetricTemporalConjunctiveQuery;
+import openllet.query.sparqldl.model.ubcq.UBCQQuery;
+import openllet.query.sparqldl.model.ubcq.UBCQQueryImpl;
 
 import java.util.*;
 
@@ -74,6 +76,13 @@ public class Edge
             }
         }
         return Collections.unmodifiableList(_bcqs);
+    }
+
+    public UBCQQuery getUBCQ(KnowledgeBase kb, boolean isDistinct)
+    {
+        UBCQQuery q = new UBCQQueryImpl(kb, isDistinct);
+        q.setQueries(getBCQs());
+        return q;
     }
 
     public int getToState()

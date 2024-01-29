@@ -1,0 +1,103 @@
+package openllet.mtcq.engine.ubcq;
+
+import openllet.aterm.ATermAppl;
+import openllet.core.utils.Pair;
+import openllet.mtcq.engine.MTCQEngine;
+import openllet.mtcq.model.kb.InMemoryTemporalKnowledgeBaseImpl;
+import openllet.mtcq.model.kb.TemporalKnowledgeBase;
+import openllet.mtcq.model.query.MetricTemporalConjunctiveQuery;
+import openllet.mtcq.model.query.MetricTemporalConjunctiveQueryImpl;
+import openllet.mtcq.model.query.Proposition;
+import openllet.mtcq.model.query.PropositionFactory;
+import openllet.query.sparqldl.model.bcq.BCQQuery;
+import openllet.query.sparqldl.model.cq.ConjunctiveQuery;
+import openllet.query.sparqldl.model.cq.QueryAtom;
+import openllet.query.sparqldl.model.results.QueryResult;
+import openllet.query.sparqldl.model.ubcq.UBCQQuery;
+
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+public class UBCQQueryEngineByMTCQ extends AbstractUBCQQueryEngine
+{
+    @Override
+    protected QueryResult execABoxQuery(UBCQQuery q, QueryResult excludeBindings, QueryResult restrictToBindings)
+            throws IOException, InterruptedException
+    {
+        if (q.getQueries().isEmpty())
+            System.out.println("Got empty UBCQ. No optimization required.");
+        else if (q.getQueries().size() == 1)
+        {
+            boolean optimizable = true;
+            for (ConjunctiveQuery cq : q.getQueries().get(0).getNegativeQueries())
+                if (!cq.getUndistVars().isEmpty())
+                {
+                    optimizable = false;
+                    break;
+                }
+            if (optimizable)
+                System.out.println("UBCQ " + q + " has only one BCQ and is optimiziable! Yay!");
+            else
+                System.out.println("UBCQ " + q + " has only one BCQ but is not optimiziable due to undist vars in negated CQs");
+        }
+        else
+        {
+            System.out.println("Got complex UBCQ " + q + ". Meh, not optimizable.");
+        }
+        TemporalKnowledgeBase tkb = new InMemoryTemporalKnowledgeBaseImpl();
+        tkb.add(q.getKB());
+        StringBuilder mtcqString = new StringBuilder();
+        PropositionFactory pf = new PropositionFactory();
+        Map<ConjunctiveQuery, Pair<Proposition, String>> cqsToPropsAndString = new HashMap<>();
+        for (int i = 0; i < q.getQueries().size(); i++)
+        {
+            BCQQuery bcq = q.getQueries().get(i);
+            for (int j = 0; j < bcq.getQueries().size(); j++)
+            {
+                ConjunctiveQuery cq = bcq.getQueries().get(j);
+                StringBuilder cqString = new StringBuilder();
+                if (cq.isNegated())
+                    mtcqString.append("!");
+                mtcqString.append("(");
+                for (int k = 0; k < cq.getAtoms().size(); k++)
+                {
+                    QueryAtom atom = cq.getAtoms().get(k);
+                    List<ATermAppl> args = atom.getArguments();
+                    switch (atom.getPredicate())
+                    {
+                        case Type:
+                            cqString.append(args.get(1)).append("(").append(args.get(0).getChildAt(0)).append(")");
+                            break;
+                        case ObjectProperty:
+                            cqString.append(args.get(2)).append("(").append(args.get(0).getChildAt(0)).append(",").append(args.get(1).getChildAt(0)).append(")");
+                            break;
+                    }
+                    if (k < cq.getAtoms().size() - 1)
+                        cqString.append(" & ");
+                }
+                Proposition propString = pf.create(cq);
+                mtcqString.append(propString);
+                mtcqString.append(")");
+                cqsToPropsAndString.put(cq, new Pair<>(propString, cqString.toString()));
+                if (j < bcq.getQueries().size() - 1)
+                    mtcqString.append(" & ");
+            }
+            if (i < q.getQueries().size() - 1)
+                mtcqString.append(" | ");
+        }
+
+        MetricTemporalConjunctiveQuery mtcq = new MetricTemporalConjunctiveQueryImpl(mtcqString.toString(), tkb, false);
+        for (ConjunctiveQuery cq : cqsToPropsAndString.keySet())
+            mtcq.addConjunctiveQuery(cqsToPropsAndString.get(cq).first, cq, cqsToPropsAndString.get(cq).second);
+
+        System.out.println("Checking " + mtcq);
+
+        QueryResult res = new MTCQEngine().exec(mtcq);
+
+        System.out.println("Result = " + res);
+
+        return res;
+    }
+}
