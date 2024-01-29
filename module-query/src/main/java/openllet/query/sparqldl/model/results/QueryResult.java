@@ -52,6 +52,10 @@ public interface QueryResult extends Iterable<ResultBinding>
 	 */
 	boolean containsPartialBindings();
 
+	/**
+	 * TODO
+	 * @param variables
+	 */
 	void expandToAllVariables(Collection<ATermAppl> variables);
 
 	/**

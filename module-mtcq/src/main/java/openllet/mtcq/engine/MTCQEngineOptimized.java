@@ -16,6 +16,7 @@ public class MTCQEngineOptimized extends AbstractQueryEngine<MetricTemporalConju
     @Override
     protected QueryResult execABoxQuery(MetricTemporalConjunctiveQuery q, QueryResult excludeBindings, QueryResult restrictToBindings) throws IOException, InterruptedException
     {
+        System.out.println("========== CHECKING " + q + " ========================");
         // 1) construct FA from q
         DFA automaton;
         try
@@ -27,7 +28,6 @@ public class MTCQEngineOptimized extends AbstractQueryEngine<MetricTemporalConju
         {
             throw new IOException(e.getMessage());
         }
-        System.out.println("========== CHECKING " + q + " ========================");
         FAStates states = new FAStates();
         Integer initState = automaton.getInitialState();
         if (initState != null && !q.getTemporalKB().isEmpty())

@@ -147,13 +147,13 @@ public class QueryResultImpl implements QueryResult
 	{
 		if (variables.size() > _resultVars.size())
 		{
-			boolean equals = _resultVars.addAll(variables);
-			if (!equals)
+			boolean notEquals = _resultVars.addAll(variables);
+			if (notEquals)
 			{
 				_maxSize = -1;
 				explicate();
 			}
-			_resultVars = new HashSet<>(variables);
+			//_resultVars = new HashSet<>(variables); // TODO this seems not required anymore?
 		}
 	}
 

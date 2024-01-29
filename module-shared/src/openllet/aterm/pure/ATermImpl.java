@@ -77,7 +77,6 @@ public abstract class ATermImpl extends ATermVisitableImpl implements ATerm, Sha
 	 * Deprecated Just here for backwards compatibility : use new ATermImpl instead (or super)
 	 *
 	 * @param hashCode x
-	 * @param annos x
 	 */
 	protected void init(final int hashCode)
 	{

@@ -16,6 +16,7 @@ import openllet.query.sparqldl.model.results.QueryResult;
 import openllet.query.sparqldl.model.ubcq.UBCQQuery;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -50,9 +51,10 @@ public class UBCQQueryEngineByMTCQ extends AbstractUBCQQueryEngine
         tkb.add(q.getKB());
         StringBuilder mtcqString = new StringBuilder();
         PropositionFactory pf = new PropositionFactory();
-        Map<ConjunctiveQuery, Pair<Proposition, String>> cqsToPropsAndString = new HashMap<>();
+        List<Pair<ConjunctiveQuery, Pair<Proposition, String>>> cqsToPropsAndString = new ArrayList<>();
         for (int i = 0; i < q.getQueries().size(); i++)
         {
+            mtcqString.append("(");
             BCQQuery bcq = q.getQueries().get(i);
             for (int j = 0; j < bcq.getQueries().size(); j++)
             {
@@ -78,23 +80,30 @@ public class UBCQQueryEngineByMTCQ extends AbstractUBCQQueryEngine
                         cqString.append(" & ");
                 }
                 Proposition propString = pf.create(cq);
-                mtcqString.append(propString);
+                mtcqString.append(cqString);
                 mtcqString.append(")");
-                cqsToPropsAndString.put(cq, new Pair<>(propString, cqString.toString()));
+                cqsToPropsAndString.add(new Pair<>(cq, new Pair<>(propString, cqString.toString())));
                 if (j < bcq.getQueries().size() - 1)
                     mtcqString.append(" & ");
             }
+            mtcqString.append(")");
             if (i < q.getQueries().size() - 1)
                 mtcqString.append(" | ");
         }
 
-        MetricTemporalConjunctiveQuery mtcq = new MetricTemporalConjunctiveQueryImpl(mtcqString.toString(), tkb, false);
-        for (ConjunctiveQuery cq : cqsToPropsAndString.keySet())
-            mtcq.addConjunctiveQuery(cqsToPropsAndString.get(cq).first, cq, cqsToPropsAndString.get(cq).second);
+        MetricTemporalConjunctiveQuery mtcq = new MetricTemporalConjunctiveQueryImpl(mtcqString.toString(), tkb, q.isDistinct());
+        for (Pair<ConjunctiveQuery, Pair<Proposition, String>> cqToPropsAndString : cqsToPropsAndString)
+        {
+            ConjunctiveQuery cq = cqToPropsAndString.first;
+            Proposition prop = cqToPropsAndString.second.first;
+            String cqString = cqToPropsAndString.second.second;
+            mtcq.addConjunctiveQuery(prop, cq, cqString);
+        }
 
         System.out.println("Checking " + mtcq);
 
         QueryResult res = new MTCQEngine().exec(mtcq);
+        res.explicate();
 
         System.out.println("Result = " + res);
 

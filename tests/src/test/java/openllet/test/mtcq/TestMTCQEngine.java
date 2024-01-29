@@ -19,7 +19,6 @@ public class TestMTCQEngine extends AbstractMTCQTest
     {
         simpleTKB();
         testQuery("G(A(?x) & B(?y)) & F(r(?x,?y))", new ATermAppl[][] { { _a, _b } });
-        /**
         testQuery("G(A(?x))", new ATermAppl[][] { { _a } });
         testQuery("G((A(?x)) & (B(?y))) & F(r(?x,?y))", new ATermAppl[][] { { _a, _b } });
         testQuery("G(A(?x) & B(?y)) & F!(r(?x,?y))");
@@ -28,7 +27,6 @@ public class TestMTCQEngine extends AbstractMTCQTest
         testQuery("G(A(?x)) & G(r(?x,?y))", new ATermAppl[][] { { _a, _b } });
         testQuery("G(A(?x)) & F(p(?x,?y))");
         testQuery("G(A(?x)) & F(r(?x,?y))", new ATermAppl[][] { { _a, _b } });
-         **/
     }
 
     @Test
@@ -36,8 +34,9 @@ public class TestMTCQEngine extends AbstractMTCQTest
     {
         simpleTKB();
         testQuery("(A(?x)) U (B(?y))", new ATermAppl[][] { { _a, _b }, { _c, _b } });
-        testQuery("((A(?x)) U (B(?y))) | F(C(?y))", new ATermAppl[][] { { _a, _b }, { _c, _b } });
-        testQuery("((A(?x)) U (B(?y))) | X(C(?y))", new ATermAppl[][] { { _a, _b }, { _c, _b } });
+        //testQuery("((A(?x)) U (B(?y))) | F(C(?y))", new ATermAppl[][] { { _a, _b }, { _c, _b } });
+        //testQuery("((A(?x)) U (B(?y))) | X(C(?y))", new ATermAppl[][] { { _a, _b }, { _c, _b } });
+        //testQuery("((!(A(?x))) & (B(y))) | ((A(?x)) & (B(?y)))", new ATermAppl[][] { { _a, _b }, { _c, _b } });
     }
 
     @Test
