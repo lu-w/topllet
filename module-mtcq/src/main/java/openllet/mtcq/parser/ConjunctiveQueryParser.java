@@ -20,7 +20,7 @@ public class ConjunctiveQueryParser
     public static final Logger _logger = Log.getLogger(ConjunctiveQueryParser.class);
 
     /**
-     * Helper method to convert a string to either an individual, a answer variable, or a undistinguished variable.
+     * Helper method to convert a string to either an individual, an answer variable, or a undistinguished variable.
      * Adds the appropriate result to the given CQ.
      * @param indString String representing the name of the given variable / individual.
      * @param cq The CQ to add the variable / individual to.
