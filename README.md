@@ -118,7 +118,7 @@ It thus consists of a list of prefixes (which can be empty), of the format
 `PREFIX string <string>`
 
 This is analogous to the SPARQL prefix syntax.
-It is followed by an MMTCQ, which roughly adheres to [this](https://github.com/marcofavorito/tl-grammars/blob/main/content/04.ltlf.md) LTLf grammar, with two exceptions.
+It is followed by an MTCQ, which roughly adheres to [this](https://github.com/marcofavorito/tl-grammars/blob/main/content/04.ltlf.md) LTLf grammar, with two exceptions.
 
 Firstly, it allows for additional operators bounded by non-negative integers `a` and `b` with `b >= a`:
 
