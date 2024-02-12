@@ -7,6 +7,16 @@ import org.antlr.v4.runtime.tree.ParseTreeListener;
  */
 public interface MTCQListener extends ParseTreeListener {
 	/**
+	 * Enter a parse tree produced by {@link MTCQParser#trace_position}.
+	 * @param ctx the parse tree
+	 */
+	void enterTrace_position(MTCQParser.Trace_positionContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link MTCQParser#trace_position}.
+	 * @param ctx the parse tree
+	 */
+	void exitTrace_position(MTCQParser.Trace_positionContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link MTCQParser#prop_booleans}.
 	 * @param ctx the parse tree
 	 */
@@ -176,6 +186,16 @@ public interface MTCQListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitAlways(MTCQParser.AlwaysContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link MTCQParser#term}.
+	 * @param ctx the parse tree
+	 */
+	void enterTerm(MTCQParser.TermContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link MTCQParser#term}.
+	 * @param ctx the parse tree
+	 */
+	void exitTerm(MTCQParser.TermContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link MTCQParser#subject}.
 	 * @param ctx the parse tree

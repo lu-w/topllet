@@ -16,6 +16,18 @@ public class MTCQBaseListener implements MTCQListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	@Override public void enterTrace_position(MTCQParser.Trace_positionContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitTrace_position(MTCQParser.Trace_positionContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	@Override public void enterProp_booleans(MTCQParser.Prop_booleansContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -215,6 +227,18 @@ public class MTCQBaseListener implements MTCQListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitAlways(MTCQParser.AlwaysContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterTerm(MTCQParser.TermContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitTerm(MTCQParser.TermContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
