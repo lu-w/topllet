@@ -1,5 +1,8 @@
 // Generated from MTCQ.g4 by ANTLR 4.13.1
 
+package openllet.mtcq.parser;
+
+
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.ErrorNode;
 import org.antlr.v4.runtime.tree.TerminalNode;

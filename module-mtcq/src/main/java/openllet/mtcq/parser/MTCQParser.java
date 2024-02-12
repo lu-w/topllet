@@ -1,4 +1,7 @@
 // Generated from MTCQ.g4 by ANTLR 4.13.1
+
+package openllet.mtcq.parser;
+
 import org.antlr.v4.runtime.atn.*;
 import org.antlr.v4.runtime.dfa.DFA;
 import org.antlr.v4.runtime.*;
@@ -133,6 +136,11 @@ public class MTCQParser extends Parser {
 		public void exitRule(ParseTreeListener listener) {
 			if ( listener instanceof MTCQListener ) ((MTCQListener)listener).exitTrace_position(this);
 		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof MTCQVisitor ) return ((MTCQVisitor<? extends T>)visitor).visitTrace_position(this);
+			else return visitor.visitChildren(this);
+		}
 	}
 
 	public final Trace_positionContext trace_position() throws RecognitionException {
@@ -180,6 +188,11 @@ public class MTCQParser extends Parser {
 		@Override
 		public void exitRule(ParseTreeListener listener) {
 			if ( listener instanceof MTCQListener ) ((MTCQListener)listener).exitProp_booleans(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof MTCQVisitor ) return ((MTCQVisitor<? extends T>)visitor).visitProp_booleans(this);
+			else return visitor.visitChildren(this);
 		}
 	}
 
@@ -229,6 +242,11 @@ public class MTCQParser extends Parser {
 		public void exitRule(ParseTreeListener listener) {
 			if ( listener instanceof MTCQListener ) ((MTCQListener)listener).exitLogic_booleans(this);
 		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof MTCQVisitor ) return ((MTCQVisitor<? extends T>)visitor).visitLogic_booleans(this);
+			else return visitor.visitChildren(this);
+		}
 	}
 
 	public final Logic_booleansContext logic_booleans() throws RecognitionException {
@@ -276,6 +294,11 @@ public class MTCQParser extends Parser {
 		@Override
 		public void exitRule(ParseTreeListener listener) {
 			if ( listener instanceof MTCQListener ) ((MTCQListener)listener).exitNot(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof MTCQVisitor ) return ((MTCQVisitor<? extends T>)visitor).visitNot(this);
+			else return visitor.visitChildren(this);
 		}
 	}
 
@@ -325,6 +348,11 @@ public class MTCQParser extends Parser {
 		public void exitRule(ParseTreeListener listener) {
 			if ( listener instanceof MTCQListener ) ((MTCQListener)listener).exitAnd(this);
 		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof MTCQVisitor ) return ((MTCQVisitor<? extends T>)visitor).visitAnd(this);
+			else return visitor.visitChildren(this);
+		}
 	}
 
 	public final AndContext and() throws RecognitionException {
@@ -372,6 +400,11 @@ public class MTCQParser extends Parser {
 		@Override
 		public void exitRule(ParseTreeListener listener) {
 			if ( listener instanceof MTCQListener ) ((MTCQListener)listener).exitOr(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof MTCQVisitor ) return ((MTCQVisitor<? extends T>)visitor).visitOr(this);
+			else return visitor.visitChildren(this);
 		}
 	}
 
@@ -421,6 +454,11 @@ public class MTCQParser extends Parser {
 		public void exitRule(ParseTreeListener listener) {
 			if ( listener instanceof MTCQListener ) ((MTCQListener)listener).exitImpl(this);
 		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof MTCQVisitor ) return ((MTCQVisitor<? extends T>)visitor).visitImpl(this);
+			else return visitor.visitChildren(this);
+		}
 	}
 
 	public final ImplContext impl() throws RecognitionException {
@@ -469,6 +507,11 @@ public class MTCQParser extends Parser {
 		public void exitRule(ParseTreeListener listener) {
 			if ( listener instanceof MTCQListener ) ((MTCQListener)listener).exitEquiv(this);
 		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof MTCQVisitor ) return ((MTCQVisitor<? extends T>)visitor).visitEquiv(this);
+			else return visitor.visitChildren(this);
+		}
 	}
 
 	public final EquivContext equiv() throws RecognitionException {
@@ -516,6 +559,11 @@ public class MTCQParser extends Parser {
 		public void exitRule(ParseTreeListener listener) {
 			if ( listener instanceof MTCQListener ) ((MTCQListener)listener).exitXor(this);
 		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof MTCQVisitor ) return ((MTCQVisitor<? extends T>)visitor).visitXor(this);
+			else return visitor.visitChildren(this);
+		}
 	}
 
 	public final XorContext xor() throws RecognitionException {
@@ -556,6 +604,11 @@ public class MTCQParser extends Parser {
 		@Override
 		public void exitRule(ParseTreeListener listener) {
 			if ( listener instanceof MTCQListener ) ((MTCQListener)listener).exitFull_interval(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof MTCQVisitor ) return ((MTCQVisitor<? extends T>)visitor).visitFull_interval(this);
+			else return visitor.visitChildren(this);
 		}
 	}
 
@@ -603,6 +656,11 @@ public class MTCQParser extends Parser {
 		public void exitRule(ParseTreeListener listener) {
 			if ( listener instanceof MTCQListener ) ((MTCQListener)listener).exitUpper_including_bound_interval(this);
 		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof MTCQVisitor ) return ((MTCQVisitor<? extends T>)visitor).visitUpper_including_bound_interval(this);
+			else return visitor.visitChildren(this);
+		}
 	}
 
 	public final Upper_including_bound_intervalContext upper_including_bound_interval() throws RecognitionException {
@@ -642,6 +700,11 @@ public class MTCQParser extends Parser {
 		@Override
 		public void exitRule(ParseTreeListener listener) {
 			if ( listener instanceof MTCQListener ) ((MTCQListener)listener).exitUpper_excluding_bound_interval(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof MTCQVisitor ) return ((MTCQVisitor<? extends T>)visitor).visitUpper_excluding_bound_interval(this);
+			else return visitor.visitChildren(this);
 		}
 	}
 
@@ -690,6 +753,11 @@ public class MTCQParser extends Parser {
 		@Override
 		public void exitRule(ParseTreeListener listener) {
 			if ( listener instanceof MTCQListener ) ((MTCQListener)listener).exitInterval(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof MTCQVisitor ) return ((MTCQVisitor<? extends T>)visitor).visitInterval(this);
+			else return visitor.visitChildren(this);
 		}
 	}
 
@@ -751,6 +819,11 @@ public class MTCQParser extends Parser {
 		public void exitRule(ParseTreeListener listener) {
 			if ( listener instanceof MTCQListener ) ((MTCQListener)listener).exitWeak_next(this);
 		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof MTCQVisitor ) return ((MTCQVisitor<? extends T>)visitor).visitWeak_next(this);
+			else return visitor.visitChildren(this);
+		}
 	}
 
 	public final Weak_nextContext weak_next() throws RecognitionException {
@@ -788,6 +861,11 @@ public class MTCQParser extends Parser {
 		@Override
 		public void exitRule(ParseTreeListener listener) {
 			if ( listener instanceof MTCQListener ) ((MTCQListener)listener).exitNext(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof MTCQVisitor ) return ((MTCQVisitor<? extends T>)visitor).visitNext(this);
+			else return visitor.visitChildren(this);
 		}
 	}
 
@@ -830,6 +908,11 @@ public class MTCQParser extends Parser {
 		@Override
 		public void exitRule(ParseTreeListener listener) {
 			if ( listener instanceof MTCQListener ) ((MTCQListener)listener).exitUntil(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof MTCQVisitor ) return ((MTCQVisitor<? extends T>)visitor).visitUntil(this);
+			else return visitor.visitChildren(this);
 		}
 	}
 
@@ -890,6 +973,11 @@ public class MTCQParser extends Parser {
 		public void exitRule(ParseTreeListener listener) {
 			if ( listener instanceof MTCQListener ) ((MTCQListener)listener).exitEventually(this);
 		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof MTCQVisitor ) return ((MTCQVisitor<? extends T>)visitor).visitEventually(this);
+			else return visitor.visitChildren(this);
+		}
 	}
 
 	public final EventuallyContext eventually() throws RecognitionException {
@@ -948,6 +1036,11 @@ public class MTCQParser extends Parser {
 		@Override
 		public void exitRule(ParseTreeListener listener) {
 			if ( listener instanceof MTCQListener ) ((MTCQListener)listener).exitAlways(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof MTCQVisitor ) return ((MTCQVisitor<? extends T>)visitor).visitAlways(this);
+			else return visitor.visitChildren(this);
 		}
 	}
 
@@ -1008,6 +1101,11 @@ public class MTCQParser extends Parser {
 		public void exitRule(ParseTreeListener listener) {
 			if ( listener instanceof MTCQListener ) ((MTCQListener)listener).exitTerm(this);
 		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof MTCQVisitor ) return ((MTCQVisitor<? extends T>)visitor).visitTerm(this);
+			else return visitor.visitChildren(this);
+		}
 	}
 
 	public final TermContext term() throws RecognitionException {
@@ -1066,6 +1164,11 @@ public class MTCQParser extends Parser {
 		@Override
 		public void exitRule(ParseTreeListener listener) {
 			if ( listener instanceof MTCQListener ) ((MTCQListener)listener).exitSubject(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof MTCQVisitor ) return ((MTCQVisitor<? extends T>)visitor).visitSubject(this);
+			else return visitor.visitChildren(this);
 		}
 	}
 
@@ -1131,6 +1234,11 @@ public class MTCQParser extends Parser {
 		public void exitRule(ParseTreeListener listener) {
 			if ( listener instanceof MTCQListener ) ((MTCQListener)listener).exitRole_atom(this);
 		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof MTCQVisitor ) return ((MTCQVisitor<? extends T>)visitor).visitRole_atom(this);
+			else return visitor.visitChildren(this);
+		}
 	}
 
 	public final Role_atomContext role_atom() throws RecognitionException {
@@ -1184,6 +1292,11 @@ public class MTCQParser extends Parser {
 		public void exitRule(ParseTreeListener listener) {
 			if ( listener instanceof MTCQListener ) ((MTCQListener)listener).exitConcept_atom(this);
 		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof MTCQVisitor ) return ((MTCQVisitor<? extends T>)visitor).visitConcept_atom(this);
+			else return visitor.visitChildren(this);
+		}
 	}
 
 	public final Concept_atomContext concept_atom() throws RecognitionException {
@@ -1232,6 +1345,11 @@ public class MTCQParser extends Parser {
 		@Override
 		public void exitRule(ParseTreeListener listener) {
 			if ( listener instanceof MTCQListener ) ((MTCQListener)listener).exitAtom(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof MTCQVisitor ) return ((MTCQVisitor<? extends T>)visitor).visitAtom(this);
+			else return visitor.visitChildren(this);
 		}
 	}
 
@@ -1294,6 +1412,11 @@ public class MTCQParser extends Parser {
 		@Override
 		public void exitRule(ParseTreeListener listener) {
 			if ( listener instanceof MTCQListener ) ((MTCQListener)listener).exitConjunctive_query(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof MTCQVisitor ) return ((MTCQVisitor<? extends T>)visitor).visitConjunctive_query(this);
+			else return visitor.visitChildren(this);
 		}
 	}
 
@@ -1401,6 +1524,11 @@ public class MTCQParser extends Parser {
 		@Override
 		public void exitRule(ParseTreeListener listener) {
 			if ( listener instanceof MTCQListener ) ((MTCQListener)listener).exitMtcq_formula(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof MTCQVisitor ) return ((MTCQVisitor<? extends T>)visitor).visitMtcq_formula(this);
+			else return visitor.visitChildren(this);
 		}
 	}
 
@@ -1625,6 +1753,11 @@ public class MTCQParser extends Parser {
 		public void exitRule(ParseTreeListener listener) {
 			if ( listener instanceof MTCQListener ) ((MTCQListener)listener).exitPrefix(this);
 		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof MTCQVisitor ) return ((MTCQVisitor<? extends T>)visitor).visitPrefix(this);
+			else return visitor.visitChildren(this);
+		}
 	}
 
 	public final PrefixContext prefix() throws RecognitionException {
@@ -1680,6 +1813,11 @@ public class MTCQParser extends Parser {
 		@Override
 		public void exitRule(ParseTreeListener listener) {
 			if ( listener instanceof MTCQListener ) ((MTCQListener)listener).exitStart(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof MTCQVisitor ) return ((MTCQVisitor<? extends T>)visitor).visitStart(this);
+			else return visitor.visitChildren(this);
 		}
 	}
 

@@ -15,6 +15,7 @@ import java.util.logging.Logger;
  * Standard implementation of a temporal conjunctive query.
  * Note that some functionality of the Query interface is not accessible due to operating partially on unparsed strings.
  */
+@Deprecated
 public class MetricTemporalConjunctiveQueryImpl extends AbstractCompositeQuery<ConjunctiveQuery, MetricTemporalConjunctiveQuery>
         implements MetricTemporalConjunctiveQuery
 {
@@ -31,27 +32,6 @@ public class MetricTemporalConjunctiveQueryImpl extends AbstractCompositeQuery<C
         _temporalKb = temporalKb;
         _mtcq = mtcq;
         _propAbsMtcq = mtcq;
-    }
-
-    @Override
-    public Collection<Proposition> getPropositionsInAbstraction()
-    {
-        return _propAbs.keySet();
-    }
-
-    @Override
-    public Collection<ConjunctiveQuery> getConjunctiveQueries()
-    {
-        return _propAbs.values();
-    }
-
-    @Override
-    public void addConjunctiveQuery(Proposition proposition, ConjunctiveQuery query, String queryString)
-    {
-        super.addQuery(query);
-        _propAbs.put(proposition, query);
-        if (queryString != null)
-            _propAbsMtcq = _propAbsMtcq.replace("(" + queryString + ")", "(" + proposition.toString() + ")");
     }
 
     @Override
@@ -112,7 +92,7 @@ public class MetricTemporalConjunctiveQueryImpl extends AbstractCompositeQuery<C
     public MetricTemporalConjunctiveQuery copy()
     {
         MetricTemporalConjunctiveQuery copy = new MetricTemporalConjunctiveQueryImpl(_mtcq, _temporalKb, _distinct);
-        for (ConjunctiveQuery q : getConjunctiveQueries())
+        for (ConjunctiveQuery q : getQueries())
             copy.addQuery(q.copy());
         copy.setDistVars(new EnumMap<>(getDistVarsWithVarType()));
         copy.setResultVars(new ArrayList<>(getResultVars()));

@@ -5,10 +5,7 @@ import openllet.core.utils.Pair;
 import openllet.mtcq.engine.MTCQEngine;
 import openllet.mtcq.model.kb.InMemoryTemporalKnowledgeBaseImpl;
 import openllet.mtcq.model.kb.TemporalKnowledgeBase;
-import openllet.mtcq.model.query.MetricTemporalConjunctiveQuery;
-import openllet.mtcq.model.query.MetricTemporalConjunctiveQueryImpl;
-import openllet.mtcq.model.query.Proposition;
-import openllet.mtcq.model.query.PropositionFactory;
+import openllet.mtcq.model.query.*;
 import openllet.query.sparqldl.model.bcq.BCQQuery;
 import openllet.query.sparqldl.model.cq.ConjunctiveQuery;
 import openllet.query.sparqldl.model.cq.QueryAtom;
@@ -91,6 +88,8 @@ public class UBCQQueryEngineByMTCQ extends AbstractUBCQQueryEngine
                 mtcqString.append(" | ");
         }
 
+        /**
+         * TODO adapt for new MTCQFormula class (or just rewrite completely)
         MetricTemporalConjunctiveQuery mtcq = new MetricTemporalConjunctiveQueryImpl(mtcqString.toString(), tkb, q.isDistinct());
         for (Pair<ConjunctiveQuery, Pair<Proposition, String>> cqToPropsAndString : cqsToPropsAndString)
         {
@@ -99,10 +98,9 @@ public class UBCQQueryEngineByMTCQ extends AbstractUBCQQueryEngine
             String cqString = cqToPropsAndString.second.second;
             mtcq.addConjunctiveQuery(prop, cq, cqString);
         }
+         **/
 
-        System.out.println("Checking " + mtcq);
-
-        QueryResult res = new MTCQEngine().exec(mtcq);
+        QueryResult res = new MTCQEngine().exec(new MTCQFormula(tkb, true));
         res.explicate();
 
         System.out.println("Result = " + res);

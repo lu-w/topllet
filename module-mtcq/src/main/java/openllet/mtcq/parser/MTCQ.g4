@@ -1,5 +1,9 @@
 grammar MTCQ;
 
+@header {
+package openllet.mtcq.parser;
+}
+
 X_TERMINAL          : 'X';
 XB_TERMINAL         : 'X[!]';
 UI_TERMINAL         : 'U_';
