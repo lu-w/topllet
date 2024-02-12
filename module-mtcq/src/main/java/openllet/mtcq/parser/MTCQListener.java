@@ -97,16 +97,6 @@ public interface MTCQListener extends ParseTreeListener {
 	 */
 	void exitXor(MTCQParser.XorContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link MTCQParser#interval}.
-	 * @param ctx the parse tree
-	 */
-	void enterInterval(MTCQParser.IntervalContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link MTCQParser#interval}.
-	 * @param ctx the parse tree
-	 */
-	void exitInterval(MTCQParser.IntervalContext ctx);
-	/**
 	 * Enter a parse tree produced by {@link MTCQParser#full_interval}.
 	 * @param ctx the parse tree
 	 */
@@ -136,6 +126,16 @@ public interface MTCQListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitUpper_excluding_bound_interval(MTCQParser.Upper_excluding_bound_intervalContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link MTCQParser#interval}.
+	 * @param ctx the parse tree
+	 */
+	void enterInterval(MTCQParser.IntervalContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link MTCQParser#interval}.
+	 * @param ctx the parse tree
+	 */
+	void exitInterval(MTCQParser.IntervalContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link MTCQParser#weak_next}.
 	 * @param ctx the parse tree
@@ -247,15 +247,15 @@ public interface MTCQListener extends ParseTreeListener {
 	 */
 	void exitConjunctive_query(MTCQParser.Conjunctive_queryContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link MTCQParser#mltl_formula}.
+	 * Enter a parse tree produced by {@link MTCQParser#mtcq_formula}.
 	 * @param ctx the parse tree
 	 */
-	void enterMltl_formula(MTCQParser.Mltl_formulaContext ctx);
+	void enterMtcq_formula(MTCQParser.Mtcq_formulaContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link MTCQParser#mltl_formula}.
+	 * Exit a parse tree produced by {@link MTCQParser#mtcq_formula}.
 	 * @param ctx the parse tree
 	 */
-	void exitMltl_formula(MTCQParser.Mltl_formulaContext ctx);
+	void exitMtcq_formula(MTCQParser.Mtcq_formulaContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link MTCQParser#prefix}.
 	 * @param ctx the parse tree

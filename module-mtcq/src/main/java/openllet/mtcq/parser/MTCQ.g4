@@ -25,13 +25,13 @@ TRUE_TERMINAL       : 'TRUE';
 FALSE_TERMINAL      : 'FALSE';
 TT_TERMINAL         : 'TT';
 FF_TERMINAL         : 'FF';
-ROLE_DIV            : ',';
 TIME_POINT          : [0-9]+;
 NAME                : [0-9a-zA-Z_.-]+;
 URI                 : [a-zA-Z0-9.:/#?&_-]+('/'|'#');
 COMMENT             : '#' ~('\r' | '\n')* -> skip;
 WS                  : [ \t\r\n]+ -> skip;
 
+// Boolean terminals
 trace_position : LAST_TERMINAL | END_TERMINAL;
 prop_booleans  : TRUE_TERMINAL | FALSE_TERMINAL;
 logic_booleans : TT_TERMINAL | FF_TERMINAL;
@@ -42,33 +42,38 @@ impl           : IMPL1_TERMINAL | IMPL2_TERMINAL;
 equiv          : EQUIV1_TERMINAL | EQUIV2_TERMINAL;
 xor            : XOR_TERMINAL;
 
-interval : full_interval | upper_including_bound_interval | upper_excluding_bound_interval;
-full_interval : '[' TIME_POINT ',' TIME_POINT ']';
+// temporal operators
+full_interval                  : '[' TIME_POINT ',' TIME_POINT ']';
 upper_including_bound_interval : '<=' TIME_POINT;
 upper_excluding_bound_interval : '<' TIME_POINT;
+interval                       : full_interval 
+                                  | upper_including_bound_interval
+                                  | upper_excluding_bound_interval;
+weak_next                      : X_TERMINAL;
+next                           : XB_TERMINAL;
+until                          : U_TERMINAL | UI_TERMINAL interval;
+eventually                     : F_TERMINAL | FI_TERMINAL interval;
+always                         : G_TERMINAL | GI_TERMINAL interval;
 
-weak_next      : X_TERMINAL;
-next           : XB_TERMINAL;
-until          : U_TERMINAL | UI_TERMINAL interval;
-eventually     : F_TERMINAL | FI_TERMINAL interval;
-always         : G_TERMINAL | GI_TERMINAL interval;
-
+// conjunctive query
 term              : (URI | NAME ':')? NAME;
 subject           : '?' NAME | term;
-role_atom         : term '(' subject ROLE_DIV subject ')';
+role_atom         : term '(' subject ',' subject ')';
 concept_atom      : term '(' subject ')';
 atom              : role_atom | concept_atom;
 conjunctive_query : atom (and atom)*;
 
-mltl_formula : conjunctive_query
+// formula 
+mtcq_formula : conjunctive_query
                 | prop_booleans
                 | logic_booleans
                 | trace_position
-                | '(' mltl_formula ')'
-                | mltl_formula (and | or | impl | equiv | xor) mltl_formula
-                | (not | eventually | always | weak_next | next) mltl_formula
-                | mltl_formula until mltl_formula;
-                
+                | '(' mtcq_formula ')'
+                | mtcq_formula (and | or | impl | equiv | xor) mtcq_formula
+                | (not | eventually | always | weak_next | next) mtcq_formula
+                | mtcq_formula until mtcq_formula;
+
+// SPARQL-like prefix
 prefix : 'PREFIX' NAME ':' '<' URI '>';
 
-start: (prefix)* mltl_formula;
+start: (prefix)* mtcq_formula;

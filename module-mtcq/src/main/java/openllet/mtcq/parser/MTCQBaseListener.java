@@ -124,18 +124,6 @@ public class MTCQBaseListener implements MTCQListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterInterval(MTCQParser.IntervalContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitInterval(MTCQParser.IntervalContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
 	@Override public void enterFull_interval(MTCQParser.Full_intervalContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -167,6 +155,18 @@ public class MTCQBaseListener implements MTCQListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitUpper_excluding_bound_interval(MTCQParser.Upper_excluding_bound_intervalContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterInterval(MTCQParser.IntervalContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitInterval(MTCQParser.IntervalContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -304,13 +304,13 @@ public class MTCQBaseListener implements MTCQListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterMltl_formula(MTCQParser.Mltl_formulaContext ctx) { }
+	@Override public void enterMtcq_formula(MTCQParser.Mtcq_formulaContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitMltl_formula(MTCQParser.Mltl_formulaContext ctx) { }
+	@Override public void exitMtcq_formula(MTCQParser.Mtcq_formulaContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
