@@ -250,15 +250,197 @@ public interface MTCQListener extends ParseTreeListener {
 	 */
 	void exitConjunctive_query(MTCQParser.Conjunctive_queryContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link MTCQParser#mtcq_formula}.
+	 * Enter a parse tree produced by the {@code TracePositionFormula}
+	 * labeled alternative in {@link MTCQParser#mtcq_formula}.
 	 * @param ctx the parse tree
 	 */
-	void enterMtcq_formula(MTCQParser.Mtcq_formulaContext ctx);
+	void enterTracePositionFormula(MTCQParser.TracePositionFormulaContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link MTCQParser#mtcq_formula}.
+	 * Exit a parse tree produced by the {@code TracePositionFormula}
+	 * labeled alternative in {@link MTCQParser#mtcq_formula}.
 	 * @param ctx the parse tree
 	 */
-	void exitMtcq_formula(MTCQParser.Mtcq_formulaContext ctx);
+	void exitTracePositionFormula(MTCQParser.TracePositionFormulaContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code LogicBooleanFormula}
+	 * labeled alternative in {@link MTCQParser#mtcq_formula}.
+	 * @param ctx the parse tree
+	 */
+	void enterLogicBooleanFormula(MTCQParser.LogicBooleanFormulaContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code LogicBooleanFormula}
+	 * labeled alternative in {@link MTCQParser#mtcq_formula}.
+	 * @param ctx the parse tree
+	 */
+	void exitLogicBooleanFormula(MTCQParser.LogicBooleanFormulaContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code XorFormula}
+	 * labeled alternative in {@link MTCQParser#mtcq_formula}.
+	 * @param ctx the parse tree
+	 */
+	void enterXorFormula(MTCQParser.XorFormulaContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code XorFormula}
+	 * labeled alternative in {@link MTCQParser#mtcq_formula}.
+	 * @param ctx the parse tree
+	 */
+	void exitXorFormula(MTCQParser.XorFormulaContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code ImplFormula}
+	 * labeled alternative in {@link MTCQParser#mtcq_formula}.
+	 * @param ctx the parse tree
+	 */
+	void enterImplFormula(MTCQParser.ImplFormulaContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code ImplFormula}
+	 * labeled alternative in {@link MTCQParser#mtcq_formula}.
+	 * @param ctx the parse tree
+	 */
+	void exitImplFormula(MTCQParser.ImplFormulaContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code PropositionalBooleanFormula}
+	 * labeled alternative in {@link MTCQParser#mtcq_formula}.
+	 * @param ctx the parse tree
+	 */
+	void enterPropositionalBooleanFormula(MTCQParser.PropositionalBooleanFormulaContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code PropositionalBooleanFormula}
+	 * labeled alternative in {@link MTCQParser#mtcq_formula}.
+	 * @param ctx the parse tree
+	 */
+	void exitPropositionalBooleanFormula(MTCQParser.PropositionalBooleanFormulaContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code BracketFormula}
+	 * labeled alternative in {@link MTCQParser#mtcq_formula}.
+	 * @param ctx the parse tree
+	 */
+	void enterBracketFormula(MTCQParser.BracketFormulaContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code BracketFormula}
+	 * labeled alternative in {@link MTCQParser#mtcq_formula}.
+	 * @param ctx the parse tree
+	 */
+	void exitBracketFormula(MTCQParser.BracketFormulaContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code AlwaysFormula}
+	 * labeled alternative in {@link MTCQParser#mtcq_formula}.
+	 * @param ctx the parse tree
+	 */
+	void enterAlwaysFormula(MTCQParser.AlwaysFormulaContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code AlwaysFormula}
+	 * labeled alternative in {@link MTCQParser#mtcq_formula}.
+	 * @param ctx the parse tree
+	 */
+	void exitAlwaysFormula(MTCQParser.AlwaysFormulaContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code WeakNextFormula}
+	 * labeled alternative in {@link MTCQParser#mtcq_formula}.
+	 * @param ctx the parse tree
+	 */
+	void enterWeakNextFormula(MTCQParser.WeakNextFormulaContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code WeakNextFormula}
+	 * labeled alternative in {@link MTCQParser#mtcq_formula}.
+	 * @param ctx the parse tree
+	 */
+	void exitWeakNextFormula(MTCQParser.WeakNextFormulaContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code EventuallyFormula}
+	 * labeled alternative in {@link MTCQParser#mtcq_formula}.
+	 * @param ctx the parse tree
+	 */
+	void enterEventuallyFormula(MTCQParser.EventuallyFormulaContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code EventuallyFormula}
+	 * labeled alternative in {@link MTCQParser#mtcq_formula}.
+	 * @param ctx the parse tree
+	 */
+	void exitEventuallyFormula(MTCQParser.EventuallyFormulaContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code EquivFormula}
+	 * labeled alternative in {@link MTCQParser#mtcq_formula}.
+	 * @param ctx the parse tree
+	 */
+	void enterEquivFormula(MTCQParser.EquivFormulaContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code EquivFormula}
+	 * labeled alternative in {@link MTCQParser#mtcq_formula}.
+	 * @param ctx the parse tree
+	 */
+	void exitEquivFormula(MTCQParser.EquivFormulaContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code ConjunctiveQueryFormula}
+	 * labeled alternative in {@link MTCQParser#mtcq_formula}.
+	 * @param ctx the parse tree
+	 */
+	void enterConjunctiveQueryFormula(MTCQParser.ConjunctiveQueryFormulaContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code ConjunctiveQueryFormula}
+	 * labeled alternative in {@link MTCQParser#mtcq_formula}.
+	 * @param ctx the parse tree
+	 */
+	void exitConjunctiveQueryFormula(MTCQParser.ConjunctiveQueryFormulaContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code NextFormula}
+	 * labeled alternative in {@link MTCQParser#mtcq_formula}.
+	 * @param ctx the parse tree
+	 */
+	void enterNextFormula(MTCQParser.NextFormulaContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code NextFormula}
+	 * labeled alternative in {@link MTCQParser#mtcq_formula}.
+	 * @param ctx the parse tree
+	 */
+	void exitNextFormula(MTCQParser.NextFormulaContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code AndFormula}
+	 * labeled alternative in {@link MTCQParser#mtcq_formula}.
+	 * @param ctx the parse tree
+	 */
+	void enterAndFormula(MTCQParser.AndFormulaContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code AndFormula}
+	 * labeled alternative in {@link MTCQParser#mtcq_formula}.
+	 * @param ctx the parse tree
+	 */
+	void exitAndFormula(MTCQParser.AndFormulaContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code UntilFormula}
+	 * labeled alternative in {@link MTCQParser#mtcq_formula}.
+	 * @param ctx the parse tree
+	 */
+	void enterUntilFormula(MTCQParser.UntilFormulaContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code UntilFormula}
+	 * labeled alternative in {@link MTCQParser#mtcq_formula}.
+	 * @param ctx the parse tree
+	 */
+	void exitUntilFormula(MTCQParser.UntilFormulaContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code NotFormula}
+	 * labeled alternative in {@link MTCQParser#mtcq_formula}.
+	 * @param ctx the parse tree
+	 */
+	void enterNotFormula(MTCQParser.NotFormulaContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code NotFormula}
+	 * labeled alternative in {@link MTCQParser#mtcq_formula}.
+	 * @param ctx the parse tree
+	 */
+	void exitNotFormula(MTCQParser.NotFormulaContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code OrFormula}
+	 * labeled alternative in {@link MTCQParser#mtcq_formula}.
+	 * @param ctx the parse tree
+	 */
+	void enterOrFormula(MTCQParser.OrFormulaContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code OrFormula}
+	 * labeled alternative in {@link MTCQParser#mtcq_formula}.
+	 * @param ctx the parse tree
+	 */
+	void exitOrFormula(MTCQParser.OrFormulaContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link MTCQParser#prefix}.
 	 * @param ctx the parse tree

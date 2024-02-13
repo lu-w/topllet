@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 
-public class MTCQFormula extends AbstractCompositeQuery<ConjunctiveQuery, MetricTemporalConjunctiveQuery>
+public abstract class MTCQFormula extends AbstractCompositeQuery<ConjunctiveQuery, MetricTemporalConjunctiveQuery>
         implements MetricTemporalConjunctiveQuery
 {
     public static final Logger _logger = Log.getLogger(MTCQFormula.class);
@@ -25,6 +25,11 @@ public class MTCQFormula extends AbstractCompositeQuery<ConjunctiveQuery, Metric
         super(temporalKb.get(0), isDistinct);
         _temporalKb = temporalKb;
     }
+
+    /**
+     * @return True iff. this formula is temporal, i.e., it does not contain a temporal operator also in its subformulae
+     */
+    public abstract boolean isTemporal();
 
     @Override
     public Map<Proposition, ConjunctiveQuery> getPropositionalAbstraction()
@@ -62,7 +67,7 @@ public class MTCQFormula extends AbstractCompositeQuery<ConjunctiveQuery, Metric
     public MTCQFormula createQuery(KnowledgeBase kb, boolean isDistinct)
     {
          _logger.warning("Using createQuery() on an MTCQ - this method shall not be used");
-         return new MTCQFormula(new FileBasedTemporalKnowledgeBaseImpl(new ArrayList<>()), isDistinct);
+         return new TrueFormula(new FileBasedTemporalKnowledgeBaseImpl(new ArrayList<>()), isDistinct);
     }
 
     @Override
@@ -77,9 +82,8 @@ public class MTCQFormula extends AbstractCompositeQuery<ConjunctiveQuery, Metric
         return toString(new HashMap<>());
     }
 
-    private String toString(Map<Proposition, ConjunctiveQuery> replaceCQsWithPropositions)
+    protected String toString(Map<Proposition, ConjunctiveQuery> replaceCQsWithPropositions)
     {
-        // TODO
         return "";
     }
 }

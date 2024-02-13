@@ -2,7 +2,7 @@ package openllet.mtcq.model.query;
 
 import openllet.mtcq.model.kb.TemporalKnowledgeBase;
 
-public class BinaryMTCQFormula extends MTCQFormula
+public abstract class BinaryMTCQFormula extends MTCQFormula
 {
     private final MTCQFormula _leftSubFormula;
     private final MTCQFormula _rightSubFormula;

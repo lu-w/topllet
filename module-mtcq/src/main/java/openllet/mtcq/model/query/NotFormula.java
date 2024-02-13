@@ -2,9 +2,9 @@ package openllet.mtcq.model.query;
 
 import openllet.mtcq.model.kb.TemporalKnowledgeBase;
 
-public class NextFormula extends UnaryMTCQFormula
+public class NotFormula extends UnaryBooleanFormula
 {
-    public NextFormula(TemporalKnowledgeBase temporalKb, boolean isDistinct, MTCQFormula subFormula)
+    public NotFormula(TemporalKnowledgeBase temporalKb, boolean isDistinct, MTCQFormula subFormula)
     {
         super(temporalKb, isDistinct, subFormula);
     }

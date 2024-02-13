@@ -1462,72 +1462,384 @@ public class MTCQParser extends Parser {
 
 	@SuppressWarnings("CheckReturnValue")
 	public static class Mtcq_formulaContext extends ParserRuleContext {
-		public Conjunctive_queryContext conjunctive_query() {
-			return getRuleContext(Conjunctive_queryContext.class,0);
+		public Mtcq_formulaContext(ParserRuleContext parent, int invokingState) {
+			super(parent, invokingState);
 		}
-		public Prop_booleansContext prop_booleans() {
-			return getRuleContext(Prop_booleansContext.class,0);
+		@Override public int getRuleIndex() { return RULE_mtcq_formula; }
+	 
+		public Mtcq_formulaContext() { }
+		public void copyFrom(Mtcq_formulaContext ctx) {
+			super.copyFrom(ctx);
 		}
-		public Logic_booleansContext logic_booleans() {
-			return getRuleContext(Logic_booleansContext.class,0);
-		}
+	}
+	@SuppressWarnings("CheckReturnValue")
+	public static class TracePositionFormulaContext extends Mtcq_formulaContext {
 		public Trace_positionContext trace_position() {
 			return getRuleContext(Trace_positionContext.class,0);
 		}
+		public TracePositionFormulaContext(Mtcq_formulaContext ctx) { copyFrom(ctx); }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof MTCQListener ) ((MTCQListener)listener).enterTracePositionFormula(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof MTCQListener ) ((MTCQListener)listener).exitTracePositionFormula(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof MTCQVisitor ) return ((MTCQVisitor<? extends T>)visitor).visitTracePositionFormula(this);
+			else return visitor.visitChildren(this);
+		}
+	}
+	@SuppressWarnings("CheckReturnValue")
+	public static class LogicBooleanFormulaContext extends Mtcq_formulaContext {
+		public Logic_booleansContext logic_booleans() {
+			return getRuleContext(Logic_booleansContext.class,0);
+		}
+		public LogicBooleanFormulaContext(Mtcq_formulaContext ctx) { copyFrom(ctx); }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof MTCQListener ) ((MTCQListener)listener).enterLogicBooleanFormula(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof MTCQListener ) ((MTCQListener)listener).exitLogicBooleanFormula(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof MTCQVisitor ) return ((MTCQVisitor<? extends T>)visitor).visitLogicBooleanFormula(this);
+			else return visitor.visitChildren(this);
+		}
+	}
+	@SuppressWarnings("CheckReturnValue")
+	public static class XorFormulaContext extends Mtcq_formulaContext {
 		public List<Mtcq_formulaContext> mtcq_formula() {
 			return getRuleContexts(Mtcq_formulaContext.class);
 		}
 		public Mtcq_formulaContext mtcq_formula(int i) {
 			return getRuleContext(Mtcq_formulaContext.class,i);
 		}
-		public NotContext not() {
-			return getRuleContext(NotContext.class,0);
+		public XorContext xor() {
+			return getRuleContext(XorContext.class,0);
 		}
-		public EventuallyContext eventually() {
-			return getRuleContext(EventuallyContext.class,0);
+		public XorFormulaContext(Mtcq_formulaContext ctx) { copyFrom(ctx); }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof MTCQListener ) ((MTCQListener)listener).enterXorFormula(this);
 		}
-		public AlwaysContext always() {
-			return getRuleContext(AlwaysContext.class,0);
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof MTCQListener ) ((MTCQListener)listener).exitXorFormula(this);
 		}
-		public Weak_nextContext weak_next() {
-			return getRuleContext(Weak_nextContext.class,0);
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof MTCQVisitor ) return ((MTCQVisitor<? extends T>)visitor).visitXorFormula(this);
+			else return visitor.visitChildren(this);
 		}
-		public NextContext next() {
-			return getRuleContext(NextContext.class,0);
+	}
+	@SuppressWarnings("CheckReturnValue")
+	public static class ImplFormulaContext extends Mtcq_formulaContext {
+		public List<Mtcq_formulaContext> mtcq_formula() {
+			return getRuleContexts(Mtcq_formulaContext.class);
 		}
-		public AndContext and() {
-			return getRuleContext(AndContext.class,0);
-		}
-		public OrContext or() {
-			return getRuleContext(OrContext.class,0);
+		public Mtcq_formulaContext mtcq_formula(int i) {
+			return getRuleContext(Mtcq_formulaContext.class,i);
 		}
 		public ImplContext impl() {
 			return getRuleContext(ImplContext.class,0);
 		}
+		public ImplFormulaContext(Mtcq_formulaContext ctx) { copyFrom(ctx); }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof MTCQListener ) ((MTCQListener)listener).enterImplFormula(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof MTCQListener ) ((MTCQListener)listener).exitImplFormula(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof MTCQVisitor ) return ((MTCQVisitor<? extends T>)visitor).visitImplFormula(this);
+			else return visitor.visitChildren(this);
+		}
+	}
+	@SuppressWarnings("CheckReturnValue")
+	public static class PropositionalBooleanFormulaContext extends Mtcq_formulaContext {
+		public Prop_booleansContext prop_booleans() {
+			return getRuleContext(Prop_booleansContext.class,0);
+		}
+		public PropositionalBooleanFormulaContext(Mtcq_formulaContext ctx) { copyFrom(ctx); }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof MTCQListener ) ((MTCQListener)listener).enterPropositionalBooleanFormula(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof MTCQListener ) ((MTCQListener)listener).exitPropositionalBooleanFormula(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof MTCQVisitor ) return ((MTCQVisitor<? extends T>)visitor).visitPropositionalBooleanFormula(this);
+			else return visitor.visitChildren(this);
+		}
+	}
+	@SuppressWarnings("CheckReturnValue")
+	public static class BracketFormulaContext extends Mtcq_formulaContext {
+		public Mtcq_formulaContext mtcq_formula() {
+			return getRuleContext(Mtcq_formulaContext.class,0);
+		}
+		public BracketFormulaContext(Mtcq_formulaContext ctx) { copyFrom(ctx); }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof MTCQListener ) ((MTCQListener)listener).enterBracketFormula(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof MTCQListener ) ((MTCQListener)listener).exitBracketFormula(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof MTCQVisitor ) return ((MTCQVisitor<? extends T>)visitor).visitBracketFormula(this);
+			else return visitor.visitChildren(this);
+		}
+	}
+	@SuppressWarnings("CheckReturnValue")
+	public static class AlwaysFormulaContext extends Mtcq_formulaContext {
+		public AlwaysContext always() {
+			return getRuleContext(AlwaysContext.class,0);
+		}
+		public Mtcq_formulaContext mtcq_formula() {
+			return getRuleContext(Mtcq_formulaContext.class,0);
+		}
+		public AlwaysFormulaContext(Mtcq_formulaContext ctx) { copyFrom(ctx); }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof MTCQListener ) ((MTCQListener)listener).enterAlwaysFormula(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof MTCQListener ) ((MTCQListener)listener).exitAlwaysFormula(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof MTCQVisitor ) return ((MTCQVisitor<? extends T>)visitor).visitAlwaysFormula(this);
+			else return visitor.visitChildren(this);
+		}
+	}
+	@SuppressWarnings("CheckReturnValue")
+	public static class WeakNextFormulaContext extends Mtcq_formulaContext {
+		public Weak_nextContext weak_next() {
+			return getRuleContext(Weak_nextContext.class,0);
+		}
+		public Mtcq_formulaContext mtcq_formula() {
+			return getRuleContext(Mtcq_formulaContext.class,0);
+		}
+		public WeakNextFormulaContext(Mtcq_formulaContext ctx) { copyFrom(ctx); }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof MTCQListener ) ((MTCQListener)listener).enterWeakNextFormula(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof MTCQListener ) ((MTCQListener)listener).exitWeakNextFormula(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof MTCQVisitor ) return ((MTCQVisitor<? extends T>)visitor).visitWeakNextFormula(this);
+			else return visitor.visitChildren(this);
+		}
+	}
+	@SuppressWarnings("CheckReturnValue")
+	public static class EventuallyFormulaContext extends Mtcq_formulaContext {
+		public EventuallyContext eventually() {
+			return getRuleContext(EventuallyContext.class,0);
+		}
+		public Mtcq_formulaContext mtcq_formula() {
+			return getRuleContext(Mtcq_formulaContext.class,0);
+		}
+		public EventuallyFormulaContext(Mtcq_formulaContext ctx) { copyFrom(ctx); }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof MTCQListener ) ((MTCQListener)listener).enterEventuallyFormula(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof MTCQListener ) ((MTCQListener)listener).exitEventuallyFormula(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof MTCQVisitor ) return ((MTCQVisitor<? extends T>)visitor).visitEventuallyFormula(this);
+			else return visitor.visitChildren(this);
+		}
+	}
+	@SuppressWarnings("CheckReturnValue")
+	public static class EquivFormulaContext extends Mtcq_formulaContext {
+		public List<Mtcq_formulaContext> mtcq_formula() {
+			return getRuleContexts(Mtcq_formulaContext.class);
+		}
+		public Mtcq_formulaContext mtcq_formula(int i) {
+			return getRuleContext(Mtcq_formulaContext.class,i);
+		}
 		public EquivContext equiv() {
 			return getRuleContext(EquivContext.class,0);
 		}
-		public XorContext xor() {
-			return getRuleContext(XorContext.class,0);
+		public EquivFormulaContext(Mtcq_formulaContext ctx) { copyFrom(ctx); }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof MTCQListener ) ((MTCQListener)listener).enterEquivFormula(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof MTCQListener ) ((MTCQListener)listener).exitEquivFormula(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof MTCQVisitor ) return ((MTCQVisitor<? extends T>)visitor).visitEquivFormula(this);
+			else return visitor.visitChildren(this);
+		}
+	}
+	@SuppressWarnings("CheckReturnValue")
+	public static class ConjunctiveQueryFormulaContext extends Mtcq_formulaContext {
+		public Conjunctive_queryContext conjunctive_query() {
+			return getRuleContext(Conjunctive_queryContext.class,0);
+		}
+		public ConjunctiveQueryFormulaContext(Mtcq_formulaContext ctx) { copyFrom(ctx); }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof MTCQListener ) ((MTCQListener)listener).enterConjunctiveQueryFormula(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof MTCQListener ) ((MTCQListener)listener).exitConjunctiveQueryFormula(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof MTCQVisitor ) return ((MTCQVisitor<? extends T>)visitor).visitConjunctiveQueryFormula(this);
+			else return visitor.visitChildren(this);
+		}
+	}
+	@SuppressWarnings("CheckReturnValue")
+	public static class NextFormulaContext extends Mtcq_formulaContext {
+		public NextContext next() {
+			return getRuleContext(NextContext.class,0);
+		}
+		public Mtcq_formulaContext mtcq_formula() {
+			return getRuleContext(Mtcq_formulaContext.class,0);
+		}
+		public NextFormulaContext(Mtcq_formulaContext ctx) { copyFrom(ctx); }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof MTCQListener ) ((MTCQListener)listener).enterNextFormula(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof MTCQListener ) ((MTCQListener)listener).exitNextFormula(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof MTCQVisitor ) return ((MTCQVisitor<? extends T>)visitor).visitNextFormula(this);
+			else return visitor.visitChildren(this);
+		}
+	}
+	@SuppressWarnings("CheckReturnValue")
+	public static class AndFormulaContext extends Mtcq_formulaContext {
+		public List<Mtcq_formulaContext> mtcq_formula() {
+			return getRuleContexts(Mtcq_formulaContext.class);
+		}
+		public Mtcq_formulaContext mtcq_formula(int i) {
+			return getRuleContext(Mtcq_formulaContext.class,i);
+		}
+		public AndContext and() {
+			return getRuleContext(AndContext.class,0);
+		}
+		public AndFormulaContext(Mtcq_formulaContext ctx) { copyFrom(ctx); }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof MTCQListener ) ((MTCQListener)listener).enterAndFormula(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof MTCQListener ) ((MTCQListener)listener).exitAndFormula(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof MTCQVisitor ) return ((MTCQVisitor<? extends T>)visitor).visitAndFormula(this);
+			else return visitor.visitChildren(this);
+		}
+	}
+	@SuppressWarnings("CheckReturnValue")
+	public static class UntilFormulaContext extends Mtcq_formulaContext {
+		public List<Mtcq_formulaContext> mtcq_formula() {
+			return getRuleContexts(Mtcq_formulaContext.class);
+		}
+		public Mtcq_formulaContext mtcq_formula(int i) {
+			return getRuleContext(Mtcq_formulaContext.class,i);
 		}
 		public UntilContext until() {
 			return getRuleContext(UntilContext.class,0);
 		}
-		public Mtcq_formulaContext(ParserRuleContext parent, int invokingState) {
-			super(parent, invokingState);
-		}
-		@Override public int getRuleIndex() { return RULE_mtcq_formula; }
+		public UntilFormulaContext(Mtcq_formulaContext ctx) { copyFrom(ctx); }
 		@Override
 		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof MTCQListener ) ((MTCQListener)listener).enterMtcq_formula(this);
+			if ( listener instanceof MTCQListener ) ((MTCQListener)listener).enterUntilFormula(this);
 		}
 		@Override
 		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof MTCQListener ) ((MTCQListener)listener).exitMtcq_formula(this);
+			if ( listener instanceof MTCQListener ) ((MTCQListener)listener).exitUntilFormula(this);
 		}
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof MTCQVisitor ) return ((MTCQVisitor<? extends T>)visitor).visitMtcq_formula(this);
+			if ( visitor instanceof MTCQVisitor ) return ((MTCQVisitor<? extends T>)visitor).visitUntilFormula(this);
+			else return visitor.visitChildren(this);
+		}
+	}
+	@SuppressWarnings("CheckReturnValue")
+	public static class NotFormulaContext extends Mtcq_formulaContext {
+		public NotContext not() {
+			return getRuleContext(NotContext.class,0);
+		}
+		public Mtcq_formulaContext mtcq_formula() {
+			return getRuleContext(Mtcq_formulaContext.class,0);
+		}
+		public NotFormulaContext(Mtcq_formulaContext ctx) { copyFrom(ctx); }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof MTCQListener ) ((MTCQListener)listener).enterNotFormula(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof MTCQListener ) ((MTCQListener)listener).exitNotFormula(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof MTCQVisitor ) return ((MTCQVisitor<? extends T>)visitor).visitNotFormula(this);
+			else return visitor.visitChildren(this);
+		}
+	}
+	@SuppressWarnings("CheckReturnValue")
+	public static class OrFormulaContext extends Mtcq_formulaContext {
+		public List<Mtcq_formulaContext> mtcq_formula() {
+			return getRuleContexts(Mtcq_formulaContext.class);
+		}
+		public Mtcq_formulaContext mtcq_formula(int i) {
+			return getRuleContext(Mtcq_formulaContext.class,i);
+		}
+		public OrContext or() {
+			return getRuleContext(OrContext.class,0);
+		}
+		public OrFormulaContext(Mtcq_formulaContext ctx) { copyFrom(ctx); }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof MTCQListener ) ((MTCQListener)listener).enterOrFormula(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof MTCQListener ) ((MTCQListener)listener).exitOrFormula(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof MTCQVisitor ) return ((MTCQVisitor<? extends T>)visitor).visitOrFormula(this);
 			else return visitor.visitChildren(this);
 		}
 	}
@@ -1547,12 +1859,16 @@ public class MTCQParser extends Parser {
 			int _alt;
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(163);
+			setState(169);
 			_errHandler.sync(this);
 			switch (_input.LA(1)) {
 			case NAME:
 			case URI:
 				{
+				_localctx = new ConjunctiveQueryFormulaContext(_localctx);
+				_ctx = _localctx;
+				_prevctx = _localctx;
+
 				setState(146);
 				conjunctive_query();
 				}
@@ -1560,6 +1876,9 @@ public class MTCQParser extends Parser {
 			case TRUE_TERMINAL:
 			case FALSE_TERMINAL:
 				{
+				_localctx = new PropositionalBooleanFormulaContext(_localctx);
+				_ctx = _localctx;
+				_prevctx = _localctx;
 				setState(147);
 				prop_booleans();
 				}
@@ -1567,6 +1886,9 @@ public class MTCQParser extends Parser {
 			case TT_TERMINAL:
 			case FF_TERMINAL:
 				{
+				_localctx = new LogicBooleanFormulaContext(_localctx);
+				_ctx = _localctx;
+				_prevctx = _localctx;
 				setState(148);
 				logic_booleans();
 				}
@@ -1574,12 +1896,18 @@ public class MTCQParser extends Parser {
 			case LAST_TERMINAL:
 			case END_TERMINAL:
 				{
+				_localctx = new TracePositionFormulaContext(_localctx);
+				_ctx = _localctx;
+				_prevctx = _localctx;
 				setState(149);
 				trace_position();
 				}
 				break;
 			case T__7:
 				{
+				_localctx = new BracketFormulaContext(_localctx);
+				_ctx = _localctx;
+				_prevctx = _localctx;
 				setState(150);
 				match(T__7);
 				setState(151);
@@ -1588,55 +1916,61 @@ public class MTCQParser extends Parser {
 				match(T__8);
 				}
 				break;
-			case X_TERMINAL:
-			case XB_TERMINAL:
-			case FI_TERMINAL:
-			case F_TERMINAL:
-			case GI_TERMINAL:
-			case G_TERMINAL:
 			case NOT1_TERMINAL:
 			case NOT2_TERMINAL:
 				{
-				setState(159);
-				_errHandler.sync(this);
-				switch (_input.LA(1)) {
-				case NOT1_TERMINAL:
-				case NOT2_TERMINAL:
-					{
-					setState(154);
-					not();
-					}
-					break;
-				case FI_TERMINAL:
-				case F_TERMINAL:
-					{
-					setState(155);
-					eventually();
-					}
-					break;
-				case GI_TERMINAL:
-				case G_TERMINAL:
-					{
-					setState(156);
-					always();
-					}
-					break;
-				case X_TERMINAL:
-					{
-					setState(157);
-					weak_next();
-					}
-					break;
-				case XB_TERMINAL:
-					{
-					setState(158);
-					next();
-					}
-					break;
-				default:
-					throw new NoViableAltException(this);
+				_localctx = new NotFormulaContext(_localctx);
+				_ctx = _localctx;
+				_prevctx = _localctx;
+				setState(154);
+				not();
+				setState(155);
+				mtcq_formula(6);
 				}
+				break;
+			case FI_TERMINAL:
+			case F_TERMINAL:
+				{
+				_localctx = new EventuallyFormulaContext(_localctx);
+				_ctx = _localctx;
+				_prevctx = _localctx;
+				setState(157);
+				eventually();
+				setState(158);
+				mtcq_formula(5);
+				}
+				break;
+			case GI_TERMINAL:
+			case G_TERMINAL:
+				{
+				_localctx = new AlwaysFormulaContext(_localctx);
+				_ctx = _localctx;
+				_prevctx = _localctx;
+				setState(160);
+				always();
 				setState(161);
+				mtcq_formula(4);
+				}
+				break;
+			case X_TERMINAL:
+				{
+				_localctx = new WeakNextFormulaContext(_localctx);
+				_ctx = _localctx;
+				_prevctx = _localctx;
+				setState(163);
+				weak_next();
+				setState(164);
+				mtcq_formula(3);
+				}
+				break;
+			case XB_TERMINAL:
+				{
+				_localctx = new NextFormulaContext(_localctx);
+				_ctx = _localctx;
+				_prevctx = _localctx;
+				setState(166);
+				next();
+				setState(167);
 				mtcq_formula(2);
 				}
 				break;
@@ -1644,85 +1978,95 @@ public class MTCQParser extends Parser {
 				throw new NoViableAltException(this);
 			}
 			_ctx.stop = _input.LT(-1);
-			setState(181);
+			setState(197);
 			_errHandler.sync(this);
-			_alt = getInterpreter().adaptivePredict(_input,12,_ctx);
+			_alt = getInterpreter().adaptivePredict(_input,10,_ctx);
 			while ( _alt!=2 && _alt!=org.antlr.v4.runtime.atn.ATN.INVALID_ALT_NUMBER ) {
 				if ( _alt==1 ) {
 					if ( _parseListeners!=null ) triggerExitRuleEvent();
 					_prevctx = _localctx;
 					{
-					setState(179);
+					setState(195);
 					_errHandler.sync(this);
-					switch ( getInterpreter().adaptivePredict(_input,11,_ctx) ) {
+					switch ( getInterpreter().adaptivePredict(_input,9,_ctx) ) {
 					case 1:
 						{
-						_localctx = new Mtcq_formulaContext(_parentctx, _parentState);
+						_localctx = new AndFormulaContext(new Mtcq_formulaContext(_parentctx, _parentState));
 						pushNewRecursionContext(_localctx, _startState, RULE_mtcq_formula);
-						setState(165);
-						if (!(precpred(_ctx, 3))) throw new FailedPredicateException(this, "precpred(_ctx, 3)");
 						setState(171);
-						_errHandler.sync(this);
-						switch (_input.LA(1)) {
-						case AND1_TERMINAL:
-						case AND2_TERMINAL:
-							{
-							setState(166);
-							and();
-							}
-							break;
-						case OR1_TERMINAL:
-						case OR2_TERMINAL:
-							{
-							setState(167);
-							or();
-							}
-							break;
-						case IMPL1_TERMINAL:
-						case IMPL2_TERMINAL:
-							{
-							setState(168);
-							impl();
-							}
-							break;
-						case EQUIV1_TERMINAL:
-						case EQUIV2_TERMINAL:
-							{
-							setState(169);
-							equiv();
-							}
-							break;
-						case XOR_TERMINAL:
-							{
-							setState(170);
-							xor();
-							}
-							break;
-						default:
-							throw new NoViableAltException(this);
-						}
+						if (!(precpred(_ctx, 11))) throw new FailedPredicateException(this, "precpred(_ctx, 11)");
+						setState(172);
+						and();
 						setState(173);
-						mtcq_formula(4);
+						mtcq_formula(12);
 						}
 						break;
 					case 2:
 						{
-						_localctx = new Mtcq_formulaContext(_parentctx, _parentState);
+						_localctx = new OrFormulaContext(new Mtcq_formulaContext(_parentctx, _parentState));
 						pushNewRecursionContext(_localctx, _startState, RULE_mtcq_formula);
 						setState(175);
-						if (!(precpred(_ctx, 1))) throw new FailedPredicateException(this, "precpred(_ctx, 1)");
+						if (!(precpred(_ctx, 10))) throw new FailedPredicateException(this, "precpred(_ctx, 10)");
 						setState(176);
-						until();
+						or();
 						setState(177);
+						mtcq_formula(11);
+						}
+						break;
+					case 3:
+						{
+						_localctx = new ImplFormulaContext(new Mtcq_formulaContext(_parentctx, _parentState));
+						pushNewRecursionContext(_localctx, _startState, RULE_mtcq_formula);
+						setState(179);
+						if (!(precpred(_ctx, 9))) throw new FailedPredicateException(this, "precpred(_ctx, 9)");
+						setState(180);
+						impl();
+						setState(181);
+						mtcq_formula(10);
+						}
+						break;
+					case 4:
+						{
+						_localctx = new EquivFormulaContext(new Mtcq_formulaContext(_parentctx, _parentState));
+						pushNewRecursionContext(_localctx, _startState, RULE_mtcq_formula);
+						setState(183);
+						if (!(precpred(_ctx, 8))) throw new FailedPredicateException(this, "precpred(_ctx, 8)");
+						setState(184);
+						equiv();
+						setState(185);
+						mtcq_formula(9);
+						}
+						break;
+					case 5:
+						{
+						_localctx = new XorFormulaContext(new Mtcq_formulaContext(_parentctx, _parentState));
+						pushNewRecursionContext(_localctx, _startState, RULE_mtcq_formula);
+						setState(187);
+						if (!(precpred(_ctx, 7))) throw new FailedPredicateException(this, "precpred(_ctx, 7)");
+						setState(188);
+						xor();
+						setState(189);
+						mtcq_formula(8);
+						}
+						break;
+					case 6:
+						{
+						_localctx = new UntilFormulaContext(new Mtcq_formulaContext(_parentctx, _parentState));
+						pushNewRecursionContext(_localctx, _startState, RULE_mtcq_formula);
+						setState(191);
+						if (!(precpred(_ctx, 1))) throw new FailedPredicateException(this, "precpred(_ctx, 1)");
+						setState(192);
+						until();
+						setState(193);
 						mtcq_formula(2);
 						}
 						break;
 					}
 					} 
 				}
-				setState(183);
+				setState(199);
 				_errHandler.sync(this);
-				_alt = getInterpreter().adaptivePredict(_input,12,_ctx);
+				_alt = getInterpreter().adaptivePredict(_input,10,_ctx);
 			}
 			}
 		}
@@ -1766,17 +2110,17 @@ public class MTCQParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(184);
+			setState(200);
 			match(T__9);
-			setState(185);
+			setState(201);
 			match(NAME);
-			setState(186);
+			setState(202);
 			match(T__5);
-			setState(187);
+			setState(203);
 			match(T__4);
-			setState(188);
+			setState(204);
 			match(URI);
-			setState(189);
+			setState(205);
 			match(T__10);
 			}
 		}
@@ -1828,21 +2172,21 @@ public class MTCQParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(194);
+			setState(210);
 			_errHandler.sync(this);
 			_la = _input.LA(1);
 			while (_la==T__9) {
 				{
 				{
-				setState(191);
+				setState(207);
 				prefix();
 				}
 				}
-				setState(196);
+				setState(212);
 				_errHandler.sync(this);
 				_la = _input.LA(1);
 			}
-			setState(197);
+			setState(213);
 			mtcq_formula(0);
 			}
 		}
@@ -1867,15 +2211,23 @@ public class MTCQParser extends Parser {
 	private boolean mtcq_formula_sempred(Mtcq_formulaContext _localctx, int predIndex) {
 		switch (predIndex) {
 		case 0:
-			return precpred(_ctx, 3);
+			return precpred(_ctx, 11);
 		case 1:
+			return precpred(_ctx, 10);
+		case 2:
+			return precpred(_ctx, 9);
+		case 3:
+			return precpred(_ctx, 8);
+		case 4:
+			return precpred(_ctx, 7);
+		case 5:
 			return precpred(_ctx, 1);
 		}
 		return true;
 	}
 
 	public static final String _serializedATN =
-		"\u0004\u0001)\u00c8\u0002\u0000\u0007\u0000\u0002\u0001\u0007\u0001\u0002"+
+		"\u0004\u0001)\u00d8\u0002\u0000\u0007\u0000\u0002\u0001\u0007\u0001\u0002"+
 		"\u0002\u0007\u0002\u0002\u0003\u0007\u0003\u0002\u0004\u0007\u0004\u0002"+
 		"\u0005\u0007\u0005\u0002\u0006\u0007\u0006\u0002\u0007\u0007\u0007\u0002"+
 		"\b\u0007\b\u0002\t\u0007\t\u0002\n\u0007\n\u0002\u000b\u0007\u000b\u0002"+
@@ -1900,101 +2252,111 @@ public class MTCQParser extends Parser {
 		"\u0005\u0017\u008d\b\u0017\n\u0017\f\u0017\u0090\t\u0017\u0001\u0018\u0001"+
 		"\u0018\u0001\u0018\u0001\u0018\u0001\u0018\u0001\u0018\u0001\u0018\u0001"+
 		"\u0018\u0001\u0018\u0001\u0018\u0001\u0018\u0001\u0018\u0001\u0018\u0001"+
-		"\u0018\u0003\u0018\u00a0\b\u0018\u0001\u0018\u0001\u0018\u0003\u0018\u00a4"+
+		"\u0018\u0001\u0018\u0001\u0018\u0001\u0018\u0001\u0018\u0001\u0018\u0001"+
+		"\u0018\u0001\u0018\u0001\u0018\u0001\u0018\u0001\u0018\u0003\u0018\u00aa"+
 		"\b\u0018\u0001\u0018\u0001\u0018\u0001\u0018\u0001\u0018\u0001\u0018\u0001"+
-		"\u0018\u0003\u0018\u00ac\b\u0018\u0001\u0018\u0001\u0018\u0001\u0018\u0001"+
-		"\u0018\u0001\u0018\u0001\u0018\u0005\u0018\u00b4\b\u0018\n\u0018\f\u0018"+
-		"\u00b7\t\u0018\u0001\u0019\u0001\u0019\u0001\u0019\u0001\u0019\u0001\u0019"+
-		"\u0001\u0019\u0001\u0019\u0001\u001a\u0005\u001a\u00c1\b\u001a\n\u001a"+
-		"\f\u001a\u00c4\t\u001a\u0001\u001a\u0001\u001a\u0001\u001a\u0000\u0001"+
-		"0\u001b\u0000\u0002\u0004\u0006\b\n\f\u000e\u0010\u0012\u0014\u0016\u0018"+
-		"\u001a\u001c\u001e \"$&(*,.024\u0000\b\u0001\u0000\u0014\u0015\u0001\u0000"+
-		"!\"\u0001\u0000#$\u0001\u0000\u0016\u0017\u0001\u0000\u0018\u0019\u0001"+
-		"\u0000\u001a\u001b\u0001\u0000\u001c\u001d\u0001\u0000\u001e\u001f\u00c6"+
-		"\u00006\u0001\u0000\u0000\u0000\u00028\u0001\u0000\u0000\u0000\u0004:"+
-		"\u0001\u0000\u0000\u0000\u0006<\u0001\u0000\u0000\u0000\b>\u0001\u0000"+
-		"\u0000\u0000\n@\u0001\u0000\u0000\u0000\fB\u0001\u0000\u0000\u0000\u000e"+
-		"D\u0001\u0000\u0000\u0000\u0010F\u0001\u0000\u0000\u0000\u0012H\u0001"+
-		"\u0000\u0000\u0000\u0014N\u0001\u0000\u0000\u0000\u0016Q\u0001\u0000\u0000"+
-		"\u0000\u0018W\u0001\u0000\u0000\u0000\u001aY\u0001\u0000\u0000\u0000\u001c"+
-		"[\u0001\u0000\u0000\u0000\u001e`\u0001\u0000\u0000\u0000 e\u0001\u0000"+
-		"\u0000\u0000\"j\u0001\u0000\u0000\u0000$o\u0001\u0000\u0000\u0000&v\u0001"+
-		"\u0000\u0000\u0000(x\u0001\u0000\u0000\u0000*\u007f\u0001\u0000\u0000"+
-		"\u0000,\u0086\u0001\u0000\u0000\u0000.\u0088\u0001\u0000\u0000\u00000"+
-		"\u00a3\u0001\u0000\u0000\u00002\u00b8\u0001\u0000\u0000\u00004\u00c2\u0001"+
-		"\u0000\u0000\u000067\u0007\u0000\u0000\u00007\u0001\u0001\u0000\u0000"+
-		"\u000089\u0007\u0001\u0000\u00009\u0003\u0001\u0000\u0000\u0000:;\u0007"+
-		"\u0002\u0000\u0000;\u0005\u0001\u0000\u0000\u0000<=\u0007\u0003\u0000"+
-		"\u0000=\u0007\u0001\u0000\u0000\u0000>?\u0007\u0004\u0000\u0000?\t\u0001"+
-		"\u0000\u0000\u0000@A\u0007\u0005\u0000\u0000A\u000b\u0001\u0000\u0000"+
-		"\u0000BC\u0007\u0006\u0000\u0000C\r\u0001\u0000\u0000\u0000DE\u0007\u0007"+
-		"\u0000\u0000E\u000f\u0001\u0000\u0000\u0000FG\u0005 \u0000\u0000G\u0011"+
-		"\u0001\u0000\u0000\u0000HI\u0005\u0001\u0000\u0000IJ\u0005%\u0000\u0000"+
-		"JK\u0005\u0002\u0000\u0000KL\u0005%\u0000\u0000LM\u0005\u0003\u0000\u0000"+
-		"M\u0013\u0001\u0000\u0000\u0000NO\u0005\u0004\u0000\u0000OP\u0005%\u0000"+
-		"\u0000P\u0015\u0001\u0000\u0000\u0000QR\u0005\u0005\u0000\u0000RS\u0005"+
-		"%\u0000\u0000S\u0017\u0001\u0000\u0000\u0000TX\u0003\u0012\t\u0000UX\u0003"+
-		"\u0014\n\u0000VX\u0003\u0016\u000b\u0000WT\u0001\u0000\u0000\u0000WU\u0001"+
-		"\u0000\u0000\u0000WV\u0001\u0000\u0000\u0000X\u0019\u0001\u0000\u0000"+
-		"\u0000YZ\u0005\f\u0000\u0000Z\u001b\u0001\u0000\u0000\u0000[\\\u0005\r"+
-		"\u0000\u0000\\\u001d\u0001\u0000\u0000\u0000]a\u0005\u000f\u0000\u0000"+
-		"^_\u0005\u000e\u0000\u0000_a\u0003\u0018\f\u0000`]\u0001\u0000\u0000\u0000"+
-		"`^\u0001\u0000\u0000\u0000a\u001f\u0001\u0000\u0000\u0000bf\u0005\u0011"+
-		"\u0000\u0000cd\u0005\u0010\u0000\u0000df\u0003\u0018\f\u0000eb\u0001\u0000"+
-		"\u0000\u0000ec\u0001\u0000\u0000\u0000f!\u0001\u0000\u0000\u0000gk\u0005"+
-		"\u0013\u0000\u0000hi\u0005\u0012\u0000\u0000ik\u0003\u0018\f\u0000jg\u0001"+
-		"\u0000\u0000\u0000jh\u0001\u0000\u0000\u0000k#\u0001\u0000\u0000\u0000"+
-		"lp\u0005\'\u0000\u0000mn\u0005&\u0000\u0000np\u0005\u0006\u0000\u0000"+
-		"ol\u0001\u0000\u0000\u0000om\u0001\u0000\u0000\u0000op\u0001\u0000\u0000"+
-		"\u0000pq\u0001\u0000\u0000\u0000qr\u0005&\u0000\u0000r%\u0001\u0000\u0000"+
-		"\u0000st\u0005\u0007\u0000\u0000tw\u0005&\u0000\u0000uw\u0003$\u0012\u0000"+
-		"vs\u0001\u0000\u0000\u0000vu\u0001\u0000\u0000\u0000w\'\u0001\u0000\u0000"+
-		"\u0000xy\u0003$\u0012\u0000yz\u0005\b\u0000\u0000z{\u0003&\u0013\u0000"+
-		"{|\u0005\u0002\u0000\u0000|}\u0003&\u0013\u0000}~\u0005\t\u0000\u0000"+
-		"~)\u0001\u0000\u0000\u0000\u007f\u0080\u0003$\u0012\u0000\u0080\u0081"+
-		"\u0005\b\u0000\u0000\u0081\u0082\u0003&\u0013\u0000\u0082\u0083\u0005"+
-		"\t\u0000\u0000\u0083+\u0001\u0000\u0000\u0000\u0084\u0087\u0003(\u0014"+
-		"\u0000\u0085\u0087\u0003*\u0015\u0000\u0086\u0084\u0001\u0000\u0000\u0000"+
-		"\u0086\u0085\u0001\u0000\u0000\u0000\u0087-\u0001\u0000\u0000\u0000\u0088"+
-		"\u008e\u0003,\u0016\u0000\u0089\u008a\u0003\b\u0004\u0000\u008a\u008b"+
-		"\u0003,\u0016\u0000\u008b\u008d\u0001\u0000\u0000\u0000\u008c\u0089\u0001"+
-		"\u0000\u0000\u0000\u008d\u0090\u0001\u0000\u0000\u0000\u008e\u008c\u0001"+
-		"\u0000\u0000\u0000\u008e\u008f\u0001\u0000\u0000\u0000\u008f/\u0001\u0000"+
-		"\u0000\u0000\u0090\u008e\u0001\u0000\u0000\u0000\u0091\u0092\u0006\u0018"+
-		"\uffff\uffff\u0000\u0092\u00a4\u0003.\u0017\u0000\u0093\u00a4\u0003\u0002"+
-		"\u0001\u0000\u0094\u00a4\u0003\u0004\u0002\u0000\u0095\u00a4\u0003\u0000"+
-		"\u0000\u0000\u0096\u0097\u0005\b\u0000\u0000\u0097\u0098\u00030\u0018"+
-		"\u0000\u0098\u0099\u0005\t\u0000\u0000\u0099\u00a4\u0001\u0000\u0000\u0000"+
-		"\u009a\u00a0\u0003\u0006\u0003\u0000\u009b\u00a0\u0003 \u0010\u0000\u009c"+
-		"\u00a0\u0003\"\u0011\u0000\u009d\u00a0\u0003\u001a\r\u0000\u009e\u00a0"+
-		"\u0003\u001c\u000e\u0000\u009f\u009a\u0001\u0000\u0000\u0000\u009f\u009b"+
-		"\u0001\u0000\u0000\u0000\u009f\u009c\u0001\u0000\u0000\u0000\u009f\u009d"+
-		"\u0001\u0000\u0000\u0000\u009f\u009e\u0001\u0000\u0000\u0000\u00a0\u00a1"+
-		"\u0001\u0000\u0000\u0000\u00a1\u00a2\u00030\u0018\u0002\u00a2\u00a4\u0001"+
-		"\u0000\u0000\u0000\u00a3\u0091\u0001\u0000\u0000\u0000\u00a3\u0093\u0001"+
-		"\u0000\u0000\u0000\u00a3\u0094\u0001\u0000\u0000\u0000\u00a3\u0095\u0001"+
-		"\u0000\u0000\u0000\u00a3\u0096\u0001\u0000\u0000\u0000\u00a3\u009f\u0001"+
-		"\u0000\u0000\u0000\u00a4\u00b5\u0001\u0000\u0000\u0000\u00a5\u00ab\n\u0003"+
-		"\u0000\u0000\u00a6\u00ac\u0003\b\u0004\u0000\u00a7\u00ac\u0003\n\u0005"+
-		"\u0000\u00a8\u00ac\u0003\f\u0006\u0000\u00a9\u00ac\u0003\u000e\u0007\u0000"+
-		"\u00aa\u00ac\u0003\u0010\b\u0000\u00ab\u00a6\u0001\u0000\u0000\u0000\u00ab"+
-		"\u00a7\u0001\u0000\u0000\u0000\u00ab\u00a8\u0001\u0000\u0000\u0000\u00ab"+
-		"\u00a9\u0001\u0000\u0000\u0000\u00ab\u00aa\u0001\u0000\u0000\u0000\u00ac"+
-		"\u00ad\u0001\u0000\u0000\u0000\u00ad\u00ae\u00030\u0018\u0004\u00ae\u00b4"+
-		"\u0001\u0000\u0000\u0000\u00af\u00b0\n\u0001\u0000\u0000\u00b0\u00b1\u0003"+
-		"\u001e\u000f\u0000\u00b1\u00b2\u00030\u0018\u0002\u00b2\u00b4\u0001\u0000"+
-		"\u0000\u0000\u00b3\u00a5\u0001\u0000\u0000\u0000\u00b3\u00af\u0001\u0000"+
-		"\u0000\u0000\u00b4\u00b7\u0001\u0000\u0000\u0000\u00b5\u00b3\u0001\u0000"+
-		"\u0000\u0000\u00b5\u00b6\u0001\u0000\u0000\u0000\u00b61\u0001\u0000\u0000"+
-		"\u0000\u00b7\u00b5\u0001\u0000\u0000\u0000\u00b8\u00b9\u0005\n\u0000\u0000"+
-		"\u00b9\u00ba\u0005&\u0000\u0000\u00ba\u00bb\u0005\u0006\u0000\u0000\u00bb"+
-		"\u00bc\u0005\u0005\u0000\u0000\u00bc\u00bd\u0005\'\u0000\u0000\u00bd\u00be"+
-		"\u0005\u000b\u0000\u0000\u00be3\u0001\u0000\u0000\u0000\u00bf\u00c1\u0003"+
-		"2\u0019\u0000\u00c0\u00bf\u0001\u0000\u0000\u0000\u00c1\u00c4\u0001\u0000"+
-		"\u0000\u0000\u00c2\u00c0\u0001\u0000\u0000\u0000\u00c2\u00c3\u0001\u0000"+
-		"\u0000\u0000\u00c3\u00c5\u0001\u0000\u0000\u0000\u00c4\u00c2\u0001\u0000"+
-		"\u0000\u0000\u00c5\u00c6\u00030\u0018\u0000\u00c65\u0001\u0000\u0000\u0000"+
-		"\u000eW`ejov\u0086\u008e\u009f\u00a3\u00ab\u00b3\u00b5\u00c2";
+		"\u0018\u0001\u0018\u0001\u0018\u0001\u0018\u0001\u0018\u0001\u0018\u0001"+
+		"\u0018\u0001\u0018\u0001\u0018\u0001\u0018\u0001\u0018\u0001\u0018\u0001"+
+		"\u0018\u0001\u0018\u0001\u0018\u0001\u0018\u0001\u0018\u0001\u0018\u0001"+
+		"\u0018\u0005\u0018\u00c4\b\u0018\n\u0018\f\u0018\u00c7\t\u0018\u0001\u0019"+
+		"\u0001\u0019\u0001\u0019\u0001\u0019\u0001\u0019\u0001\u0019\u0001\u0019"+
+		"\u0001\u001a\u0005\u001a\u00d1\b\u001a\n\u001a\f\u001a\u00d4\t\u001a\u0001"+
+		"\u001a\u0001\u001a\u0001\u001a\u0000\u00010\u001b\u0000\u0002\u0004\u0006"+
+		"\b\n\f\u000e\u0010\u0012\u0014\u0016\u0018\u001a\u001c\u001e \"$&(*,."+
+		"024\u0000\b\u0001\u0000\u0014\u0015\u0001\u0000!\"\u0001\u0000#$\u0001"+
+		"\u0000\u0016\u0017\u0001\u0000\u0018\u0019\u0001\u0000\u001a\u001b\u0001"+
+		"\u0000\u001c\u001d\u0001\u0000\u001e\u001f\u00d6\u00006\u0001\u0000\u0000"+
+		"\u0000\u00028\u0001\u0000\u0000\u0000\u0004:\u0001\u0000\u0000\u0000\u0006"+
+		"<\u0001\u0000\u0000\u0000\b>\u0001\u0000\u0000\u0000\n@\u0001\u0000\u0000"+
+		"\u0000\fB\u0001\u0000\u0000\u0000\u000eD\u0001\u0000\u0000\u0000\u0010"+
+		"F\u0001\u0000\u0000\u0000\u0012H\u0001\u0000\u0000\u0000\u0014N\u0001"+
+		"\u0000\u0000\u0000\u0016Q\u0001\u0000\u0000\u0000\u0018W\u0001\u0000\u0000"+
+		"\u0000\u001aY\u0001\u0000\u0000\u0000\u001c[\u0001\u0000\u0000\u0000\u001e"+
+		"`\u0001\u0000\u0000\u0000 e\u0001\u0000\u0000\u0000\"j\u0001\u0000\u0000"+
+		"\u0000$o\u0001\u0000\u0000\u0000&v\u0001\u0000\u0000\u0000(x\u0001\u0000"+
+		"\u0000\u0000*\u007f\u0001\u0000\u0000\u0000,\u0086\u0001\u0000\u0000\u0000"+
+		".\u0088\u0001\u0000\u0000\u00000\u00a9\u0001\u0000\u0000\u00002\u00c8"+
+		"\u0001\u0000\u0000\u00004\u00d2\u0001\u0000\u0000\u000067\u0007\u0000"+
+		"\u0000\u00007\u0001\u0001\u0000\u0000\u000089\u0007\u0001\u0000\u0000"+
+		"9\u0003\u0001\u0000\u0000\u0000:;\u0007\u0002\u0000\u0000;\u0005\u0001"+
+		"\u0000\u0000\u0000<=\u0007\u0003\u0000\u0000=\u0007\u0001\u0000\u0000"+
+		"\u0000>?\u0007\u0004\u0000\u0000?\t\u0001\u0000\u0000\u0000@A\u0007\u0005"+
+		"\u0000\u0000A\u000b\u0001\u0000\u0000\u0000BC\u0007\u0006\u0000\u0000"+
+		"C\r\u0001\u0000\u0000\u0000DE\u0007\u0007\u0000\u0000E\u000f\u0001\u0000"+
+		"\u0000\u0000FG\u0005 \u0000\u0000G\u0011\u0001\u0000\u0000\u0000HI\u0005"+
+		"\u0001\u0000\u0000IJ\u0005%\u0000\u0000JK\u0005\u0002\u0000\u0000KL\u0005"+
+		"%\u0000\u0000LM\u0005\u0003\u0000\u0000M\u0013\u0001\u0000\u0000\u0000"+
+		"NO\u0005\u0004\u0000\u0000OP\u0005%\u0000\u0000P\u0015\u0001\u0000\u0000"+
+		"\u0000QR\u0005\u0005\u0000\u0000RS\u0005%\u0000\u0000S\u0017\u0001\u0000"+
+		"\u0000\u0000TX\u0003\u0012\t\u0000UX\u0003\u0014\n\u0000VX\u0003\u0016"+
+		"\u000b\u0000WT\u0001\u0000\u0000\u0000WU\u0001\u0000\u0000\u0000WV\u0001"+
+		"\u0000\u0000\u0000X\u0019\u0001\u0000\u0000\u0000YZ\u0005\f\u0000\u0000"+
+		"Z\u001b\u0001\u0000\u0000\u0000[\\\u0005\r\u0000\u0000\\\u001d\u0001\u0000"+
+		"\u0000\u0000]a\u0005\u000f\u0000\u0000^_\u0005\u000e\u0000\u0000_a\u0003"+
+		"\u0018\f\u0000`]\u0001\u0000\u0000\u0000`^\u0001\u0000\u0000\u0000a\u001f"+
+		"\u0001\u0000\u0000\u0000bf\u0005\u0011\u0000\u0000cd\u0005\u0010\u0000"+
+		"\u0000df\u0003\u0018\f\u0000eb\u0001\u0000\u0000\u0000ec\u0001\u0000\u0000"+
+		"\u0000f!\u0001\u0000\u0000\u0000gk\u0005\u0013\u0000\u0000hi\u0005\u0012"+
+		"\u0000\u0000ik\u0003\u0018\f\u0000jg\u0001\u0000\u0000\u0000jh\u0001\u0000"+
+		"\u0000\u0000k#\u0001\u0000\u0000\u0000lp\u0005\'\u0000\u0000mn\u0005&"+
+		"\u0000\u0000np\u0005\u0006\u0000\u0000ol\u0001\u0000\u0000\u0000om\u0001"+
+		"\u0000\u0000\u0000op\u0001\u0000\u0000\u0000pq\u0001\u0000\u0000\u0000"+
+		"qr\u0005&\u0000\u0000r%\u0001\u0000\u0000\u0000st\u0005\u0007\u0000\u0000"+
+		"tw\u0005&\u0000\u0000uw\u0003$\u0012\u0000vs\u0001\u0000\u0000\u0000v"+
+		"u\u0001\u0000\u0000\u0000w\'\u0001\u0000\u0000\u0000xy\u0003$\u0012\u0000"+
+		"yz\u0005\b\u0000\u0000z{\u0003&\u0013\u0000{|\u0005\u0002\u0000\u0000"+
+		"|}\u0003&\u0013\u0000}~\u0005\t\u0000\u0000~)\u0001\u0000\u0000\u0000"+
+		"\u007f\u0080\u0003$\u0012\u0000\u0080\u0081\u0005\b\u0000\u0000\u0081"+
+		"\u0082\u0003&\u0013\u0000\u0082\u0083\u0005\t\u0000\u0000\u0083+\u0001"+
+		"\u0000\u0000\u0000\u0084\u0087\u0003(\u0014\u0000\u0085\u0087\u0003*\u0015"+
+		"\u0000\u0086\u0084\u0001\u0000\u0000\u0000\u0086\u0085\u0001\u0000\u0000"+
+		"\u0000\u0087-\u0001\u0000\u0000\u0000\u0088\u008e\u0003,\u0016\u0000\u0089"+
+		"\u008a\u0003\b\u0004\u0000\u008a\u008b\u0003,\u0016\u0000\u008b\u008d"+
+		"\u0001\u0000\u0000\u0000\u008c\u0089\u0001\u0000\u0000\u0000\u008d\u0090"+
+		"\u0001\u0000\u0000\u0000\u008e\u008c\u0001\u0000\u0000\u0000\u008e\u008f"+
+		"\u0001\u0000\u0000\u0000\u008f/\u0001\u0000\u0000\u0000\u0090\u008e\u0001"+
+		"\u0000\u0000\u0000\u0091\u0092\u0006\u0018\uffff\uffff\u0000\u0092\u00aa"+
+		"\u0003.\u0017\u0000\u0093\u00aa\u0003\u0002\u0001\u0000\u0094\u00aa\u0003"+
+		"\u0004\u0002\u0000\u0095\u00aa\u0003\u0000\u0000\u0000\u0096\u0097\u0005"+
+		"\b\u0000\u0000\u0097\u0098\u00030\u0018\u0000\u0098\u0099\u0005\t\u0000"+
+		"\u0000\u0099\u00aa\u0001\u0000\u0000\u0000\u009a\u009b\u0003\u0006\u0003"+
+		"\u0000\u009b\u009c\u00030\u0018\u0006\u009c\u00aa\u0001\u0000\u0000\u0000"+
+		"\u009d\u009e\u0003 \u0010\u0000\u009e\u009f\u00030\u0018\u0005\u009f\u00aa"+
+		"\u0001\u0000\u0000\u0000\u00a0\u00a1\u0003\"\u0011\u0000\u00a1\u00a2\u0003"+
+		"0\u0018\u0004\u00a2\u00aa\u0001\u0000\u0000\u0000\u00a3\u00a4\u0003\u001a"+
+		"\r\u0000\u00a4\u00a5\u00030\u0018\u0003\u00a5\u00aa\u0001\u0000\u0000"+
+		"\u0000\u00a6\u00a7\u0003\u001c\u000e\u0000\u00a7\u00a8\u00030\u0018\u0002"+
+		"\u00a8\u00aa\u0001\u0000\u0000\u0000\u00a9\u0091\u0001\u0000\u0000\u0000"+
+		"\u00a9\u0093\u0001\u0000\u0000\u0000\u00a9\u0094\u0001\u0000\u0000\u0000"+
+		"\u00a9\u0095\u0001\u0000\u0000\u0000\u00a9\u0096\u0001\u0000\u0000\u0000"+
+		"\u00a9\u009a\u0001\u0000\u0000\u0000\u00a9\u009d\u0001\u0000\u0000\u0000"+
+		"\u00a9\u00a0\u0001\u0000\u0000\u0000\u00a9\u00a3\u0001\u0000\u0000\u0000"+
+		"\u00a9\u00a6\u0001\u0000\u0000\u0000\u00aa\u00c5\u0001\u0000\u0000\u0000"+
+		"\u00ab\u00ac\n\u000b\u0000\u0000\u00ac\u00ad\u0003\b\u0004\u0000\u00ad"+
+		"\u00ae\u00030\u0018\f\u00ae\u00c4\u0001\u0000\u0000\u0000\u00af\u00b0"+
+		"\n\n\u0000\u0000\u00b0\u00b1\u0003\n\u0005\u0000\u00b1\u00b2\u00030\u0018"+
+		"\u000b\u00b2\u00c4\u0001\u0000\u0000\u0000\u00b3\u00b4\n\t\u0000\u0000"+
+		"\u00b4\u00b5\u0003\f\u0006\u0000\u00b5\u00b6\u00030\u0018\n\u00b6\u00c4"+
+		"\u0001\u0000\u0000\u0000\u00b7\u00b8\n\b\u0000\u0000\u00b8\u00b9\u0003"+
+		"\u000e\u0007\u0000\u00b9\u00ba\u00030\u0018\t\u00ba\u00c4\u0001\u0000"+
+		"\u0000\u0000\u00bb\u00bc\n\u0007\u0000\u0000\u00bc\u00bd\u0003\u0010\b"+
+		"\u0000\u00bd\u00be\u00030\u0018\b\u00be\u00c4\u0001\u0000\u0000\u0000"+
+		"\u00bf\u00c0\n\u0001\u0000\u0000\u00c0\u00c1\u0003\u001e\u000f\u0000\u00c1"+
+		"\u00c2\u00030\u0018\u0002\u00c2\u00c4\u0001\u0000\u0000\u0000\u00c3\u00ab"+
+		"\u0001\u0000\u0000\u0000\u00c3\u00af\u0001\u0000\u0000\u0000\u00c3\u00b3"+
+		"\u0001\u0000\u0000\u0000\u00c3\u00b7\u0001\u0000\u0000\u0000\u00c3\u00bb"+
+		"\u0001\u0000\u0000\u0000\u00c3\u00bf\u0001\u0000\u0000\u0000\u00c4\u00c7"+
+		"\u0001\u0000\u0000\u0000\u00c5\u00c3\u0001\u0000\u0000\u0000\u00c5\u00c6"+
+		"\u0001\u0000\u0000\u0000\u00c61\u0001\u0000\u0000\u0000\u00c7\u00c5\u0001"+
+		"\u0000\u0000\u0000\u00c8\u00c9\u0005\n\u0000\u0000\u00c9\u00ca\u0005&"+
+		"\u0000\u0000\u00ca\u00cb\u0005\u0006\u0000\u0000\u00cb\u00cc\u0005\u0005"+
+		"\u0000\u0000\u00cc\u00cd\u0005\'\u0000\u0000\u00cd\u00ce\u0005\u000b\u0000"+
+		"\u0000\u00ce3\u0001\u0000\u0000\u0000\u00cf\u00d1\u00032\u0019\u0000\u00d0"+
+		"\u00cf\u0001\u0000\u0000\u0000\u00d1\u00d4\u0001\u0000\u0000\u0000\u00d2"+
+		"\u00d0\u0001\u0000\u0000\u0000\u00d2\u00d3\u0001\u0000\u0000\u0000\u00d3"+
+		"\u00d5\u0001\u0000\u0000\u0000\u00d4\u00d2\u0001\u0000\u0000\u0000\u00d5"+
+		"\u00d6\u00030\u0018\u0000\u00d65\u0001\u0000\u0000\u0000\fW`ejov\u0086"+
+		"\u008e\u00a9\u00c3\u00c5\u00d2";
 	public static final ATN _ATN =
 		new ATNDeserializer().deserialize(_serializedATN.toCharArray());
 	static {

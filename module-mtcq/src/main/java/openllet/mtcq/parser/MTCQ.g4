@@ -68,14 +68,23 @@ atom              : role_atom | concept_atom;
 conjunctive_query : atom (and atom)*;
 
 // formula 
-mtcq_formula : conjunctive_query
-                | prop_booleans
-                | logic_booleans
-                | trace_position
-                | '(' mtcq_formula ')'
-                | mtcq_formula (and | or | impl | equiv | xor) mtcq_formula
-                | (not | eventually | always | weak_next | next) mtcq_formula
-                | mtcq_formula until mtcq_formula;
+mtcq_formula : conjunctive_query			#ConjunctiveQueryFormula
+                | prop_booleans				#PropositionalBooleanFormula
+                | logic_booleans			#LogicBooleanFormula
+                | trace_position			#TracePositionFormula
+                | '(' mtcq_formula ')'			#BracketFormula
+                | mtcq_formula and mtcq_formula		#AndFormula
+                | mtcq_formula or mtcq_formula 		#OrFormula
+                | mtcq_formula impl mtcq_formula	#ImplFormula
+                | mtcq_formula equiv mtcq_formula	#EquivFormula
+                | mtcq_formula xor mtcq_formula 	#XorFormula
+                | not mtcq_formula			#NotFormula
+                | eventually mtcq_formula		#EventuallyFormula
+                | always mtcq_formula			#AlwaysFormula
+                | weak_next mtcq_formula		#WeakNextFormula
+                | next mtcq_formula			#NextFormula
+                | mtcq_formula until mtcq_formula	#UntilFormula
+                ;
 
 // SPARQL-like prefix
 prefix : 'PREFIX' NAME ':' '<' URI '>';

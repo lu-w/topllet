@@ -157,11 +157,117 @@ public interface MTCQVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitConjunctive_query(MTCQParser.Conjunctive_queryContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link MTCQParser#mtcq_formula}.
+	 * Visit a parse tree produced by the {@code TracePositionFormula}
+	 * labeled alternative in {@link MTCQParser#mtcq_formula}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitMtcq_formula(MTCQParser.Mtcq_formulaContext ctx);
+	T visitTracePositionFormula(MTCQParser.TracePositionFormulaContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code LogicBooleanFormula}
+	 * labeled alternative in {@link MTCQParser#mtcq_formula}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitLogicBooleanFormula(MTCQParser.LogicBooleanFormulaContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code XorFormula}
+	 * labeled alternative in {@link MTCQParser#mtcq_formula}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitXorFormula(MTCQParser.XorFormulaContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code ImplFormula}
+	 * labeled alternative in {@link MTCQParser#mtcq_formula}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitImplFormula(MTCQParser.ImplFormulaContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code PropositionalBooleanFormula}
+	 * labeled alternative in {@link MTCQParser#mtcq_formula}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitPropositionalBooleanFormula(MTCQParser.PropositionalBooleanFormulaContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code BracketFormula}
+	 * labeled alternative in {@link MTCQParser#mtcq_formula}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitBracketFormula(MTCQParser.BracketFormulaContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code AlwaysFormula}
+	 * labeled alternative in {@link MTCQParser#mtcq_formula}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitAlwaysFormula(MTCQParser.AlwaysFormulaContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code WeakNextFormula}
+	 * labeled alternative in {@link MTCQParser#mtcq_formula}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitWeakNextFormula(MTCQParser.WeakNextFormulaContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code EventuallyFormula}
+	 * labeled alternative in {@link MTCQParser#mtcq_formula}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitEventuallyFormula(MTCQParser.EventuallyFormulaContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code EquivFormula}
+	 * labeled alternative in {@link MTCQParser#mtcq_formula}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitEquivFormula(MTCQParser.EquivFormulaContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code ConjunctiveQueryFormula}
+	 * labeled alternative in {@link MTCQParser#mtcq_formula}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitConjunctiveQueryFormula(MTCQParser.ConjunctiveQueryFormulaContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code NextFormula}
+	 * labeled alternative in {@link MTCQParser#mtcq_formula}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitNextFormula(MTCQParser.NextFormulaContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code AndFormula}
+	 * labeled alternative in {@link MTCQParser#mtcq_formula}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitAndFormula(MTCQParser.AndFormulaContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code UntilFormula}
+	 * labeled alternative in {@link MTCQParser#mtcq_formula}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitUntilFormula(MTCQParser.UntilFormulaContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code NotFormula}
+	 * labeled alternative in {@link MTCQParser#mtcq_formula}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitNotFormula(MTCQParser.NotFormulaContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code OrFormula}
+	 * labeled alternative in {@link MTCQParser#mtcq_formula}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitOrFormula(MTCQParser.OrFormulaContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link MTCQParser#prefix}.
 	 * @param ctx the parse tree
