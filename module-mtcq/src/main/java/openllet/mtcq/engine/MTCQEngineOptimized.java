@@ -9,25 +9,15 @@ import openllet.query.sparqldl.engine.QueryExec;
 import openllet.query.sparqldl.model.results.QueryResult;
 import openllet.query.sparqldl.model.results.QueryResultImpl;
 
-import java.io.IOException;
-
 public class MTCQEngineOptimized extends AbstractQueryEngine<MetricTemporalConjunctiveQuery> implements QueryExec<MetricTemporalConjunctiveQuery>
 {
     @Override
-    protected QueryResult execABoxQuery(MetricTemporalConjunctiveQuery q, QueryResult excludeBindings, QueryResult restrictToBindings) throws IOException, InterruptedException
+    protected QueryResult execABoxQuery(MetricTemporalConjunctiveQuery q, QueryResult excludeBindings, QueryResult restrictToBindings)
     {
         System.out.println("========== CHECKING " + q + " ========================");
         // 1) construct FA from q
-        DFA automaton;
-        try
-        {
-            System.out.println("Prop abs = " + q.toPropositionalAbstractionString());
-            automaton = MLTL2DFA.convert(q.toPropositionalAbstractionString(), q);
-        }
-        catch (ParseException e)
-        {
-            throw new IOException(e.getMessage());
-        }
+        System.out.println("Prop abs = " + q.toPropositionalAbstractionString());
+        DFA automaton = MLTL2DFA.convert(q.toPropositionalAbstractionString(), q);
         FAStates states = new FAStates();
         Integer initState = automaton.getInitialState();
         if (initState != null && !q.getTemporalKB().isEmpty())

@@ -8,7 +8,6 @@ import openllet.mtcq.model.query.MetricTemporalConjunctiveQuery;
 import openllet.query.sparqldl.model.results.QueryResult;
 import openllet.query.sparqldl.model.ubcq.UBCQQuery;
 
-import java.io.IOException;
 import java.util.List;
 
 public class FAState
@@ -96,28 +95,21 @@ public class FAState
             {
                 System.out.println("Checking edge " + edge);
                 UBCQQuery ubcq = edge.getUBCQ(_kb, _mtcq.isDistinct());
-                try
+                // TODO: excludeBindings are those for which we already certainly know that they are entailed (due to accepting sinks)
+                // incorporates prior knowledge on entailed answers (only those need to be checked)
+                QueryResult edgeResult = _ubcqEngine.exec(ubcq, null, _entailedAnswers);
+                edgeResult.expandToAllVariables(_mtcq.getResultVars());
+                System.out.println("Expanded (to " + _mtcq.getResultVars() + ") edge result = " + edgeResult);
+                // TODO this should obviously be avoided - only create those answers in restrictToBindings...
+                if (_entailedAnswers != null)
+                    edgeResult.retainAll(_entailedAnswers);
+                System.out.println("Retained (to " + _entailedAnswers + ") edge result = " + edgeResult);
+                if (!edgeResult.isEmpty())
                 {
-                    // TODO: excludeBindings are those for which we already certainly know that they are entailed (due to accepting sinks)
-                    // incorporates prior knowledge on entailed answers (only those need to be checked)
-                    QueryResult edgeResult = _ubcqEngine.exec(ubcq, null, _entailedAnswers);
-                    edgeResult.expandToAllVariables(_mtcq.getResultVars());
-                    System.out.println("Expanded (to " + _mtcq.getResultVars() + ") edge result = " + edgeResult);
-                    // TODO this should obviously be avoided - only create those answers in restrictToBindings...
-                    if (_entailedAnswers != null)
-                        edgeResult.retainAll(_entailedAnswers);
-                    System.out.println("Retained (to " + _entailedAnswers + ") edge result = " + edgeResult);
-                    if (!edgeResult.isEmpty())
-                    {
-                        FAState newState = new FAState(_mtcq, _dfa, edge.getToState(), _timePoint + 1);
-                        newState.setEntailedAnswers(edgeResult);
-                        newStates.add(newState);
-                        System.out.println("New state generated: " + newState);
-                    }
-                }
-                catch (IOException | InterruptedException e)
-                {
-                    throw new RuntimeException(e);
+                    FAState newState = new FAState(_mtcq, _dfa, edge.getToState(), _timePoint + 1);
+                    newState.setEntailedAnswers(edgeResult);
+                    newStates.add(newState);
+                    System.out.println("New state generated: " + newState);
                 }
             }
         }

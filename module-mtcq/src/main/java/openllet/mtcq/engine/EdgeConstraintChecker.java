@@ -9,7 +9,6 @@ import openllet.mtcq.model.automaton.DFA;
 import openllet.mtcq.model.automaton.Edge;
 import openllet.mtcq.model.query.MetricTemporalConjunctiveQuery;
 
-import java.io.IOException;
 import java.util.*;
 import java.util.logging.Logger;
 
@@ -78,7 +77,6 @@ public class EdgeConstraintChecker
     }
 
     public Map<Bool, QueryResult> checkEdge(Edge edge, int timePoint, KnowledgeBase kb)
-            throws IOException, InterruptedException
     {
         return checkEdge(edge, timePoint, kb, null);
     }
@@ -91,12 +89,9 @@ public class EdgeConstraintChecker
      * @param restrictSatToBindings If not null, satisfiability results are restricted to this set of bindings
      * @return A pointer to a query result for satisfiable and unsatisfiable knowledge, as a mapping from true
      * (satisfiable) and false (unsatisfiable) to a query result.
-     * @throws IOException If BCQ query engine encountered an IO exception.
-     * @throws InterruptedException If BCQ query engine was interrupted.
      */
     public Map<Bool, QueryResult> checkEdge(Edge edge, int timePoint, KnowledgeBase kb,
                                             QueryResult restrictSatToBindings)
-            throws IOException, InterruptedException
     {
         Map<Bool, QueryResult> result = new HashMap<>();
         List<BCQQuery> bcqs = edge.getBCQs();

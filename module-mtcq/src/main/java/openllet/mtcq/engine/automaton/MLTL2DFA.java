@@ -24,17 +24,25 @@ public class MLTL2DFA
 {
     public static final Logger _logger = Log.getLogger(MLTL2DFA.class);
 
-    public static DFA convert(String mltlFormula) throws IOException, ParseException, InterruptedException
+    public static DFA convert(String mltlFormula)
     {
         return convert(mltlFormula, null);
     }
 
     public static DFA convert(String mltlFormula, MetricTemporalConjunctiveQuery mtcq)
-            throws IOException, InterruptedException, ParseException
     {
-        String ltlfFormula = MLTL2LTLf.convert(mltlFormula);
+        String ltlfFormula;
+        ltlfFormula = MLTL2LTLf.convert(mltlFormula);
         ltlfFormula = ltlfFormula.replace("\n", "");
-        File file = File.createTempFile("mltl2dfa-", "");
+        File file;
+        try
+        {
+            file = File.createTempFile("mltl2dfa-", "");
+        }
+        catch (IOException e)
+        {
+            throw new LydiaException(e.getMessage());
+        }
         String tmpFile = file.getPath();
         file.delete();
         final String command = "lydia";
@@ -46,17 +54,26 @@ public class MLTL2DFA
             child.waitFor();
             error = IOUtils.toString(child.getErrorStream());
         }
-        catch (IOException e)
+        catch (InterruptedException | IOException e)
         {
-            throw new IOException("Can not execute " + command + " - is the '" + command +
+            throw new LydiaException("Can not execute " + command + " - is the '" + command +
                     "' executable in your PATH?");
         }
         if (!error.isEmpty())
             throw new ParseException("Lydia error: " + error.replaceAll("[\r\n]", " "));
 
         tmpFile += ".dot";
-        FileInputStream fis = new FileInputStream(tmpFile);
-        String dotAutomaton = IOUtils.toString(fis, StandardCharsets.UTF_8);
+        FileInputStream fis;
+        String dotAutomaton;
+        try
+        {
+            fis = new FileInputStream(tmpFile);
+            dotAutomaton = IOUtils.toString(fis, StandardCharsets.UTF_8);
+        }
+        catch (IOException e)
+        {
+            throw new LydiaException(e.getMessage());
+        }
 
         _logger.fine("Lydia DFA is located at " + tmpFile);
         System.out.println("DFA file: " + tmpFile);

@@ -19,15 +19,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * TODO tmrw:
- * - add all relevant data classes to query model
- * - implement toString method in each of these classes
- * - implement the recursive visit methods (easy, just see how the parse tree looks)
- * - implement the base cases:
- *   - for CQs: take the code from CQParser and add it here
- *   - also handle prop. abstraction while building CQ (should be easy, just use the _propositionFactory
- *   - store propAbstraction somewhere and add it to the query
- * - implement getPropAbstraction() method in MTCQFormula
+ * TODO:
+ * - implement toString method in data class
  */
 
 public class MTCQBuilder extends AbstractParseTreeVisitor<MTCQFormula> implements MTCQVisitor<MTCQFormula>
@@ -80,6 +73,174 @@ public class MTCQBuilder extends AbstractParseTreeVisitor<MTCQFormula> implement
         _propositionFactory.create(cq);
         // TODO add CQ to overall MTCQ as subquery??? where?
         return cq;
+    }
+
+    @Override
+    public MTCQFormula visitTrace_position(MTCQParser.Trace_positionContext ctx)
+    {
+        // Intentionally left empty.
+        return null;
+    }
+
+    @Override
+    public MTCQFormula visitProp_booleans(MTCQParser.Prop_booleansContext ctx)
+    {
+        // Intentionally left empty.
+        return null;
+    }
+
+    @Override
+    public MTCQFormula visitLogic_booleans(MTCQParser.Logic_booleansContext ctx)
+    {
+        // Intentionally left empty.
+        return null;
+    }
+
+    @Override
+    public MTCQFormula visitNot(MTCQParser.NotContext ctx)
+    {
+        // Intentionally left empty.
+        return null;
+    }
+
+    @Override
+    public MTCQFormula visitAnd(MTCQParser.AndContext ctx)
+    {
+        // Intentionally left empty.
+        return null;
+    }
+
+    @Override
+    public MTCQFormula visitOr(MTCQParser.OrContext ctx)
+    {
+        // Intentionally left empty.
+        return null;
+    }
+
+    @Override
+    public MTCQFormula visitImpl(MTCQParser.ImplContext ctx)
+    {
+        // Intentionally left empty.
+        return null;
+    }
+
+    @Override
+    public MTCQFormula visitEquiv(MTCQParser.EquivContext ctx)
+    {
+        // Intentionally left empty.
+        return null;
+    }
+
+    @Override
+    public MTCQFormula visitXor(MTCQParser.XorContext ctx)
+    {
+        // Intentionally left empty.
+        return null;
+    }
+
+    @Override
+    public MTCQFormula visitFull_interval(MTCQParser.Full_intervalContext ctx)
+    {
+        // Intentionally left empty.
+        return null;
+    }
+
+    @Override
+    public MTCQFormula visitUpper_including_bound_interval(MTCQParser.Upper_including_bound_intervalContext ctx)
+    {
+        // Intentionally left empty.
+        return null;
+    }
+
+    @Override
+    public MTCQFormula visitUpper_excluding_bound_interval(MTCQParser.Upper_excluding_bound_intervalContext ctx)
+    {
+        // Intentionally left empty.
+        return null;
+    }
+
+    @Override
+    public MTCQFormula visitInterval(MTCQParser.IntervalContext ctx)
+    {
+        // Intentionally left empty.
+        return null;
+    }
+
+    @Override
+    public MTCQFormula visitWeak_next(MTCQParser.Weak_nextContext ctx)
+    {
+        // Intentionally left empty.
+        return null;
+    }
+
+    @Override
+    public MTCQFormula visitNext(MTCQParser.NextContext ctx)
+    {
+        // Intentionally left empty.
+        return null;
+    }
+
+    @Override
+    public MTCQFormula visitUntil(MTCQParser.UntilContext ctx)
+    {
+        // Intentionally left empty.
+        return null;
+    }
+
+    @Override
+    public MTCQFormula visitEventually(MTCQParser.EventuallyContext ctx)
+    {
+        // Intentionally left empty.
+        return null;
+    }
+
+    @Override
+    public MTCQFormula visitGlobally(MTCQParser.GloballyContext ctx)
+    {
+        // Intentionally left empty.
+        return null;
+    }
+
+    @Override
+    public MTCQFormula visitTerm(MTCQParser.TermContext ctx)
+    {
+        // Intentionally left empty.
+        return null;
+    }
+
+    @Override
+    public MTCQFormula visitSubject(MTCQParser.SubjectContext ctx)
+    {
+        // Intentionally left empty.
+        return null;
+    }
+
+    @Override
+    public MTCQFormula visitRole_atom(MTCQParser.Role_atomContext ctx)
+    {
+        // Intentionally left empty.
+        return null;
+    }
+
+    @Override
+    public MTCQFormula visitConcept_atom(MTCQParser.Concept_atomContext ctx)
+    {
+        // Intentionally left empty.
+        return null;
+    }
+
+    @Override
+    public MTCQFormula visitAtom(MTCQParser.AtomContext ctx)
+    {
+        // Intentionally left empty.
+        return null;
+    }
+
+    @Override
+    public MTCQFormula visitConjunctive_query(MTCQParser.Conjunctive_queryContext ctx)
+    {
+        // Intentionally left empty.
+        return null;
     }
 
     @Override

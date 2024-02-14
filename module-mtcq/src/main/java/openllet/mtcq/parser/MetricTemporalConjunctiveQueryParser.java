@@ -23,12 +23,25 @@ public class MetricTemporalConjunctiveQueryParser
      * @return The parsed MTCQ containing the propositional abstraction and the CQs.
      * @throws ParseException If the input was not a valid MTCQ string.
      */
-    static public MTCQFormula parse(String input, TemporalKnowledgeBase tkb) throws ParseException
+    static public MTCQFormula parse(String input, TemporalKnowledgeBase tkb)
+    {
+        return parse(input, tkb, true);
+    }
+
+    /**
+     * Parses the given string as a MTCQ over the given knowledge base.
+     * @param input The string to parse.
+     * @param tkb The knowledge base containing roles and concepts used in the CQs.
+     * @param isDistinct whether the answers variable to the MTCQ shall be mapped to distinct individuals.
+     * @return The parsed MTCQ containing the propositional abstraction and the CQs.
+     * @throws ParseException If the input was not a valid MTCQ string.
+     */
+    static public MTCQFormula parse(String input, TemporalKnowledgeBase tkb, boolean isDistinct)
     {
         MTCQLexer lexer = new MTCQLexer(CharStreams.fromString(input));
         MTCQParser parser = new MTCQParser(new CommonTokenStream(lexer));
         ParseTree tree = parser.start();
-        MTCQBuilder builder = new MTCQBuilder(tkb, true);  // TODO handle distinct
+        MTCQBuilder builder = new MTCQBuilder(tkb, isDistinct);
         return builder.visit(tree);
     }
 }

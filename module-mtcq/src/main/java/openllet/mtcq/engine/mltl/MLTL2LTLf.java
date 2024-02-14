@@ -10,12 +10,11 @@ import java.io.IOException;
  */
 public class MLTL2LTLf
 {
-    static public String convert(String mltlFormula) throws InterruptedException, IOException, ParseException
+    static public String convert(String mltlFormula)
     {
         final String command = "mltl2ltl";
         String ltlfFormula = "";
         String error = "";
-
         try
         {
             Process child = Runtime.getRuntime().exec(new String[]{command, mltlFormula});
@@ -23,9 +22,9 @@ public class MLTL2LTLf
             ltlfFormula = IOUtils.toString(child.getInputStream());
             error = IOUtils.toString(child.getErrorStream());
         }
-        catch (IOException e)
+        catch (IOException | InterruptedException e)
         {
-            throw new IOException("Can not execute " + command + " - is the '" + command +
+            throw new MLTL2LTLfException("Can not execute " + command + " - is the '" + command +
                     "' executable in your PATH?");
         }
         if (!error.isEmpty())
@@ -39,7 +38,6 @@ public class MLTL2LTLf
                 errorMessage = "Other error - " + errorMessage;
             throw new ParseException("MLTL2LTL error: " + errorMessage);
         }
-
         return ltlfFormula;
     }
 }

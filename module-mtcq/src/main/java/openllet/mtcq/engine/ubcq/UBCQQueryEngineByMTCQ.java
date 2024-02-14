@@ -6,23 +6,21 @@ import openllet.mtcq.engine.MTCQEngine;
 import openllet.mtcq.model.kb.InMemoryTemporalKnowledgeBaseImpl;
 import openllet.mtcq.model.kb.TemporalKnowledgeBase;
 import openllet.mtcq.model.query.*;
+import openllet.mtcq.parser.MTCQBuilder;
+import openllet.mtcq.parser.MetricTemporalConjunctiveQueryParser;
 import openllet.query.sparqldl.model.bcq.BCQQuery;
 import openllet.query.sparqldl.model.cq.ConjunctiveQuery;
 import openllet.query.sparqldl.model.cq.QueryAtom;
 import openllet.query.sparqldl.model.results.QueryResult;
 import openllet.query.sparqldl.model.ubcq.UBCQQuery;
 
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class UBCQQueryEngineByMTCQ extends AbstractUBCQQueryEngine
 {
     @Override
     protected QueryResult execABoxQuery(UBCQQuery q, QueryResult excludeBindings, QueryResult restrictToBindings)
-            throws IOException, InterruptedException
     {
         if (q.getQueries().isEmpty())
             System.out.println("Got empty UBCQ. No optimization required.");
@@ -100,7 +98,8 @@ public class UBCQQueryEngineByMTCQ extends AbstractUBCQQueryEngine
         }
          **/
 
-        QueryResult res = new MTCQEngine().exec(new MTCQFormula(tkb, true));
+        MTCQFormula mtcq = MetricTemporalConjunctiveQueryParser.parse(mtcqString.toString(), tkb, q.isDistinct());
+        QueryResult res = new MTCQEngine().exec(mtcq);
         res.explicate();
 
         System.out.println("Result = " + res);

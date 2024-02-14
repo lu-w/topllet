@@ -11,9 +11,7 @@ import openllet.mtcq.model.automaton.DFA;
 import openllet.mtcq.model.automaton.Edge;
 import openllet.mtcq.model.query.MetricTemporalConjunctiveQuery;
 import openllet.core.utils.Timer;
-import openllet.mtcq.parser.ParseException;
 
-import java.io.IOException;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -33,27 +31,19 @@ public class BooleanMTCQEngine extends AbstractBooleanQueryEngine<MetricTemporal
     private final QueryExec<BCQQuery> _bcqQueryEngine = new BCQQueryEngineSimple();
 
     @Override
-    protected boolean execBooleanABoxQuery(MetricTemporalConjunctiveQuery q) throws IOException, InterruptedException
+    protected boolean execBooleanABoxQuery(MetricTemporalConjunctiveQuery q)
     {
         _logger.fine("Starting entailment check for MTCQ " + q);
         String negMtcqProp = q.toNegatedPropositionalAbstractionString();
         _logger.finer("Checking DFA satisfiability for negated and propositionally abstracted MTCQ " + negMtcqProp);
-        try
-        {
-            DFA automaton = MLTL2DFA.convert(negMtcqProp);
-            boolean dfaSatisfiable = _checkDFASatisfiability(automaton, q);
-            _logger.finer("DFA check returned " + (dfaSatisfiable ? "satisfiable" : "unsatisfiable") +
-                    ", therefore MTCQ is " + (dfaSatisfiable ? "not entailed" : "entailed"));
-            return !dfaSatisfiable;
-        }
-        catch (ParseException e)
-        {
-            throw new IOException(e.getMessage());
-        }
+        DFA automaton = MLTL2DFA.convert(negMtcqProp);
+        boolean dfaSatisfiable = _checkDFASatisfiability(automaton, q);
+        _logger.finer("DFA check returned " + (dfaSatisfiable ? "satisfiable" : "unsatisfiable") +
+                ", therefore MTCQ is " + (dfaSatisfiable ? "not entailed" : "entailed"));
+        return !dfaSatisfiable;
     }
 
-    private boolean _checkDFASatisfiability(DFA dfa, MetricTemporalConjunctiveQuery mtcq) throws IOException,
-            InterruptedException
+    private boolean _checkDFASatisfiability(DFA dfa, MetricTemporalConjunctiveQuery mtcq)
     {
         Timer bcqTimer = new Timer();
         Integer initState = dfa.getInitialState();

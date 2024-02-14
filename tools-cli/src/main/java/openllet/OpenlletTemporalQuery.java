@@ -239,7 +239,7 @@ public class OpenlletTemporalQuery extends OpenlletCmdApp
         {
             queryResults = queryEngine.exec(query, null, timer);
         }
-        catch (RuntimeException | IOException | InterruptedException e)
+        catch (RuntimeException e)
         {
             throw new OpenlletCmdException(e);
         }
