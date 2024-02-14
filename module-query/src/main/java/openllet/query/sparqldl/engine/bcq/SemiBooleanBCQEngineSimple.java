@@ -13,7 +13,6 @@ import openllet.query.sparqldl.model.results.*;
 import openllet.query.sparqldl.model.ucq.UnionQuery;
 import openllet.query.sparqldl.model.ucq.UnionQueryImpl;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -36,7 +35,6 @@ public class SemiBooleanBCQEngineSimple extends AbstractSemiBooleanBCQEngine
 
     @Override
     protected QueryResult execABoxQuery(BCQQuery q, QueryResult excludeBindings, QueryResult restrictToBindings)
-            throws IOException, InterruptedException
     {
         QueryResult satResult = new QueryResultImpl(q);
 
@@ -120,7 +118,6 @@ public class SemiBooleanBCQEngineSimple extends AbstractSemiBooleanBCQEngine
 
     private QueryResult computeSatisfiableBindings(BCQQuery query, QueryResult excludeBindings,
                                                    QueryResult restrictToBindings)
-            throws IOException, InterruptedException
     {
         QueryResult res = new QueryResultImpl(query);
         if (_abox.isConsistent())

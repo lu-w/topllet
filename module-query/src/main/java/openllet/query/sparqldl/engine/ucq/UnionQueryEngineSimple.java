@@ -14,7 +14,6 @@ import openllet.query.sparqldl.model.results.ResultBinding;
 import openllet.query.sparqldl.model.ucq.CNFQuery;
 import openllet.query.sparqldl.model.ucq.UnionQuery;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
@@ -51,7 +50,6 @@ public class UnionQueryEngineSimple extends AbstractUnionQueryEngine
 
     @Override
     protected QueryResult execABoxQuery(UnionQuery q, QueryResult excludeBindings, QueryResult restrictToBindings)
-            throws IOException, InterruptedException
     {
         if (q.getQueries().size() == 0)
             return new QueryResultImpl(q);
@@ -76,7 +74,6 @@ public class UnionQueryEngineSimple extends AbstractUnionQueryEngine
 
     protected QueryResult execABoxQueryBindingBeforeCNF(UnionQuery q, QueryResult excludeBindings,
                                                         QueryResult restrictToBindings)
-            throws IOException, InterruptedException
     {
         // Note: we can not split the query here due to semantics. Queries can only be split after conversion to CNF.
         QueryResult result = new QueryResultImpl(q);
@@ -103,7 +100,6 @@ public class UnionQueryEngineSimple extends AbstractUnionQueryEngine
 
     protected QueryResult execABoxQueryBindingAfterCNF(UnionQuery q, QueryResult excludeBindings,
                                                        QueryResult restrictToBindings)
-            throws IOException, InterruptedException
     {
         // 1. ROLL-UP UCQ
         UnionQuery rolledUpUnionQuery = q.rollUp(true);

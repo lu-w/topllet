@@ -19,5 +19,5 @@ abstract public class AbstractBooleanUnionQueryEngine extends AbstractBooleanQue
      * @param q The CNF query to execute
      * @return True iff. the Boolean CNF query is entailed in its knowledge base
      */
-    abstract protected boolean execBooleanABoxQuery(CNFQuery q, ABox abox) throws IOException, InterruptedException;
+    abstract protected boolean execBooleanABoxQuery(CNFQuery q, ABox abox);
 }

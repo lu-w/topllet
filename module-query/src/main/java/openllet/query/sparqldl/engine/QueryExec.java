@@ -27,9 +27,9 @@ public interface QueryExec<QueryType extends Query<QueryType>>
      * size 0) if it is not entailed. In case an entailed Boolean query is given, it returns a QueryResult of size 1
      * containing a single, empty ResultBinding.
      */
-    QueryResult exec(QueryType query) throws IOException, InterruptedException;
+    QueryResult exec(QueryType query);
 
-    QueryResult exec(QueryType q, ABox abox) throws IOException, InterruptedException;
+    QueryResult exec(QueryType q, ABox abox);
 
-    QueryResult exec(QueryType q, ABox abox, Timer timer) throws IOException, InterruptedException;
+    QueryResult exec(QueryType q, ABox abox, Timer timer);
 }

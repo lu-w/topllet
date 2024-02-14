@@ -37,7 +37,7 @@ public class BooleanUnionQueryEngineSimple extends AbstractBooleanUnionQueryEngi
     public static final Logger _logger = Log.getLogger(BooleanUnionQueryEngineSimple.class);
 
     @Override
-    protected boolean execBooleanABoxQuery(CNFQuery q, ABox abox) throws IOException, InterruptedException
+    protected boolean execBooleanABoxQuery(CNFQuery q, ABox abox)
     {
         _abox = abox;
 
@@ -69,7 +69,7 @@ public class BooleanUnionQueryEngineSimple extends AbstractBooleanUnionQueryEngi
     }
 
     @Override
-    protected boolean execBooleanABoxQuery(UnionQuery q) throws IOException, InterruptedException
+    protected boolean execBooleanABoxQuery(UnionQuery q)
     {
         // 1. TRY TO USE STANDARD CQ ENGINE
         if (OpenlletOptions.UCQ_ENGINE_USE_STANDARD_CQ_ENGINE_IF_POSSIBLE && q.getQueries().size() == 1)
@@ -216,7 +216,7 @@ public class BooleanUnionQueryEngineSimple extends AbstractBooleanUnionQueryEngi
      * @param q The query to check
      * @return True only if the query is entailed
      */
-    private boolean execUnderapproximatingSemanticsBoolean(UnionQuery q) throws IOException, InterruptedException
+    private boolean execUnderapproximatingSemanticsBoolean(UnionQuery q)
     {
         return !execUnderapproximatingSemantics(q).isEmpty();
     }
@@ -227,7 +227,7 @@ public class BooleanUnionQueryEngineSimple extends AbstractBooleanUnionQueryEngi
      * @param q The query to check
      * @return The answers for all its disjuncts
      */
-    private QueryResult execUnderapproximatingSemantics(UnionQuery q) throws IOException, InterruptedException
+    private QueryResult execUnderapproximatingSemantics(UnionQuery q)
     {
         QueryResult result = new QueryResultImpl(q);
         UnionQuery qCopy = q.copy();

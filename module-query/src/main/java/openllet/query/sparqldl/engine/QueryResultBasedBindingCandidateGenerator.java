@@ -25,7 +25,7 @@ public class QueryResultBasedBindingCandidateGenerator extends QueryBindingCandi
         {
             _excludeBindings = bindings;
             // If we exclude something non-empty, then we need to copy _restrictToBindings to avoid side effects.
-            if (_restrictToBindings != null && _excludeBindings.size() > 0)
+            if (_restrictToBindings != null && !_excludeBindings.isEmpty())
                 _restrictToBindings = _restrictToBindings.copy();
         }
     }
@@ -35,7 +35,7 @@ public class QueryResultBasedBindingCandidateGenerator extends QueryBindingCandi
     {
         if (bindings != null)
         {
-            if (_excludeBindings != null && _excludeBindings.size() > 0)
+            if (_excludeBindings != null && !_excludeBindings.isEmpty())
                 _restrictToBindings = bindings.copy();
             else
                 _restrictToBindings = bindings;

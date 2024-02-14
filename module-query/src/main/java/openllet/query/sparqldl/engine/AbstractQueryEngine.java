@@ -8,7 +8,6 @@ import openllet.query.sparqldl.model.results.QueryResultImpl;
 import openllet.query.sparqldl.model.results.ResultBindingImpl;
 import openllet.shared.tools.Log;
 
-import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -38,13 +37,13 @@ public abstract class AbstractQueryEngine<QueryType extends Query<QueryType>> im
     }
 
     @Override
-    public QueryResult exec(QueryType query) throws IOException, InterruptedException
+    public QueryResult exec(QueryType query)
     {
         return exec(query, (QueryResult) null, null);
     }
 
     @Override
-    public QueryResult exec(QueryType q, ABox abox, Timer timer) throws IOException, InterruptedException
+    public QueryResult exec(QueryType q, ABox abox, Timer timer)
     {
         _timer = timer;
         timer.start();
@@ -54,14 +53,13 @@ public abstract class AbstractQueryEngine<QueryType extends Query<QueryType>> im
     }
 
     @Override
-    public QueryResult exec(QueryType q, ABox abox) throws IOException, InterruptedException
+    public QueryResult exec(QueryType q, ABox abox)
     {
         _abox = abox;
         return exec(q);
     }
 
     public QueryResult exec(QueryType q, QueryResult excludeBindings, QueryResult restrictToBindings)
-            throws IOException, InterruptedException
     {
         if (_abox == null)
             _abox = q.getKB().getABox();
@@ -108,12 +106,11 @@ public abstract class AbstractQueryEngine<QueryType extends Query<QueryType>> im
         return results;
     }
 
-    protected QueryResult execABoxQuery(QueryType q) throws IOException, InterruptedException
+    protected QueryResult execABoxQuery(QueryType q)
     {
         return execABoxQuery(q, null, null);
     }
 
     protected abstract QueryResult execABoxQuery(QueryType q, QueryResult excludeBindings,
-                                                 QueryResult restrictToBindings)
-            throws IOException, InterruptedException;
+                                                 QueryResult restrictToBindings);
 }

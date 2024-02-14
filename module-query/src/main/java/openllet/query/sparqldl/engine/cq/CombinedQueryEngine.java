@@ -12,7 +12,6 @@ import static openllet.core.utils.TermFactory.hasValue;
 import static openllet.core.utils.TermFactory.inv;
 import static openllet.core.utils.TermFactory.not;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -232,13 +231,13 @@ public class CombinedQueryEngine implements QueryExec<ConjunctiveQuery>
 	}
 
 	@Override
-	public QueryResult exec(ConjunctiveQuery q, ABox abox) throws IOException, InterruptedException
+	public QueryResult exec(ConjunctiveQuery q, ABox abox)
 	{
 		return exec(q);
 	}
 
 	@Override
-	public QueryResult exec(ConjunctiveQuery q, ABox abox, Timer timer) throws IOException, InterruptedException
+	public QueryResult exec(ConjunctiveQuery q, ABox abox, Timer timer)
 	{
 		timer.start();
 		QueryResult result = exec(q, abox);
@@ -250,7 +249,7 @@ public class CombinedQueryEngine implements QueryExec<ConjunctiveQuery>
 	 * {@inheritDoc}
 	 */
 	@Override
-	public QueryResult exec(final ConjunctiveQuery q) throws IOException, InterruptedException
+	public QueryResult exec(final ConjunctiveQuery q)
 	{
 		if (!supports(q))
 			throw new UnsupportedOperationException("Unsupported query " + q);
@@ -271,7 +270,7 @@ public class CombinedQueryEngine implements QueryExec<ConjunctiveQuery>
 
 	private long branches;
 
-	private void exec(final ResultBinding bindingParam) throws IOException, InterruptedException
+	private void exec(final ResultBinding bindingParam)
 	{
 		ResultBinding binding = bindingParam;
 
@@ -323,7 +322,7 @@ public class CombinedQueryEngine implements QueryExec<ConjunctiveQuery>
 		_plan.back();
 	}
 
-	private void exec(final QueryAtom current, final ResultBinding binding) throws IOException, InterruptedException
+	private void exec(final QueryAtom current, final ResultBinding binding)
 	{
 		final List<ATermAppl> arguments = current.getArguments();
 
@@ -1103,7 +1102,7 @@ public class CombinedQueryEngine implements QueryExec<ConjunctiveQuery>
 				for (final ATermAppl var : newQuery.getUndistVars())
 					newQuery.addDistVar(var, VarType.INDIVIDUAL);
 
-				final QueryExec newEngine = new CombinedQueryEngine();
+				final QueryExec<ConjunctiveQuery> newEngine = new CombinedQueryEngine();
 
 				final boolean isNegationTrue = newEngine.exec(newQuery).isEmpty();
 
@@ -1126,7 +1125,7 @@ public class CombinedQueryEngine implements QueryExec<ConjunctiveQuery>
 						newQuery.addResultVar(var);
 					}
 
-					final QueryExec newEngine = new CombinedQueryEngine();
+					final QueryExec<ConjunctiveQuery> newEngine = new CombinedQueryEngine();
 
 					final QueryResult newResult = newEngine.exec(newQuery);
 					for (final ResultBinding newBinding : newResult)
@@ -1162,7 +1161,7 @@ public class CombinedQueryEngine implements QueryExec<ConjunctiveQuery>
 
 	private final boolean STOP_ROLLING_ON_CONSTANTS = false;
 
-	private void execSimpleCore(final ConjunctiveQuery q, final ResultBinding binding, final Collection<ATermAppl> distVars) throws IOException, InterruptedException
+	private void execSimpleCore(final ConjunctiveQuery q, final ResultBinding binding, final Collection<ATermAppl> distVars)
 	{
 		final Map<ATermAppl, Set<ATermAppl>> varBindings = new HashMap<>();
 
@@ -1224,7 +1223,7 @@ public class CombinedQueryEngine implements QueryExec<ConjunctiveQuery>
 		return map;
 	}
 
-	private void execAllFastCore(final ConjunctiveQuery q, final ResultBinding binding, final Collection<ATermAppl> distVars, final Collection<ATermAppl> undistVars) throws IOException, InterruptedException
+	private void execAllFastCore(final ConjunctiveQuery q, final ResultBinding binding, final Collection<ATermAppl> distVars, final Collection<ATermAppl> undistVars)
 	{
 		if (distVars.isEmpty())
 			exec(binding);
@@ -1251,7 +1250,7 @@ public class CombinedQueryEngine implements QueryExec<ConjunctiveQuery>
 		}
 	}
 
-	private void downMonotonic(final Taxonomy<ATermAppl> taxonomy, final Collection<ATermAppl> all, final boolean lhsDM, final ATermAppl lhs, final ATermAppl rhs, final ResultBinding binding, final boolean direct, final boolean strict) throws IOException, InterruptedException
+	private void downMonotonic(final Taxonomy<ATermAppl> taxonomy, final Collection<ATermAppl> all, final boolean lhsDM, final ATermAppl lhs, final ATermAppl rhs, final ResultBinding binding, final boolean direct, final boolean strict)
 	{
 		final ATermAppl downMonotonic = lhsDM ? lhs : rhs;
 		final ATermAppl theOther = lhsDM ? rhs : lhs;
@@ -1308,7 +1307,7 @@ public class CombinedQueryEngine implements QueryExec<ConjunctiveQuery>
 		return OpenlletOptions.OPTIMIZE_DOWN_MONOTONIC && _downMonotonic.contains(scLHS);
 	}
 
-	private void runNext(final ResultBinding binding, final List<ATermAppl> arguments, final ATermAppl... values) throws IOException, InterruptedException
+	private void runNext(final ResultBinding binding, final List<ATermAppl> arguments, final ATermAppl... values)
 	{
 
 		final ResultBinding candidateBinding = binding.duplicate();
@@ -1348,7 +1347,7 @@ public class CombinedQueryEngine implements QueryExec<ConjunctiveQuery>
 		return candidates;
 	}
 
-	private void runRecursively(final Taxonomy<ATermAppl> t, final ATermAppl downMonotonic, final ATermAppl rootCandidate, final ResultBinding binding, final Set<ATermAppl> toDo, final boolean direct, final boolean strict) throws IOException, InterruptedException
+	private void runRecursively(final Taxonomy<ATermAppl> t, final ATermAppl downMonotonic, final ATermAppl rootCandidate, final ResultBinding binding, final Set<ATermAppl> toDo, final boolean direct, final boolean strict)
 	{
 		final int size = _result.size();
 
@@ -1381,7 +1380,7 @@ public class CombinedQueryEngine implements QueryExec<ConjunctiveQuery>
 		}
 	}
 
-	private void runSymetricCheck(@SuppressWarnings("unused") final QueryAtom current, final ATermAppl cA, final ATermAppl known, final ATermAppl cB, final ATermAppl dependent, final ResultBinding binding) throws IOException, InterruptedException
+	private void runSymetricCheck(@SuppressWarnings("unused") final QueryAtom current, final ATermAppl cA, final ATermAppl known, final ATermAppl cB, final ATermAppl dependent, final ResultBinding binding)
 	{
 		final ResultBinding candidateBinding = binding.duplicate();
 
@@ -1399,7 +1398,7 @@ public class CombinedQueryEngine implements QueryExec<ConjunctiveQuery>
 		exec(candidateBinding);
 	}
 
-	private void runAllPropertyChecks(@SuppressWarnings("unused") final QueryAtom current, final ATermAppl var, final Set<ATermAppl> candidates, final ResultBinding binding) throws IOException, InterruptedException
+	private void runAllPropertyChecks(@SuppressWarnings("unused") final QueryAtom current, final ATermAppl var, final Set<ATermAppl> candidates, final ResultBinding binding)
 	{
 		if (isDownMonotonic(var))
 			for (final TaxonomyNode<ATermAppl> topNode : _kb.getRoleTaxonomy(true).getTop().getSubs())
