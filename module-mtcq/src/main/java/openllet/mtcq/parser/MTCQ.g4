@@ -60,7 +60,7 @@ eventually                     : F_TERMINAL | FI_TERMINAL interval;
 globally                       : G_TERMINAL | GI_TERMINAL interval;
 
 // conjunctive query
-term              : (URI | NAME ':')? NAME;
+term              : (URI | (NAME)? ':')? NAME;
 subject           : '?' NAME | term;
 role_atom         : term '(' subject ',' subject ')';
 concept_atom      : term '(' subject ')';
@@ -87,6 +87,6 @@ mtcq_formula : conjunctive_query					#ConjunctiveQueryFormula
                 ;
 
 // SPARQL-like prefix
-prefix : 'PREFIX' NAME ':' '<' URI '>';
+prefix : 'PREFIX' (NAME)? ':' '<' URI '>';
 
 start: (prefix)* (mtcq_formula)? ;

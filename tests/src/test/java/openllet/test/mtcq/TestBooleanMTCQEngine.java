@@ -48,7 +48,7 @@ public class TestBooleanMTCQEngine extends AbstractMTCQTest
         assertQueryEntailed("X[!](A(a))");
         assertQueryNotEntailed("X[!]X[!](A(a))");
         assertQueryEntailed("X(A(a))");
-        assertQueryEntailed("XX(A(a))");
+        assertQueryEntailed("X(X(A(a)))");
     }
 
     @Test

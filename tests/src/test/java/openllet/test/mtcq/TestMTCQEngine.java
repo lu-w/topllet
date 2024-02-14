@@ -134,7 +134,7 @@ public class TestMTCQEngine extends AbstractMTCQTest
         testQuery("X[!](A(?x))",  new ATermAppl[][] { { _a } });
         testQuery("X[!]X[!](A(a))");
         testQuery("X(A(?x))",  new ATermAppl[][] { { _a } });
-        testQuery("XX(A(?x))",  new ATermAppl[][] { { _a }, { _b }, { _c } });
+        testQuery("X(X(A(?x)))",  new ATermAppl[][] { { _a }, { _b }, { _c } });
     }
 
     @Test

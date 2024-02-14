@@ -363,7 +363,10 @@ public class MTCQBuilder extends AbstractParseTreeVisitor<MTCQFormula> implement
     @Override
     public MTCQFormula visitPrefix(MTCQParser.PrefixContext ctx)
     {
-        _prefixes.put(ctx.NAME().getText(), ctx.URI().getText());
+        if (ctx.NAME() != null)
+            _prefixes.put(ctx.NAME().getText(), ctx.URI().getText());
+        else
+            _prefixes.put("", ctx.URI().getText());
         return null;
     }
 
@@ -417,7 +420,7 @@ public class MTCQBuilder extends AbstractParseTreeVisitor<MTCQFormula> implement
         String replaced = orig;
         for (String prefix : _prefixes.keySet())
         {
-            if (replaced.startsWith(prefix))
+            if (replaced.startsWith(prefix + _PREFIX_CHARACTER))
             {
                 replaced = replaced.replace(prefix + _PREFIX_CHARACTER, _prefixes.get(prefix));
                 break;
