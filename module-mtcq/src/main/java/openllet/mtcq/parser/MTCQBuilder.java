@@ -450,8 +450,8 @@ public class MTCQBuilder extends AbstractParseTreeVisitor<MTCQFormula> implement
                 cq.addDistVar(ind, Query.VarType.INDIVIDUAL);
             }
             else if (cq.getResultVars().contains(ind))
-                throw new UnsupportedOperationException("Undistinguished variable " + indString +
-                        " is also present as a result " + "variable in " + cq);
+                throw new ParseException("Undistinguished variable " + indString + " is also present as a result " +
+                        "variable in " + cq);
         }
         else if (isResultVar)
             throw new ParseException("Individual " + indString + " can not be used as a result variable in " + cq);

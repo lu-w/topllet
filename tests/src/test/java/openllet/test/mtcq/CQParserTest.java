@@ -85,7 +85,7 @@ public class CQParserTest extends AbstractMTCQTest
     @Test
     public void testWrongTokenInCQ()
     {
-        assertThrows(ParseException.class, () -> uncheckedTemporalQuery("(C(a) ^ C(b))"));
+        assertThrows(ParseException.class, () -> uncheckedTemporalQuery("(C(a) / C(b))"));
     }
 
     @Test
