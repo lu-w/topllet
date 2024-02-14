@@ -21,13 +21,13 @@ import java.util.Map;
 /**
  * TODO:
  * - implement toString method in CQ data class (after finishing toConjunctiveQuery)
+ * - implement get prop abs in MTCQ formula (based on toString and a propfactory passed along the chain)
  */
 
 public class MTCQBuilder extends AbstractParseTreeVisitor<MTCQFormula> implements MTCQVisitor<MTCQFormula>
 {
     private final TemporalKnowledgeBase _tkb;
     private final boolean _isDistinct;
-    private final PropositionFactory _propositionFactory = new PropositionFactory();
     private final Map<String, String> _prefixes = new HashMap<>();
 
     public MTCQBuilder(TemporalKnowledgeBase tkb, boolean isDistinct)
@@ -41,13 +41,12 @@ public class MTCQBuilder extends AbstractParseTreeVisitor<MTCQFormula> implement
         final ConjunctiveQuery cq = new ConjunctiveQueryImpl(_tkb.get(0), _isDistinct);
         for (MTCQParser.AtomContext parsedAtom : ctx.atom())
         {
-            // TODO replace prefixes
             QueryAtom qAtom;
             if (parsedAtom.concept_atom() != null)
             {
                 // Concept atom
-                String cls = parsedAtom.concept_atom().term().getText();
-                String indString = parsedAtom.concept_atom().subject().getText();
+                String cls = replacePrefix(parsedAtom.concept_atom().term().getText());
+                String indString = replacePrefix(parsedAtom.concept_atom().subject().getText());
                 ensureValidURI(cls, indString);
                 ATermAppl clsATerm = ATermUtils.makeTermAppl(cls);
                 ensureValidClass(clsATerm, cq);
@@ -57,9 +56,9 @@ public class MTCQBuilder extends AbstractParseTreeVisitor<MTCQFormula> implement
             else
             {
                 // Role atom
-                String role = parsedAtom.role_atom().term().getText();
-                String indString0 = parsedAtom.role_atom().subject(0).getText();
-                String indString1 = parsedAtom.role_atom().subject(1).getText();
+                String role = replacePrefix(parsedAtom.role_atom().term().getText());
+                String indString0 = replacePrefix(parsedAtom.role_atom().subject(0).getText());
+                String indString1 = replacePrefix(parsedAtom.role_atom().subject(1).getText());
                 ensureValidURI(role, indString0, indString1);
                 ATermAppl roleATerm = ATermUtils.makeTermAppl(role);
                 ensureValidRole(roleATerm, cq);
@@ -69,9 +68,6 @@ public class MTCQBuilder extends AbstractParseTreeVisitor<MTCQFormula> implement
             }
             cq.add(qAtom);
         }
-        // TODO global prop abs dict? or do not create prop abs here at all (waste of time?)
-        _propositionFactory.create(cq);
-        // TODO add CQ to overall MTCQ as subquery??? where?
         return cq;
     }
 
@@ -387,7 +383,7 @@ public class MTCQBuilder extends AbstractParseTreeVisitor<MTCQFormula> implement
         }
         else
         {
-            return new LogicalTrueFormula(_tkb, _isDistinct);  // TODO check (empty query always true?)
+            return new EmptyFormula(_tkb, _isDistinct);
         }
     }
 
@@ -417,6 +413,18 @@ public class MTCQBuilder extends AbstractParseTreeVisitor<MTCQFormula> implement
             bounds = new Pair<>(0, Integer.parseInt(vals.TIME_POINT().getText()) - 1);
         }
         return bounds;
+    }
+
+    private String replacePrefix(String orig)
+    {
+        String replaced = orig;
+        for (String prefix : _prefixes.keySet())
+        {
+            if (replaced.startsWith(prefix))
+                replaced = replaced.replace(prefix, _prefixes.get(prefix));
+            break;
+        }
+        return replaced;
     }
 
     /**
