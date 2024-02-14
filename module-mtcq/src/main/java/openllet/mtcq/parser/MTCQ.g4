@@ -57,7 +57,7 @@ weak_next                      : X_TERMINAL;
 next                           : XB_TERMINAL;
 until                          : U_TERMINAL | UI_TERMINAL interval;
 eventually                     : F_TERMINAL | FI_TERMINAL interval;
-always                         : G_TERMINAL | GI_TERMINAL interval;
+globally                       : G_TERMINAL | GI_TERMINAL interval;
 
 // conjunctive query
 term              : (URI | NAME ':')? NAME;
@@ -68,21 +68,21 @@ atom              : role_atom | concept_atom;
 conjunctive_query : atom (and atom)*;
 
 // formula 
-mtcq_formula : conjunctive_query			#ConjunctiveQueryFormula
-                | prop_booleans				#PropositionalBooleanFormula
-                | logic_booleans			#LogicBooleanFormula
-                | trace_position			#TracePositionFormula
-                | '(' mtcq_formula ')'			#BracketFormula
+mtcq_formula : conjunctive_query					#ConjunctiveQueryFormula
+                | prop_booleans						#PropositionalBooleanFormula
+                | logic_booleans					#LogicBooleanFormula
+                | trace_position					#TracePositionFormula
+                | '(' mtcq_formula ')'				#BracketFormula
                 | mtcq_formula and mtcq_formula		#AndFormula
                 | mtcq_formula or mtcq_formula 		#OrFormula
                 | mtcq_formula impl mtcq_formula	#ImplFormula
                 | mtcq_formula equiv mtcq_formula	#EquivFormula
                 | mtcq_formula xor mtcq_formula 	#XorFormula
-                | not mtcq_formula			#NotFormula
-                | eventually mtcq_formula		#EventuallyFormula
-                | always mtcq_formula			#AlwaysFormula
-                | weak_next mtcq_formula		#WeakNextFormula
-                | next mtcq_formula			#NextFormula
+                | not mtcq_formula					#NotFormula
+                | eventually mtcq_formula			#EventuallyFormula
+                | globally mtcq_formula				#GloballyFormula
+                | weak_next mtcq_formula			#WeakNextFormula
+                | next mtcq_formula					#NextFormula
                 | mtcq_formula until mtcq_formula	#UntilFormula
                 ;
 

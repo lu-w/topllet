@@ -223,13 +223,13 @@ public class MTCQBaseListener implements MTCQListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterAlways(MTCQParser.AlwaysContext ctx) { }
+	@Override public void enterGlobally(MTCQParser.GloballyContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitAlways(MTCQParser.AlwaysContext ctx) { }
+	@Override public void exitGlobally(MTCQParser.GloballyContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -379,18 +379,6 @@ public class MTCQBaseListener implements MTCQListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterAlwaysFormula(MTCQParser.AlwaysFormulaContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitAlwaysFormula(MTCQParser.AlwaysFormulaContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
 	@Override public void enterWeakNextFormula(MTCQParser.WeakNextFormulaContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -446,6 +434,18 @@ public class MTCQBaseListener implements MTCQListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitNextFormula(MTCQParser.NextFormulaContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterGloballyFormula(MTCQParser.GloballyFormulaContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitGloballyFormula(MTCQParser.GloballyFormulaContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *

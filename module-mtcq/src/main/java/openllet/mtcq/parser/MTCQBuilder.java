@@ -1,12 +1,20 @@
 package openllet.mtcq.parser;
 
+import openllet.aterm.ATermAppl;
+import openllet.core.utils.ATermUtils;
+import openllet.core.utils.Pair;
 import openllet.mtcq.model.kb.TemporalKnowledgeBase;
-import openllet.mtcq.model.query.LogicalTrueFormula;
-import openllet.mtcq.model.query.MTCQFormula;
-import openllet.mtcq.model.query.StrongNextFormula;
-import openllet.mtcq.model.query.PropositionFactory;
+import openllet.mtcq.model.query.*;
+import openllet.query.sparqldl.model.Query;
+import openllet.query.sparqldl.model.cq.ConjunctiveQuery;
+import openllet.query.sparqldl.model.cq.ConjunctiveQueryImpl;
+import openllet.query.sparqldl.model.cq.QueryAtom;
+import openllet.query.sparqldl.model.cq.QueryAtomFactory;
+import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.*;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -35,244 +43,169 @@ public class MTCQBuilder extends AbstractParseTreeVisitor<MTCQFormula> implement
         _isDistinct = isDistinct;
     }
 
-    @Override
-    public MTCQFormula visitTrace_position(MTCQParser.Trace_positionContext ctx)
+    public ConjunctiveQuery toConjunctiveQuery(MTCQParser.Conjunctive_queryContext ctx)
     {
-        return null;
-    }
-
-    @Override
-    public MTCQFormula visitProp_booleans(MTCQParser.Prop_booleansContext ctx)
-    {
-        return null;
-    }
-
-    @Override
-    public MTCQFormula visitLogic_booleans(MTCQParser.Logic_booleansContext ctx)
-    {
-        return null;
-    }
-
-    @Override
-    public MTCQFormula visitNot(MTCQParser.NotContext ctx)
-    {
-        return null;
-    }
-
-    @Override
-    public MTCQFormula visitAnd(MTCQParser.AndContext ctx)
-    {
-        return null;
-    }
-
-    @Override
-    public MTCQFormula visitOr(MTCQParser.OrContext ctx)
-    {
-        return null;
-    }
-
-    @Override
-    public MTCQFormula visitImpl(MTCQParser.ImplContext ctx)
-    {
-        return null;
-    }
-
-    @Override
-    public MTCQFormula visitEquiv(MTCQParser.EquivContext ctx)
-    {
-        return null;
-    }
-
-    @Override
-    public MTCQFormula visitXor(MTCQParser.XorContext ctx)
-    {
-        return null;
-    }
-
-    @Override
-    public MTCQFormula visitFull_interval(MTCQParser.Full_intervalContext ctx)
-    {
-        return null;
-    }
-
-    @Override
-    public MTCQFormula visitUpper_including_bound_interval(MTCQParser.Upper_including_bound_intervalContext ctx)
-    {
-        return null;
-    }
-
-    @Override
-    public MTCQFormula visitUpper_excluding_bound_interval(MTCQParser.Upper_excluding_bound_intervalContext ctx)
-    {
-        return null;
-    }
-
-    @Override
-    public MTCQFormula visitInterval(MTCQParser.IntervalContext ctx)
-    {
-        return null;
-    }
-
-    @Override
-    public MTCQFormula visitWeak_next(MTCQParser.Weak_nextContext ctx)
-    {
-        return null;
-    }
-
-    @Override
-    public MTCQFormula visitNext(MTCQParser.NextContext ctx)
-    {
-        return null;
-    }
-
-    @Override
-    public MTCQFormula visitUntil(MTCQParser.UntilContext ctx)
-    {
-        return null;
-    }
-
-    @Override
-    public MTCQFormula visitEventually(MTCQParser.EventuallyContext ctx)
-    {
-        return null;
-    }
-
-    @Override
-    public MTCQFormula visitAlways(MTCQParser.AlwaysContext ctx)
-    {
-        return null;
-    }
-
-    @Override
-    public MTCQFormula visitTerm(MTCQParser.TermContext ctx)
-    {
-        return null;
-    }
-
-    @Override
-    public MTCQFormula visitSubject(MTCQParser.SubjectContext ctx)
-    {
-        return null;
-    }
-
-    @Override
-    public MTCQFormula visitRole_atom(MTCQParser.Role_atomContext ctx)
-    {
-        return null;
-    }
-
-    @Override
-    public MTCQFormula visitConcept_atom(MTCQParser.Concept_atomContext ctx)
-    {
-        return null;
-    }
-
-    @Override
-    public MTCQFormula visitAtom(MTCQParser.AtomContext ctx)
-    {
-        return null;
-    }
-
-    @Override
-    public MTCQFormula visitConjunctive_query(MTCQParser.Conjunctive_queryContext ctx)
-    {
-        return null;
+        final ConjunctiveQuery cq = new ConjunctiveQueryImpl(_tkb.get(0), _isDistinct);
+        for (MTCQParser.AtomContext parsedAtom : ctx.atom())
+        {
+            // TODO replace prefixes
+            QueryAtom qAtom;
+            if (parsedAtom.concept_atom() != null)
+            {
+                // Concept atom
+                String cls = parsedAtom.concept_atom().term().getText();
+                String indString = parsedAtom.concept_atom().subject().getText();
+                ensureValidURI(cls, indString);
+                ATermAppl clsATerm = ATermUtils.makeTermAppl(cls);
+                ensureValidClass(clsATerm, cq);
+                ATermAppl ind = toIndividual(indString, cq);
+                qAtom = QueryAtomFactory.TypeAtom(ind, clsATerm);
+            }
+            else
+            {
+                // Role atom
+                String role = parsedAtom.role_atom().term().getText();
+                String indString0 = parsedAtom.role_atom().subject(0).getText();
+                String indString1 = parsedAtom.role_atom().subject(1).getText();
+                ensureValidURI(role, indString0, indString1);
+                ATermAppl roleATerm = ATermUtils.makeTermAppl(role);
+                ensureValidRole(roleATerm, cq);
+                ATermAppl ind1 = toIndividual(indString0, cq);
+                ATermAppl ind2 = toIndividual(indString1, cq);
+                qAtom = QueryAtomFactory.PropertyValueAtom(ind1, roleATerm, ind2);
+            }
+            cq.add(qAtom);
+        }
+        // TODO global prop abs dict? or do not create prop abs here at all (waste of time?)
+        _propositionFactory.create(cq);
+        // TODO add CQ to overall MTCQ as subquery??? where?
+        return cq;
     }
 
     @Override
     public MTCQFormula visitTracePositionFormula(MTCQParser.TracePositionFormulaContext ctx)
     {
-        return null;
+        if (ctx.trace_position().END_TERMINAL() != null)
+            return new EndFormula(_tkb, _isDistinct);
+        else
+            return new LastFormula(_tkb, _isDistinct);
     }
 
     @Override
     public MTCQFormula visitLogicBooleanFormula(MTCQParser.LogicBooleanFormulaContext ctx)
     {
-        return null;
+        if (ctx.logic_booleans().FF_TERMINAL() != null)
+            return new LogicalFalseFormula(_tkb, _isDistinct);
+        else
+            return new LogicalTrueFormula(_tkb, _isDistinct);
     }
 
     @Override
     public MTCQFormula visitXorFormula(MTCQParser.XorFormulaContext ctx)
     {
-        return null;
+        return new XorFormula(_tkb, _isDistinct, visit(ctx.mtcq_formula(0)), visit(ctx.mtcq_formula(1)));
     }
 
     @Override
     public MTCQFormula visitImplFormula(MTCQParser.ImplFormulaContext ctx)
     {
-        return null;
+        return new ImplFormula(_tkb, _isDistinct, visit(ctx.mtcq_formula(0)), visit(ctx.mtcq_formula(1)));
     }
 
     @Override
     public MTCQFormula visitPropositionalBooleanFormula(MTCQParser.PropositionalBooleanFormulaContext ctx)
     {
-        return null;
+        if (ctx.prop_booleans().FALSE_TERMINAL() != null)
+            return new PropositionalFalseFormula(_tkb, _isDistinct);
+        else
+            return new PropositionalTrueFormula(_tkb, _isDistinct);
     }
 
     @Override
     public MTCQFormula visitBracketFormula(MTCQParser.BracketFormulaContext ctx)
     {
-        return null;
+        return visit(ctx.mtcq_formula());
     }
 
     @Override
-    public MTCQFormula visitAlwaysFormula(MTCQParser.AlwaysFormulaContext ctx)
+    public MTCQFormula visitGloballyFormula(MTCQParser.GloballyFormulaContext ctx)
     {
-        return null;
+        if (isBounded(ctx))
+        {
+            Pair<Integer, Integer> bounds = getBounds(ctx);
+            return new BoundedGloballyFormula(_tkb, _isDistinct, visit(ctx.mtcq_formula()), bounds.first,
+                    bounds.second);
+        }
+        else
+            return new GloballyFormula(_tkb, _isDistinct, visit(ctx.mtcq_formula()));
     }
 
     @Override
     public MTCQFormula visitWeakNextFormula(MTCQParser.WeakNextFormulaContext ctx)
     {
-        return null;
+        return new WeakNextFormula(_tkb, _isDistinct, visit(ctx.mtcq_formula()));
     }
 
     @Override
     public MTCQFormula visitEventuallyFormula(MTCQParser.EventuallyFormulaContext ctx)
     {
-        return null;
+        if (isBounded(ctx))
+        {
+            Pair<Integer, Integer> bounds = getBounds(ctx);
+            return new BoundedEventuallyFormula(_tkb, _isDistinct, visit(ctx.mtcq_formula()), bounds.first,
+                    bounds.second);
+        }
+        else
+            return new EventuallyFormula(_tkb, _isDistinct, visit(ctx.mtcq_formula()));
     }
 
     @Override
     public MTCQFormula visitEquivFormula(MTCQParser.EquivFormulaContext ctx)
     {
-        return null;
+        return new EquivFormula(_tkb, _isDistinct, visit(ctx.mtcq_formula(0)), visit(ctx.mtcq_formula(1)));
     }
 
     @Override
     public MTCQFormula visitConjunctiveQueryFormula(MTCQParser.ConjunctiveQueryFormulaContext ctx)
     {
-        return null;
+        return new ConjunctiveQueryFormula(_tkb, _isDistinct, toConjunctiveQuery(ctx.conjunctive_query()));
     }
 
     @Override
     public MTCQFormula visitNextFormula(MTCQParser.NextFormulaContext ctx)
     {
-        return null;
+        return new StrongNextFormula(_tkb, _isDistinct, visit(ctx.mtcq_formula()));
     }
 
     @Override
     public MTCQFormula visitAndFormula(MTCQParser.AndFormulaContext ctx)
     {
-        return null;
+        return new AndFormula(_tkb, _isDistinct, visit(ctx.mtcq_formula(0)), visit(ctx.mtcq_formula(1)));
     }
 
     @Override
     public MTCQFormula visitUntilFormula(MTCQParser.UntilFormulaContext ctx)
     {
-        return null;
+        if (isBounded(ctx))
+        {
+            Pair<Integer, Integer> bounds = getBounds(ctx);
+            return new BoundedUntilFormula(_tkb, _isDistinct, visit(ctx.mtcq_formula(0)),
+                    visit(ctx.mtcq_formula(1)), bounds.first, bounds.second);
+        }
+        else
+            return new UntilFormula(_tkb, _isDistinct, visit(ctx.mtcq_formula(0)), visit(ctx.mtcq_formula(1)));
     }
 
     @Override
     public MTCQFormula visitNotFormula(MTCQParser.NotFormulaContext ctx)
     {
-        return null;
+        return new NotFormula(_tkb, _isDistinct, visit(ctx.mtcq_formula()));
     }
 
     @Override
     public MTCQFormula visitOrFormula(MTCQParser.OrFormulaContext ctx)
     {
-        return null;
+        return new OrFormula(_tkb, _isDistinct, visit(ctx.mtcq_formula(0)), visit(ctx.mtcq_formula(1)));
     }
 
     @Override
@@ -287,13 +220,99 @@ public class MTCQBuilder extends AbstractParseTreeVisitor<MTCQFormula> implement
     {
         if (ctx.getChildCount() > 0)
         {
-            for (int i = 0; i < ctx.getChildCount() - 1; i++)
-                visit(ctx.getChild(i));
-            return visit(ctx.getChild(ctx.getChildCount() - 1));
+            for (MTCQParser.PrefixContext prefix : ctx.prefix())
+                visit(prefix);
+            return visit(ctx.mtcq_formula());
         }
         else
         {
             return new LogicalTrueFormula(_tkb, _isDistinct);  // TODO check (empty query always true?)
         }
+    }
+
+    private boolean isBounded(ParserRuleContext ctx)
+    {
+        return ctx.getChildCount() > 0 && ctx.getChild(0).getChildCount() > 1 &&
+                ctx.getChild(0).getChild(1) instanceof MTCQParser.IntervalContext;
+    }
+
+    // Assumes isBounded() has been verified before.
+    private Pair<Integer, Integer> getBounds(ParserRuleContext ctx)
+    {
+        Pair<Integer, Integer> bounds = new Pair<>(0,0);
+        MTCQParser.IntervalContext interval = (MTCQParser.IntervalContext) ctx.getChild(0).getChild(1);
+        if (interval.getChild(0) instanceof MTCQParser.Full_intervalContext vals)
+        {
+            bounds = new Pair<>(Integer.parseInt(vals.TIME_POINT(0).getText()),
+                    Integer.parseInt(vals.TIME_POINT(1).getText())
+            );
+        }
+        else if (interval.getChild(0) instanceof MTCQParser.Upper_including_bound_intervalContext vals)
+        {
+            bounds = new Pair<>(0, Integer.parseInt(vals.TIME_POINT().getText()));
+        }
+        else if (interval.getChild(0) instanceof MTCQParser.Upper_excluding_bound_intervalContext vals)
+        {
+            bounds = new Pair<>(0, Integer.parseInt(vals.TIME_POINT().getText()) - 1);
+        }
+        return bounds;
+    }
+
+    /**
+     * Helper method to convert a string to either an individual, an answer variable, or an undistinguished variable.
+     * Adds the appropriate result to the given CQ.
+     * @param indString String representing the name of the given variable / individual.
+     * @param cq The CQ to add the variable / individual to.
+     * @return The ATermAppl representing the variable / individual.
+     * @throws ParseException If conflicting information on variables / individuals is present in the CQ.
+     */
+    static private ATermAppl toIndividual(String indString, ConjunctiveQuery cq)
+    {
+        indString = indString.trim();
+        boolean isResultVar = indString.startsWith("?");
+        if (isResultVar)
+            indString = indString.substring(1);
+        ATermAppl ind = ATermUtils.makeTermAppl(indString);
+        if (!cq.getKB().isIndividual(ATermUtils.makeTermAppl(indString)))
+        {
+            ind = ATermUtils.makeVar(indString);
+            if (isResultVar)
+            {
+                cq.addResultVar(ind);
+                cq.addDistVar(ind, Query.VarType.INDIVIDUAL);
+            }
+            else if (cq.getResultVars().contains(ind))
+                throw new UnsupportedOperationException("Undistinguished variable " + indString +
+                        " is also present as a result " + "variable in " + cq);
+        }
+        else if (isResultVar)
+            throw new ParseException("Individual " + indString + " can not be used as a result variable in " + cq);
+        return ind;
+    }
+
+    static private void ensureValidClass(ATermAppl cls, ConjunctiveQuery cq) throws ParseException
+    {
+        if (!cq.getKB().getClasses().contains(cls))
+            throw new ParseException("Class " + cls + " not in knowledge base");
+    }
+
+    static private void ensureValidRole(ATermAppl role, ConjunctiveQuery cq) throws ParseException
+    {
+        if (!cq.getKB().getProperties().contains(role))
+            throw new ParseException("Role " + role + " not in knowledge base");
+    }
+
+    static private void ensureValidURI(String... uris) throws ParseException
+    {
+        for (String uri : uris)
+            try
+            {
+                new URI(uri);
+            }
+            catch (URISyntaxException e)
+            {
+                if (!uri.isEmpty() && !uri.matches("[a-zA-Z0-9_-]"))
+                    throw new ParseException("Invalid URI: " + uri);
+            }
     }
 }

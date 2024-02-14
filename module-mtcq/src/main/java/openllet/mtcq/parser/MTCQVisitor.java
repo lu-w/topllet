@@ -115,11 +115,11 @@ public interface MTCQVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitEventually(MTCQParser.EventuallyContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link MTCQParser#always}.
+	 * Visit a parse tree produced by {@link MTCQParser#globally}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitAlways(MTCQParser.AlwaysContext ctx);
+	T visitGlobally(MTCQParser.GloballyContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link MTCQParser#term}.
 	 * @param ctx the parse tree
@@ -199,13 +199,6 @@ public interface MTCQVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitBracketFormula(MTCQParser.BracketFormulaContext ctx);
 	/**
-	 * Visit a parse tree produced by the {@code AlwaysFormula}
-	 * labeled alternative in {@link MTCQParser#mtcq_formula}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitAlwaysFormula(MTCQParser.AlwaysFormulaContext ctx);
-	/**
 	 * Visit a parse tree produced by the {@code WeakNextFormula}
 	 * labeled alternative in {@link MTCQParser#mtcq_formula}.
 	 * @param ctx the parse tree
@@ -240,6 +233,13 @@ public interface MTCQVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitNextFormula(MTCQParser.NextFormulaContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code GloballyFormula}
+	 * labeled alternative in {@link MTCQParser#mtcq_formula}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitGloballyFormula(MTCQParser.GloballyFormulaContext ctx);
 	/**
 	 * Visit a parse tree produced by the {@code AndFormula}
 	 * labeled alternative in {@link MTCQParser#mtcq_formula}.

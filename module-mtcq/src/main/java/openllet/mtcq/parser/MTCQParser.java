@@ -32,7 +32,7 @@ public class MTCQParser extends Parser {
 		RULE_not = 3, RULE_and = 4, RULE_or = 5, RULE_impl = 6, RULE_equiv = 7, 
 		RULE_xor = 8, RULE_full_interval = 9, RULE_upper_including_bound_interval = 10, 
 		RULE_upper_excluding_bound_interval = 11, RULE_interval = 12, RULE_weak_next = 13, 
-		RULE_next = 14, RULE_until = 15, RULE_eventually = 16, RULE_always = 17, 
+		RULE_next = 14, RULE_until = 15, RULE_eventually = 16, RULE_globally = 17, 
 		RULE_term = 18, RULE_subject = 19, RULE_role_atom = 20, RULE_concept_atom = 21, 
 		RULE_atom = 22, RULE_conjunctive_query = 23, RULE_mtcq_formula = 24, RULE_prefix = 25, 
 		RULE_start = 26;
@@ -41,7 +41,7 @@ public class MTCQParser extends Parser {
 			"trace_position", "prop_booleans", "logic_booleans", "not", "and", "or", 
 			"impl", "equiv", "xor", "full_interval", "upper_including_bound_interval", 
 			"upper_excluding_bound_interval", "interval", "weak_next", "next", "until", 
-			"eventually", "always", "term", "subject", "role_atom", "concept_atom", 
+			"eventually", "globally", "term", "subject", "role_atom", "concept_atom", 
 			"atom", "conjunctive_query", "mtcq_formula", "prefix", "start"
 		};
 	}
@@ -1019,34 +1019,34 @@ public class MTCQParser extends Parser {
 	}
 
 	@SuppressWarnings("CheckReturnValue")
-	public static class AlwaysContext extends ParserRuleContext {
+	public static class GloballyContext extends ParserRuleContext {
 		public TerminalNode G_TERMINAL() { return getToken(MTCQParser.G_TERMINAL, 0); }
 		public TerminalNode GI_TERMINAL() { return getToken(MTCQParser.GI_TERMINAL, 0); }
 		public IntervalContext interval() {
 			return getRuleContext(IntervalContext.class,0);
 		}
-		public AlwaysContext(ParserRuleContext parent, int invokingState) {
+		public GloballyContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
-		@Override public int getRuleIndex() { return RULE_always; }
+		@Override public int getRuleIndex() { return RULE_globally; }
 		@Override
 		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof MTCQListener ) ((MTCQListener)listener).enterAlways(this);
+			if ( listener instanceof MTCQListener ) ((MTCQListener)listener).enterGlobally(this);
 		}
 		@Override
 		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof MTCQListener ) ((MTCQListener)listener).exitAlways(this);
+			if ( listener instanceof MTCQListener ) ((MTCQListener)listener).exitGlobally(this);
 		}
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof MTCQVisitor ) return ((MTCQVisitor<? extends T>)visitor).visitAlways(this);
+			if ( visitor instanceof MTCQVisitor ) return ((MTCQVisitor<? extends T>)visitor).visitGlobally(this);
 			else return visitor.visitChildren(this);
 		}
 	}
 
-	public final AlwaysContext always() throws RecognitionException {
-		AlwaysContext _localctx = new AlwaysContext(_ctx, getState());
-		enterRule(_localctx, 34, RULE_always);
+	public final GloballyContext globally() throws RecognitionException {
+		GloballyContext _localctx = new GloballyContext(_ctx, getState());
+		enterRule(_localctx, 34, RULE_globally);
 		try {
 			setState(106);
 			_errHandler.sync(this);
@@ -1605,29 +1605,6 @@ public class MTCQParser extends Parser {
 		}
 	}
 	@SuppressWarnings("CheckReturnValue")
-	public static class AlwaysFormulaContext extends Mtcq_formulaContext {
-		public AlwaysContext always() {
-			return getRuleContext(AlwaysContext.class,0);
-		}
-		public Mtcq_formulaContext mtcq_formula() {
-			return getRuleContext(Mtcq_formulaContext.class,0);
-		}
-		public AlwaysFormulaContext(Mtcq_formulaContext ctx) { copyFrom(ctx); }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof MTCQListener ) ((MTCQListener)listener).enterAlwaysFormula(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof MTCQListener ) ((MTCQListener)listener).exitAlwaysFormula(this);
-		}
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof MTCQVisitor ) return ((MTCQVisitor<? extends T>)visitor).visitAlwaysFormula(this);
-			else return visitor.visitChildren(this);
-		}
-	}
-	@SuppressWarnings("CheckReturnValue")
 	public static class WeakNextFormulaContext extends Mtcq_formulaContext {
 		public Weak_nextContext weak_next() {
 			return getRuleContext(Weak_nextContext.class,0);
@@ -1739,6 +1716,29 @@ public class MTCQParser extends Parser {
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof MTCQVisitor ) return ((MTCQVisitor<? extends T>)visitor).visitNextFormula(this);
+			else return visitor.visitChildren(this);
+		}
+	}
+	@SuppressWarnings("CheckReturnValue")
+	public static class GloballyFormulaContext extends Mtcq_formulaContext {
+		public GloballyContext globally() {
+			return getRuleContext(GloballyContext.class,0);
+		}
+		public Mtcq_formulaContext mtcq_formula() {
+			return getRuleContext(Mtcq_formulaContext.class,0);
+		}
+		public GloballyFormulaContext(Mtcq_formulaContext ctx) { copyFrom(ctx); }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof MTCQListener ) ((MTCQListener)listener).enterGloballyFormula(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof MTCQListener ) ((MTCQListener)listener).exitGloballyFormula(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof MTCQVisitor ) return ((MTCQVisitor<? extends T>)visitor).visitGloballyFormula(this);
 			else return visitor.visitChildren(this);
 		}
 	}
@@ -1943,11 +1943,11 @@ public class MTCQParser extends Parser {
 			case GI_TERMINAL:
 			case G_TERMINAL:
 				{
-				_localctx = new AlwaysFormulaContext(_localctx);
+				_localctx = new GloballyFormulaContext(_localctx);
 				_ctx = _localctx;
 				_prevctx = _localctx;
 				setState(160);
-				always();
+				globally();
 				setState(161);
 				mtcq_formula(4);
 				}

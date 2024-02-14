@@ -139,7 +139,7 @@ public class MTCQBaseVisitor<T> extends AbstractParseTreeVisitor<T> implements M
 	 * <p>The default implementation returns the result of calling
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
-	@Override public T visitAlways(MTCQParser.AlwaysContext ctx) { return visitChildren(ctx); }
+	@Override public T visitGlobally(MTCQParser.GloballyContext ctx) { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -230,13 +230,6 @@ public class MTCQBaseVisitor<T> extends AbstractParseTreeVisitor<T> implements M
 	 * <p>The default implementation returns the result of calling
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
-	@Override public T visitAlwaysFormula(MTCQParser.AlwaysFormulaContext ctx) { return visitChildren(ctx); }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation returns the result of calling
-	 * {@link #visitChildren} on {@code ctx}.</p>
-	 */
 	@Override public T visitWeakNextFormula(MTCQParser.WeakNextFormulaContext ctx) { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}
@@ -266,6 +259,13 @@ public class MTCQBaseVisitor<T> extends AbstractParseTreeVisitor<T> implements M
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
 	@Override public T visitNextFormula(MTCQParser.NextFormulaContext ctx) { return visitChildren(ctx); }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation returns the result of calling
+	 * {@link #visitChildren} on {@code ctx}.</p>
+	 */
+	@Override public T visitGloballyFormula(MTCQParser.GloballyFormulaContext ctx) { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}
 	 *

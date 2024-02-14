@@ -180,15 +180,15 @@ public interface MTCQListener extends ParseTreeListener {
 	 */
 	void exitEventually(MTCQParser.EventuallyContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link MTCQParser#always}.
+	 * Enter a parse tree produced by {@link MTCQParser#globally}.
 	 * @param ctx the parse tree
 	 */
-	void enterAlways(MTCQParser.AlwaysContext ctx);
+	void enterGlobally(MTCQParser.GloballyContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link MTCQParser#always}.
+	 * Exit a parse tree produced by {@link MTCQParser#globally}.
 	 * @param ctx the parse tree
 	 */
-	void exitAlways(MTCQParser.AlwaysContext ctx);
+	void exitGlobally(MTCQParser.GloballyContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link MTCQParser#term}.
 	 * @param ctx the parse tree
@@ -322,18 +322,6 @@ public interface MTCQListener extends ParseTreeListener {
 	 */
 	void exitBracketFormula(MTCQParser.BracketFormulaContext ctx);
 	/**
-	 * Enter a parse tree produced by the {@code AlwaysFormula}
-	 * labeled alternative in {@link MTCQParser#mtcq_formula}.
-	 * @param ctx the parse tree
-	 */
-	void enterAlwaysFormula(MTCQParser.AlwaysFormulaContext ctx);
-	/**
-	 * Exit a parse tree produced by the {@code AlwaysFormula}
-	 * labeled alternative in {@link MTCQParser#mtcq_formula}.
-	 * @param ctx the parse tree
-	 */
-	void exitAlwaysFormula(MTCQParser.AlwaysFormulaContext ctx);
-	/**
 	 * Enter a parse tree produced by the {@code WeakNextFormula}
 	 * labeled alternative in {@link MTCQParser#mtcq_formula}.
 	 * @param ctx the parse tree
@@ -393,6 +381,18 @@ public interface MTCQListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitNextFormula(MTCQParser.NextFormulaContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code GloballyFormula}
+	 * labeled alternative in {@link MTCQParser#mtcq_formula}.
+	 * @param ctx the parse tree
+	 */
+	void enterGloballyFormula(MTCQParser.GloballyFormulaContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code GloballyFormula}
+	 * labeled alternative in {@link MTCQParser#mtcq_formula}.
+	 * @param ctx the parse tree
+	 */
+	void exitGloballyFormula(MTCQParser.GloballyFormulaContext ctx);
 	/**
 	 * Enter a parse tree produced by the {@code AndFormula}
 	 * labeled alternative in {@link MTCQParser#mtcq_formula}.
