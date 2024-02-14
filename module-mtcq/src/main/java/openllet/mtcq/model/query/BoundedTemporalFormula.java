@@ -34,6 +34,6 @@ public abstract class BoundedTemporalFormula extends TemporalFormula
 
     protected String intervalToString()
     {
-        return "[" + Integer.toString(_lowerBound) + "," + Integer.toString(_upperBound) + "]";
+        return "[" + _lowerBound + "," + _upperBound + "]";
     }
 }

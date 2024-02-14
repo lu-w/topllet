@@ -2,7 +2,7 @@ package openllet.mtcq.model.query;
 
 import openllet.mtcq.model.kb.TemporalKnowledgeBase;
 
-public class BoundedUnaryTemporalFormula extends BoundedTemporalFormula
+public abstract class BoundedUnaryTemporalFormula extends BoundedTemporalFormula
 {
     private final MTCQFormula _subFormula;
 

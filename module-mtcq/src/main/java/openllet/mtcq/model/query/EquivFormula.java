@@ -8,4 +8,11 @@ public class EquivFormula extends BinaryBooleanFormula
     {
         super(temporalKb, isDistinct, left, right);
     }
+
+    @Override
+    protected String toString(PropositionFactory propositions)
+    {
+        return "(" + getLeftSubFormula().toString(propositions) + " <-> " + getRightSubFormula().toString(propositions)
+                + ")";
+    }
 }

@@ -18,12 +18,6 @@ import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * TODO:
- * - implement toString method in CQ data class (after finishing toConjunctiveQuery)
- * - implement get prop abs in MTCQ formula (based on toString and a propfactory passed along the chain)
- */
-
 public class MTCQBuilder extends AbstractParseTreeVisitor<MTCQFormula> implements MTCQVisitor<MTCQFormula>
 {
     private final TemporalKnowledgeBase _tkb;

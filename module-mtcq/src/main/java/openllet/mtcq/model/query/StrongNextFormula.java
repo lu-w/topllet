@@ -10,8 +10,8 @@ public class StrongNextFormula extends UnaryTemporalFormula
     }
 
     @Override
-    public String toString()
+    public String toString(PropositionFactory propositions)
     {
-        return "X[!] (" + getSubFormula() + ")";
+        return "X[!] (" + getSubFormula().toString(propositions) + ")";
     }
 }

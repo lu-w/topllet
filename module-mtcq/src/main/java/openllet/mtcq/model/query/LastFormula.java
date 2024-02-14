@@ -10,7 +10,7 @@ public class LastFormula extends NullaryMTCQFormula
     }
 
     @Override
-    public String toString()
+    public String toString(PropositionFactory propositions)
     {
         return "last";
     }

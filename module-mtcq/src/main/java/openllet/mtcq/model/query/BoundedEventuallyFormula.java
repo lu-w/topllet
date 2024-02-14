@@ -11,8 +11,8 @@ public class BoundedEventuallyFormula extends BoundedUnaryTemporalFormula
     }
 
     @Override
-    public String toString()
+    public String toString(PropositionFactory propositions)
     {
-        return "F_" + intervalToString() + " (" + getSubFormula() + ")";
+        return "F_" + intervalToString() + " (" + getSubFormula().toString(propositions) + ")";
     }
 }

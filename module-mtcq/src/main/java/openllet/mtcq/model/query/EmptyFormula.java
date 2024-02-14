@@ -14,4 +14,10 @@ public class EmptyFormula extends MTCQFormula
     {
         return false;
     }
+
+    @Override
+    protected String toString(PropositionFactory propositions)
+    {
+        return "";
+    }
 }

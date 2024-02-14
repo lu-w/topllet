@@ -1,8 +1,10 @@
 package openllet.mtcq.model.query;
 
+import openllet.aterm.ATermAppl;
 import openllet.mtcq.model.kb.TemporalKnowledgeBase;
 import openllet.query.sparqldl.model.cq.ConjunctiveQuery;
 import openllet.query.sparqldl.model.cq.QueryAtom;
+import openllet.query.sparqldl.model.cq.QueryPredicate;
 
 public class ConjunctiveQueryFormula extends MTCQFormula
 {
@@ -27,14 +29,47 @@ public class ConjunctiveQueryFormula extends MTCQFormula
     }
 
     @Override
-    public String toString()
+    public String toString(PropositionFactory propositions)
     {
-        String cqString = "";
-        for (QueryAtom atom : _cq.getAtoms())
+        if (propositions == null)
         {
-            // TODO
-
+            StringBuilder cqString = new StringBuilder();
+            for (int i = 0; i < _cq.getAtoms().size(); i++)
+            {
+                QueryAtom atom = _cq.getAtoms().get(i);
+                QueryPredicate pred = atom.getPredicate();
+                if (pred == QueryPredicate.Type)
+                {
+                    cqString.append(atom.getArguments().get(1)).
+                            append("(").
+                            append(prefix(atom.getArguments().get(0))).
+                            append(")");
+                }
+                else if (pred == QueryPredicate.PropertyValue || pred == QueryPredicate.DatatypeProperty)
+                {
+                    cqString.append(atom.getArguments().get(1)).
+                            append("(").
+                            append(prefix(atom.getArguments().get(0))).
+                            append(",").
+                            append(prefix(atom.getArguments().get(2))).
+                            append(")");
+                }
+                else
+                    _logger.warning("Encountered unsupported query atom for textual representation: " + atom);
+                if (i < _cq.getAtoms().size() - 1)
+                    cqString.append(" & ");
+            }
+            return cqString.toString();
         }
-        return cqString;
+        else
+            return propositions.create(_cq).toString();
+    }
+
+    private String prefix(ATermAppl var)
+    {
+        if (_cq.getResultVars().contains(var))
+            return "?" + var.toString();
+        else
+            return var.toString();
     }
 }

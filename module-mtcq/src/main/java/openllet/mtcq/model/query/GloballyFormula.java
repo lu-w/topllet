@@ -8,4 +8,10 @@ public class GloballyFormula extends UnaryTemporalFormula
     {
         super(temporalKb, isDistinct, subFormula);
     }
+
+    @Override
+    protected String toString(PropositionFactory propositions)
+    {
+        return "G (" + getSubFormula().toString(propositions) + ")";
+    }
 }

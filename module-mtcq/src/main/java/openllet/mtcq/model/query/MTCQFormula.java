@@ -19,6 +19,7 @@ public abstract class MTCQFormula extends AbstractCompositeQuery<ConjunctiveQuer
     public static final Logger _logger = Log.getLogger(MTCQFormula.class);
 
     private final TemporalKnowledgeBase _temporalKb;
+    private PropositionFactory _propositions = null;
 
     public MTCQFormula(TemporalKnowledgeBase temporalKb, boolean isDistinct)
     {
@@ -34,14 +35,18 @@ public abstract class MTCQFormula extends AbstractCompositeQuery<ConjunctiveQuer
     @Override
     public Map<Proposition, ConjunctiveQuery> getPropositionalAbstraction()
     {
-        // TODO
-        return null;
+        if (_propositions != null)
+            return _propositions.getCreatedPropositions();
+        else
+            return new HashMap<>();
     }
 
     @Override
     public String toPropositionalAbstractionString()
     {
-        return toString(getPropositionalAbstraction());
+        if (_propositions == null)
+            _propositions = new PropositionFactory();
+        return toString(_propositions);
     }
 
     @Override
@@ -79,11 +84,8 @@ public abstract class MTCQFormula extends AbstractCompositeQuery<ConjunctiveQuer
     @Override
     public String toString()
     {
-        return toString(new HashMap<>());
+        return toString(null);
     }
 
-    protected String toString(Map<Proposition, ConjunctiveQuery> replaceCQsWithPropositions)
-    {
-        return "";
-    }
+    protected abstract String toString(PropositionFactory propositions);
 }

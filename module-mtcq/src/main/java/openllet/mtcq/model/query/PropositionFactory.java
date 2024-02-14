@@ -39,4 +39,12 @@ public class PropositionFactory
             return prop;
         }
     }
+
+    public Map<Proposition, ConjunctiveQuery> getCreatedPropositions()
+    {
+        Map<Proposition, ConjunctiveQuery> created = new HashMap<>();
+        for (ConjunctiveQuery cq : _alreadyCreated.keySet())
+            created.put(_alreadyCreated.get(cq), cq);
+        return created;
+    }
 }

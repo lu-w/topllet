@@ -8,4 +8,10 @@ public class EventuallyFormula extends UnaryTemporalFormula
     {
         super(temporalKb, isDistinct, subFormula);
     }
+
+    @Override
+    protected String toString(PropositionFactory propositions)
+    {
+        return "F (" + getSubFormula().toString(propositions) + ")";
+    }
 }

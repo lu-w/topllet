@@ -10,8 +10,9 @@ public class OrFormula extends BinaryBooleanFormula
     }
 
     @Override
-    public String toString()
+    public String toString(PropositionFactory propositions)
     {
-        return "(" + getLeftSubFormula() + " | " + getRightSubFormula() + ")";
+        return "(" + getLeftSubFormula().toString(propositions) + " | " + getRightSubFormula().toString(propositions) +
+                ")";
     }
 }

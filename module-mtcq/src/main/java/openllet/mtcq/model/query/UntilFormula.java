@@ -11,8 +11,9 @@ public class UntilFormula extends BinaryTemporalFormula
     }
 
     @Override
-    public String toString()
+    public String toString(PropositionFactory propositions)
     {
-        return "(" + getLeftSubFormula() + " U " + getRightSubFormula() + ")";
+        return "(" + getLeftSubFormula().toString(propositions) + " U " + getRightSubFormula().toString(propositions) +
+                ")";
     }
 }

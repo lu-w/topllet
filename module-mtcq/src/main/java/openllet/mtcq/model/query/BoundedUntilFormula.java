@@ -11,8 +11,9 @@ public class BoundedUntilFormula extends BoundedBinaryTemporalFormula
     }
 
     @Override
-    public String toString()
+    public String toString(PropositionFactory propositions)
     {
-        return "(" + getLeftSubFormula() + "U_" + intervalToString() + getRightSubFormula() + ")";
+        return "(" + getLeftSubFormula().toString(propositions) + " U_" + intervalToString() + " " +
+                getRightSubFormula().toString(propositions) + ")";
     }
 }
