@@ -76,7 +76,6 @@ public class MLTL2DFA
         }
 
         _logger.fine("Lydia DFA is located at " + tmpFile);
-        System.out.println("DFA file: " + tmpFile);
 
         // AutomataLib assumes a certain shape for DFAs that Lydia/Mona does not adhere to. Some fixes are required.
         Pattern r1 = Pattern.compile("([0-9]+) -> ([0-9]+)");

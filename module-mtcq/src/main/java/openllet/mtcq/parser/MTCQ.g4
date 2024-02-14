@@ -89,4 +89,4 @@ mtcq_formula : conjunctive_query					#ConjunctiveQueryFormula
 // SPARQL-like prefix
 prefix : 'PREFIX' NAME ':' '<' URI '>';
 
-start: (prefix)* mtcq_formula;
+start: (prefix)* (mtcq_formula)? ;

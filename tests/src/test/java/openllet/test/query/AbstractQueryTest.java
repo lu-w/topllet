@@ -228,8 +228,7 @@ public abstract class AbstractQueryTest extends AbstractKBTests
 		else if (query instanceof BCQQuery)
 			result = new BCQQueryEngineSimple().exec((BCQQuery) query);
 		else if (query instanceof MetricTemporalConjunctiveQuery)
-			// TODO just for testing here.
-			result = new MTCQEngineOptimized().exec((MetricTemporalConjunctiveQuery) query);
+			result = new MTCQEngine().exec((MetricTemporalConjunctiveQuery) query);
 		else
 			fail("Unknown query type " + query.getClass());
 		if (result == null)
