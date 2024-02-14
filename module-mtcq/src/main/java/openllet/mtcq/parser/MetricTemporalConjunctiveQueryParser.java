@@ -3,8 +3,10 @@ package openllet.mtcq.parser;
 import openllet.mtcq.model.query.MTCQFormula;
 import openllet.shared.tools.Log;
 import openllet.mtcq.model.kb.TemporalKnowledgeBase;
+import org.antlr.v4.runtime.BailErrorStrategy;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
+import org.antlr.v4.runtime.misc.ParseCancellationException;
 import org.antlr.v4.runtime.tree.ParseTree;
 
 import java.util.logging.Logger;
@@ -40,8 +42,16 @@ public class MetricTemporalConjunctiveQueryParser
     {
         MTCQLexer lexer = new MTCQLexer(CharStreams.fromString(input));
         MTCQParser parser = new MTCQParser(new CommonTokenStream(lexer));
-        ParseTree tree = parser.start();
-        MTCQBuilder builder = new MTCQBuilder(tkb, isDistinct);
-        return builder.visit(tree);
+        parser.setErrorHandler(new BailErrorStrategy());
+        try
+        {
+            ParseTree tree = parser.start();
+            MTCQBuilder builder = new MTCQBuilder(tkb, isDistinct);
+            return builder.visit(tree);
+        }
+        catch (ParseCancellationException e)
+        {
+            throw new ParseException(e.getMessage());
+        }
     }
 }
