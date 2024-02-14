@@ -23,6 +23,7 @@ public class MTCQBuilder extends AbstractParseTreeVisitor<MTCQFormula> implement
     private final TemporalKnowledgeBase _tkb;
     private final boolean _isDistinct;
     private final Map<String, String> _prefixes = new HashMap<>();
+    private final char _PREFIX_CHARACTER = ':';
 
     public MTCQBuilder(TemporalKnowledgeBase tkb, boolean isDistinct)
     {
@@ -281,9 +282,9 @@ public class MTCQBuilder extends AbstractParseTreeVisitor<MTCQFormula> implement
     @Override
     public MTCQFormula visitGloballyFormula(MTCQParser.GloballyFormulaContext ctx)
     {
-        if (isBounded(ctx))
+        if (isBounded(ctx, true))
         {
-            Pair<Integer, Integer> bounds = getBounds(ctx);
+            Pair<Integer, Integer> bounds = getBounds(ctx, true);
             return new BoundedGloballyFormula(_tkb, _isDistinct, visit(ctx.mtcq_formula()), bounds.first,
                     bounds.second);
         }
@@ -300,9 +301,9 @@ public class MTCQBuilder extends AbstractParseTreeVisitor<MTCQFormula> implement
     @Override
     public MTCQFormula visitEventuallyFormula(MTCQParser.EventuallyFormulaContext ctx)
     {
-        if (isBounded(ctx))
+        if (isBounded(ctx, true))
         {
-            Pair<Integer, Integer> bounds = getBounds(ctx);
+            Pair<Integer, Integer> bounds = getBounds(ctx, true);
             return new BoundedEventuallyFormula(_tkb, _isDistinct, visit(ctx.mtcq_formula()), bounds.first,
                     bounds.second);
         }
@@ -337,9 +338,9 @@ public class MTCQBuilder extends AbstractParseTreeVisitor<MTCQFormula> implement
     @Override
     public MTCQFormula visitUntilFormula(MTCQParser.UntilFormulaContext ctx)
     {
-        if (isBounded(ctx))
+        if (isBounded(ctx, false))
         {
-            Pair<Integer, Integer> bounds = getBounds(ctx);
+            Pair<Integer, Integer> bounds = getBounds(ctx, false);
             return new BoundedUntilFormula(_tkb, _isDistinct, visit(ctx.mtcq_formula(0)),
                     visit(ctx.mtcq_formula(1)), bounds.first, bounds.second);
         }
@@ -362,7 +363,7 @@ public class MTCQBuilder extends AbstractParseTreeVisitor<MTCQFormula> implement
     @Override
     public MTCQFormula visitPrefix(MTCQParser.PrefixContext ctx)
     {
-        _prefixes.put(ctx.getChild(1).getText(), ctx.getChild(4).getText());
+        _prefixes.put(ctx.NAME().getText(), ctx.URI().getText());
         return null;
     }
 
@@ -381,17 +382,19 @@ public class MTCQBuilder extends AbstractParseTreeVisitor<MTCQFormula> implement
         }
     }
 
-    private boolean isBounded(ParserRuleContext ctx)
+    private boolean isBounded(ParserRuleContext ctx, boolean isUnary)
     {
-        return ctx.getChildCount() > 0 && ctx.getChild(0).getChildCount() > 1 &&
-                ctx.getChild(0).getChild(1) instanceof MTCQParser.IntervalContext;
+        int operatorIndex = isUnary ? 0 : 1;
+        return ctx.getChildCount() > 0 && ctx.getChild(operatorIndex).getChildCount() > 1 &&
+                ctx.getChild(operatorIndex).getChild(1) instanceof MTCQParser.IntervalContext;
     }
 
     // Assumes isBounded() has been verified before.
-    private Pair<Integer, Integer> getBounds(ParserRuleContext ctx)
+    private Pair<Integer, Integer> getBounds(ParserRuleContext ctx, boolean isUnary)
     {
         Pair<Integer, Integer> bounds = new Pair<>(0,0);
-        MTCQParser.IntervalContext interval = (MTCQParser.IntervalContext) ctx.getChild(0).getChild(1);
+        int operatorIndex = isUnary ? 0 : 1;
+        MTCQParser.IntervalContext interval = (MTCQParser.IntervalContext) ctx.getChild(operatorIndex).getChild(1);
         if (interval.getChild(0) instanceof MTCQParser.Full_intervalContext vals)
         {
             bounds = new Pair<>(Integer.parseInt(vals.TIME_POINT(0).getText()),
@@ -415,8 +418,10 @@ public class MTCQBuilder extends AbstractParseTreeVisitor<MTCQFormula> implement
         for (String prefix : _prefixes.keySet())
         {
             if (replaced.startsWith(prefix))
-                replaced = replaced.replace(prefix, _prefixes.get(prefix));
-            break;
+            {
+                replaced = replaced.replace(prefix + _PREFIX_CHARACTER, _prefixes.get(prefix));
+                break;
+            }
         }
         return replaced;
     }

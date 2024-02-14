@@ -1,6 +1,7 @@
 package openllet.mtcq.model.query;
 
 import openllet.mtcq.model.kb.TemporalKnowledgeBase;
+import openllet.query.sparqldl.model.cq.ConjunctiveQuery;
 
 public abstract class BoundedBinaryTemporalFormula extends BoundedTemporalFormula
 {
@@ -14,6 +15,12 @@ public abstract class BoundedBinaryTemporalFormula extends BoundedTemporalFormul
         super(temporalKb, isDistinct, lowerBound, upperBound);
         _leftSubFormula = leftSubFormula;
         _rightSubFormula = rightSubFormula;
+        for (ConjunctiveQuery cq : leftSubFormula.getQueries())
+            if (!getQueries().contains(cq))
+                addQuery(cq);
+        for (ConjunctiveQuery cq : rightSubFormula.getQueries())
+            if (!getQueries().contains(cq))
+                addQuery(cq);
     }
 
     public MTCQFormula getLeftSubFormula()

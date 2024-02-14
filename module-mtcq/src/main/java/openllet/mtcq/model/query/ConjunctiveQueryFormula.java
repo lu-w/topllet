@@ -32,9 +32,9 @@ public class ConjunctiveQueryFormula extends MTCQFormula
     @Override
     public String toString(PropositionFactory propositions)
     {
+        StringBuilder cqString = new StringBuilder("(");
         if (propositions == null)
         {
-            StringBuilder cqString = new StringBuilder();
             for (int i = 0; i < _cq.getAtoms().size(); i++)
             {
                 QueryAtom atom = _cq.getAtoms().get(i);
@@ -60,10 +60,10 @@ public class ConjunctiveQueryFormula extends MTCQFormula
                 if (i < _cq.getAtoms().size() - 1)
                     cqString.append(" & ");
             }
-            return cqString.toString();
         }
         else
-            return propositions.create(_cq).toString();
+            cqString.append(propositions.create(_cq).toString());
+        return cqString.append(")").toString();
     }
 
     private String prefix(ATermAppl var)
