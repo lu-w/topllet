@@ -14,16 +14,7 @@ public class TestMLTL2LTL
 {
     protected String convert(String mltlFormula)
     {
-        String ltlf = "";
-        try
-        {
-            ltlf = MLTL2LTLf.convert(mltlFormula);
-        }
-        catch (IOException | InterruptedException | ParseException e)
-        {
-            fail("Can not convert " + mltlFormula + " to LTLf: " + e);
-        }
-        return ltlf;
+        return MLTL2LTLf.convert(mltlFormula);
     }
 
     @Test

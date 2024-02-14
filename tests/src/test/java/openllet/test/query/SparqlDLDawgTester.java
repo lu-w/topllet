@@ -219,14 +219,7 @@ public class SparqlDLDawgTester implements SparqlDawgTester
 
 		t.start();
 		QueryResult bindings;
-		try
-		{
-			bindings = QueryEngine.execQuery(query);
-		}
-		catch (IOException | InterruptedException e)
-		{
-			bindings = new QueryResultImpl(query);
-		}
+		bindings = QueryEngine.execQuery(query);
 		_logger.info("Execution time=" + t.getElapsed());
 		t.stop();
 		_logger.info("Result size = " + bindings.size());

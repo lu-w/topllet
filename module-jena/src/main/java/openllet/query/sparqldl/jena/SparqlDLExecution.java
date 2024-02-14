@@ -272,11 +272,6 @@ class SparqlDLExecution implements QueryExecution
 				return null;
 			}
 		}
-		catch (IOException | InterruptedException ignored)
-		{
-			_logger.fine("Encountered I/O Exception");
-			return null;
-		}
 	}
 
 	@Override

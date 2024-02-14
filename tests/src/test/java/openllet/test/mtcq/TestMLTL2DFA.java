@@ -14,16 +14,7 @@ public class TestMLTL2DFA
 {
     protected DFA convert(String mltlFormula)
     {
-        DFA dfa = new DFA();
-        try
-        {
-            dfa = MLTL2DFA.convert(mltlFormula);
-        }
-        catch (IOException | InterruptedException | ParseException e)
-        {
-            fail("Can not convert " + mltlFormula + " to DFA: " + e);
-        }
-        return dfa;
+        return MLTL2DFA.convert(mltlFormula);
     }
 
     @Test

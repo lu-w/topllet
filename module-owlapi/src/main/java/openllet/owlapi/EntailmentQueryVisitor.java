@@ -81,13 +81,7 @@ public class EntailmentQueryVisitor implements OWLAxiomVisitor, FacetReasonerOWL
 	public boolean isEntailed()
 	{
 		QueryResult results = new QueryResultImpl(_query);
-		try
-		{
-			results = QueryEngine.execQuery(_query);
-		}
-		catch (IOException | InterruptedException ignored)
-		{
-		}
+		results = QueryEngine.execQuery(_query);
 		return !results.isEmpty();
 
 	}
