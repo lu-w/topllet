@@ -12,6 +12,6 @@ public class NotFormula extends UnaryBooleanFormula
     @Override
     public String toString(PropositionFactory propositions)
     {
-        return "! (" + getSubFormula().toString(propositions) + ")";
+        return "!(" + getSubFormula().toString(propositions) + ")";
     }
 }

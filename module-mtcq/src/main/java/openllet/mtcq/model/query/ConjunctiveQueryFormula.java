@@ -15,6 +15,7 @@ public class ConjunctiveQueryFormula extends MTCQFormula
     {
         super(temporalKb, isDistinct);
         _cq = conjunctiveQuery;
+        addQuery(_cq);
     }
 
     @Override

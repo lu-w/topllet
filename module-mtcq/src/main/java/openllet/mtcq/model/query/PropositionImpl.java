@@ -32,4 +32,19 @@ public class PropositionImpl implements Proposition
     {
         return Integer.compare(_integerRepr, other.getIntegerRepresentation());
     }
+
+    @Override
+    public boolean equals(@Nonnull Object other)
+    {
+        if (other instanceof Proposition prop)
+            return _integerRepr == prop.getIntegerRepresentation();
+        else
+            return false;
+    }
+
+    @Override
+    public int hashCode()
+    {
+        return _integerRepr;
+    }
 }

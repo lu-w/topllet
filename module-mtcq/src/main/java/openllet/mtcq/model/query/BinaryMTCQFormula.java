@@ -14,9 +14,11 @@ public abstract class BinaryMTCQFormula extends MTCQFormula
         _leftSubFormula = left;
         _rightSubFormula = right;
         for (ConjunctiveQuery cq : left.getQueries())
-            addQuery(cq);
+            if (!getQueries().contains(cq))
+                addQuery(cq);
         for (ConjunctiveQuery cq : right.getQueries())
-            addQuery(cq);
+            if (!getQueries().contains(cq))
+                addQuery(cq);
     }
 
     public MTCQFormula getLeftSubFormula()

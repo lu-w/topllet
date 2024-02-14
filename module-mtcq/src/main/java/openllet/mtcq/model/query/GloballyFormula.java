@@ -12,6 +12,6 @@ public class GloballyFormula extends UnaryTemporalFormula
     @Override
     protected String toString(PropositionFactory propositions)
     {
-        return "G (" + getSubFormula().toString(propositions) + ")";
+        return "G(" + getSubFormula().toString(propositions) + ")";
     }
 }

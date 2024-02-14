@@ -13,6 +13,6 @@ public class BoundedGloballyFormula extends BoundedUnaryTemporalFormula
     @Override
     public String toString(PropositionFactory propositions)
     {
-        return "G_" + intervalToString() + " (" + getSubFormula().toString(propositions) + ")";
+        return "G_" + intervalToString() + "(" + getSubFormula().toString(propositions) + ")";
     }
 }

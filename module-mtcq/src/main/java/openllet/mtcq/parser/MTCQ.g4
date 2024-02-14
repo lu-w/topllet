@@ -30,8 +30,8 @@ FALSE_TERMINAL      : 'FALSE';
 TT_TERMINAL         : 'TT';
 FF_TERMINAL         : 'FF';
 TIME_POINT          : [0-9]+;
-NAME                : [0-9a-zA-Z_.-]+;
-URI                 : [a-zA-Z0-9.:/#?&_-]+('/'|'#');
+NAME                : [0-9a-zA-Z$_.-]+;
+URI                 : [a-zA-Z0-9.:/#?&$_-]+('/'|'#');
 COMMENT             : '#' ~('\r' | '\n')* -> skip;
 WS                  : [ \t\r\n]+ -> skip;
 

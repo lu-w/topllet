@@ -8,8 +8,6 @@ public abstract class UnaryTemporalFormula extends UnaryMTCQFormula
     public UnaryTemporalFormula(TemporalKnowledgeBase temporalKb, boolean isDistinct, MTCQFormula subFormula)
     {
         super(temporalKb, isDistinct, subFormula);
-        for (ConjunctiveQuery cq : subFormula.getQueries())
-            addQuery(cq);
     }
 
     @Override

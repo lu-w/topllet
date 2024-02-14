@@ -35,10 +35,9 @@ public abstract class MTCQFormula extends AbstractCompositeQuery<ConjunctiveQuer
     @Override
     public Map<Proposition, ConjunctiveQuery> getPropositionalAbstraction()
     {
-        if (_propositions != null)
-            return _propositions.getCreatedPropositions();
-        else
-            return new HashMap<>();
+        if (_propositions == null)
+            toPropositionalAbstractionString();
+        return _propositions.getCreatedPropositions();
     }
 
     @Override
