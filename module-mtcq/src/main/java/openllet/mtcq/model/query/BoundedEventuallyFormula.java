@@ -9,4 +9,10 @@ public class BoundedEventuallyFormula extends BoundedUnaryTemporalFormula
     {
         super(temporalKb, isDistinct, subFormula, lowerBound, upperBound);
     }
+
+    @Override
+    public String toString()
+    {
+        return "F_" + intervalToString() + " (" + getSubFormula() + ")";
+    }
 }

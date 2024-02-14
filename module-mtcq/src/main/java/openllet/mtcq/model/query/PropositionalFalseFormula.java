@@ -8,4 +8,10 @@ public class PropositionalFalseFormula extends NullaryMTCQFormula
     {
         super(temporalKb, isDistinct);
     }
+
+    @Override
+    public String toString()
+    {
+        return "false";
+    }
 }

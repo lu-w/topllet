@@ -8,4 +8,10 @@ public class StrongNextFormula extends UnaryTemporalFormula
     {
         super(temporalKb, isDistinct, subFormula);
     }
+
+    @Override
+    public String toString()
+    {
+        return "X[!] (" + getSubFormula() + ")";
+    }
 }

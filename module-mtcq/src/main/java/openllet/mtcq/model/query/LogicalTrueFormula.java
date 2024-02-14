@@ -8,4 +8,10 @@ public class LogicalTrueFormula extends NullaryMTCQFormula
     {
         super(temporalKb, isDistinct);
     }
+
+    @Override
+    public String toString()
+    {
+        return "tt";
+    }
 }

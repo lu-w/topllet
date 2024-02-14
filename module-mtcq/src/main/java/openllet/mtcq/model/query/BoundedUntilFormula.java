@@ -9,4 +9,10 @@ public class BoundedUntilFormula extends BoundedBinaryTemporalFormula
     {
         super(temporalKb, isDistinct, leftSubFormula, rightSubFormula, lowerBound, upperBound);
     }
+
+    @Override
+    public String toString()
+    {
+        return "(" + getLeftSubFormula() + "U_" + intervalToString() + getRightSubFormula() + ")";
+    }
 }

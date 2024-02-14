@@ -20,7 +20,7 @@ import java.util.Map;
 
 /**
  * TODO:
- * - implement toString method in data class
+ * - implement toString method in CQ data class (after finishing toConjunctiveQuery)
  */
 
 public class MTCQBuilder extends AbstractParseTreeVisitor<MTCQFormula> implements MTCQVisitor<MTCQFormula>

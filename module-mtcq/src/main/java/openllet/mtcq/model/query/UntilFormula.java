@@ -9,4 +9,10 @@ public class UntilFormula extends BinaryTemporalFormula
     {
         super(temporalKb, isDistinct, leftSubFormula, rightSubFormula);
     }
+
+    @Override
+    public String toString()
+    {
+        return "(" + getLeftSubFormula() + " U " + getRightSubFormula() + ")";
+    }
 }

@@ -8,4 +8,10 @@ public class EndFormula extends NullaryMTCQFormula
     {
         super(temporalKb, isDistinct);
     }
+
+    @Override
+    public String toString()
+    {
+        return "end";
+    }
 }

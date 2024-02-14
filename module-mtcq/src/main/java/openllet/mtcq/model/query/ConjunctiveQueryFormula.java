@@ -2,6 +2,7 @@ package openllet.mtcq.model.query;
 
 import openllet.mtcq.model.kb.TemporalKnowledgeBase;
 import openllet.query.sparqldl.model.cq.ConjunctiveQuery;
+import openllet.query.sparqldl.model.cq.QueryAtom;
 
 public class ConjunctiveQueryFormula extends MTCQFormula
 {
@@ -23,5 +24,17 @@ public class ConjunctiveQueryFormula extends MTCQFormula
     public ConjunctiveQuery getConjunctiveQuery()
     {
         return _cq;
+    }
+
+    @Override
+    public String toString()
+    {
+        String cqString = "";
+        for (QueryAtom atom : _cq.getAtoms())
+        {
+            // TODO
+
+        }
+        return cqString;
     }
 }

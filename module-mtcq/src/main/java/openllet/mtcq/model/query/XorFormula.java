@@ -8,4 +8,10 @@ public class XorFormula extends BinaryBooleanFormula
     {
         super(temporalKb, isDistinct, left, right);
     }
+
+    @Override
+    public String toString()
+    {
+        return "(" + getLeftSubFormula() + " ^ " + getRightSubFormula() + ")";
+    }
 }

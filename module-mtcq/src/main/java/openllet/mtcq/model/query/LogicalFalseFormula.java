@@ -8,4 +8,10 @@ public class LogicalFalseFormula extends NullaryMTCQFormula
     {
         super(temporalKb, isDistinct);
     }
+
+    @Override
+    public String toString()
+    {
+        return "ff";
+    }
 }

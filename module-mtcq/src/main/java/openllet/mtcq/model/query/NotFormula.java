@@ -8,4 +8,10 @@ public class NotFormula extends UnaryBooleanFormula
     {
         super(temporalKb, isDistinct, subFormula);
     }
+
+    @Override
+    public String toString()
+    {
+        return "! (" + getSubFormula() + ")";
+    }
 }

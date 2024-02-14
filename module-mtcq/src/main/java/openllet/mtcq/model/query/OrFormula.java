@@ -8,4 +8,10 @@ public class OrFormula extends BinaryBooleanFormula
     {
         super(temporalKb, isDistinct, left, right);
     }
+
+    @Override
+    public String toString()
+    {
+        return "(" + getLeftSubFormula() + " | " + getRightSubFormula() + ")";
+    }
 }

@@ -8,4 +8,10 @@ public class LastFormula extends NullaryMTCQFormula
     {
         super(temporalKb, isDistinct);
     }
+
+    @Override
+    public String toString()
+    {
+        return "last";
+    }
 }

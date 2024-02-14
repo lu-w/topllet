@@ -9,4 +9,10 @@ public class BoundedGloballyFormula extends BoundedUnaryTemporalFormula
     {
         super(temporalKb, isDistinct, subFormula, lowerBound, upperBound);
     }
+
+    @Override
+    public String toString()
+    {
+        return "G_" + intervalToString() + " (" + getSubFormula() + ")";
+    }
 }
