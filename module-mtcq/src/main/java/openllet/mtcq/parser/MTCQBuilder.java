@@ -1,6 +1,7 @@
 package openllet.mtcq.parser;
 
 import openllet.aterm.ATermAppl;
+import openllet.core.KnowledgeBase;
 import openllet.core.utils.ATermUtils;
 import openllet.core.utils.Pair;
 import openllet.mtcq.model.kb.TemporalKnowledgeBase;
@@ -21,6 +22,7 @@ import java.util.Map;
 public class MTCQBuilder extends AbstractParseTreeVisitor<MTCQFormula> implements MTCQVisitor<MTCQFormula>
 {
     private final TemporalKnowledgeBase _tkb;
+    private final KnowledgeBase _kb;
     private final boolean _isDistinct;
     private final Map<String, String> _prefixes = new HashMap<>();
     private final char _PREFIX_CHARACTER = ':';
@@ -28,12 +30,13 @@ public class MTCQBuilder extends AbstractParseTreeVisitor<MTCQFormula> implement
     public MTCQBuilder(TemporalKnowledgeBase tkb, boolean isDistinct)
     {
         _tkb = tkb;
+        _kb = _tkb.get(0);
         _isDistinct = isDistinct;
     }
 
     public ConjunctiveQuery toConjunctiveQuery(MTCQParser.Conjunctive_queryContext ctx)
     {
-        final ConjunctiveQuery cq = new ConjunctiveQueryImpl(_tkb.get(0), _isDistinct);
+        final ConjunctiveQuery cq = new ConjunctiveQueryImpl(_kb, _isDistinct);
         for (MTCQParser.AtomContext parsedAtom : ctx.atom())
         {
             QueryAtom qAtom;
