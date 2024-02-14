@@ -25,4 +25,9 @@ public abstract class BoundedBinaryTemporalFormula extends BoundedTemporalFormul
     {
         return _rightSubFormula;
     }
+
+    public boolean isTemporal()
+    {
+        return true;
+    }
 }

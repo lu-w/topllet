@@ -67,7 +67,7 @@ public abstract class MTCQFormula extends AbstractCompositeQuery<ConjunctiveQuer
     public MTCQFormula createQuery(KnowledgeBase kb, boolean isDistinct)
     {
          _logger.warning("Using createQuery() on an MTCQ - this method shall not be used");
-         return new TrueFormula(new FileBasedTemporalKnowledgeBaseImpl(new ArrayList<>()), isDistinct);
+         return new LogicalTrueFormula(new FileBasedTemporalKnowledgeBaseImpl(new ArrayList<>()), isDistinct);
     }
 
     @Override

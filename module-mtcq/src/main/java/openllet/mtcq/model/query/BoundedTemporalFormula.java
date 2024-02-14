@@ -10,6 +10,9 @@ public abstract class BoundedTemporalFormula extends TemporalFormula
     public BoundedTemporalFormula(TemporalKnowledgeBase temporalKb, boolean isDistinct, int lowerBound, int upperBound)
     {
         super(temporalKb, isDistinct);
+        if (lowerBound > upperBound || lowerBound < 0)
+            throw new IllegalArgumentException("Invalid bound configuration [" + lowerBound + "," + upperBound +
+                    " in formula " + this);
         _lowerBound = lowerBound;
         _upperBound = upperBound;
     }

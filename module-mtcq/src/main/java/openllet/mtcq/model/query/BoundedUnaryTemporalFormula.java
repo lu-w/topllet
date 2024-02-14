@@ -6,8 +6,8 @@ public class BoundedUnaryTemporalFormula extends BoundedTemporalFormula
 {
     private final MTCQFormula _subFormula;
 
-    public BoundedUnaryTemporalFormula(TemporalKnowledgeBase temporalKb, boolean isDistinct, int lowerBound,
-                                       int upperBound, MTCQFormula subFormula)
+    public BoundedUnaryTemporalFormula(TemporalKnowledgeBase temporalKb, boolean isDistinct, MTCQFormula subFormula,
+                                       int lowerBound, int upperBound)
     {
         super(temporalKb, isDistinct, lowerBound, upperBound);
         _subFormula = subFormula;
@@ -16,5 +16,10 @@ public class BoundedUnaryTemporalFormula extends BoundedTemporalFormula
     public MTCQFormula getSubFormula()
     {
         return _subFormula;
+    }
+
+    public boolean isTemporal()
+    {
+        return true;
     }
 }

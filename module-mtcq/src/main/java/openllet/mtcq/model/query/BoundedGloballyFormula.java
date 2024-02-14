@@ -1,5 +1,12 @@
 package openllet.mtcq.model.query;
 
-public class BoundedGloballyFormula
+import openllet.mtcq.model.kb.TemporalKnowledgeBase;
+
+public class BoundedGloballyFormula extends BoundedUnaryTemporalFormula
 {
+    public BoundedGloballyFormula(TemporalKnowledgeBase temporalKb, boolean isDistinct, MTCQFormula subFormula,
+                                  int lowerBound, int upperBound)
+    {
+        super(temporalKb, isDistinct, subFormula, lowerBound, upperBound);
+    }
 }

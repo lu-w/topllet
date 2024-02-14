@@ -1,2 +1,11 @@
-package openllet.mtcq.model.query;public class PropositionalFalseFormula {
+package openllet.mtcq.model.query;
+
+import openllet.mtcq.model.kb.TemporalKnowledgeBase;
+
+public class PropositionalFalseFormula extends NullaryMTCQFormula
+{
+    public PropositionalFalseFormula(TemporalKnowledgeBase temporalKb, boolean isDistinct)
+    {
+        super(temporalKb, isDistinct);
+    }
 }

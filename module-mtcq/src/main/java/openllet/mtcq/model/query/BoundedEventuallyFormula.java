@@ -4,9 +4,9 @@ import openllet.mtcq.model.kb.TemporalKnowledgeBase;
 
 public class BoundedEventuallyFormula extends BoundedUnaryTemporalFormula
 {
-    public BoundedEventuallyFormula(TemporalKnowledgeBase temporalKb, boolean isDistinct, int lowerBound,
-                                    int upperBound, MTCQFormula subFormula)
+    public BoundedEventuallyFormula(TemporalKnowledgeBase temporalKb, boolean isDistinct, MTCQFormula subFormula,
+                                    int lowerBound, int upperBound)
     {
-        super(temporalKb, isDistinct, lowerBound, upperBound, subFormula);
+        super(temporalKb, isDistinct, subFormula, lowerBound, upperBound);
     }
 }

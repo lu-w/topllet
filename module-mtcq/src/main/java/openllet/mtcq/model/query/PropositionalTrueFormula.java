@@ -1,5 +1,11 @@
 package openllet.mtcq.model.query;
 
-public class PropositionalTrueFormula
+import openllet.mtcq.model.kb.TemporalKnowledgeBase;
+
+public class PropositionalTrueFormula extends NullaryMTCQFormula
 {
+    public PropositionalTrueFormula(TemporalKnowledgeBase temporalKb, boolean isDistinct)
+    {
+        super(temporalKb, isDistinct);
+    }
 }
