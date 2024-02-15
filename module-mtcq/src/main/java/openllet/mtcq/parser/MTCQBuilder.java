@@ -2,6 +2,7 @@ package openllet.mtcq.parser;
 
 import openllet.aterm.ATermAppl;
 import openllet.core.KnowledgeBase;
+import openllet.core.KnowledgeBaseImpl;
 import openllet.core.utils.ATermUtils;
 import openllet.core.utils.Pair;
 import openllet.mtcq.model.kb.TemporalKnowledgeBase;
@@ -25,12 +26,14 @@ public class MTCQBuilder extends AbstractParseTreeVisitor<MTCQFormula> implement
     private final KnowledgeBase _kb;
     private final boolean _isDistinct;
     private final Map<String, String> _prefixes = new HashMap<>();
-    private final char _PREFIX_CHARACTER = ':';
 
     public MTCQBuilder(TemporalKnowledgeBase tkb, boolean isDistinct)
     {
         _tkb = tkb;
-        _kb = _tkb.get(0);
+        if (!_tkb.isEmpty())
+            _kb = _tkb.get(0);
+        else
+            _kb =  new KnowledgeBaseImpl();
         _isDistinct = isDistinct;
     }
 
@@ -420,6 +423,7 @@ public class MTCQBuilder extends AbstractParseTreeVisitor<MTCQFormula> implement
 
     private String replacePrefix(String orig)
     {
+        final char _PREFIX_CHARACTER = ':';
         String replaced = orig;
         for (String prefix : _prefixes.keySet())
         {

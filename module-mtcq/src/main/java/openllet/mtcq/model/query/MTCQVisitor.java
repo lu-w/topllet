@@ -11,6 +11,8 @@ public interface MTCQVisitor
     void visit(NotFormula formula);
     void visit(LogicalTrueFormula formula);
     void visit(LogicalFalseFormula formula);
+    void visit(PropositionalTrueFormula formula);
+    void visit(PropositionalFalseFormula formula);
     void visit(LastFormula formula);
     void visit(ImplFormula formula);
     void visit(GloballyFormula formula);

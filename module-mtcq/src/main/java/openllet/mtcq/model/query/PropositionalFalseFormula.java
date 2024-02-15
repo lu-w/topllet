@@ -14,4 +14,10 @@ public class PropositionalFalseFormula extends NullaryMTCQFormula
     {
         return "false";
     }
+
+    @Override
+    public void accept(MTCQVisitor visitor)
+    {
+        visitor.visit(this);
+    }
 }

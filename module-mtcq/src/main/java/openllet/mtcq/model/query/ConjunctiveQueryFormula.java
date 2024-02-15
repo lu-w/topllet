@@ -74,7 +74,7 @@ public class ConjunctiveQueryFormula extends MTCQFormula
             return var.toString();
     }
 
-    protected void accept(MTCQVisitor visitor)
+    public void accept(MTCQVisitor visitor)
     {
         visitor.visit(this);
     }

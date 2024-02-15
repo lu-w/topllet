@@ -14,4 +14,10 @@ public class PropositionalTrueFormula extends NullaryMTCQFormula
     {
         return "true";
     }
+
+    @Override
+    public void accept(MTCQVisitor visitor)
+    {
+        visitor.visit(this);
+    }
 }

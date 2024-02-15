@@ -17,7 +17,7 @@ public class ReleaseFormula extends BinaryTemporalFormula
                 ")";
     }
 
-    protected void accept(MTCQVisitor visitor)
+    public void accept(MTCQVisitor visitor)
     {
         visitor.visit(this);
     }

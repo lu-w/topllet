@@ -15,7 +15,7 @@ public class EventuallyFormula extends UnaryTemporalFormula
         return "F(" + getSubFormula().toString(propositions) + ")";
     }
 
-    protected void accept(MTCQVisitor visitor)
+    public void accept(MTCQVisitor visitor)
     {
         visitor.visit(this);
     }

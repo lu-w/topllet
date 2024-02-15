@@ -16,7 +16,7 @@ public class BoundedGloballyFormula extends BoundedUnaryTemporalFormula
         return "G_" + intervalToString() + "(" + getSubFormula().toString(propositions) + ")";
     }
 
-    protected void accept(MTCQVisitor visitor)
+    public void accept(MTCQVisitor visitor)
     {
         visitor.visit(this);
     }

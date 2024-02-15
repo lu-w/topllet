@@ -16,7 +16,7 @@ public class ImplFormula extends BinaryBooleanFormula
                 ")";
     }
 
-    protected void accept(MTCQVisitor visitor)
+    public void accept(MTCQVisitor visitor)
     {
         visitor.visit(this);
     }

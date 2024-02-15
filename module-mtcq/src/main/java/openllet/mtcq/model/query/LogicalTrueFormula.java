@@ -15,7 +15,7 @@ public class LogicalTrueFormula extends NullaryMTCQFormula
         return "tt";
     }
 
-    protected void accept(MTCQVisitor visitor)
+    public void accept(MTCQVisitor visitor)
     {
         visitor.visit(this);
     }

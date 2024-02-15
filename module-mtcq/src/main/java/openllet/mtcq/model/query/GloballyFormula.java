@@ -15,7 +15,7 @@ public class GloballyFormula extends UnaryTemporalFormula
         return "G(" + getSubFormula().toString(propositions) + ")";
     }
 
-    protected void accept(MTCQVisitor visitor)
+    public void accept(MTCQVisitor visitor)
     {
         visitor.visit(this);
     }
