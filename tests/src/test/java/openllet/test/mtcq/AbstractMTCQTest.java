@@ -5,6 +5,7 @@ import openllet.core.KnowledgeBase;
 import openllet.core.KnowledgeBaseImpl;
 import openllet.mtcq.model.kb.InMemoryTemporalKnowledgeBaseImpl;
 import openllet.mtcq.model.kb.TemporalKnowledgeBase;
+import openllet.mtcq.model.query.MTCQFormula;
 import openllet.mtcq.model.query.MetricTemporalConjunctiveQuery;
 import openllet.mtcq.parser.ParseException;
 import openllet.mtcq.parser.MetricTemporalConjunctiveQueryParser;
@@ -102,14 +103,14 @@ public class AbstractMTCQTest extends AbstractQueryTest
         _tkb.add(new KnowledgeBaseImpl());
     }
 
-    protected MetricTemporalConjunctiveQuery temporalQuery(String formula)
+    protected MTCQFormula temporalQuery(String formula)
     {
         return temporalQuery(formula, true);
     }
 
-    protected MetricTemporalConjunctiveQuery temporalQuery(String formula, boolean distinct)
+    protected MTCQFormula temporalQuery(String formula, boolean distinct)
     {
-        MetricTemporalConjunctiveQuery mtcq = null;
+        MTCQFormula mtcq = null;
         try
         {
             mtcq = MetricTemporalConjunctiveQueryParser.parse(formula, _tkb, distinct);
@@ -121,7 +122,7 @@ public class AbstractMTCQTest extends AbstractQueryTest
         return mtcq;
     }
 
-    protected MetricTemporalConjunctiveQuery uncheckedTemporalQuery(String formula) throws ParseException
+    protected MTCQFormula uncheckedTemporalQuery(String formula) throws ParseException
     {
         return MetricTemporalConjunctiveQueryParser.parse(formula, _tkb);
     }
