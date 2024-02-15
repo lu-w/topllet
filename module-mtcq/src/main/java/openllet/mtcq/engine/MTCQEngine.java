@@ -21,6 +21,7 @@ import java.util.logging.Logger;
  * As an optimization, it uses CQ answering in a pre-processing run to efficiently generate (partial)
  * (un)satisfiability knowledge.
  */
+@Deprecated
 public class MTCQEngine extends AbstractQueryEngine<MetricTemporalConjunctiveQuery>
         implements QueryExec<MetricTemporalConjunctiveQuery>
 {

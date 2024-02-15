@@ -22,6 +22,7 @@ import java.util.logging.Logger;
  * states are created that represented the propagated (un)satisfiability information from the current state to these new
  * states.
  */
+@Deprecated
 public class DFAExecutableState
 {
     public static final Logger _logger = Log.getLogger(DFAExecutableState.class);

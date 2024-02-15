@@ -8,7 +8,6 @@ package openllet.test.query;
 
 import openllet.aterm.ATermAppl;
 import openllet.core.utils.ATermUtils;
-import openllet.mtcq.engine.MTCQEngineOptimized;
 import openllet.query.sparqldl.engine.bcq.BCQQueryEngineSimple;
 import openllet.query.sparqldl.engine.cq.QueryEngine;
 import openllet.query.sparqldl.engine.ucq.UnionQueryEngineSimple;
@@ -27,7 +26,6 @@ import openllet.mtcq.model.query.MetricTemporalConjunctiveQuery;
 import openllet.test.AbstractKBTests;
 import org.junit.Assert;
 
-import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.util.*;
 

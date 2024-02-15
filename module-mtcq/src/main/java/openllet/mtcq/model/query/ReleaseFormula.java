@@ -2,9 +2,9 @@ package openllet.mtcq.model.query;
 
 import openllet.mtcq.model.kb.TemporalKnowledgeBase;
 
-public class UntilFormula extends BinaryTemporalFormula
+public class ReleaseFormula extends BinaryTemporalFormula
 {
-    public UntilFormula(TemporalKnowledgeBase temporalKb, boolean isDistinct, MTCQFormula leftSubFormula,
+    public ReleaseFormula(TemporalKnowledgeBase temporalKb, boolean isDistinct, MTCQFormula leftSubFormula,
                         MTCQFormula rightSubFormula)
     {
         super(temporalKb, isDistinct, leftSubFormula, rightSubFormula);
@@ -13,7 +13,7 @@ public class UntilFormula extends BinaryTemporalFormula
     @Override
     public String toString(PropositionFactory propositions)
     {
-        return "(" + getLeftSubFormula().toString(propositions) + " U " + getRightSubFormula().toString(propositions) +
+        return "(" + getLeftSubFormula().toString(propositions) + " R " + getRightSubFormula().toString(propositions) +
                 ")";
     }
 

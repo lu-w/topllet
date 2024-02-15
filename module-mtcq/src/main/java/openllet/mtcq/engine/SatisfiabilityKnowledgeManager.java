@@ -30,6 +30,7 @@ import java.util.stream.IntStream;
  * query with the unsatisfiability of its negation.
  * It can also propagate knowledge around based on similarities of ABoxes to certain time points.
  */
+@Deprecated
 public class SatisfiabilityKnowledgeManager
 {
     public static final Logger _logger = Log.getLogger(SatisfiabilityKnowledgeManager.class);

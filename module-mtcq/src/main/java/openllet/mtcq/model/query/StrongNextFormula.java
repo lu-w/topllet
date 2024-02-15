@@ -14,4 +14,9 @@ public class StrongNextFormula extends UnaryTemporalFormula
     {
         return "X[!] (" + getSubFormula().toString(propositions) + ")";
     }
+
+    protected void accept(MTCQVisitor visitor)
+    {
+        visitor.visit(this);
+    }
 }

@@ -15,4 +15,9 @@ public class XorFormula extends BinaryBooleanFormula
         return "(" + getLeftSubFormula().toString(propositions) + " ^ " + getRightSubFormula().toString(propositions) +
                 ")";
     }
+
+    protected void accept(MTCQVisitor visitor)
+    {
+        visitor.visit(this);
+    }
 }

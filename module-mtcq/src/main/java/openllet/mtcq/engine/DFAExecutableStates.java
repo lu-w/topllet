@@ -10,6 +10,7 @@ import java.util.Set;
 /**
  * This class manages a set of executable states.
  */
+@Deprecated
 public class DFAExecutableStates extends ArrayList<DFAExecutableState>
 {
     private final DFA _dfa;

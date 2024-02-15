@@ -15,4 +15,9 @@ public class BoundedEventuallyFormula extends BoundedUnaryTemporalFormula
     {
         return "F_" + intervalToString() + "(" + getSubFormula().toString(propositions) + ")";
     }
+
+    protected void accept(MTCQVisitor visitor)
+    {
+        visitor.visit(this);
+    }
 }

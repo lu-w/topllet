@@ -20,4 +20,9 @@ public class EmptyFormula extends MTCQFormula
     {
         return "";
     }
+
+    protected void accept(MTCQVisitor visitor)
+    {
+        visitor.visit(this);
+    }
 }

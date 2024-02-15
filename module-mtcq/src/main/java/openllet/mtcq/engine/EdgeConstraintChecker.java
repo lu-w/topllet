@@ -18,6 +18,7 @@ import java.util.logging.Logger;
  * Internally, it relies on the SatisfiabilityKnowledgeManager to perform checking and caching of satisfiability of
  * BCQs.
  */
+@Deprecated
 public class EdgeConstraintChecker
 {
     public static final Logger _logger = Log.getLogger(EdgeConstraintChecker.class);

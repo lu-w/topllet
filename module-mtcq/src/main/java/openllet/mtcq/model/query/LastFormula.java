@@ -14,4 +14,9 @@ public class LastFormula extends NullaryMTCQFormula
     {
         return "last";
     }
+
+    protected void accept(MTCQVisitor visitor)
+    {
+        visitor.visit(this);
+    }
 }

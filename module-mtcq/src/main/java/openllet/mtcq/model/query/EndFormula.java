@@ -14,4 +14,9 @@ public class EndFormula extends NullaryMTCQFormula
     {
         return "end";
     }
+
+    protected void accept(MTCQVisitor visitor)
+    {
+        visitor.visit(this);
+    }
 }
