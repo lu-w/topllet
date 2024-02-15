@@ -73,17 +73,17 @@ mtcq_formula : conjunctive_query					#ConjunctiveQueryFormula
                 | logic_booleans					#LogicBooleanFormula
                 | trace_position					#TracePositionFormula
                 | '(' mtcq_formula ')'				#BracketFormula
-                | mtcq_formula and mtcq_formula		#AndFormula
-                | mtcq_formula or mtcq_formula 		#OrFormula
-                | mtcq_formula impl mtcq_formula	#ImplFormula
-                | mtcq_formula equiv mtcq_formula	#EquivFormula
-                | mtcq_formula xor mtcq_formula 	#XorFormula
                 | not mtcq_formula					#NotFormula
+                | next mtcq_formula					#NextFormula
+                | weak_next mtcq_formula			#WeakNextFormula
                 | eventually mtcq_formula			#EventuallyFormula
                 | globally mtcq_formula				#GloballyFormula
-                | weak_next mtcq_formula			#WeakNextFormula
-                | next mtcq_formula					#NextFormula
                 | mtcq_formula until mtcq_formula	#UntilFormula
+                | mtcq_formula and mtcq_formula		#AndFormula
+                | mtcq_formula equiv mtcq_formula	#EquivFormula
+                | mtcq_formula impl mtcq_formula	#ImplFormula
+                | mtcq_formula xor mtcq_formula 	#XorFormula
+                | mtcq_formula or mtcq_formula 		#OrFormula
                 ;
 
 // SPARQL-like prefix

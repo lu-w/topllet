@@ -1936,7 +1936,29 @@ public class MTCQParser extends Parser {
 				setState(156);
 				not();
 				setState(157);
-				mtcq_formula(6);
+				mtcq_formula(11);
+				}
+				break;
+			case XB_TERMINAL:
+				{
+				_localctx = new NextFormulaContext(_localctx);
+				_ctx = _localctx;
+				_prevctx = _localctx;
+				setState(159);
+				next();
+				setState(160);
+				mtcq_formula(10);
+				}
+				break;
+			case X_TERMINAL:
+				{
+				_localctx = new WeakNextFormulaContext(_localctx);
+				_ctx = _localctx;
+				_prevctx = _localctx;
+				setState(162);
+				weak_next();
+				setState(163);
+				mtcq_formula(9);
 				}
 				break;
 			case FI_TERMINAL:
@@ -1945,10 +1967,10 @@ public class MTCQParser extends Parser {
 				_localctx = new EventuallyFormulaContext(_localctx);
 				_ctx = _localctx;
 				_prevctx = _localctx;
-				setState(159);
+				setState(165);
 				eventually();
-				setState(160);
-				mtcq_formula(5);
+				setState(166);
+				mtcq_formula(8);
 				}
 				break;
 			case GI_TERMINAL:
@@ -1957,32 +1979,10 @@ public class MTCQParser extends Parser {
 				_localctx = new GloballyFormulaContext(_localctx);
 				_ctx = _localctx;
 				_prevctx = _localctx;
-				setState(162);
-				globally();
-				setState(163);
-				mtcq_formula(4);
-				}
-				break;
-			case X_TERMINAL:
-				{
-				_localctx = new WeakNextFormulaContext(_localctx);
-				_ctx = _localctx;
-				_prevctx = _localctx;
-				setState(165);
-				weak_next();
-				setState(166);
-				mtcq_formula(3);
-				}
-				break;
-			case XB_TERMINAL:
-				{
-				_localctx = new NextFormulaContext(_localctx);
-				_ctx = _localctx;
-				_prevctx = _localctx;
 				setState(168);
-				next();
+				globally();
 				setState(169);
-				mtcq_formula(2);
+				mtcq_formula(7);
 				}
 				break;
 			default:
@@ -2002,50 +2002,50 @@ public class MTCQParser extends Parser {
 					switch ( getInterpreter().adaptivePredict(_input,10,_ctx) ) {
 					case 1:
 						{
-						_localctx = new AndFormulaContext(new Mtcq_formulaContext(_parentctx, _parentState));
+						_localctx = new UntilFormulaContext(new Mtcq_formulaContext(_parentctx, _parentState));
 						pushNewRecursionContext(_localctx, _startState, RULE_mtcq_formula);
 						setState(173);
-						if (!(precpred(_ctx, 11))) throw new FailedPredicateException(this, "precpred(_ctx, 11)");
+						if (!(precpred(_ctx, 6))) throw new FailedPredicateException(this, "precpred(_ctx, 6)");
 						setState(174);
-						and();
+						until();
 						setState(175);
-						mtcq_formula(12);
+						mtcq_formula(7);
 						}
 						break;
 					case 2:
 						{
-						_localctx = new OrFormulaContext(new Mtcq_formulaContext(_parentctx, _parentState));
+						_localctx = new AndFormulaContext(new Mtcq_formulaContext(_parentctx, _parentState));
 						pushNewRecursionContext(_localctx, _startState, RULE_mtcq_formula);
 						setState(177);
-						if (!(precpred(_ctx, 10))) throw new FailedPredicateException(this, "precpred(_ctx, 10)");
+						if (!(precpred(_ctx, 5))) throw new FailedPredicateException(this, "precpred(_ctx, 5)");
 						setState(178);
-						or();
+						and();
 						setState(179);
-						mtcq_formula(11);
+						mtcq_formula(6);
 						}
 						break;
 					case 3:
 						{
-						_localctx = new ImplFormulaContext(new Mtcq_formulaContext(_parentctx, _parentState));
+						_localctx = new EquivFormulaContext(new Mtcq_formulaContext(_parentctx, _parentState));
 						pushNewRecursionContext(_localctx, _startState, RULE_mtcq_formula);
 						setState(181);
-						if (!(precpred(_ctx, 9))) throw new FailedPredicateException(this, "precpred(_ctx, 9)");
+						if (!(precpred(_ctx, 4))) throw new FailedPredicateException(this, "precpred(_ctx, 4)");
 						setState(182);
-						impl();
+						equiv();
 						setState(183);
-						mtcq_formula(10);
+						mtcq_formula(5);
 						}
 						break;
 					case 4:
 						{
-						_localctx = new EquivFormulaContext(new Mtcq_formulaContext(_parentctx, _parentState));
+						_localctx = new ImplFormulaContext(new Mtcq_formulaContext(_parentctx, _parentState));
 						pushNewRecursionContext(_localctx, _startState, RULE_mtcq_formula);
 						setState(185);
-						if (!(precpred(_ctx, 8))) throw new FailedPredicateException(this, "precpred(_ctx, 8)");
+						if (!(precpred(_ctx, 3))) throw new FailedPredicateException(this, "precpred(_ctx, 3)");
 						setState(186);
-						equiv();
+						impl();
 						setState(187);
-						mtcq_formula(9);
+						mtcq_formula(4);
 						}
 						break;
 					case 5:
@@ -2053,21 +2053,21 @@ public class MTCQParser extends Parser {
 						_localctx = new XorFormulaContext(new Mtcq_formulaContext(_parentctx, _parentState));
 						pushNewRecursionContext(_localctx, _startState, RULE_mtcq_formula);
 						setState(189);
-						if (!(precpred(_ctx, 7))) throw new FailedPredicateException(this, "precpred(_ctx, 7)");
+						if (!(precpred(_ctx, 2))) throw new FailedPredicateException(this, "precpred(_ctx, 2)");
 						setState(190);
 						xor();
 						setState(191);
-						mtcq_formula(8);
+						mtcq_formula(3);
 						}
 						break;
 					case 6:
 						{
-						_localctx = new UntilFormulaContext(new Mtcq_formulaContext(_parentctx, _parentState));
+						_localctx = new OrFormulaContext(new Mtcq_formulaContext(_parentctx, _parentState));
 						pushNewRecursionContext(_localctx, _startState, RULE_mtcq_formula);
 						setState(193);
 						if (!(precpred(_ctx, 1))) throw new FailedPredicateException(this, "precpred(_ctx, 1)");
 						setState(194);
-						until();
+						or();
 						setState(195);
 						mtcq_formula(2);
 						}
@@ -2239,15 +2239,15 @@ public class MTCQParser extends Parser {
 	private boolean mtcq_formula_sempred(Mtcq_formulaContext _localctx, int predIndex) {
 		switch (predIndex) {
 		case 0:
-			return precpred(_ctx, 11);
+			return precpred(_ctx, 6);
 		case 1:
-			return precpred(_ctx, 10);
+			return precpred(_ctx, 5);
 		case 2:
-			return precpred(_ctx, 9);
+			return precpred(_ctx, 4);
 		case 3:
-			return precpred(_ctx, 8);
+			return precpred(_ctx, 3);
 		case 4:
-			return precpred(_ctx, 7);
+			return precpred(_ctx, 2);
 		case 5:
 			return precpred(_ctx, 1);
 		}
@@ -2350,46 +2350,46 @@ public class MTCQParser extends Parser {
 		"\u0096\u00ac\u0003\u0004\u0002\u0000\u0097\u00ac\u0003\u0000\u0000\u0000"+
 		"\u0098\u0099\u0005\b\u0000\u0000\u0099\u009a\u00030\u0018\u0000\u009a"+
 		"\u009b\u0005\t\u0000\u0000\u009b\u00ac\u0001\u0000\u0000\u0000\u009c\u009d"+
-		"\u0003\u0006\u0003\u0000\u009d\u009e\u00030\u0018\u0006\u009e\u00ac\u0001"+
-		"\u0000\u0000\u0000\u009f\u00a0\u0003 \u0010\u0000\u00a0\u00a1\u00030\u0018"+
-		"\u0005\u00a1\u00ac\u0001\u0000\u0000\u0000\u00a2\u00a3\u0003\"\u0011\u0000"+
-		"\u00a3\u00a4\u00030\u0018\u0004\u00a4\u00ac\u0001\u0000\u0000\u0000\u00a5"+
-		"\u00a6\u0003\u001a\r\u0000\u00a6\u00a7\u00030\u0018\u0003\u00a7\u00ac"+
-		"\u0001\u0000\u0000\u0000\u00a8\u00a9\u0003\u001c\u000e\u0000\u00a9\u00aa"+
-		"\u00030\u0018\u0002\u00aa\u00ac\u0001\u0000\u0000\u0000\u00ab\u0093\u0001"+
-		"\u0000\u0000\u0000\u00ab\u0095\u0001\u0000\u0000\u0000\u00ab\u0096\u0001"+
-		"\u0000\u0000\u0000\u00ab\u0097\u0001\u0000\u0000\u0000\u00ab\u0098\u0001"+
-		"\u0000\u0000\u0000\u00ab\u009c\u0001\u0000\u0000\u0000\u00ab\u009f\u0001"+
-		"\u0000\u0000\u0000\u00ab\u00a2\u0001\u0000\u0000\u0000\u00ab\u00a5\u0001"+
-		"\u0000\u0000\u0000\u00ab\u00a8\u0001\u0000\u0000\u0000\u00ac\u00c7\u0001"+
-		"\u0000\u0000\u0000\u00ad\u00ae\n\u000b\u0000\u0000\u00ae\u00af\u0003\b"+
-		"\u0004\u0000\u00af\u00b0\u00030\u0018\f\u00b0\u00c6\u0001\u0000\u0000"+
-		"\u0000\u00b1\u00b2\n\n\u0000\u0000\u00b2\u00b3\u0003\n\u0005\u0000\u00b3"+
-		"\u00b4\u00030\u0018\u000b\u00b4\u00c6\u0001\u0000\u0000\u0000\u00b5\u00b6"+
-		"\n\t\u0000\u0000\u00b6\u00b7\u0003\f\u0006\u0000\u00b7\u00b8\u00030\u0018"+
-		"\n\u00b8\u00c6\u0001\u0000\u0000\u0000\u00b9\u00ba\n\b\u0000\u0000\u00ba"+
-		"\u00bb\u0003\u000e\u0007\u0000\u00bb\u00bc\u00030\u0018\t\u00bc\u00c6"+
-		"\u0001\u0000\u0000\u0000\u00bd\u00be\n\u0007\u0000\u0000\u00be\u00bf\u0003"+
-		"\u0010\b\u0000\u00bf\u00c0\u00030\u0018\b\u00c0\u00c6\u0001\u0000\u0000"+
-		"\u0000\u00c1\u00c2\n\u0001\u0000\u0000\u00c2\u00c3\u0003\u001e\u000f\u0000"+
-		"\u00c3\u00c4\u00030\u0018\u0002\u00c4\u00c6\u0001\u0000\u0000\u0000\u00c5"+
-		"\u00ad\u0001\u0000\u0000\u0000\u00c5\u00b1\u0001\u0000\u0000\u0000\u00c5"+
-		"\u00b5\u0001\u0000\u0000\u0000\u00c5\u00b9\u0001\u0000\u0000\u0000\u00c5"+
-		"\u00bd\u0001\u0000\u0000\u0000\u00c5\u00c1\u0001\u0000\u0000\u0000\u00c6"+
-		"\u00c9\u0001\u0000\u0000\u0000\u00c7\u00c5\u0001\u0000\u0000\u0000\u00c7"+
-		"\u00c8\u0001\u0000\u0000\u0000\u00c81\u0001\u0000\u0000\u0000\u00c9\u00c7"+
-		"\u0001\u0000\u0000\u0000\u00ca\u00cc\u0005\n\u0000\u0000\u00cb\u00cd\u0005"+
-		"&\u0000\u0000\u00cc\u00cb\u0001\u0000\u0000\u0000\u00cc\u00cd\u0001\u0000"+
-		"\u0000\u0000\u00cd\u00ce\u0001\u0000\u0000\u0000\u00ce\u00cf\u0005\u0006"+
-		"\u0000\u0000\u00cf\u00d0\u0005\u0005\u0000\u0000\u00d0\u00d1\u0005\'\u0000"+
-		"\u0000\u00d1\u00d2\u0005\u000b\u0000\u0000\u00d23\u0001\u0000\u0000\u0000"+
-		"\u00d3\u00d5\u00032\u0019\u0000\u00d4\u00d3\u0001\u0000\u0000\u0000\u00d5"+
-		"\u00d8\u0001\u0000\u0000\u0000\u00d6\u00d4\u0001\u0000\u0000\u0000\u00d6"+
-		"\u00d7\u0001\u0000\u0000\u0000\u00d7\u00da\u0001\u0000\u0000\u0000\u00d8"+
-		"\u00d6\u0001\u0000\u0000\u0000\u00d9\u00db\u00030\u0018\u0000\u00da\u00d9"+
-		"\u0001\u0000\u0000\u0000\u00da\u00db\u0001\u0000\u0000\u0000\u00db5\u0001"+
-		"\u0000\u0000\u0000\u000fW`ejnqx\u0088\u0090\u00ab\u00c5\u00c7\u00cc\u00d6"+
-		"\u00da";
+		"\u0003\u0006\u0003\u0000\u009d\u009e\u00030\u0018\u000b\u009e\u00ac\u0001"+
+		"\u0000\u0000\u0000\u009f\u00a0\u0003\u001c\u000e\u0000\u00a0\u00a1\u0003"+
+		"0\u0018\n\u00a1\u00ac\u0001\u0000\u0000\u0000\u00a2\u00a3\u0003\u001a"+
+		"\r\u0000\u00a3\u00a4\u00030\u0018\t\u00a4\u00ac\u0001\u0000\u0000\u0000"+
+		"\u00a5\u00a6\u0003 \u0010\u0000\u00a6\u00a7\u00030\u0018\b\u00a7\u00ac"+
+		"\u0001\u0000\u0000\u0000\u00a8\u00a9\u0003\"\u0011\u0000\u00a9\u00aa\u0003"+
+		"0\u0018\u0007\u00aa\u00ac\u0001\u0000\u0000\u0000\u00ab\u0093\u0001\u0000"+
+		"\u0000\u0000\u00ab\u0095\u0001\u0000\u0000\u0000\u00ab\u0096\u0001\u0000"+
+		"\u0000\u0000\u00ab\u0097\u0001\u0000\u0000\u0000\u00ab\u0098\u0001\u0000"+
+		"\u0000\u0000\u00ab\u009c\u0001\u0000\u0000\u0000\u00ab\u009f\u0001\u0000"+
+		"\u0000\u0000\u00ab\u00a2\u0001\u0000\u0000\u0000\u00ab\u00a5\u0001\u0000"+
+		"\u0000\u0000\u00ab\u00a8\u0001\u0000\u0000\u0000\u00ac\u00c7\u0001\u0000"+
+		"\u0000\u0000\u00ad\u00ae\n\u0006\u0000\u0000\u00ae\u00af\u0003\u001e\u000f"+
+		"\u0000\u00af\u00b0\u00030\u0018\u0007\u00b0\u00c6\u0001\u0000\u0000\u0000"+
+		"\u00b1\u00b2\n\u0005\u0000\u0000\u00b2\u00b3\u0003\b\u0004\u0000\u00b3"+
+		"\u00b4\u00030\u0018\u0006\u00b4\u00c6\u0001\u0000\u0000\u0000\u00b5\u00b6"+
+		"\n\u0004\u0000\u0000\u00b6\u00b7\u0003\u000e\u0007\u0000\u00b7\u00b8\u0003"+
+		"0\u0018\u0005\u00b8\u00c6\u0001\u0000\u0000\u0000\u00b9\u00ba\n\u0003"+
+		"\u0000\u0000\u00ba\u00bb\u0003\f\u0006\u0000\u00bb\u00bc\u00030\u0018"+
+		"\u0004\u00bc\u00c6\u0001\u0000\u0000\u0000\u00bd\u00be\n\u0002\u0000\u0000"+
+		"\u00be\u00bf\u0003\u0010\b\u0000\u00bf\u00c0\u00030\u0018\u0003\u00c0"+
+		"\u00c6\u0001\u0000\u0000\u0000\u00c1\u00c2\n\u0001\u0000\u0000\u00c2\u00c3"+
+		"\u0003\n\u0005\u0000\u00c3\u00c4\u00030\u0018\u0002\u00c4\u00c6\u0001"+
+		"\u0000\u0000\u0000\u00c5\u00ad\u0001\u0000\u0000\u0000\u00c5\u00b1\u0001"+
+		"\u0000\u0000\u0000\u00c5\u00b5\u0001\u0000\u0000\u0000\u00c5\u00b9\u0001"+
+		"\u0000\u0000\u0000\u00c5\u00bd\u0001\u0000\u0000\u0000\u00c5\u00c1\u0001"+
+		"\u0000\u0000\u0000\u00c6\u00c9\u0001\u0000\u0000\u0000\u00c7\u00c5\u0001"+
+		"\u0000\u0000\u0000\u00c7\u00c8\u0001\u0000\u0000\u0000\u00c81\u0001\u0000"+
+		"\u0000\u0000\u00c9\u00c7\u0001\u0000\u0000\u0000\u00ca\u00cc\u0005\n\u0000"+
+		"\u0000\u00cb\u00cd\u0005&\u0000\u0000\u00cc\u00cb\u0001\u0000\u0000\u0000"+
+		"\u00cc\u00cd\u0001\u0000\u0000\u0000\u00cd\u00ce\u0001\u0000\u0000\u0000"+
+		"\u00ce\u00cf\u0005\u0006\u0000\u0000\u00cf\u00d0\u0005\u0005\u0000\u0000"+
+		"\u00d0\u00d1\u0005\'\u0000\u0000\u00d1\u00d2\u0005\u000b\u0000\u0000\u00d2"+
+		"3\u0001\u0000\u0000\u0000\u00d3\u00d5\u00032\u0019\u0000\u00d4\u00d3\u0001"+
+		"\u0000\u0000\u0000\u00d5\u00d8\u0001\u0000\u0000\u0000\u00d6\u00d4\u0001"+
+		"\u0000\u0000\u0000\u00d6\u00d7\u0001\u0000\u0000\u0000\u00d7\u00da\u0001"+
+		"\u0000\u0000\u0000\u00d8\u00d6\u0001\u0000\u0000\u0000\u00d9\u00db\u0003"+
+		"0\u0018\u0000\u00da\u00d9\u0001\u0000\u0000\u0000\u00da\u00db\u0001\u0000"+
+		"\u0000\u0000\u00db5\u0001\u0000\u0000\u0000\u000fW`ejnqx\u0088\u0090\u00ab"+
+		"\u00c5\u00c7\u00cc\u00d6\u00da";
 	public static final ATN _ATN =
 		new ATNDeserializer().deserialize(_serializedATN.toCharArray());
 	static {
