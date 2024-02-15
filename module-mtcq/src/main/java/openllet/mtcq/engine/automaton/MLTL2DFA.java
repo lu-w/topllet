@@ -48,7 +48,6 @@ public class MLTL2DFA
         final String command = "lydia";
         String error = "";
         String[] commandString = new String[]{command, "-l", "ltlf", "-i", ltlfFormula, "-p", "-g", tmpFile};
-        System.out.println(String.join(" ", commandString));
         try
         {
             Process child = Runtime.getRuntime().exec(commandString);
