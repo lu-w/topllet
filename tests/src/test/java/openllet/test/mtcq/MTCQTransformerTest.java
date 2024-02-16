@@ -13,8 +13,18 @@ public class MTCQTransformerTest extends AbstractMTCQTest
     public void testNegation()
     {
         simpleTKB();
-        MTCQFormula q = temporalQuery("!X(A(a) | ((B(b)) & (C(c))))");
+        MTCQFormula q = temporalQuery("!X[!](A(a) | ((B(b)) & (C(c))))");
         MTCQFormula tq = DNFTransformer.transform(q);
-        assertEquals("X ((!((A(a))) & (!((B(b))) | !((C(c))))))", tq.toString());
+        assertEquals("(last | X[!] ((!((A(a))) & (!((B(b))) | !((C(c)))))))", tq.toString());
+    }
+
+    @Test
+    public void test()
+    {
+        simpleTKB();
+        //MTCQFormula q = temporalQuery("(A(a)) U (X[!] (G (B(a))) | X[!] (C(a))) | (D(a))");
+        MTCQFormula q = temporalQuery("(A(a)) U (B(a))");
+        MTCQFormula tq = DNFTransformer.transform(q);
+        System.out.println(tq);
     }
 }
