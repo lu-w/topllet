@@ -499,7 +499,7 @@ public class DNFTransformer implements MTCQVisitor
         {
             // sub1O.left = X.. and sub1O.right != X..
             // if sub2 = X...
-            // else if:
+            // else if
         }
         else if (sub2 instanceof OrFormula sub2O)
         {
