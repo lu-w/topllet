@@ -17,7 +17,7 @@ public class AndFormula extends BinaryBooleanFormula
     @Override
     public String toString(PropositionFactory propositions)
     {
-        return "(" + getLeftSubFormula().toString(propositions) + " & " +
+        return "(" + getLeftSubFormula().toString(propositions) + ") & (" +
                 getRightSubFormula().toString(propositions) + ")";
     }
 

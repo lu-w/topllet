@@ -26,15 +26,12 @@ public class DNFTransformer implements MTCQVisitor
         {
             transformer = new DNFTransformer();
             mtcq = transformer.run(mtcq);
-            System.out.println("Run done.");
-            System.out.println("Lead to: " + transformer.getTransformedFormula());
         } while(transformer.hasAppliedTransformationRules());
         return mtcq;
     }
 
     protected MTCQFormula run(MTCQFormula formula)
     {
-        System.out.println("Running on " + formula);
         formula.accept(this);
         return this.getTransformedFormula();
     }
@@ -49,8 +46,6 @@ public class DNFTransformer implements MTCQVisitor
         // only require reiterating the tree if rule 8.2 was applied
         if ("8.2".equals(rule))
             _hasAppliedTransformationRule = true;
-        System.out.println("Applied rule#" + rule);
-        System.out.println(_newFormula);
     }
 
     protected MTCQFormula getTransformedFormula()

@@ -19,7 +19,7 @@ public class BoundedReleaseFormula extends BoundedBinaryTemporalFormula
     @Override
     public String toString(PropositionFactory propositions)
     {
-        return "(" + getLeftSubFormula().toString(propositions) + " R_" + intervalToString() + " " +
+        return "(" + getLeftSubFormula().toString(propositions) + ") R_" + intervalToString() + " (" +
                 getRightSubFormula().toString(propositions) + ")";
     }
 

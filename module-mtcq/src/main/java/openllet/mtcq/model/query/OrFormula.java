@@ -17,8 +17,8 @@ public class OrFormula extends BinaryBooleanFormula
     @Override
     public String toString(PropositionFactory propositions)
     {
-        return "(" + getLeftSubFormula().toString(propositions) + " | " + getRightSubFormula().toString(propositions) +
-                ")";
+        return "(" + getLeftSubFormula().toString(propositions) + ") | (" +
+                getRightSubFormula().toString(propositions) + ")";
     }
 
     public void accept(MTCQVisitor visitor)

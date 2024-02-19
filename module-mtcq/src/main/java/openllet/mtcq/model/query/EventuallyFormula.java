@@ -17,7 +17,7 @@ public class EventuallyFormula extends UnaryTemporalFormula
     @Override
     protected String toString(PropositionFactory propositions)
     {
-        return "F(" + getSubFormula().toString(propositions) + ")";
+        return "F (" + getSubFormula().toString(propositions) + ")";
     }
 
     public void accept(MTCQVisitor visitor)

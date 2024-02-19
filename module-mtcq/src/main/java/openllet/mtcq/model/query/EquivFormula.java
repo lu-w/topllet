@@ -17,7 +17,7 @@ public class EquivFormula extends BinaryBooleanFormula
     @Override
     protected String toString(PropositionFactory propositions)
     {
-        return "(" + getLeftSubFormula().toString(propositions) + " <-> " + getRightSubFormula().toString(propositions)
+        return "(" + getLeftSubFormula().toString(propositions) + ") <-> (" + getRightSubFormula().toString(propositions)
                 + ")";
     }
 
