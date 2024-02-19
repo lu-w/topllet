@@ -9,6 +9,11 @@ public class XorFormula extends BinaryBooleanFormula
         super(temporalKb, isDistinct, left, right);
     }
 
+    public XorFormula(MTCQFormula parentFormula, MTCQFormula left, MTCQFormula right)
+    {
+        super(parentFormula, left, right);
+    }
+
     @Override
     public String toString(PropositionFactory propositions)
     {

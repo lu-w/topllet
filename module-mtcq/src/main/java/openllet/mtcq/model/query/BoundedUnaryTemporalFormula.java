@@ -17,6 +17,12 @@ public abstract class BoundedUnaryTemporalFormula extends BoundedTemporalFormula
                 addQuery(cq);
     }
 
+    public BoundedUnaryTemporalFormula(MTCQFormula parentFormula, MTCQFormula subFormula, int lowerBound,
+                                       int upperBound)
+    {
+        this(parentFormula.getTemporalKB(), parentFormula.isDistinct(), subFormula, lowerBound, upperBound);
+    }
+
     public MTCQFormula getSubFormula()
     {
         return _subFormula;

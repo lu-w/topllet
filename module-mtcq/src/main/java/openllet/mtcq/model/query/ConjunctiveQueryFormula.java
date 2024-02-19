@@ -18,6 +18,11 @@ public class ConjunctiveQueryFormula extends MTCQFormula
         addQuery(_cq);
     }
 
+    public ConjunctiveQueryFormula(MTCQFormula parentFormula, ConjunctiveQuery conjunctiveQuery)
+    {
+        this(parentFormula.getTemporalKB(), parentFormula.isDistinct(), conjunctiveQuery);
+    }
+
     @Override
     public boolean isTemporal()
     {

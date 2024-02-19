@@ -30,6 +30,7 @@ public class DNFTransformer implements MTCQVisitor
             transformer = new DNFTransformer();
             mtcq = transformer.run(mtcq);
             System.out.println("Run done.");
+            System.out.println("Lead to: " + transformer.getTransformedFormula());
         } while(transformer.hasAppliedTransformationRules());
         return mtcq;
     }

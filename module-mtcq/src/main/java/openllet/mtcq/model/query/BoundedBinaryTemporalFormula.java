@@ -23,6 +23,13 @@ public abstract class BoundedBinaryTemporalFormula extends BoundedTemporalFormul
                 addQuery(cq);
     }
 
+    public BoundedBinaryTemporalFormula(MTCQFormula parentFormula, MTCQFormula leftSubFormula,
+                                        MTCQFormula rightSubFormula, int lowerBound, int upperBound)
+    {
+        this(parentFormula.getTemporalKB(), parentFormula.isDistinct(), leftSubFormula, rightSubFormula, lowerBound,
+                upperBound);
+    }
+
     public MTCQFormula getLeftSubFormula()
     {
         return _leftSubFormula;

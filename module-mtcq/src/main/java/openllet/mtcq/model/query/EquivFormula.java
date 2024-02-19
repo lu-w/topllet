@@ -9,6 +9,11 @@ public class EquivFormula extends BinaryBooleanFormula
         super(temporalKb, isDistinct, left, right);
     }
 
+    public EquivFormula(MTCQFormula parentFormula, MTCQFormula left, MTCQFormula right)
+    {
+        super(parentFormula, left, right);
+    }
+
     @Override
     protected String toString(PropositionFactory propositions)
     {

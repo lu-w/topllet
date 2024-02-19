@@ -20,11 +20,29 @@ public abstract class MTCQFormula extends AbstractCompositeQuery<ConjunctiveQuer
 
     private final TemporalKnowledgeBase _temporalKb;
     private PropositionFactory _propositions = null;
+    private MTCQFormula _parentFormula;
+
+    public MTCQFormula(MTCQFormula parentFormula)
+    {
+        super(parentFormula.getKB(), parentFormula.isDistinct());
+        _temporalKb = parentFormula.getTemporalKB();
+        _parentFormula = parentFormula;
+    }
 
     public MTCQFormula(TemporalKnowledgeBase temporalKb, boolean isDistinct)
     {
         super(temporalKb.get(0), isDistinct);
         _temporalKb = temporalKb;
+    }
+
+    public void setParentFormula(MTCQFormula parentFormula)
+    {
+        _parentFormula = parentFormula;
+    }
+
+    public MTCQFormula getParentFormula()
+    {
+        return _parentFormula;
     }
 
     /**

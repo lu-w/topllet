@@ -10,6 +10,11 @@ public class BoundedEventuallyFormula extends BoundedUnaryTemporalFormula
         super(temporalKb, isDistinct, subFormula, lowerBound, upperBound);
     }
 
+    public BoundedEventuallyFormula(MTCQFormula parentFormula, MTCQFormula subFormula, int lowerBound, int upperBound)
+    {
+        super(parentFormula, subFormula, lowerBound, upperBound);
+    }
+
     @Override
     public String toString(PropositionFactory propositions)
     {

@@ -9,6 +9,11 @@ public class ImplFormula extends BinaryBooleanFormula
         super(temporalKb, isDistinct, left, right);
     }
 
+    public ImplFormula(MTCQFormula parentFormula, MTCQFormula left, MTCQFormula right)
+    {
+        super(parentFormula, left, right);
+    }
+
     @Override
     protected String toString(PropositionFactory propositions)
     {

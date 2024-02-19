@@ -4,6 +4,11 @@ import openllet.mtcq.model.kb.TemporalKnowledgeBase;
 
 public class PropositionalFalseFormula extends NullaryMTCQFormula
 {
+    public PropositionalFalseFormula(MTCQFormula parentFormula)
+    {
+        super(parentFormula);
+    }
+
     public PropositionalFalseFormula(TemporalKnowledgeBase temporalKb, boolean isDistinct)
     {
         super(temporalKb, isDistinct);

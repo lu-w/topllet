@@ -4,10 +4,14 @@ import openllet.mtcq.model.kb.TemporalKnowledgeBase;
 
 public class UntilFormula extends BinaryTemporalFormula
 {
-    public UntilFormula(TemporalKnowledgeBase temporalKb, boolean isDistinct, MTCQFormula leftSubFormula,
-                        MTCQFormula rightSubFormula)
+    public UntilFormula(TemporalKnowledgeBase temporalKb, boolean isDistinct, MTCQFormula left, MTCQFormula right)
     {
-        super(temporalKb, isDistinct, leftSubFormula, rightSubFormula);
+        super(temporalKb, isDistinct, left, right);
+    }
+
+    public UntilFormula(MTCQFormula parentFormula, MTCQFormula left, MTCQFormula right)
+    {
+        super(parentFormula, left, right);
     }
 
     @Override

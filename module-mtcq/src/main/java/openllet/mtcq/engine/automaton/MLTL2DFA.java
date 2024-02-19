@@ -20,6 +20,7 @@ import java.util.regex.Pattern;
  * Converter from MLTL string to a DFA based on the MLTL2LTLf converter and the lydia command line tool.
  * Calls the tool using IOUtils.
  */
+@Deprecated
 public class MLTL2DFA
 {
     public static final Logger _logger = Log.getLogger(MLTL2DFA.class);

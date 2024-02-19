@@ -4,6 +4,11 @@ import openllet.mtcq.model.kb.TemporalKnowledgeBase;
 
 public class EndFormula extends NullaryMTCQFormula
 {
+    public EndFormula(MTCQFormula parentFormula)
+    {
+        super(parentFormula);
+    }
+
     public EndFormula(TemporalKnowledgeBase temporalKb, boolean isDistinct)
     {
         super(temporalKb, isDistinct);

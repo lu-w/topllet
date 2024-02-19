@@ -9,6 +9,11 @@ public class WeakNextFormula extends UnaryTemporalFormula
         super(temporalKb, isDistinct, subFormula);
     }
 
+    public WeakNextFormula(MTCQFormula parentFormula, MTCQFormula subFormula)
+    {
+        super(parentFormula, subFormula);
+    }
+
     @Override
     public String toString(PropositionFactory propositions)
     {

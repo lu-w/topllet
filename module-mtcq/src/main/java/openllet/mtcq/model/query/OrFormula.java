@@ -9,6 +9,11 @@ public class OrFormula extends BinaryBooleanFormula
         super(temporalKb, isDistinct, left, right);
     }
 
+    public OrFormula(MTCQFormula parentFormula, MTCQFormula left, MTCQFormula right)
+    {
+        super(parentFormula, left, right);
+    }
+
     @Override
     public String toString(PropositionFactory propositions)
     {

@@ -9,6 +9,11 @@ public class EventuallyFormula extends UnaryTemporalFormula
         super(temporalKb, isDistinct, subFormula);
     }
 
+    public EventuallyFormula(MTCQFormula parentFormula, MTCQFormula subFormula)
+    {
+        super(parentFormula, subFormula);
+    }
+
     @Override
     protected String toString(PropositionFactory propositions)
     {

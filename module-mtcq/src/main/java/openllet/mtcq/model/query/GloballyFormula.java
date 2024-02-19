@@ -9,6 +9,11 @@ public class GloballyFormula extends UnaryTemporalFormula
         super(temporalKb, isDistinct, subFormula);
     }
 
+    public GloballyFormula(MTCQFormula parentFormula, MTCQFormula subFormula)
+    {
+        super(parentFormula, subFormula);
+    }
+
     @Override
     protected String toString(PropositionFactory propositions)
     {

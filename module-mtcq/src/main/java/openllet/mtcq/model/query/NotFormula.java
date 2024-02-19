@@ -9,6 +9,11 @@ public class NotFormula extends UnaryBooleanFormula
         super(temporalKb, isDistinct, subFormula);
     }
 
+    public NotFormula(MTCQFormula parentFormula, MTCQFormula subFormula)
+    {
+        super(parentFormula, subFormula);
+    }
+
     @Override
     public String toString(PropositionFactory propositions)
     {

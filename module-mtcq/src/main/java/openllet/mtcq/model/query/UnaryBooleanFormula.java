@@ -9,6 +9,11 @@ public abstract class UnaryBooleanFormula extends UnaryMTCQFormula
         super(temporalKb, isDistinct, subFormula);
     }
 
+    public UnaryBooleanFormula(MTCQFormula parentFormula, MTCQFormula subFormula)
+    {
+        super(parentFormula, subFormula);
+    }
+
     @Override
     public boolean isTemporal()
     {

@@ -10,6 +10,11 @@ public abstract class BinaryBooleanFormula extends BinaryMTCQFormula
         super(temporalKb, isDistinct, left, right);
     }
 
+    public BinaryBooleanFormula(MTCQFormula parentFormula, MTCQFormula left, MTCQFormula right)
+    {
+        super(parentFormula, left, right);
+    }
+
     @Override
     public boolean isTemporal()
     {

@@ -9,6 +9,11 @@ public class StrongNextFormula extends UnaryTemporalFormula
         super(temporalKb, isDistinct, subFormula);
     }
 
+    public StrongNextFormula(MTCQFormula parentFormula, MTCQFormula subFormula)
+    {
+        super(parentFormula, subFormula);
+    }
+
     @Override
     public String toString(PropositionFactory propositions)
     {
