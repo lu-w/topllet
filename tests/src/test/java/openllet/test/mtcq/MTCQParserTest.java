@@ -47,7 +47,7 @@ public class MTCQParserTest extends AbstractMTCQTest
     public void testRepeatedCQ2()
     {
         MetricTemporalConjunctiveQuery q = temporalQuery("G(C(?x)) & X(C(x))");
-        testMTCQ(q, 2, "!((G (a)) & (X (a)))");
+        testMTCQ(q, 2, "!((G (a)) & (X (b)))");
         testCQ(q.getQueries().get(0), atoms(x, _C));
         testCQ(q.getQueries().get(1), atoms(x, _C));
         testVars(q, Set.of(), Set.of(x));

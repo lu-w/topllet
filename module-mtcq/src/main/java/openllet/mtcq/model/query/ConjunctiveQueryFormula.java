@@ -73,10 +73,14 @@ public class ConjunctiveQueryFormula extends MTCQFormula
 
     private String prefix(ATermAppl var)
     {
+        String result = "";
         if (_cq.getResultVars().contains(var))
-            return "?" + var.toString();
+            result = "?";
+        if (var.getArguments().isEmpty())
+            result += var.toString();
         else
-            return var.toString();
+            result += var.getArgument(0).toString(); // case: funVar()
+        return result;
     }
 
     public void accept(MTCQVisitor visitor)

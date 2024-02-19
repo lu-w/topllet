@@ -2,9 +2,6 @@ package openllet.mtcq.engine.rewriting;
 
 import openllet.mtcq.model.query.*;
 
-import java.util.ArrayList;
-import java.util.List;
-
 // TODO
 //  - check if all insideNext are set correctly
 //  - check if all appliedTransformationRule are set correctly (this is only required if the transformation has an effect "above it" - so e.g. rule 8
@@ -12,7 +9,7 @@ import java.util.List;
 //  - check if there is redundant code (that could be solved by using symmetry (see rule 14) or using existing rules and put run() outside)
 //  - build in some simplifcations (true or ... = true, a or a = a, a and a = a, etc.)
 
-public class DNFTransformer implements MTCQVisitor
+public class DXNFTransformer implements MTCQVisitor
 {
     private MTCQFormula _newFormula;
     private boolean _hasAppliedTransformationRule = false;
@@ -21,10 +18,10 @@ public class DNFTransformer implements MTCQVisitor
     public static MTCQFormula transform(MTCQFormula formula)
     {
         MTCQFormula mtcq = formula;
-        DNFTransformer transformer;
+        DXNFTransformer transformer;
         do
         {
-            transformer = new DNFTransformer();
+            transformer = new DXNFTransformer();
             mtcq = transformer.run(mtcq);
         } while(transformer.hasAppliedTransformationRules());
         return mtcq;
@@ -44,7 +41,7 @@ public class DNFTransformer implements MTCQVisitor
     private void appliedTransformationRule(String rule)
     {
         // only require reiterating the tree if rule 8.2 was applied
-        if ("8.2".equals(rule))
+        if ("8.2".equals(rule) || rule.startsWith("15."))
             _hasAppliedTransformationRule = true;
     }
 
@@ -171,16 +168,34 @@ public class DNFTransformer implements MTCQVisitor
     public void visit(GloballyFormula formula)
     {
         // Done
-        _newFormula = new GloballyFormula(formula.getTemporalKB(), formula.isDistinct(),
-                run(formula.getSubFormula()));
+        if (!_isInsideNext)
+        {
+            _newFormula = run(new AndFormula(formula.getTemporalKB(), formula.isDistinct(),
+                    formula.getSubFormula(),
+                    new WeakNextFormula(formula.getTemporalKB(), formula.isDistinct(), formula.copy())
+            ));
+            appliedTransformationRule("12");
+        }
+        else
+            _newFormula = new GloballyFormula(formula.getTemporalKB(), formula.isDistinct(),
+                    formula.getSubFormula().copy());
     }
 
     @Override
     public void visit(EventuallyFormula formula)
     {
         // Done
-        _newFormula = new EventuallyFormula(formula.getTemporalKB(), formula.isDistinct(),
-                run(formula.getSubFormula()));
+        if (!_isInsideNext)
+        {
+            _newFormula = run(new OrFormula(formula.getTemporalKB(), formula.isDistinct(),
+                    formula.getSubFormula(),
+                    new StrongNextFormula(formula.getTemporalKB(), formula.isDistinct(), formula.copy())
+            ));
+            appliedTransformationRule("12");
+        }
+        else
+            _newFormula = new EventuallyFormula(formula.getTemporalKB(), formula.isDistinct(),
+                    formula.getSubFormula().copy());
     }
 
     @Override
@@ -555,7 +570,9 @@ public class DNFTransformer implements MTCQVisitor
                 _newFormula = run(
                         new OrFormula(formula.getTemporalKB(), formula.isDistinct(),
                                 new StrongNextFormula(formula.getTemporalKB(), formula.isDistinct(),
-                                        new OrFormula(formula.getTemporalKB(), formula.isDistinct(), sub1O1, sub2)
+                                        new OrFormula(formula.getTemporalKB(), formula.isDistinct(),
+                                                ((StrongNextFormula) sub1O1).getSubFormula(),
+                                                ((StrongNextFormula) sub2).getSubFormula())
                                 ),
                                 sub1O2
                         )
@@ -567,7 +584,9 @@ public class DNFTransformer implements MTCQVisitor
                 _newFormula = run(
                         new OrFormula(formula.getTemporalKB(), formula.isDistinct(),
                                 new StrongNextFormula(formula.getTemporalKB(), formula.isDistinct(),
-                                        new OrFormula(formula.getTemporalKB(), formula.isDistinct(), sub1O2, sub2)
+                                        new OrFormula(formula.getTemporalKB(), formula.isDistinct(),
+                                                ((StrongNextFormula) sub1O2).getSubFormula(),
+                                                ((StrongNextFormula) sub2).getSubFormula())
                                 ),
                                 sub1O1
                         )
@@ -578,7 +597,8 @@ public class DNFTransformer implements MTCQVisitor
             {
                 _newFormula = new OrFormula(formula.getTemporalKB(), formula.isDistinct(),
                         run(new OrFormula(formula.getTemporalKB(), formula.isDistinct(), sub1O2, sub2)),
-                        run(new StrongNextFormula(formula.getTemporalKB(), formula.isDistinct(), sub1O1))
+                        run(new StrongNextFormula(formula.getTemporalKB(), formula.isDistinct(),
+                                ((StrongNextFormula) sub1O1).getSubFormula()))
                 );
                 appliedTransformationRule("15.3");
             }
@@ -586,7 +606,8 @@ public class DNFTransformer implements MTCQVisitor
             {
                 _newFormula = new OrFormula(formula.getTemporalKB(), formula.isDistinct(),
                         run(new OrFormula(formula.getTemporalKB(), formula.isDistinct(), sub1O1, sub2)),
-                        run(new StrongNextFormula(formula.getTemporalKB(), formula.isDistinct(), sub1O2))
+                        run(new StrongNextFormula(formula.getTemporalKB(), formula.isDistinct(),
+                                ((StrongNextFormula) sub1O2).getSubFormula()))
                 );
                 appliedTransformationRule("15.4");
             }

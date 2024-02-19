@@ -1,6 +1,6 @@
 package openllet.test.mtcq;
 
-import openllet.mtcq.engine.rewriting.DNFTransformer;
+import openllet.mtcq.engine.rewriting.DXNFTransformer;
 import openllet.mtcq.model.query.MTCQFormula;
 import org.junit.Test;
 
@@ -13,16 +13,86 @@ public class MTCQTransformerTest extends AbstractMTCQTest
     {
         simpleTKB();
         MTCQFormula q = temporalQuery("!X[!](A(a) | ((B(b)) & (C(c))))");
-        MTCQFormula tq = DNFTransformer.transform(q);
-        assertEquals("(last | X[!] ((!((A(a))) & (!((B(b))) | !((C(c)))))))", tq.toString());
+        MTCQFormula tq = DXNFTransformer.transform(q);
+        assertEquals("(last) | (X[!] ((!(A(a))) & ((!(B(b))) | (!(C(c))))))", tq.toString());
     }
 
     @Test
-    public void test()
+    public void testNextInUntil()
     {
-        simpleTKB(); // "(A(a)) U (X[!] (G (B(a))) | X[!] (C(a))) | (D(a))"
+        simpleTKB();
         MTCQFormula q = temporalQuery("(A(a)) U (X[!] (D(a)))");
-        MTCQFormula tq = DNFTransformer.transform(q);
-        System.out.println(tq);
+        MTCQFormula tq = DXNFTransformer.transform(q);
+        assertEquals("((X[!] (D(a))) | (A(a))) & (X[!] ((D(a)) | ((A(a)) U (X[!] (D(a))))))", tq.toString());
+    }
+
+    @Test
+    public void testNextNestedInOr()
+    {
+        simpleTKB();
+        MTCQFormula q = temporalQuery("(X[!] (A(a))) | ((B(b)) | ((C(c)) | (X[!] (D(d)))))");
+        MTCQFormula tq = DXNFTransformer.transform(q);
+        assertEquals("(X[!] ((D(d)) | (A(a)))) | ((C(c)) | (B(b)))", tq.toString());
+    }
+
+    @Test
+    public void testBubblingUpNext1()
+    {
+        simpleTKB();
+        MTCQFormula q = temporalQuery("X[!] (A(a)) | (X[!] B(b))");
+        MTCQFormula tq = DXNFTransformer.transform(q);
+        assertEquals("X[!] ((A(a)) | (B(b)))", tq.toString());
+    }
+
+    @Test
+    public void testBubblingUpNext2()
+    {
+        simpleTKB();
+        MTCQFormula q = temporalQuery("X[!] (A(a)) | (X[!] (B(b)) | (X[!] (C(c))))");
+        MTCQFormula tq = DXNFTransformer.transform(q);
+        assertEquals("X[!] ((A(a)) | ((B(b)) | (C(c))))", tq.toString());
+    }
+
+    @Test
+    public void testBubblingUpNext3()
+    {
+        simpleTKB();
+        MTCQFormula q = temporalQuery("X[!] (A(a)) | ((X[!] B(b)) | (((X[!] C(c)) | (X[!] D(d)))))");
+        MTCQFormula tq = DXNFTransformer.transform(q);
+        assertEquals("X[!] (((B(b)) | (A(a))) | ((C(c)) | (D(d))))", tq.toString());
+    }
+
+    @Test
+    public void testBubblingUpNext4()
+    {
+        simpleTKB();
+        MTCQFormula q = temporalQuery("X[!] (A(a)) | (X[!] (B(b)) | (X[!] ( C(c) | X[!] D(d))))");
+        MTCQFormula tq = DXNFTransformer.transform(q);
+        assertEquals("X[!] ((((C(c)) | (B(b))) | (A(a))) | (X[!] (D(d))))", tq.toString());
+    }
+
+    @Test
+    public void testParkingVehicles()
+    {
+        useCaseTKBPassingParkingVehicles(false);
+        MTCQFormula q = temporalQuery("""
+        # A=Vehicle, B=2_Lane_Road, C=Parking_Vehicle, r=is_in_front_of, q=sfIntersects, s=is_to_the_side_of,
+        # t=is_in_proximity, u=phy:is_behind
+        G (A(?x) & B(z) & q(z,?x) & C(?y))
+            &
+        F
+        (
+            (r(?y,?x))
+                &
+            X[!]
+            (
+                (t(?x,?y) & s(?y,?x))
+                    U
+                (u(?y,?x))
+            )
+        )""");
+        MTCQFormula tq = DXNFTransformer.transform(q);
+        assertEquals("", tq.toString());
+
     }
 }
