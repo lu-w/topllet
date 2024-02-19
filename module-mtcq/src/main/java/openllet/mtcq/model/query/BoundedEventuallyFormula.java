@@ -25,4 +25,11 @@ public class BoundedEventuallyFormula extends BoundedUnaryTemporalFormula
     {
         visitor.visit(this);
     }
+
+    @Override
+    public BoundedEventuallyFormula copy()
+    {
+        return new BoundedEventuallyFormula(getTemporalKB(), isDistinct(), getSubFormula().copy(), getLowerBound(),
+                getUpperBound());
+    }
 }

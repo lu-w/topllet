@@ -4,12 +4,14 @@ import openllet.mtcq.model.kb.TemporalKnowledgeBase;
 
 public class BoundedReleaseFormula extends BoundedBinaryTemporalFormula
 {
-    public BoundedReleaseFormula(TemporalKnowledgeBase temporalKb, boolean isDistinct, MTCQFormula leftSubFormula, MTCQFormula rightSubFormula, int lowerBound, int upperBound)
+    public BoundedReleaseFormula(TemporalKnowledgeBase temporalKb, boolean isDistinct, MTCQFormula leftSubFormula,
+                                 MTCQFormula rightSubFormula, int lowerBound, int upperBound)
     {
         super(temporalKb, isDistinct, leftSubFormula, rightSubFormula, lowerBound, upperBound);
     }
 
-    public BoundedReleaseFormula(MTCQFormula parentFormula, MTCQFormula leftSubFormula, MTCQFormula rightSubFormula, int lowerBound, int upperBound)
+    public BoundedReleaseFormula(MTCQFormula parentFormula, MTCQFormula leftSubFormula, MTCQFormula rightSubFormula,
+                                 int lowerBound, int upperBound)
     {
         super(parentFormula, leftSubFormula, rightSubFormula, lowerBound, upperBound);
     }
@@ -24,5 +26,12 @@ public class BoundedReleaseFormula extends BoundedBinaryTemporalFormula
     public void accept(MTCQVisitor visitor)
     {
         visitor.visit(this);
+    }
+
+    @Override
+    public BoundedReleaseFormula copy()
+    {
+        return new BoundedReleaseFormula(getTemporalKB(), isDistinct(), getLeftSubFormula().copy(),
+                getRightSubFormula().copy(), getLowerBound(), getUpperBound());
     }
 }

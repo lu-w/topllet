@@ -107,4 +107,7 @@ public abstract class MTCQFormula extends AbstractCompositeQuery<ConjunctiveQuer
     protected abstract String toString(PropositionFactory propositions);
 
     public abstract void accept(MTCQVisitor visitor);
+
+    @Override
+    public abstract MTCQFormula copy();
 }

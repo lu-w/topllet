@@ -83,4 +83,10 @@ public class ConjunctiveQueryFormula extends MTCQFormula
     {
         visitor.visit(this);
     }
+
+    @Override
+    public MTCQFormula copy()
+    {
+        return new ConjunctiveQueryFormula(getTemporalKB(), isDistinct(), _cq.copy());
+    }
 }

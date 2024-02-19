@@ -24,4 +24,10 @@ public class EventuallyFormula extends UnaryTemporalFormula
     {
         visitor.visit(this);
     }
+
+    @Override
+    public EventuallyFormula copy()
+    {
+        return new EventuallyFormula(getTemporalKB(), isDistinct(), getSubFormula().copy());
+    }
 }

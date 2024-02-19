@@ -24,4 +24,11 @@ public class BoundedGloballyFormula extends BoundedUnaryTemporalFormula
     {
         visitor.visit(this);
     }
+
+    @Override
+    public BoundedGloballyFormula copy()
+    {
+        return new BoundedGloballyFormula(getTemporalKB(), isDistinct(), getSubFormula().copy(), getLowerBound(),
+                getUpperBound());
+    }
 }

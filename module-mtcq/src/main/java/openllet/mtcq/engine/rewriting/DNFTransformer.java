@@ -16,15 +16,12 @@ public class DNFTransformer implements MTCQVisitor
 {
     private MTCQFormula _newFormula;
     private boolean _hasAppliedTransformationRule = false;
-    private List<String> _appliedRules = new ArrayList<>();
     private boolean _isInsideNext = false;
 
     public static MTCQFormula transform(MTCQFormula formula)
     {
         MTCQFormula mtcq = formula;
         DNFTransformer transformer;
-        // TODO multiple passes could probably be prevented since the only rule requiring it is 8 (where we could use a parent link and then call run() on the parent)
-        //  but make sure that this is the only rule where it can happen
         do
         {
             transformer = new DNFTransformer();
@@ -37,6 +34,7 @@ public class DNFTransformer implements MTCQVisitor
 
     protected MTCQFormula run(MTCQFormula formula)
     {
+        System.out.println("Running on " + formula);
         formula.accept(this);
         return this.getTransformedFormula();
     }
@@ -48,9 +46,11 @@ public class DNFTransformer implements MTCQVisitor
 
     private void appliedTransformationRule(String rule)
     {
-        _hasAppliedTransformationRule = true;
+        // only require reiterating the tree if rule 8.2 was applied
+        if ("8.2".equals(rule))
+            _hasAppliedTransformationRule = true;
         System.out.println("Applied rule#" + rule);
-        _appliedRules.add(rule);
+        System.out.println(_newFormula);
     }
 
     protected MTCQFormula getTransformedFormula()
@@ -280,13 +280,14 @@ public class DNFTransformer implements MTCQVisitor
     @Override
     public void visit(WeakNextFormula formula)
     {
-        // Rule 15
+        // Rule 14
         _newFormula = run(
                 new OrFormula(formula.getTemporalKB(), formula.isDistinct(),
                     new LastFormula(formula.getTemporalKB(), formula.isDistinct()),
                     new StrongNextFormula(formula.getTemporalKB(), formula.isDistinct(), formula.getSubFormula())
                 )
         );
+        appliedTransformationRule("14");
     }
 
     @Override
@@ -305,8 +306,8 @@ public class DNFTransformer implements MTCQVisitor
         // Done
         if (!_isInsideNext)
         {
-            _newFormula = run(
-                    new OrFormula(formula.getTemporalKB(), formula.isDistinct(),
+            _newFormula =
+                    run(new OrFormula(formula.getTemporalKB(), formula.isDistinct(),
                             formula.getRightSubFormula(),
                             new AndFormula(formula.getTemporalKB(), formula.isDistinct(),
                                     formula.getLeftSubFormula(),
@@ -317,13 +318,12 @@ public class DNFTransformer implements MTCQVisitor
                                             )
                                     )
                             )
-                    )
-            );
+                    ));
             appliedTransformationRule("12");
         }
         else
-            _newFormula = new UntilFormula(formula.getTemporalKB(), formula.isDistinct(), formula.getLeftSubFormula(),
-                    formula.getRightSubFormula()); // TODO copy of all subformula required since we do not recurse into them (that would be useless)
+            _newFormula = new UntilFormula(formula.getTemporalKB(), formula.isDistinct(),
+                    formula.getLeftSubFormula().copy(), formula.getRightSubFormula().copy());
     }
 
     @Override
@@ -349,8 +349,8 @@ public class DNFTransformer implements MTCQVisitor
             appliedTransformationRule("13");
         }
         else
-            _newFormula = new ReleaseFormula(formula.getTemporalKB(), formula.isDistinct(), formula.getLeftSubFormula(),
-                    formula.getRightSubFormula()); // TODO copy of all subformula required since we do not recurse into them (that would be useless)
+            _newFormula = new ReleaseFormula(formula.getTemporalKB(), formula.isDistinct(),
+                    formula.getLeftSubFormula().copy(), formula.getRightSubFormula().copy());
     }
 
     @Override
@@ -396,6 +396,7 @@ public class DNFTransformer implements MTCQVisitor
                             sub2,
                             sub1A.getRightSubFormula()
                     )));
+            appliedTransformationRule("9.1");
         }
         else if (sub2 instanceof AndFormula sub2A)
         {
@@ -409,8 +410,9 @@ public class DNFTransformer implements MTCQVisitor
                             sub1,
                             sub2A.getRightSubFormula()
                     )));
+            appliedTransformationRule("9.2");
         }
-        else if (sub1 instanceof UntilFormula sub1U)
+        else if (sub1 instanceof UntilFormula sub1U && !_isInsideNext)
         {
             // Rule 10.1
             _newFormula = new AndFormula(formula.getTemporalKB(), formula.isDistinct(),
@@ -438,8 +440,9 @@ public class DNFTransformer implements MTCQVisitor
                     )
                 )
             );
+            appliedTransformationRule("10.1");
         }
-        else if (sub2 instanceof UntilFormula sub2U)
+        else if (sub2 instanceof UntilFormula sub2U && !_isInsideNext)
         {
             // Rule 10.2
             _newFormula = new AndFormula(formula.getTemporalKB(), formula.isDistinct(),
@@ -467,8 +470,9 @@ public class DNFTransformer implements MTCQVisitor
                             )
                     )
             );
+            appliedTransformationRule("10.2");
         }
-        else if (sub1 instanceof ReleaseFormula sub1R)
+        else if (sub1 instanceof ReleaseFormula sub1R && !_isInsideNext)
         {
             // Rule 11.1
             _newFormula = new AndFormula(formula.getTemporalKB(), formula.isDistinct(),
@@ -496,8 +500,9 @@ public class DNFTransformer implements MTCQVisitor
                             )
                     )
             );
+            appliedTransformationRule("11.1");
         }
-        else if (sub2 instanceof ReleaseFormula sub2R)
+        else if (sub2 instanceof ReleaseFormula sub2R && !_isInsideNext)
         {
             // Rule 11.2
             _newFormula = new AndFormula(formula.getTemporalKB(), formula.isDistinct(),
@@ -525,6 +530,7 @@ public class DNFTransformer implements MTCQVisitor
                             )
                     )
             );
+            appliedTransformationRule("11.2");
         }
         else if (sub1 instanceof OrFormula || sub2 instanceof OrFormula)
         {
@@ -559,7 +565,7 @@ public class DNFTransformer implements MTCQVisitor
                                 sub1O2
                         )
                 );
-                appliedTransformationRule("14.1");
+                appliedTransformationRule("15.1");
             }
             else if (!sub1O1X && sub1O2X && sub2X)
             {
@@ -571,7 +577,7 @@ public class DNFTransformer implements MTCQVisitor
                                 sub1O1
                         )
                 );
-                appliedTransformationRule("14.2");
+                appliedTransformationRule("15.2");
             }
             else if (sub1O1X && !sub1O2X && !sub2X)
             {
@@ -579,7 +585,7 @@ public class DNFTransformer implements MTCQVisitor
                         run(new OrFormula(formula.getTemporalKB(), formula.isDistinct(), sub1O2, sub2)),
                         run(new StrongNextFormula(formula.getTemporalKB(), formula.isDistinct(), sub1O1))
                 );
-                appliedTransformationRule("14.3");
+                appliedTransformationRule("15.3");
             }
             else if (!sub1O1X && sub1O2X && !sub2X)
             {
@@ -587,7 +593,7 @@ public class DNFTransformer implements MTCQVisitor
                         run(new OrFormula(formula.getTemporalKB(), formula.isDistinct(), sub1O1, sub2)),
                         run(new StrongNextFormula(formula.getTemporalKB(), formula.isDistinct(), sub1O2))
                 );
-                appliedTransformationRule("14.4");
+                appliedTransformationRule("15.4");
             }
             else
             {

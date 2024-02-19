@@ -25,4 +25,10 @@ public class AndFormula extends BinaryBooleanFormula
     {
         visitor.visit(this);
     }
+
+    @Override
+    public AndFormula copy()
+    {
+        return new AndFormula(getTemporalKB(), isDistinct(), getLeftSubFormula().copy(), getRightSubFormula().copy());
+    }
 }

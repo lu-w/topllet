@@ -25,4 +25,10 @@ public class PropositionalTrueFormula extends NullaryMTCQFormula
     {
         visitor.visit(this);
     }
+
+    @Override
+    public PropositionalTrueFormula copy()
+    {
+        return new PropositionalTrueFormula(getTemporalKB(), isDistinct());
+    }
 }

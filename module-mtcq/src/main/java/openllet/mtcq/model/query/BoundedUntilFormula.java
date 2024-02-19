@@ -28,4 +28,11 @@ public class BoundedUntilFormula extends BoundedBinaryTemporalFormula
     {
         visitor.visit(this);
     }
+
+    @Override
+    public BoundedUntilFormula copy()
+    {
+        return new BoundedUntilFormula(getTemporalKB(), isDistinct(), getLeftSubFormula().copy(),
+                getRightSubFormula().copy(), getLowerBound(), getUpperBound());
+    }
 }

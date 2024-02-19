@@ -24,4 +24,10 @@ public class LogicalFalseFormula extends NullaryMTCQFormula
     {
         visitor.visit(this);
     }
+
+    @Override
+    public LogicalFalseFormula copy()
+    {
+        return new LogicalFalseFormula(getTemporalKB(), isDistinct());
+    }
 }

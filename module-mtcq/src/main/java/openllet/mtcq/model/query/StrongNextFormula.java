@@ -24,4 +24,10 @@ public class StrongNextFormula extends UnaryTemporalFormula
     {
         visitor.visit(this);
     }
+
+    @Override
+    public StrongNextFormula copy()
+    {
+        return new StrongNextFormula(getTemporalKB(), isDistinct(), getSubFormula().copy());
+    }
 }

@@ -25,4 +25,10 @@ public class EquivFormula extends BinaryBooleanFormula
     {
         visitor.visit(this);
     }
+
+    @Override
+    public EquivFormula copy()
+    {
+        return new EquivFormula(getTemporalKB(), isDistinct(), getLeftSubFormula().copy(), getRightSubFormula().copy());
+    }
 }

@@ -30,4 +30,10 @@ public class EmptyFormula extends MTCQFormula
     {
         visitor.visit(this);
     }
+
+    @Override
+    public EmptyFormula copy()
+    {
+        return new EmptyFormula(getTemporalKB(), isDistinct());
+    }
 }

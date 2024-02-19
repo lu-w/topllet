@@ -24,4 +24,10 @@ public class WeakNextFormula extends UnaryTemporalFormula
     {
         visitor.visit(this);
     }
+
+    @Override
+    public WeakNextFormula copy()
+    {
+        return new WeakNextFormula(getTemporalKB(), isDistinct(), getSubFormula().copy());
+    }
 }

@@ -24,4 +24,10 @@ public class GloballyFormula extends UnaryTemporalFormula
     {
         visitor.visit(this);
     }
+
+    @Override
+    public GloballyFormula copy()
+    {
+        return new GloballyFormula(getTemporalKB(), isDistinct(), getSubFormula().copy());
+    }
 }

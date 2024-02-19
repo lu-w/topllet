@@ -24,4 +24,10 @@ public class NotFormula extends UnaryBooleanFormula
     {
         visitor.visit(this);
     }
+
+    @Override
+    public NotFormula copy()
+    {
+        return new NotFormula(getTemporalKB(), isDistinct(), getSubFormula().copy());
+    }
 }

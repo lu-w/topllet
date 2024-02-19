@@ -25,4 +25,10 @@ public class ImplFormula extends BinaryBooleanFormula
     {
         visitor.visit(this);
     }
+
+    @Override
+    public ImplFormula copy()
+    {
+        return new ImplFormula(getTemporalKB(), isDistinct(), getLeftSubFormula().copy(), getRightSubFormula().copy());
+    }
 }

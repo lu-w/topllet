@@ -25,4 +25,10 @@ public class OrFormula extends BinaryBooleanFormula
     {
         visitor.visit(this);
     }
+
+    @Override
+    public OrFormula copy()
+    {
+        return new OrFormula(getTemporalKB(), isDistinct(), getLeftSubFormula().copy(), getRightSubFormula().copy());
+    }
 }

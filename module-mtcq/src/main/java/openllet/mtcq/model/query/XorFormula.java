@@ -25,4 +25,10 @@ public class XorFormula extends BinaryBooleanFormula
     {
         visitor.visit(this);
     }
+
+    @Override
+    public XorFormula copy()
+    {
+        return new XorFormula(getTemporalKB(), isDistinct(), getLeftSubFormula().copy(), getRightSubFormula().copy());
+    }
 }

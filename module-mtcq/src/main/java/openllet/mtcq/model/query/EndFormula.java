@@ -24,4 +24,10 @@ public class EndFormula extends NullaryMTCQFormula
     {
         visitor.visit(this);
     }
+
+    @Override
+    public EndFormula copy()
+    {
+        return new EndFormula(getTemporalKB(), isDistinct());
+    }
 }

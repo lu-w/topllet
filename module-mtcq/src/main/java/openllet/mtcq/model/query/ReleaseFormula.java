@@ -25,4 +25,10 @@ public class ReleaseFormula extends BinaryTemporalFormula
     {
         visitor.visit(this);
     }
+
+    @Override
+    public ReleaseFormula copy()
+    {
+        return new ReleaseFormula(getTemporalKB(), isDistinct(), getLeftSubFormula().copy(), getRightSubFormula().copy());
+    }
 }

@@ -25,4 +25,10 @@ public class UntilFormula extends BinaryTemporalFormula
     {
         visitor.visit(this);
     }
+
+    @Override
+    public UntilFormula copy()
+    {
+        return new UntilFormula(getTemporalKB(), isDistinct(), getLeftSubFormula().copy(), getRightSubFormula().copy());
+    }
 }

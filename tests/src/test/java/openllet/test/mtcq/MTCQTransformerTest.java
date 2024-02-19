@@ -20,8 +20,8 @@ public class MTCQTransformerTest extends AbstractMTCQTest
     @Test
     public void test()
     {
-        simpleTKB();
-        MTCQFormula q = temporalQuery("(A(a)) U (X[!] (G (B(a))) | X[!] (C(a))) | (D(a))");
+        simpleTKB(); // "(A(a)) U (X[!] (G (B(a))) | X[!] (C(a))) | (D(a))"
+        MTCQFormula q = temporalQuery("(A(a)) U (X[!] (D(a)))");
         MTCQFormula tq = DNFTransformer.transform(q);
         System.out.println(tq);
     }
