@@ -3,12 +3,13 @@ package openllet.mtcq.engine.rewriting;
 import openllet.mtcq.model.query.*;
 
 // TODO
+//  - implement bounded operators
 //  - check if all insideNext are set correctly
 //  - check if all appliedTransformationRule are set correctly (this is only required if the transformation has an effect "above it" - so e.g. rule 8
 //  - check if all runs are correctly set (sometimes they can be pushed inwards or pushed outwards to reduce code complexity)
 //  - check if copy() can be used instead of creating the formula on the fly.
 //  - check if there is redundant code (that could be solved by using symmetry (see rule 14) or using existing rules and put run() outside)
-//  - build in some simplifcations (true or ... = true, a or a = a, a and a = a, etc.)
+//  - build an extra visitor for simplifications (https://github.com/bpodgursky/jbool_expressions?tab=readme-ov-file#rules)
 
 public class DXNFTransformer implements MTCQVisitor
 {
@@ -143,42 +144,36 @@ public class DXNFTransformer implements MTCQVisitor
     @Override
     public void visit(LogicalTrueFormula formula)
     {
-        // Done
         _newFormula = new LogicalTrueFormula(formula.getTemporalKB(), formula.isDistinct());
     }
 
     @Override
     public void visit(LogicalFalseFormula formula)
     {
-        // Done
         _newFormula = new LogicalFalseFormula(formula.getTemporalKB(), formula.isDistinct());
     }
 
     @Override
     public void visit(PropositionalTrueFormula formula)
     {
-        // Done
         _newFormula = new PropositionalTrueFormula(formula.getTemporalKB(), formula.isDistinct());
     }
 
     @Override
     public void visit(PropositionalFalseFormula formula)
     {
-        // Done
         _newFormula = new PropositionalFalseFormula(formula.getTemporalKB(), formula.isDistinct());
     }
 
     @Override
     public void visit(LastFormula formula)
     {
-        // Done
         _newFormula = new LastFormula(formula.getTemporalKB(), formula.isDistinct());
     }
 
     @Override
     public void visit(ImplFormula formula)
     {
-        // Done
         _newFormula = run(new OrFormula(formula.getTemporalKB(), formula.isDistinct(),
                 new NotFormula(formula.getTemporalKB(), formula.isDistinct(), formula.getLeftSubFormula()),
                 formula.getRightSubFormula())
@@ -188,7 +183,6 @@ public class DXNFTransformer implements MTCQVisitor
     @Override
     public void visit(GloballyFormula formula)
     {
-        // Done
         if (!_isInsideNext)
         {
             _newFormula = run(new AndFormula(formula.getTemporalKB(), formula.isDistinct(),
@@ -198,14 +192,12 @@ public class DXNFTransformer implements MTCQVisitor
             appliedTransformationRule("12.2");
         }
         else
-            _newFormula = new GloballyFormula(formula.getTemporalKB(), formula.isDistinct(),
-                    formula.getSubFormula().copy());
+            _newFormula = formula.copy();
     }
 
     @Override
     public void visit(EventuallyFormula formula)
     {
-        // Done
         if (!_isInsideNext)
         {
             _newFormula = run(new OrFormula(formula.getTemporalKB(), formula.isDistinct(),
@@ -215,14 +207,12 @@ public class DXNFTransformer implements MTCQVisitor
             appliedTransformationRule("12.3");
         }
         else
-            _newFormula = new EventuallyFormula(formula.getTemporalKB(), formula.isDistinct(),
-                    formula.getSubFormula().copy());
+            _newFormula = formula.copy();
     }
 
     @Override
     public void visit(EquivFormula formula)
     {
-        // Done
         _newFormula = run(new OrFormula(formula.getTemporalKB(), formula.isDistinct(),
                 new AndFormula(formula.getTemporalKB(), formula.isDistinct(),
                         formula.getLeftSubFormula(),
@@ -238,21 +228,18 @@ public class DXNFTransformer implements MTCQVisitor
     @Override
     public void visit(EndFormula formula)
     {
-        // Done
         _newFormula = new EndFormula(formula.getTemporalKB(), formula.isDistinct());
     }
 
     @Override
     public void visit(EmptyFormula formula)
     {
-        // Done
         _newFormula = new EmptyFormula(formula.getTemporalKB(), formula.isDistinct());
     }
 
     @Override
     public void visit(ConjunctiveQueryFormula formula)
     {
-        // Done
         _newFormula = new ConjunctiveQueryFormula(formula.getTemporalKB(), formula.isDistinct(),
                 formula.getConjunctiveQuery().copy());
     }
@@ -260,34 +247,143 @@ public class DXNFTransformer implements MTCQVisitor
     @Override
     public void visit(BoundedUntilFormula formula)
     {
-        // TODO (12,13)
-
+        if (!_isInsideNext)
+        {
+            if (formula.getLowerBound() == 0 && formula.getUpperBound() == 0)
+            {
+                _newFormula = run(formula.getRightSubFormula());
+            }
+            if (formula.getLowerBound() == 0 && formula.getUpperBound() > 0)
+            {
+                _newFormula =
+                        run(new OrFormula(formula.getTemporalKB(), formula.isDistinct(),
+                                formula.getRightSubFormula(),
+                                new AndFormula(formula.getTemporalKB(), formula.isDistinct(),
+                                        formula.getLeftSubFormula(),
+                                        new StrongNextFormula(formula.getTemporalKB(), formula.isDistinct(),
+                                                new BoundedUntilFormula(formula.getTemporalKB(), formula.isDistinct(),
+                                                        formula.getLeftSubFormula(),
+                                                        formula.getRightSubFormula(),
+                                                        0,
+                                                        formula.getUpperBound() - 1
+                                                )
+                                        )
+                                )
+                        ));
+            }
+            else
+            {
+                _newFormula =
+                        run(new StrongNextFormula(formula.getTemporalKB(), formula.isDistinct(),
+                                new BoundedUntilFormula(formula.getTemporalKB(), formula.isDistinct(),
+                                        formula.getLeftSubFormula(),
+                                        formula.getRightSubFormula(),
+                                        formula.getLowerBound() - 1,
+                                        formula.getUpperBound() - 1
+                                )
+                ));
+            }
+            appliedTransformationRule("12.4");
+        }
+        else
+            _newFormula = formula.copy();
     }
 
     @Override
     public void visit(BoundedReleaseFormula formula)
     {
-        // TODO (12,13)
-
+        if (!_isInsideNext)
+        {
+            if (formula.getLowerBound() == 0 && formula.getUpperBound() == 0)
+            {
+                _newFormula = run(formula.getRightSubFormula());
+            }
+            if (formula.getLowerBound() == 0 && formula.getUpperBound() > 0)
+            {
+                _newFormula =
+                        run(new OrFormula(formula.getTemporalKB(), formula.isDistinct(),
+                                formula.getLeftSubFormula(),
+                                new AndFormula(formula.getTemporalKB(), formula.isDistinct(),
+                                        formula.getRightSubFormula(),
+                                        new WeakNextFormula(formula.getTemporalKB(), formula.isDistinct(),
+                                                new BoundedReleaseFormula(formula.getTemporalKB(), formula.isDistinct(),
+                                                        formula.getLeftSubFormula(),
+                                                        formula.getRightSubFormula(),
+                                                        0,
+                                                        formula.getUpperBound() - 1
+                                                )
+                                        )
+                                )
+                        ));
+            }
+            else
+            {
+                _newFormula =
+                        run(new WeakNextFormula(formula.getTemporalKB(), formula.isDistinct(),
+                                new BoundedReleaseFormula(formula.getTemporalKB(), formula.isDistinct(),
+                                        formula.getLeftSubFormula(),
+                                        formula.getRightSubFormula(),
+                                        formula.getLowerBound() - 1,
+                                        formula.getUpperBound() - 1
+                                )
+                        ));
+            }
+            appliedTransformationRule("12.5");
+        }
+        else
+            _newFormula = formula.copy();
     }
 
     @Override
     public void visit(BoundedGloballyFormula formula)
     {
-        // TODO (12,13)
-
+        if (!_isInsideNext)
+        {
+            if (formula.getUpperBound() > 0)
+                _newFormula = run(new AndFormula(formula.getTemporalKB(), formula.isDistinct(),
+                        formula.getSubFormula(),
+                        new WeakNextFormula(formula.getTemporalKB(), formula.isDistinct(),
+                                new BoundedGloballyFormula(formula.getTemporalKB(), formula.isDistinct(),
+                                        formula.getSubFormula(),
+                                        formula.getLowerBound(),
+                                        formula.getUpperBound() - 1
+                                )
+                        )
+                ));
+            else
+                _newFormula = run(formula.getSubFormula());  // TODO maybe EndFormula | SubFormula to handle empty trace?
+            appliedTransformationRule("12.6");
+        }
+        else
+            _newFormula = formula.copy();
     }
 
     @Override
     public void visit(BoundedEventuallyFormula formula)
     {
-        // TODO (12,13)
-
+        if (!_isInsideNext)
+        {
+            if (formula.getUpperBound() > 0)
+                _newFormula = run(new OrFormula(formula.getTemporalKB(), formula.isDistinct(),
+                        formula.getSubFormula(),
+                        new StrongNextFormula(formula.getTemporalKB(), formula.isDistinct(),
+                                new BoundedEventuallyFormula(formula.getTemporalKB(), formula.isDistinct(),
+                                        formula.getSubFormula(),
+                                        formula.getLowerBound(),
+                                        formula.getUpperBound() - 1
+                                )
+                        )
+                ));
+            else
+                _newFormula = run(formula.getSubFormula());
+            appliedTransformationRule("12.7");
+        }
+        else
+            _newFormula = formula.copy();
     }
 
     public void visit(AndFormula formula)
     {
-        // Done
         _newFormula = new AndFormula(formula.getTemporalKB(), formula.isDistinct(),
                 run(formula.getLeftSubFormula()), run(formula.getRightSubFormula()));
     }
@@ -295,7 +391,6 @@ public class DXNFTransformer implements MTCQVisitor
     @Override
     public void visit(XorFormula formula)
     {
-        // Done
         _newFormula = run(new OrFormula(formula.getTemporalKB(), formula.isDistinct(),
                 new AndFormula(formula.getTemporalKB(), formula.isDistinct(),
                         new NotFormula(formula.getTemporalKB(), formula.isDistinct(), formula.getLeftSubFormula()),
@@ -324,7 +419,6 @@ public class DXNFTransformer implements MTCQVisitor
     @Override
     public void visit(StrongNextFormula formula)
     {
-        // Done
         _isInsideNext = true;
         _newFormula = new StrongNextFormula(formula.getTemporalKB(), formula.isDistinct(),
                 run(formula.getSubFormula()));
@@ -334,7 +428,6 @@ public class DXNFTransformer implements MTCQVisitor
     @Override
     public void visit(UntilFormula formula)
     {
-        // Done
         if (!_isInsideNext)
         {
             _newFormula =
@@ -353,14 +446,12 @@ public class DXNFTransformer implements MTCQVisitor
             appliedTransformationRule("12.1");
         }
         else
-            _newFormula = new UntilFormula(formula.getTemporalKB(), formula.isDistinct(),
-                    formula.getLeftSubFormula().copy(), formula.getRightSubFormula().copy());
+            _newFormula = formula.copy();
     }
 
     @Override
     public void visit(ReleaseFormula formula)
     {
-        // Done
         if (!_isInsideNext)
         {
             _newFormula = run(
@@ -380,8 +471,7 @@ public class DXNFTransformer implements MTCQVisitor
             appliedTransformationRule("13");
         }
         else
-            _newFormula = new ReleaseFormula(formula.getTemporalKB(), formula.isDistinct(),
-                    formula.getLeftSubFormula().copy(), formula.getRightSubFormula().copy());
+            _newFormula = formula.copy();
     }
 
     @Override

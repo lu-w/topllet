@@ -92,57 +92,43 @@ public class MTCQTransformerTest extends AbstractMTCQTest
     }
 
     @Test
-    public void testParkingVehicles()
+    public void testNextInEventually()
     {
-        // TODO verify that result is correct (manually)
-        useCaseTKBPassingParkingVehicles(false);
-        testTransformation("""
-                # A=Vehicle, B=2_Lane_Road, C=Parking_Vehicle, r=is_in_front_of, q=sfIntersects, s=is_to_the_side_of,
-                # t=is_in_proximity, u=phy:is_behind
-                G (A(?x) & B(z) & q(z,?x) & C(?y))
-                    &
-                F
-                (
-                    (r(?y,?x))
-                        &
-                    X[!]
-                    (
-                        (t(?x,?y) & s(?y,?x))
-                            U
-                        (u(?y,?x))
-                    )
-                )""",
-                "");
+        simpleTKB();
+        testTransformation(
+                "F (B(?x) & X[!] (C(?x)))",
+                "((X[!] (F ((B(?x)) & (X[!] (C(?x)))))) | (B(?x))) & (X[!] ((F ((B(?x)) & (X[!] (C(?x))))) | (C(?x))))"
+        );
     }
 
     @Test
-    public void testRightOfWay()
+    public void testParkingVehicles()
     {
-        // TODO verify that result is correct (manually)
         useCaseTKBPassingParkingVehicles(false);
         testTransformation("""
-                G
-                (
-                    (A(?x) & B(?y) & C(?r2) & C(?r1) & r(?r2, ?r1))
-                        &
-                    ((D(?y)) | (E(?y)))
-                )
+                G (A(?x))
                     &
+                F
                 (
-                    F
+                    (B(?x))
+                        &
+                    X[!]
                     (
-                        (s(?x,?r1) & t(?x,?y) & u(?x,?y))
-                            &
-                        F (s(?x,?r2))
-                    )
-                        ->
-                    (
-                        (s(?x,?r1))
+                        (C(?x))
                             U
-                        ((s(?y,c) & H(c) & o(c,?r1) & o(c,?r2)))
+                        (D(?x))
                     )
                 )""",
-                ""
+                "((A(?x)) & ((last) | (X[!] (G (A(?x)))))) & (((X[!] (F ((B(?x)) & (X[!] ((C(?x)) U (D(?x))))))) | (B(?x))) & (X[!] ((F ((B(?x)) & (X[!] ((C(?x)) U (D(?x)))))) | ((C(?x)) U (D(?x))))))");
+    }
+
+    @Test
+    public void testNestedEventually()
+    {
+        useCaseTKBPassingParkingVehicles(false);
+        testTransformation(
+                "F ((D(?x)) & F (E(?x)))",
+                "((X[!] (F ((D(?x)) & (F (E(?x)))))) | (D(?x))) & ((X[!] ((F (E(?x))) | (F ((D(?x)) & (F (E(?x))))))) | (E(?x)))"
         );
     }
 
