@@ -13,6 +13,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 
+/**
+ * TODO:
+ *  - implement equals() both against String and MTCQFormula
+ */
 public abstract class MTCQFormula extends AbstractCompositeQuery<ConjunctiveQuery, MetricTemporalConjunctiveQuery>
         implements MetricTemporalConjunctiveQuery
 {

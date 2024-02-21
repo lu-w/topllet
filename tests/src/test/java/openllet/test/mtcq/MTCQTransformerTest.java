@@ -74,6 +74,7 @@ public class MTCQTransformerTest extends AbstractMTCQTest
     @Test
     public void testParkingVehicles()
     {
+        // TODO verify that result is correct (manually)
         useCaseTKBPassingParkingVehicles(false);
         MTCQFormula q = temporalQuery("""
         # A=Vehicle, B=2_Lane_Road, C=Parking_Vehicle, r=is_in_front_of, q=sfIntersects, s=is_to_the_side_of,
@@ -93,6 +94,45 @@ public class MTCQTransformerTest extends AbstractMTCQTest
         )""");
         MTCQFormula tq = DXNFTransformer.transform(q);
         assertEquals("", tq.toString());
+    }
 
+    @Test
+    public void testRightOfWay()
+    {
+        // TODO verify that result is correct (manually)
+        useCaseTKBPassingParkingVehicles(false);
+        MTCQFormula q = temporalQuery("""
+        G
+        (
+            (A(?x) & B(?y) & C(?r2) & C(?r1) & r(?r2, ?r1))
+                &
+            ((D(?y)) | (E(?y)))
+        )
+            &
+        (
+            F
+            (
+                (s(?x,?r1) & t(?x,?y) & u(?x,?y))
+                    &
+                F (s(?x,?r2))
+            )
+                ->
+            (
+                (s(?x,?r1))
+                    U
+                ((s(?y,c) & H(c) & o(c,?r1) & o(c,?r2)))
+            )
+        )""");
+        MTCQFormula tq = DXNFTransformer.transform(q);
+        assertEquals("(X[!] (s(?x,?r2))) | (((s(?x,?r1)) | (s(?y,c))) | ((last) | (!(s(?x,?r1)))))", tq.toString());
+    }
+
+    @Test
+    public void testNestedOrNext()
+    {
+        useCaseTKBPassingParkingVehicles(false);
+        MTCQFormula q = temporalQuery("((s(?x,?r1)) | (s(?y,c))) | (((last) | (!(s(?x,?r1)))) | (X[!] (s(?x,?r2))))");
+        MTCQFormula tq = DXNFTransformer.transform(q);
+        assertEquals("(X[!] (s(?x,?r2))) | (((s(?x,?r1)) | (s(?y,c))) | ((last) | (!(s(?x,?r1)))))", tq.toString());
     }
 }

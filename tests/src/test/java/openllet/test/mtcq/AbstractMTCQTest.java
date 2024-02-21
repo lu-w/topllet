@@ -460,7 +460,7 @@ public class AbstractMTCQTest extends AbstractQueryTest
     {
         timeSteps(size);
 
-        classes(_A, _B, _C, _D, _E);
+        classes(_A, _B, _C, _D, _E, _H);
         individuals(_a, _b, _c, _d, _e, _f);
         for (int i = 0; i < numberAdditionalIndividuals; i++)
             individuals(term("i" + i));
