@@ -5,11 +5,11 @@ import openllet.query.sparqldl.model.cq.ConjunctiveQuery;
 
 public abstract class BoundedBinaryTemporalFormula extends BoundedTemporalFormula
 {
-    private final MTCQFormula _leftSubFormula;
-    private final MTCQFormula _rightSubFormula;
+    private final MetricTemporalConjunctiveQuery _leftSubFormula;
+    private final MetricTemporalConjunctiveQuery _rightSubFormula;
 
     public BoundedBinaryTemporalFormula(TemporalKnowledgeBase temporalKb, boolean isDistinct,
-                                        MTCQFormula leftSubFormula, MTCQFormula rightSubFormula, int lowerBound,
+                                        MetricTemporalConjunctiveQuery leftSubFormula, MetricTemporalConjunctiveQuery rightSubFormula, int lowerBound,
                                         int upperBound)
     {
         super(temporalKb, isDistinct, lowerBound, upperBound);
@@ -23,19 +23,19 @@ public abstract class BoundedBinaryTemporalFormula extends BoundedTemporalFormul
                 addQuery(cq);
     }
 
-    public BoundedBinaryTemporalFormula(MTCQFormula parentFormula, MTCQFormula leftSubFormula,
-                                        MTCQFormula rightSubFormula, int lowerBound, int upperBound)
+    public BoundedBinaryTemporalFormula(MetricTemporalConjunctiveQuery parentFormula, MetricTemporalConjunctiveQuery leftSubFormula,
+                                        MetricTemporalConjunctiveQuery rightSubFormula, int lowerBound, int upperBound)
     {
         this(parentFormula.getTemporalKB(), parentFormula.isDistinct(), leftSubFormula, rightSubFormula, lowerBound,
                 upperBound);
     }
 
-    public MTCQFormula getLeftSubFormula()
+    public MetricTemporalConjunctiveQuery getLeftSubFormula()
     {
         return _leftSubFormula;
     }
 
-    public MTCQFormula getRightSubFormula()
+    public MetricTemporalConjunctiveQuery getRightSubFormula()
     {
         return _rightSubFormula;
     }

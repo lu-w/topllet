@@ -5,10 +5,10 @@ import openllet.query.sparqldl.model.cq.ConjunctiveQuery;
 
 public abstract class BinaryMTCQFormula extends MTCQFormula
 {
-    private final MTCQFormula _leftSubFormula;
-    private final MTCQFormula _rightSubFormula;
+    private final MetricTemporalConjunctiveQuery _leftSubFormula;
+    private final MetricTemporalConjunctiveQuery _rightSubFormula;
 
-    public BinaryMTCQFormula(TemporalKnowledgeBase temporalKb, boolean isDistinct, MTCQFormula left, MTCQFormula right)
+    public BinaryMTCQFormula(TemporalKnowledgeBase temporalKb, boolean isDistinct, MetricTemporalConjunctiveQuery left, MetricTemporalConjunctiveQuery right)
     {
         super(temporalKb, isDistinct);
         left.setParentFormula(this);
@@ -23,17 +23,17 @@ public abstract class BinaryMTCQFormula extends MTCQFormula
                 addQuery(cq);
     }
 
-    public BinaryMTCQFormula(MTCQFormula parentFormula, MTCQFormula left, MTCQFormula right)
+    public BinaryMTCQFormula(MetricTemporalConjunctiveQuery parentFormula, MetricTemporalConjunctiveQuery left, MetricTemporalConjunctiveQuery right)
     {
         this(parentFormula.getTemporalKB(), parentFormula.isDistinct(), left, right);
     }
 
-    public MTCQFormula getLeftSubFormula()
+    public MetricTemporalConjunctiveQuery getLeftSubFormula()
     {
         return _leftSubFormula;
     }
 
-    public MTCQFormula getRightSubFormula()
+    public MetricTemporalConjunctiveQuery getRightSubFormula()
     {
         return _rightSubFormula;
     }

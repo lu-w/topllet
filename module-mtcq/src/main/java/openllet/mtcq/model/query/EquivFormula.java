@@ -4,18 +4,18 @@ import openllet.mtcq.model.kb.TemporalKnowledgeBase;
 
 public class EquivFormula extends BinaryBooleanFormula
 {
-    public EquivFormula(TemporalKnowledgeBase temporalKb, boolean isDistinct, MTCQFormula left, MTCQFormula right)
+    public EquivFormula(TemporalKnowledgeBase temporalKb, boolean isDistinct, MetricTemporalConjunctiveQuery left, MetricTemporalConjunctiveQuery right)
     {
         super(temporalKb, isDistinct, left, right);
     }
 
-    public EquivFormula(MTCQFormula parentFormula, MTCQFormula left, MTCQFormula right)
+    public EquivFormula(MetricTemporalConjunctiveQuery parentFormula, MetricTemporalConjunctiveQuery left, MetricTemporalConjunctiveQuery right)
     {
         super(parentFormula, left, right);
     }
 
     @Override
-    protected String toString(PropositionFactory propositions)
+    public String toString(PropositionFactory propositions)
     {
         return "(" + getLeftSubFormula().toString(propositions) + ") <-> (" + getRightSubFormula().toString(propositions)
                 + ")";

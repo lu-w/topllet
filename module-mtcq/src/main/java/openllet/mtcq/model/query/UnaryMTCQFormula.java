@@ -5,9 +5,9 @@ import openllet.query.sparqldl.model.cq.ConjunctiveQuery;
 
 public abstract class UnaryMTCQFormula extends MTCQFormula
 {
-    private final MTCQFormula _subFormula;
+    private final MetricTemporalConjunctiveQuery _subFormula;
 
-    public UnaryMTCQFormula(TemporalKnowledgeBase temporalKb, boolean isDistinct, MTCQFormula subFormula)
+    public UnaryMTCQFormula(TemporalKnowledgeBase temporalKb, boolean isDistinct, MetricTemporalConjunctiveQuery subFormula)
     {
         super(temporalKb, isDistinct);
         subFormula.setParentFormula(this);
@@ -17,12 +17,12 @@ public abstract class UnaryMTCQFormula extends MTCQFormula
                 addQuery(cq);
     }
 
-    public UnaryMTCQFormula(MTCQFormula parentFormula, MTCQFormula subFormula)
+    public UnaryMTCQFormula(MetricTemporalConjunctiveQuery parentFormula, MetricTemporalConjunctiveQuery subFormula)
     {
         this(parentFormula.getTemporalKB(), parentFormula.isDistinct(), subFormula);
     }
 
-    public MTCQFormula getSubFormula()
+    public MetricTemporalConjunctiveQuery getSubFormula()
     {
         return _subFormula;
     }

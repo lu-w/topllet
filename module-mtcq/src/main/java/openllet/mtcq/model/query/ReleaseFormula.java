@@ -4,12 +4,12 @@ import openllet.mtcq.model.kb.TemporalKnowledgeBase;
 
 public class ReleaseFormula extends BinaryTemporalFormula
 {
-    public ReleaseFormula(TemporalKnowledgeBase temporalKb, boolean isDistinct, MTCQFormula left, MTCQFormula right)
+    public ReleaseFormula(TemporalKnowledgeBase temporalKb, boolean isDistinct, MetricTemporalConjunctiveQuery left, MetricTemporalConjunctiveQuery right)
     {
         super(temporalKb, isDistinct, left, right);
     }
 
-    public ReleaseFormula(MTCQFormula parentFormula, MTCQFormula left, MTCQFormula right)
+    public ReleaseFormula(MetricTemporalConjunctiveQuery parentFormula, MetricTemporalConjunctiveQuery left, MetricTemporalConjunctiveQuery right)
     {
         super(parentFormula, left, right);
     }

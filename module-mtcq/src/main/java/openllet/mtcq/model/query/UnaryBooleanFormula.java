@@ -4,12 +4,12 @@ import openllet.mtcq.model.kb.TemporalKnowledgeBase;
 
 public abstract class UnaryBooleanFormula extends UnaryMTCQFormula
 {
-    public UnaryBooleanFormula(TemporalKnowledgeBase temporalKb, boolean isDistinct, MTCQFormula subFormula)
+    public UnaryBooleanFormula(TemporalKnowledgeBase temporalKb, boolean isDistinct, MetricTemporalConjunctiveQuery subFormula)
     {
         super(temporalKb, isDistinct, subFormula);
     }
 
-    public UnaryBooleanFormula(MTCQFormula parentFormula, MTCQFormula subFormula)
+    public UnaryBooleanFormula(MetricTemporalConjunctiveQuery parentFormula, MetricTemporalConjunctiveQuery subFormula)
     {
         super(parentFormula, subFormula);
     }

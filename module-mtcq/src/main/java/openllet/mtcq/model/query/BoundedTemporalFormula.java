@@ -17,7 +17,7 @@ public abstract class BoundedTemporalFormula extends TemporalFormula
         _upperBound = upperBound;
     }
 
-    public BoundedTemporalFormula(MTCQFormula parentFormula, int lowerBound, int upperBound)
+    public BoundedTemporalFormula(MetricTemporalConjunctiveQuery parentFormula, int lowerBound, int upperBound)
     {
         this(parentFormula.getTemporalKB(), parentFormula.isDistinct(), lowerBound, upperBound);
     }
@@ -27,7 +27,7 @@ public abstract class BoundedTemporalFormula extends TemporalFormula
         this(temporalKb, isDistinct, 0, upperBound);
     }
 
-    public BoundedTemporalFormula(MTCQFormula parentFormula, int upperBound)
+    public BoundedTemporalFormula(MetricTemporalConjunctiveQuery parentFormula, int upperBound)
     {
         this(parentFormula, 0, upperBound);
     }

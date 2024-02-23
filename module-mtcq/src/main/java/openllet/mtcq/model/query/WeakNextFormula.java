@@ -4,12 +4,12 @@ import openllet.mtcq.model.kb.TemporalKnowledgeBase;
 
 public class WeakNextFormula extends UnaryTemporalFormula
 {
-    public WeakNextFormula(TemporalKnowledgeBase temporalKb, boolean isDistinct, MTCQFormula subFormula)
+    public WeakNextFormula(TemporalKnowledgeBase temporalKb, boolean isDistinct, MetricTemporalConjunctiveQuery subFormula)
     {
         super(temporalKb, isDistinct, subFormula);
     }
 
-    public WeakNextFormula(MTCQFormula parentFormula, MTCQFormula subFormula)
+    public WeakNextFormula(MetricTemporalConjunctiveQuery parentFormula, MetricTemporalConjunctiveQuery subFormula)
     {
         super(parentFormula, subFormula);
     }

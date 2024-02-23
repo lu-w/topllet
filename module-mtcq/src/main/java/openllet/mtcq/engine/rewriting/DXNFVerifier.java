@@ -7,7 +7,7 @@ public class DXNFVerifier implements MTCQVisitor
     private boolean _isValid = true;
     private OrFormula _reason = null;
 
-    public boolean verify(MTCQFormula formula)
+    public boolean verify(MetricTemporalConjunctiveQuery formula)
     {
         _isValid = true;
         formula.accept(this);

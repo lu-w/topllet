@@ -4,12 +4,12 @@ import openllet.mtcq.model.kb.TemporalKnowledgeBase;
 
 public class BoundedGloballyFormula extends BoundedUnaryTemporalFormula
 {
-    public BoundedGloballyFormula(TemporalKnowledgeBase temporalKb, boolean isDistinct, MTCQFormula subFormula, int lowerBound, int upperBound)
+    public BoundedGloballyFormula(TemporalKnowledgeBase temporalKb, boolean isDistinct, MetricTemporalConjunctiveQuery subFormula, int lowerBound, int upperBound)
     {
         super(temporalKb, isDistinct, subFormula, lowerBound, upperBound);
     }
 
-    public BoundedGloballyFormula(MTCQFormula parentFormula, MTCQFormula subFormula, int lowerBound, int upperBound)
+    public BoundedGloballyFormula(MetricTemporalConjunctiveQuery parentFormula, MetricTemporalConjunctiveQuery subFormula, int lowerBound, int upperBound)
     {
         super(parentFormula, subFormula, lowerBound, upperBound);
     }

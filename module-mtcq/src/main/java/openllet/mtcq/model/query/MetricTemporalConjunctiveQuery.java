@@ -1,6 +1,7 @@
 package openllet.mtcq.model.query;
 
 import openllet.query.sparqldl.model.CompositeQuery;
+import openllet.query.sparqldl.model.Query;
 import openllet.query.sparqldl.model.cq.ConjunctiveQuery;
 import openllet.mtcq.model.kb.TemporalKnowledgeBase;
 
@@ -34,4 +35,17 @@ public interface MetricTemporalConjunctiveQuery extends CompositeQuery<Conjuncti
      * @return The temporal knowledge base this query operates on.
      */
     TemporalKnowledgeBase getTemporalKB();
+
+    void setParentFormula(MetricTemporalConjunctiveQuery parentFormula);
+
+    MetricTemporalConjunctiveQuery getParentFormula();
+
+    /**
+     * @return True iff. this formula is temporal, i.e., it does not contain a temporal operator also in its subformulae
+     */
+    boolean isTemporal();
+
+    void accept(MTCQVisitor visitor);
+
+    String toString(PropositionFactory propositions);
 }

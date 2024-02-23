@@ -4,13 +4,13 @@ import openllet.mtcq.model.kb.TemporalKnowledgeBase;
 
 public abstract class BinaryBooleanFormula extends BinaryMTCQFormula
 {
-    public BinaryBooleanFormula(TemporalKnowledgeBase temporalKb, boolean isDistinct, MTCQFormula left,
-                                MTCQFormula right)
+    public BinaryBooleanFormula(TemporalKnowledgeBase temporalKb, boolean isDistinct, MetricTemporalConjunctiveQuery left,
+                                MetricTemporalConjunctiveQuery right)
     {
         super(temporalKb, isDistinct, left, right);
     }
 
-    public BinaryBooleanFormula(MTCQFormula parentFormula, MTCQFormula left, MTCQFormula right)
+    public BinaryBooleanFormula(MetricTemporalConjunctiveQuery parentFormula, MetricTemporalConjunctiveQuery left, MetricTemporalConjunctiveQuery right)
     {
         super(parentFormula, left, right);
     }

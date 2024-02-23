@@ -4,12 +4,12 @@ import openllet.mtcq.model.kb.TemporalKnowledgeBase;
 
 public class StrongNextFormula extends UnaryTemporalFormula
 {
-    public StrongNextFormula(TemporalKnowledgeBase temporalKb, boolean isDistinct, MTCQFormula subFormula)
+    public StrongNextFormula(TemporalKnowledgeBase temporalKb, boolean isDistinct, MetricTemporalConjunctiveQuery subFormula)
     {
         super(temporalKb, isDistinct, subFormula);
     }
 
-    public StrongNextFormula(MTCQFormula parentFormula, MTCQFormula subFormula)
+    public StrongNextFormula(MetricTemporalConjunctiveQuery parentFormula, MetricTemporalConjunctiveQuery subFormula)
     {
         super(parentFormula, subFormula);
     }

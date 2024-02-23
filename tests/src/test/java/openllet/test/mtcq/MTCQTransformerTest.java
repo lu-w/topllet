@@ -3,6 +3,7 @@ package openllet.test.mtcq;
 import openllet.mtcq.engine.rewriting.DXNFTransformer;
 import openllet.mtcq.engine.rewriting.DXNFVerifier;
 import openllet.mtcq.model.query.MTCQFormula;
+import openllet.mtcq.model.query.MetricTemporalConjunctiveQuery;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
@@ -11,7 +12,7 @@ public class MTCQTransformerTest extends AbstractMTCQTest
 {
     protected void testTransformation(String input, String expected)
     {
-        MTCQFormula actual = DXNFTransformer.transform(temporalQuery(input));
+        MetricTemporalConjunctiveQuery actual = DXNFTransformer.transform(temporalQuery(input));
         DXNFVerifier verifier = new DXNFVerifier();
         if (!verifier.verify(actual))
         {

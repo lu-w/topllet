@@ -4,7 +4,7 @@ import openllet.mtcq.model.kb.TemporalKnowledgeBase;
 
 public class EmptyFormula extends MTCQFormula
 {
-    public EmptyFormula(MTCQFormula parentFormula)
+    public EmptyFormula(MetricTemporalConjunctiveQuery parentFormula)
     {
         super(parentFormula);
     }
@@ -21,7 +21,7 @@ public class EmptyFormula extends MTCQFormula
     }
 
     @Override
-    protected String toString(PropositionFactory propositions)
+    public String toString(PropositionFactory propositions)
     {
         return "";
     }

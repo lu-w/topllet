@@ -6,12 +6,12 @@ import openllet.query.sparqldl.model.cq.ConjunctiveQuery;
 public abstract class UnaryTemporalFormula extends UnaryMTCQFormula
 {
 
-    public UnaryTemporalFormula(TemporalKnowledgeBase temporalKb, boolean isDistinct, MTCQFormula subFormula)
+    public UnaryTemporalFormula(TemporalKnowledgeBase temporalKb, boolean isDistinct, MetricTemporalConjunctiveQuery subFormula)
     {
         super(temporalKb, isDistinct, subFormula);
     }
 
-    public UnaryTemporalFormula(MTCQFormula parentFormula, MTCQFormula subFormula)
+    public UnaryTemporalFormula(MetricTemporalConjunctiveQuery parentFormula, MetricTemporalConjunctiveQuery subFormula)
     {
         super(parentFormula, subFormula);
     }

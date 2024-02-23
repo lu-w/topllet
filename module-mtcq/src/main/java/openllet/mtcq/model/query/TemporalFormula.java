@@ -4,7 +4,7 @@ import openllet.mtcq.model.kb.TemporalKnowledgeBase;
 
 public abstract class TemporalFormula extends MTCQFormula
 {
-    public TemporalFormula(MTCQFormula parentFormula)
+    public TemporalFormula(MetricTemporalConjunctiveQuery parentFormula)
     {
         super(parentFormula);
     }

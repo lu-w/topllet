@@ -8,7 +8,6 @@ import openllet.query.sparqldl.model.cq.ConjunctiveQuery;
 import openllet.shared.tools.Log;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
@@ -24,9 +23,9 @@ public abstract class MTCQFormula extends AbstractCompositeQuery<ConjunctiveQuer
 
     private final TemporalKnowledgeBase _temporalKb;
     private PropositionFactory _propositions = null;
-    private MTCQFormula _parentFormula;
+    private MetricTemporalConjunctiveQuery _parentFormula;
 
-    public MTCQFormula(MTCQFormula parentFormula)
+    public MTCQFormula(MetricTemporalConjunctiveQuery parentFormula)
     {
         super(parentFormula.getKB(), parentFormula.isDistinct());
         _temporalKb = parentFormula.getTemporalKB();
@@ -39,20 +38,17 @@ public abstract class MTCQFormula extends AbstractCompositeQuery<ConjunctiveQuer
         _temporalKb = temporalKb;
     }
 
-    public void setParentFormula(MTCQFormula parentFormula)
+    @Override
+    public void setParentFormula(MetricTemporalConjunctiveQuery parentFormula)
     {
         _parentFormula = parentFormula;
     }
 
-    public MTCQFormula getParentFormula()
+    @Override
+    public MetricTemporalConjunctiveQuery getParentFormula()
     {
         return _parentFormula;
     }
-
-    /**
-     * @return True iff. this formula is temporal, i.e., it does not contain a temporal operator also in its subformulae
-     */
-    public abstract boolean isTemporal();
 
     @Override
     public Map<Proposition, ConjunctiveQuery> getPropositionalAbstraction()
@@ -90,7 +86,7 @@ public abstract class MTCQFormula extends AbstractCompositeQuery<ConjunctiveQuer
     }
 
     @Override
-    public MTCQFormula createQuery(KnowledgeBase kb, boolean isDistinct)
+    public MetricTemporalConjunctiveQuery createQuery(KnowledgeBase kb, boolean isDistinct)
     {
          _logger.warning("Using createQuery() on an MTCQ - this method shall not be used");
          return new LogicalTrueFormula(new FileBasedTemporalKnowledgeBaseImpl(new ArrayList<>()), isDistinct);
@@ -107,11 +103,4 @@ public abstract class MTCQFormula extends AbstractCompositeQuery<ConjunctiveQuer
     {
         return toString(null);
     }
-
-    protected abstract String toString(PropositionFactory propositions);
-
-    public abstract void accept(MTCQVisitor visitor);
-
-    @Override
-    public abstract MTCQFormula copy();
 }

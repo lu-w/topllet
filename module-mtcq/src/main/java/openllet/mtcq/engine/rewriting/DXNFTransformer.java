@@ -2,14 +2,7 @@ package openllet.mtcq.engine.rewriting;
 
 import openllet.mtcq.model.query.*;
 
-// TODO
-//  - implement bounded operators
-//  - check if all insideNext are set correctly
-//  - check if all appliedTransformationRule are set correctly (this is only required if the transformation has an effect "above it" - so e.g. rule 8
-//  - check if all runs are correctly set (sometimes they can be pushed inwards or pushed outwards to reduce code complexity)
-//  - check if copy() can be used instead of creating the formula on the fly.
-//  - check if there is redundant code (that could be solved by using symmetry (see rule 14) or using existing rules and put run() outside)
-//  - build an extra visitor for simplifications (https://github.com/bpodgursky/jbool_expressions?tab=readme-ov-file#rules)
+// TODO build an extra visitor for simplifications (https://github.com/bpodgursky/jbool_expressions?tab=readme-ov-file#rules)
 
 public class DXNFTransformer implements MTCQVisitor
 {
@@ -17,9 +10,9 @@ public class DXNFTransformer implements MTCQVisitor
     private boolean _hasAppliedTransformationRule = false;
     private boolean _isInsideNext = false;
 
-    public static MTCQFormula transform(MTCQFormula formula)
+    public static MetricTemporalConjunctiveQuery transform(MetricTemporalConjunctiveQuery formula)
     {
-        MTCQFormula mtcq = formula;
+        MetricTemporalConjunctiveQuery mtcq = formula;
         DXNFTransformer transformer;
         do
         {
@@ -29,7 +22,7 @@ public class DXNFTransformer implements MTCQVisitor
         return mtcq;
     }
 
-    protected MTCQFormula run(MTCQFormula formula)
+    protected MTCQFormula run(MetricTemporalConjunctiveQuery formula)
     {
         formula.accept(this);
         return this.getTransformedFormula();
@@ -42,11 +35,12 @@ public class DXNFTransformer implements MTCQVisitor
 
     private void appliedTransformationRule(String rule)
     {
-        // only require re-iterating on tree when certain rules were applied (those that add some X)
-        if ("8.2".equals(rule) || "5".equals(rule) || "14".equals(rule) || rule.startsWith("15.") || rule.startsWith("12."))
+        // only require re-iterating on tree when certain rules were applied
+        if ("8.2".equals(rule) || "5".equals(rule) || rule.startsWith("12") || rule.startsWith("13.") ||
+                rule.startsWith("14."))
             _hasAppliedTransformationRule = true;
-        System.out.println("Applied #" + rule);
-        System.out.println("Lead to: " + _newFormula);
+        // System.out.println("Applied #" + rule);
+        // System.out.println("Lead to: " + _newFormula);
     }
 
     protected MTCQFormula getTransformedFormula()
@@ -57,7 +51,7 @@ public class DXNFTransformer implements MTCQVisitor
     @Override
     public void visit(NotFormula formula)
     {
-        MTCQFormula sub = formula.getSubFormula();
+        MetricTemporalConjunctiveQuery sub = formula.getSubFormula();
         if (sub instanceof NotFormula subNot)
         {
             // Rule 1
@@ -95,9 +89,11 @@ public class DXNFTransformer implements MTCQVisitor
         else if (sub instanceof WeakNextFormula subNext)
         {
             // Rule 5
+            _isInsideNext = true;
             _newFormula = new StrongNextFormula(formula.getTemporalKB(), formula.isDistinct(),
                     run(new NotFormula(formula.getTemporalKB(), formula.isDistinct(), subNext.getSubFormula()))
             );
+            _isInsideNext = false;
             appliedTransformationRule("5");
         }
         else if (sub instanceof UntilFormula subU)
@@ -107,7 +103,7 @@ public class DXNFTransformer implements MTCQVisitor
                     new NotFormula(formula.getTemporalKB(), formula.isDistinct(), subU.getLeftSubFormula()),
                     new NotFormula(formula.getTemporalKB(), formula.isDistinct(), subU.getRightSubFormula())
             ));
-            appliedTransformationRule("6");
+            appliedTransformationRule("6.1");
         }
         else if (sub instanceof EventuallyFormula subF)
         {
@@ -115,7 +111,7 @@ public class DXNFTransformer implements MTCQVisitor
             _newFormula = run(new GloballyFormula(formula.getTemporalKB(), formula.isDistinct(),
                     new NotFormula(formula.getTemporalKB(), formula.isDistinct(), subF.getSubFormula()))
             );
-            appliedTransformationRule("6.1");
+            appliedTransformationRule("6.2");
         }
         else if (sub instanceof GloballyFormula subG)
         {
@@ -123,7 +119,7 @@ public class DXNFTransformer implements MTCQVisitor
             _newFormula = run(new EventuallyFormula(formula.getTemporalKB(), formula.isDistinct(),
                     new NotFormula(formula.getTemporalKB(), formula.isDistinct(), subG.getSubFormula()))
             );
-            appliedTransformationRule("6.1");
+            appliedTransformationRule("6.3");
         }
         else if (sub instanceof ReleaseFormula subR)
         {
@@ -413,7 +409,7 @@ public class DXNFTransformer implements MTCQVisitor
                     new StrongNextFormula(formula.getTemporalKB(), formula.isDistinct(), formula.getSubFormula())
                 )
         );
-        appliedTransformationRule("14");
+        appliedTransformationRule("12");
     }
 
     @Override
@@ -435,12 +431,7 @@ public class DXNFTransformer implements MTCQVisitor
                             formula.getRightSubFormula(),
                             new AndFormula(formula.getTemporalKB(), formula.isDistinct(),
                                     formula.getLeftSubFormula(),
-                                    new StrongNextFormula(formula.getTemporalKB(), formula.isDistinct(),
-                                            new UntilFormula(formula.getTemporalKB(), formula.isDistinct(),
-                                                    formula.getLeftSubFormula(),
-                                                    formula.getRightSubFormula()
-                                            )
-                                    )
+                                    new StrongNextFormula(formula.getTemporalKB(), formula.isDistinct(), formula)
                             )
                     ));
             appliedTransformationRule("12.1");
@@ -458,13 +449,8 @@ public class DXNFTransformer implements MTCQVisitor
                     new OrFormula(formula.getTemporalKB(), formula.isDistinct(),
                             formula.getLeftSubFormula(),
                             new AndFormula(formula.getTemporalKB(), formula.isDistinct(),
-                                    formula.getRightSubFormula(),
-                                    new WeakNextFormula(formula.getTemporalKB(), formula.isDistinct(), // TODO check if weak is correct
-                                            new ReleaseFormula(formula.getTemporalKB(), formula.isDistinct(),
-                                                    formula.getLeftSubFormula(),
-                                                    formula.getRightSubFormula()
-                                            )
-                                    )
+                                    formula.getRightSubFormula(),  // TODO check if weak next is correct
+                                    new WeakNextFormula(formula.getTemporalKB(), formula.isDistinct(), formula)
                             )
                     )
             );
@@ -477,8 +463,8 @@ public class DXNFTransformer implements MTCQVisitor
     @Override
     public void visit(OrFormula formula)
     {
-        MTCQFormula sub1 = formula.getLeftSubFormula();
-        MTCQFormula sub2 = formula.getRightSubFormula();
+        MetricTemporalConjunctiveQuery sub1 = formula.getLeftSubFormula();
+        MetricTemporalConjunctiveQuery sub2 = formula.getRightSubFormula();
         if (sub1 instanceof WeakNextFormula subW1 && sub2 instanceof WeakNextFormula subW2)
         {
             // Rule 8.1
@@ -533,255 +519,132 @@ public class DXNFTransformer implements MTCQVisitor
                     )));
             appliedTransformationRule("9.2");
         }
-        else if (sub1 instanceof UntilFormula sub1U && !_isInsideNext)
+        else if (sub1 instanceof OrFormula sub1O && sub1O.getLeftSubFormula() instanceof StrongNextFormula sub1O1)
         {
-            // Rule 10.1
-            _newFormula = new AndFormula(formula.getTemporalKB(), formula.isDistinct(),
-                run(
-                    new OrFormula(formula.getTemporalKB(), formula.isDistinct(),
-                        sub2,
+            if (sub2 instanceof StrongNextFormula sub2X)
+            {
+                _newFormula = run(
                         new OrFormula(formula.getTemporalKB(), formula.isDistinct(),
-                                sub1U.getLeftSubFormula(),
-                                sub1U.getRightSubFormula()
+                                new StrongNextFormula(formula.getTemporalKB(), formula.isDistinct(),
+                                        new OrFormula(formula.getTemporalKB(), formula.isDistinct(),
+                                                sub1O1.getSubFormula(),
+                                                sub2X.getSubFormula())
+                                ),
+                                sub1O.getRightSubFormula()
                         )
-                    )
-                ),
-                run(
-                    new OrFormula(formula.getTemporalKB(), formula.isDistinct(),
-                            new OrFormula(formula.getTemporalKB(), formula.isDistinct(),
-                                    sub2,
-                                    sub1U.getRightSubFormula()
-                            ),
-                            new StrongNextFormula(formula.getTemporalKB(), formula.isDistinct(),
-                                    new UntilFormula(formula.getTemporalKB(), formula.isDistinct(),
-                                            sub1U.getLeftSubFormula(),
-                                            sub1U.getRightSubFormula()
-                                    )
-                            )
-                    )
-                )
-            );
-            appliedTransformationRule("10.1");
-        }
-        else if (sub2 instanceof UntilFormula sub2U && !_isInsideNext)
-        {
-            // Rule 10.2
-            _newFormula = new AndFormula(formula.getTemporalKB(), formula.isDistinct(),
-                    run(
-                            new OrFormula(formula.getTemporalKB(), formula.isDistinct(),
-                                    sub1,
-                                    new OrFormula(formula.getTemporalKB(), formula.isDistinct(),
-                                            sub2U.getLeftSubFormula(),
-                                            sub2U.getRightSubFormula()
-                                    )
-                            )
-                    ),
-                    run(
-                            new OrFormula(formula.getTemporalKB(), formula.isDistinct(),
-                                    new OrFormula(formula.getTemporalKB(), formula.isDistinct(),
-                                            sub1,
-                                            sub2U.getRightSubFormula()
-                                    ),
-                                    new StrongNextFormula(formula.getTemporalKB(), formula.isDistinct(),
-                                            new UntilFormula(formula.getTemporalKB(), formula.isDistinct(),
-                                                    sub2U.getLeftSubFormula(),
-                                                    sub2U.getRightSubFormula()
-                                            )
-                                    )
-                            )
-                    )
-            );
-            appliedTransformationRule("10.2");
-        }
-        else if (sub1 instanceof ReleaseFormula sub1R && !_isInsideNext)
-        {
-            // Rule 11.1
-            _newFormula = new AndFormula(formula.getTemporalKB(), formula.isDistinct(),
-                    run(
-                            new OrFormula(formula.getTemporalKB(), formula.isDistinct(),
-                                    sub2,
-                                    new OrFormula(formula.getTemporalKB(), formula.isDistinct(),
-                                            sub1R.getLeftSubFormula(),
-                                            sub1R.getRightSubFormula()
-                                    )
-                            )
-                    ),
-                    new AndFormula(formula.getTemporalKB(), formula.isDistinct(),
-                            run(
-                                new OrFormula(formula.getTemporalKB(), formula.isDistinct(),
-                                        sub2,
-                                        sub1R.getLeftSubFormula()
-                                )
-                            ),
-                            new StrongNextFormula(formula.getTemporalKB(), formula.isDistinct(),
-                                    new ReleaseFormula(formula.getTemporalKB(), formula.isDistinct(),
-                                            sub1R.getLeftSubFormula(),
-                                            sub1R.getRightSubFormula()
-                                    )
-                            )
-                    )
-            );
-            appliedTransformationRule("11.1");
-        }
-        else if (sub2 instanceof ReleaseFormula sub2R && !_isInsideNext)
-        {
-            // Rule 11.2
-            _newFormula = new AndFormula(formula.getTemporalKB(), formula.isDistinct(),
-                    run(
-                            new OrFormula(formula.getTemporalKB(), formula.isDistinct(),
-                                    sub1,
-                                    new OrFormula(formula.getTemporalKB(), formula.isDistinct(),
-                                            sub2R.getLeftSubFormula(),
-                                            sub2R.getRightSubFormula()
-                                    )
-                            )
-                    ),
-                    new AndFormula(formula.getTemporalKB(), formula.isDistinct(),
-                            run(
-                                    new OrFormula(formula.getTemporalKB(), formula.isDistinct(),
-                                            sub1,
-                                            sub2R.getLeftSubFormula()
-                                    )
-                            ),
-                            new StrongNextFormula(formula.getTemporalKB(), formula.isDistinct(),
-                                    new ReleaseFormula(formula.getTemporalKB(), formula.isDistinct(),
-                                            sub2R.getLeftSubFormula(),
-                                            sub2R.getRightSubFormula()
-                                    )
-                            )
-                    )
-            );
-            appliedTransformationRule("11.2");
-        }
-        else
-        {
-            if (sub1 instanceof OrFormula sub1O && sub1O.getLeftSubFormula() instanceof StrongNextFormula sub1O1)
-            {
-                if (sub2 instanceof StrongNextFormula sub2X)
-                {
-                    _newFormula = run(
-                            new OrFormula(formula.getTemporalKB(), formula.isDistinct(),
-                                    new StrongNextFormula(formula.getTemporalKB(), formula.isDistinct(),
-                                            new OrFormula(formula.getTemporalKB(), formula.isDistinct(),
-                                                    sub1O1.getSubFormula(),
-                                                    sub2X.getSubFormula())
-                                    ),
-                                    sub1O.getRightSubFormula()
-                            )
-                    );
-                    appliedTransformationRule("15.1.1");
-                }
-                else
-                {
-                    _newFormula = run(
-                            new OrFormula(formula.getTemporalKB(), formula.isDistinct(),
-                                    new StrongNextFormula(formula.getTemporalKB(), formula.isDistinct(),
-                                            sub1O1.getSubFormula()),
-                                    new OrFormula(formula.getTemporalKB(), formula.isDistinct(),
-                                            sub2,
-                                            sub1O.getRightSubFormula())
-                            )
-                    );
-                    appliedTransformationRule("15.1.2");
-                }
-            }
-            else if (sub1 instanceof OrFormula sub1O && sub1O.getRightSubFormula() instanceof StrongNextFormula sub1O2)
-            {
-                if (sub2 instanceof StrongNextFormula sub2X)
-                {
-                    _newFormula = run(
-                            new OrFormula(formula.getTemporalKB(), formula.isDistinct(),
-                                    new StrongNextFormula(formula.getTemporalKB(), formula.isDistinct(),
-                                            new OrFormula(formula.getTemporalKB(), formula.isDistinct(),
-                                                    sub1O2.getSubFormula(),
-                                                    sub2X.getSubFormula())
-                                    ),
-                                    sub1O.getLeftSubFormula()
-                            )
-                    );
-                    appliedTransformationRule("15.2.1");
-                }
-                else
-                {
-                    _newFormula = run(
-                            new OrFormula(formula.getTemporalKB(), formula.isDistinct(),
-                                    new StrongNextFormula(formula.getTemporalKB(), formula.isDistinct(),
-                                            sub1O2.getSubFormula()),
-                                    new OrFormula(formula.getTemporalKB(), formula.isDistinct(),
-                                            sub2,
-                                            sub1O.getLeftSubFormula())
-                            )
-                    );
-                    appliedTransformationRule("15.2.2");
-                }
-            }
-            else if (sub2 instanceof OrFormula sub2O && sub2O.getLeftSubFormula() instanceof StrongNextFormula sub2O1)
-            {
-                if (sub1 instanceof StrongNextFormula sub1X)
-                {
-                    _newFormula = run(
-                            new OrFormula(formula.getTemporalKB(), formula.isDistinct(),
-                                    new StrongNextFormula(formula.getTemporalKB(), formula.isDistinct(),
-                                            new OrFormula(formula.getTemporalKB(), formula.isDistinct(),
-                                                    sub2O1.getSubFormula(),
-                                                    sub1X.getSubFormula())
-                                    ),
-                                    sub2O.getRightSubFormula()
-                            )
-                    );
-                    appliedTransformationRule("15.3.1");
-                }
-                else
-                {
-                    _newFormula = run(
-                            new OrFormula(formula.getTemporalKB(), formula.isDistinct(),
-                                    new StrongNextFormula(formula.getTemporalKB(), formula.isDistinct(),
-                                            sub2O1.getSubFormula()),
-                                    new OrFormula(formula.getTemporalKB(), formula.isDistinct(),
-                                            sub1,
-                                            sub2O.getRightSubFormula())
-                            )
-                    );
-                    appliedTransformationRule("15.3.2");
-                }
-            }
-            else if (sub2 instanceof OrFormula sub2O && sub2O.getRightSubFormula() instanceof StrongNextFormula sub2O2)
-            {
-                if (sub1 instanceof StrongNextFormula sub1X)
-                {
-                    _newFormula = run(
-                            new OrFormula(formula.getTemporalKB(), formula.isDistinct(),
-                                    new StrongNextFormula(formula.getTemporalKB(), formula.isDistinct(),
-                                            new OrFormula(formula.getTemporalKB(), formula.isDistinct(),
-                                                    sub2O2.getSubFormula(),
-                                                    sub1X.getSubFormula())
-                                    ),
-                                    sub2O.getLeftSubFormula()
-                            )
-                    );
-                    appliedTransformationRule("15.4.1");
-                }
-                else
-                {
-                    _newFormula = run(
-                            new OrFormula(formula.getTemporalKB(), formula.isDistinct(),
-                                    new StrongNextFormula(formula.getTemporalKB(), formula.isDistinct(),
-                                            sub2O2.getSubFormula()),
-                                    new OrFormula(formula.getTemporalKB(), formula.isDistinct(),
-                                            sub1,
-                                            sub2O.getLeftSubFormula())
-                            )
-                    );
-                    appliedTransformationRule("15.4.2");
-                }
+                );
+                appliedTransformationRule("13.1");
             }
             else
             {
-                _newFormula = new OrFormula(formula.getTemporalKB(), formula.isDistinct(),
-                        run(formula.getLeftSubFormula()),
-                        run(formula.getRightSubFormula())
+                _newFormula = run(
+                        new OrFormula(formula.getTemporalKB(), formula.isDistinct(),
+                                new StrongNextFormula(formula.getTemporalKB(), formula.isDistinct(),
+                                        sub1O1.getSubFormula()),
+                                new OrFormula(formula.getTemporalKB(), formula.isDistinct(),
+                                        sub2,
+                                        sub1O.getRightSubFormula())
+                        )
                 );
+                appliedTransformationRule("14.1");
             }
+        }
+        else if (sub1 instanceof OrFormula sub1O && sub1O.getRightSubFormula() instanceof StrongNextFormula sub1O2)
+        {
+            if (sub2 instanceof StrongNextFormula sub2X)
+            {
+                _newFormula = run(
+                        new OrFormula(formula.getTemporalKB(), formula.isDistinct(),
+                                new StrongNextFormula(formula.getTemporalKB(), formula.isDistinct(),
+                                        new OrFormula(formula.getTemporalKB(), formula.isDistinct(),
+                                                sub1O2.getSubFormula(),
+                                                sub2X.getSubFormula())
+                                ),
+                                sub1O.getLeftSubFormula()
+                        )
+                );
+                appliedTransformationRule("13.2");
+            }
+            else
+            {
+                _newFormula = run(
+                        new OrFormula(formula.getTemporalKB(), formula.isDistinct(),
+                                new StrongNextFormula(formula.getTemporalKB(), formula.isDistinct(),
+                                        sub1O2.getSubFormula()),
+                                new OrFormula(formula.getTemporalKB(), formula.isDistinct(),
+                                        sub2,
+                                        sub1O.getLeftSubFormula())
+                        )
+                );
+                appliedTransformationRule("14.2");
+            }
+        }
+        else if (sub2 instanceof OrFormula sub2O && sub2O.getLeftSubFormula() instanceof StrongNextFormula sub2O1)
+        {
+            if (sub1 instanceof StrongNextFormula sub1X)
+            {
+                _newFormula = run(
+                        new OrFormula(formula.getTemporalKB(), formula.isDistinct(),
+                                new StrongNextFormula(formula.getTemporalKB(), formula.isDistinct(),
+                                        new OrFormula(formula.getTemporalKB(), formula.isDistinct(),
+                                                sub2O1.getSubFormula(),
+                                                sub1X.getSubFormula())
+                                ),
+                                sub2O.getRightSubFormula()
+                        )
+                );
+                appliedTransformationRule("13.3");
+            }
+            else
+            {
+                _newFormula = run(
+                        new OrFormula(formula.getTemporalKB(), formula.isDistinct(),
+                                new StrongNextFormula(formula.getTemporalKB(), formula.isDistinct(),
+                                        sub2O1.getSubFormula()),
+                                new OrFormula(formula.getTemporalKB(), formula.isDistinct(),
+                                        sub1,
+                                        sub2O.getRightSubFormula())
+                        )
+                );
+                appliedTransformationRule("14.3");
+            }
+        }
+        else if (sub2 instanceof OrFormula sub2O && sub2O.getRightSubFormula() instanceof StrongNextFormula sub2O2)
+        {
+            if (sub1 instanceof StrongNextFormula sub1X)
+            {
+                _newFormula = run(
+                        new OrFormula(formula.getTemporalKB(), formula.isDistinct(),
+                                new StrongNextFormula(formula.getTemporalKB(), formula.isDistinct(),
+                                        new OrFormula(formula.getTemporalKB(), formula.isDistinct(),
+                                                sub2O2.getSubFormula(),
+                                                sub1X.getSubFormula())
+                                ),
+                                sub2O.getLeftSubFormula()
+                        )
+                );
+                appliedTransformationRule("13.4");
+            }
+            else
+            {
+                _newFormula = run(
+                        new OrFormula(formula.getTemporalKB(), formula.isDistinct(),
+                                new StrongNextFormula(formula.getTemporalKB(), formula.isDistinct(),
+                                        sub2O2.getSubFormula()),
+                                new OrFormula(formula.getTemporalKB(), formula.isDistinct(),
+                                        sub1,
+                                        sub2O.getLeftSubFormula())
+                        )
+                );
+                appliedTransformationRule("14.4");
+            }
+        }
+        else
+        {
+            _newFormula = new OrFormula(formula.getTemporalKB(), formula.isDistinct(),
+                    run(formula.getLeftSubFormula()),
+                    run(formula.getRightSubFormula())
+            );
         }
     }
 }

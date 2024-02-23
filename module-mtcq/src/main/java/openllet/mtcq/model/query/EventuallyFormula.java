@@ -4,18 +4,18 @@ import openllet.mtcq.model.kb.TemporalKnowledgeBase;
 
 public class EventuallyFormula extends UnaryTemporalFormula
 {
-    public EventuallyFormula(TemporalKnowledgeBase temporalKb, boolean isDistinct, MTCQFormula subFormula)
+    public EventuallyFormula(TemporalKnowledgeBase temporalKb, boolean isDistinct, MetricTemporalConjunctiveQuery subFormula)
     {
         super(temporalKb, isDistinct, subFormula);
     }
 
-    public EventuallyFormula(MTCQFormula parentFormula, MTCQFormula subFormula)
+    public EventuallyFormula(MetricTemporalConjunctiveQuery parentFormula, MetricTemporalConjunctiveQuery subFormula)
     {
         super(parentFormula, subFormula);
     }
 
     @Override
-    protected String toString(PropositionFactory propositions)
+    public String toString(PropositionFactory propositions)
     {
         return "F (" + getSubFormula().toString(propositions) + ")";
     }
