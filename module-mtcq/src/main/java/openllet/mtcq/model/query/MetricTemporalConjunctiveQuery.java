@@ -36,6 +36,8 @@ public interface MetricTemporalConjunctiveQuery extends CompositeQuery<Conjuncti
      */
     TemporalKnowledgeBase getTemporalKB();
 
+    void setTemporalKB(TemporalKnowledgeBase tkb);
+
     void setParentFormula(MetricTemporalConjunctiveQuery parentFormula);
 
     MetricTemporalConjunctiveQuery getParentFormula();

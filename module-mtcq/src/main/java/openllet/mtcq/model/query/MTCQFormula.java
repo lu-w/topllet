@@ -21,7 +21,7 @@ public abstract class MTCQFormula extends AbstractCompositeQuery<ConjunctiveQuer
 {
     public static final Logger _logger = Log.getLogger(MTCQFormula.class);
 
-    private final TemporalKnowledgeBase _temporalKb;
+    private TemporalKnowledgeBase _temporalKb;
     private PropositionFactory _propositions = null;
     private MetricTemporalConjunctiveQuery _parentFormula;
 
@@ -76,6 +76,12 @@ public abstract class MTCQFormula extends AbstractCompositeQuery<ConjunctiveQuer
     public TemporalKnowledgeBase getTemporalKB()
     {
         return _temporalKb;
+    }
+
+    @Override
+    public void setTemporalKB(TemporalKnowledgeBase tkb)
+    {
+        _temporalKb = tkb;
     }
 
     @Override
