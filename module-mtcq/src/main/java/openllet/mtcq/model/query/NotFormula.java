@@ -30,4 +30,13 @@ public class NotFormula extends UnaryBooleanFormula
     {
         return new NotFormula(getTemporalKB(), isDistinct(), getSubFormula().copy());
     }
+
+    @Override
+    public boolean equals(Object other)
+    {
+        if (other instanceof NotFormula oN)
+            return getSubFormula().equals(oN.getSubFormula());
+        else
+            return false;
+    }
 }

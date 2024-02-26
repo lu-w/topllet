@@ -31,4 +31,14 @@ public class ReleaseFormula extends BinaryTemporalFormula
     {
         return new ReleaseFormula(getTemporalKB(), isDistinct(), getLeftSubFormula().copy(), getRightSubFormula().copy());
     }
+
+    @Override
+    public boolean equals(Object other)
+    {
+        if (other instanceof ReleaseFormula oRe)
+            return getLeftSubFormula().equals(oRe.getLeftSubFormula()) &&
+                    getRightSubFormula().equals(oRe.getRightSubFormula());
+        else
+            return false;
+    }
 }

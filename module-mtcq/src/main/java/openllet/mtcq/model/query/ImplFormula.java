@@ -31,4 +31,14 @@ public class ImplFormula extends BinaryBooleanFormula
     {
         return new ImplFormula(getTemporalKB(), isDistinct(), getLeftSubFormula().copy(), getRightSubFormula().copy());
     }
+
+    @Override
+    public boolean equals(Object other)
+    {
+        if (other instanceof ImplFormula oI)
+            return getLeftSubFormula().equals(oI.getLeftSubFormula()) &&
+                    getRightSubFormula().equals(oI.getRightSubFormula());
+        else
+            return false;
+    }
 }

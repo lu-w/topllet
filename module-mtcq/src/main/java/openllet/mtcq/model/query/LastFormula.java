@@ -30,4 +30,10 @@ public class LastFormula extends NullaryMTCQFormula
     {
         return new LastFormula(getTemporalKB(), isDistinct());
     }
+
+    @Override
+    public boolean equals(Object other)
+    {
+        return other instanceof LastFormula;
+    }
 }

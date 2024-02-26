@@ -31,4 +31,19 @@ public class XorFormula extends BinaryBooleanFormula
     {
         return new XorFormula(getTemporalKB(), isDistinct(), getLeftSubFormula().copy(), getRightSubFormula().copy());
     }
+
+    @Override
+    public boolean equals(Object other)
+    {
+        if (other instanceof XorFormula oXor)
+        {
+            MetricTemporalConjunctiveQuery tL = getLeftSubFormula();
+            MetricTemporalConjunctiveQuery tR = getRightSubFormula();
+            MetricTemporalConjunctiveQuery oL = oXor.getLeftSubFormula();
+            MetricTemporalConjunctiveQuery oR = oXor.getRightSubFormula();
+            return (tL.equals(oL) && tR.equals(oR)) || (tL.equals(oR) && tR.equals(oL));
+        }
+        else
+            return false;
+    }
 }

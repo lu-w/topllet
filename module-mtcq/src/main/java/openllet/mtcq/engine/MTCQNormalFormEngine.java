@@ -1,6 +1,7 @@
 package openllet.mtcq.engine;
 
 import openllet.aterm.ATermAppl;
+import openllet.core.utils.Pair;
 import openllet.mtcq.engine.rewriting.CNFTransformer;
 import openllet.mtcq.engine.rewriting.DXNFTransformer;
 import openllet.mtcq.engine.rewriting.DXNFVerifier;
@@ -12,10 +13,14 @@ import openllet.query.sparqldl.model.results.QueryResult;
 import openllet.query.sparqldl.model.results.QueryResultImpl;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class MTCQNormalFormEngine extends AbstractQueryEngine<MetricTemporalConjunctiveQuery>
 {
+    private final Map<Pair<MetricTemporalConjunctiveQuery, Integer>, QueryResult> _cachedResults = new HashMap<>();
+
     @Override
     protected QueryResult execABoxQuery(MetricTemporalConjunctiveQuery q, QueryResult excludeBindings, QueryResult restrictToBindings)
     {
@@ -25,81 +30,94 @@ public class MTCQNormalFormEngine extends AbstractQueryEngine<MetricTemporalConj
 
     private QueryResult answerTime(MetricTemporalConjunctiveQuery q, int timePoint, QueryResult candidates, List<ATermAppl> variables)
     {
-        q = DXNFTransformer.transform(q);
-        DXNFVerifier verifier = new DXNFVerifier();
-        if (!verifier.verify(q))
-            throw new RuntimeException("Unexpected: After transformation, MTCQ is not in normal form. Reason is: " +
-                    verifier.getReason());
-        QueryResult result = new QueryResultImpl(q);
+        QueryResult result;
+        Pair<MetricTemporalConjunctiveQuery, Integer> queryAtTime = new Pair<>(q, timePoint);
 
-        if (candidates == null || !candidates.isEmpty())
+        if (!_cachedResults.containsKey(queryAtTime))
         {
-            if (candidates != null)
-                candidates = candidates.copy();
-            if (q instanceof StrongNextFormula qNext)
+            q = DXNFTransformer.transform(q.copy());
+            DXNFVerifier verifier = new DXNFVerifier();
+            if (!verifier.verify(q))
+                throw new RuntimeException("Unexpected: After transformation, MTCQ is not in normal form. Reason is: " +
+                        verifier.getReason());
+
+            result = new QueryResultImpl(q);
+
+            if (candidates == null || !candidates.isEmpty())
             {
-                if (timePoint < q.getTemporalKB().size() - 1)
-                    result = answerTime(qNext.getSubFormula(), timePoint + 1, candidates, variables);
-                else
-                    // empty query result if strong next exceeds trace length
-                    result = new QueryResultImpl(q);
-            }
-            else if (q instanceof OrFormula qOr)
-            {
-                if (qOr.getLeftSubFormula() instanceof StrongNextFormula ||
-                        qOr.getRightSubFormula() instanceof StrongNextFormula)
+                if (candidates != null)
+                    candidates = candidates.copy();
+                if (q instanceof StrongNextFormula qNext)
                 {
-                    MetricTemporalConjunctiveQuery qOrAtemporal, qOrNext;
-                    if (qOr.getLeftSubFormula() instanceof StrongNextFormula)
+                    if (timePoint < q.getTemporalKB().size() - 1)
+                        result = answerTime(qNext.getSubFormula(), timePoint + 1, candidates, variables);
+                    else
+                        // empty query result if strong next exceeds trace length
+                        result = new QueryResultImpl(q);
+                }
+                else if (q instanceof OrFormula qOr)
+                {
+                    if (qOr.getLeftSubFormula() instanceof StrongNextFormula ||
+                            qOr.getRightSubFormula() instanceof StrongNextFormula)
                     {
-                        qOrNext = qOr.getLeftSubFormula();
-                        qOrAtemporal = qOr.getRightSubFormula();
+                        MetricTemporalConjunctiveQuery qOrAtemporal, qOrNext;
+                        if (qOr.getLeftSubFormula() instanceof StrongNextFormula)
+                        {
+                            qOrNext = qOr.getLeftSubFormula();
+                            qOrAtemporal = qOr.getRightSubFormula();
+                        }
+                        else
+                        {
+                            qOrAtemporal = qOr.getLeftSubFormula();
+                            qOrNext = qOr.getRightSubFormula();
+                        }
+                        QueryResult atemporalResult = answerAtemporal(qOrAtemporal, timePoint, candidates, variables);
+                        QueryResult qOrNextCandidates;
+                        if (candidates != null && !candidates.isEmpty())
+                        {
+                            qOrNextCandidates = candidates.copy();
+                            qOrNextCandidates.removeAll(atemporalResult);
+                        }
+                        else
+                            qOrNextCandidates = candidates;
+                        QueryResult nextResult = answerTime(qOrNext, timePoint, qOrNextCandidates, variables);
+                        result.addAll(atemporalResult);
+                        result.addAll(nextResult);
                     }
                     else
                     {
-                        qOrAtemporal = qOr.getLeftSubFormula();
-                        qOrNext = qOr.getRightSubFormula();
+                        result = answerAtemporal(q, timePoint, candidates, variables);
                     }
-                    QueryResult atemporalResult = answerAtemporal(qOrAtemporal, timePoint, candidates, variables);
-                    QueryResult qOrNextCandidates;
-                    if (candidates != null && !candidates.isEmpty())
-                    {
-                        qOrNextCandidates = candidates.copy();
-                        qOrNextCandidates.removeAll(atemporalResult);
-                    }
+                }
+                else if (q instanceof AndFormula qAnd)
+                {
+                    // TODO sort (atemporal first, conjuncts to front that consist of only one non-negated CQ)
+                    QueryResult leftResult = answerTime(qAnd.getLeftSubFormula(), timePoint, candidates, variables);
+                    if (candidates != null)
+                        candidates.retainAll(leftResult);
                     else
-                        qOrNextCandidates = candidates;
-                    QueryResult nextResult = answerTime(qOrNext, timePoint, qOrNextCandidates, variables);
-                    result.addAll(atemporalResult);
-                    result.addAll(nextResult);
+                        candidates = leftResult;
+                    result = answerTime(qAnd.getRightSubFormula(), timePoint, candidates, variables);
                 }
                 else
                 {
                     result = answerAtemporal(q, timePoint, candidates, variables);
                 }
             }
-            else if (q instanceof AndFormula qAnd)
-            {
-                // TODO sort (atemporal first, conjuncts to front that consist of only one non-negated CQ)
-                QueryResult leftResult = answerTime(qAnd.getLeftSubFormula(), timePoint, candidates, variables);
-                if (candidates != null)
-                    candidates.retainAll(leftResult);
-                else
-                    candidates = leftResult;
-                result = answerTime(qAnd.getRightSubFormula(), timePoint, candidates, variables);
-            }
-            else
-            {
-                result = answerAtemporal(q, timePoint, candidates, variables);
-            }
+
+            result.expandToAllVariables(q.getResultVars());
+            result.explicate();
+            result.retainAll(candidates);
+
+            //System.out.println("res = " + result);
+
+            _cachedResults.put(queryAtTime, result);
         }
-
-        result.expandToAllVariables(q.getResultVars());
-        result.explicate();
-        result.retainAll(candidates);
-
-        System.out.println("Answering at time " + timePoint + " for candidates " + candidates + ": " + q);
-        System.out.println("res = " + result);
+        else
+        {
+            result = _cachedResults.get(queryAtTime);
+            System.out.println("Got cached result at time " + timePoint + " for query " + q);
+        }
 
         return result;
     }
@@ -109,19 +127,34 @@ public class MTCQNormalFormEngine extends AbstractQueryEngine<MetricTemporalConj
     {
         if (q.isTemporal())
             throw new RuntimeException("Got temporal operator for answering an atemporal query: " + q);
-        List<MetricTemporalConjunctiveQuery> cnf = CNFTransformer.transformToListOfConjuncts(q);
 
-        // TODO sort conjuncts to front that consist of only one non-negated CQ
         QueryResult result = null;
+        Pair<MetricTemporalConjunctiveQuery, Integer> queryAtTime = new Pair<>(q, timePoint);
 
-        for (MetricTemporalConjunctiveQuery query : cnf)
+        if (!_cachedResults.containsKey(queryAtTime))
         {
-            QueryResult queryResult = answerUCQWithNegations(query, timePoint, candidates, variables);
-            if (result == null)
-                result = queryResult;
-            else
-                result.retainAll(queryResult);
-            result.expandToAllVariables(q.getResultVars());
+
+            System.out.println("Answering at time " + timePoint + " for atemporal query " + q);
+            List<MetricTemporalConjunctiveQuery> cnf = CNFTransformer.transformToListOfConjuncts(q);
+
+            // TODO sort conjuncts to front that consist of only one non-negated CQ
+
+            for (MetricTemporalConjunctiveQuery query : cnf)
+            {
+                QueryResult queryResult = answerUCQWithNegations(query, timePoint, candidates, variables);
+                if (result == null)
+                    result = queryResult;
+                else
+                    result.retainAll(queryResult);
+                result.expandToAllVariables(q.getResultVars());
+            }
+
+            _cachedResults.put(queryAtTime, result);
+        }
+        else
+        {
+            result = _cachedResults.get(queryAtTime);
+            System.out.println("Got cached result at time " + timePoint + " for query " + q);
         }
 
         return result;

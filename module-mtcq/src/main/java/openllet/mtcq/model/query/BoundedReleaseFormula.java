@@ -34,4 +34,20 @@ public class BoundedReleaseFormula extends BoundedBinaryTemporalFormula
         return new BoundedReleaseFormula(getTemporalKB(), isDistinct(), getLeftSubFormula().copy(),
                 getRightSubFormula().copy(), getLowerBound(), getUpperBound());
     }
+
+    @Override
+    public boolean equals(Object other)
+    {
+        if (other instanceof BoundedReleaseFormula oRe)
+        {
+            MetricTemporalConjunctiveQuery tL = getLeftSubFormula();
+            MetricTemporalConjunctiveQuery tR = getRightSubFormula();
+            MetricTemporalConjunctiveQuery oL = oRe.getLeftSubFormula();
+            MetricTemporalConjunctiveQuery oR = oRe.getRightSubFormula();
+            return (tL.equals(oL) && tR.equals(oR)) && getLowerBound() == oRe.getLowerBound() &&
+                    getUpperBound() == oRe.getUpperBound();
+        }
+        else
+            return false;
+    }
 }

@@ -30,4 +30,13 @@ public class EventuallyFormula extends UnaryTemporalFormula
     {
         return new EventuallyFormula(getTemporalKB(), isDistinct(), getSubFormula().copy());
     }
+
+    @Override
+    public boolean equals(Object other)
+    {
+        if (other instanceof BoundedEventuallyFormula oF)
+            return getSubFormula().equals(oF.getSubFormula());
+        else
+            return false;
+    }
 }

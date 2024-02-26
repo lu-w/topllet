@@ -19,4 +19,16 @@ public abstract class NullaryMTCQFormula extends MTCQFormula
     {
         return false;
     }
+
+    @Override
+    public int hashCode()
+    {
+        final int PRIME = 31;
+        int result = 1;
+        result = PRIME * result + getClass().hashCode();
+        result = PRIME * result + _distVars.hashCode();
+        result = PRIME * result + _resultVars.hashCode();
+        result = PRIME * result + getUndistVars().hashCode();
+        return result;
+    }
 }

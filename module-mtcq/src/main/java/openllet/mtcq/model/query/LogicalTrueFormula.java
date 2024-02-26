@@ -30,4 +30,10 @@ public class LogicalTrueFormula extends NullaryMTCQFormula
     {
         return new LogicalTrueFormula(getTemporalKB(), isDistinct());
     }
+
+    @Override
+    public boolean equals(Object other)
+    {
+        return other instanceof LogicalTrueFormula;
+    }
 }

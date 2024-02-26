@@ -30,4 +30,13 @@ public class StrongNextFormula extends UnaryTemporalFormula
     {
         return new StrongNextFormula(getTemporalKB(), isDistinct(), getSubFormula().copy());
     }
+
+    @Override
+    public boolean equals(Object other)
+    {
+        if (other instanceof StrongNextFormula oX)
+            return getSubFormula().equals(oX.getSubFormula());
+        else
+            return false;
+    }
 }

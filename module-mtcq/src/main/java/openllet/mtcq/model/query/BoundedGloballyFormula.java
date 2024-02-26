@@ -31,4 +31,14 @@ public class BoundedGloballyFormula extends BoundedUnaryTemporalFormula
         return new BoundedGloballyFormula(getTemporalKB(), isDistinct(), getSubFormula().copy(), getLowerBound(),
                 getUpperBound());
     }
+
+    @Override
+    public boolean equals(Object other)
+    {
+        if (other instanceof BoundedGloballyFormula oG)
+            return getSubFormula().equals(oG.getSubFormula()) && getLowerBound() == oG.getLowerBound() &&
+                    getUpperBound() == oG.getUpperBound();
+        else
+            return false;
+    }
 }

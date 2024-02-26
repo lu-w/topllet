@@ -31,4 +31,10 @@ public class PropositionalTrueFormula extends NullaryMTCQFormula
     {
         return new PropositionalTrueFormula(getTemporalKB(), isDistinct());
     }
+
+    @Override
+    public boolean equals(Object other)
+    {
+        return other instanceof PropositionalTrueFormula;
+    }
 }

@@ -31,4 +31,19 @@ public class OrFormula extends BinaryBooleanFormula
     {
         return new OrFormula(getTemporalKB(), isDistinct(), getLeftSubFormula().copy(), getRightSubFormula().copy());
     }
+
+    @Override
+    public boolean equals(Object other)
+    {
+        if (other instanceof OrFormula oOr)
+        {
+            MetricTemporalConjunctiveQuery tL = getLeftSubFormula();
+            MetricTemporalConjunctiveQuery tR = getRightSubFormula();
+            MetricTemporalConjunctiveQuery oL = oOr.getLeftSubFormula();
+            MetricTemporalConjunctiveQuery oR = oOr.getRightSubFormula();
+            return (tL.equals(oL) && tR.equals(oR)) || (tL.equals(oR) && tR.equals(oL));
+        }
+        else
+            return false;
+    }
 }

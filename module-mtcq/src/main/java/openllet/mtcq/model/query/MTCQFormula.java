@@ -3,6 +3,8 @@ package openllet.mtcq.model.query;
 import openllet.core.KnowledgeBase;
 import openllet.mtcq.model.kb.FileBasedTemporalKnowledgeBaseImpl;
 import openllet.mtcq.model.kb.TemporalKnowledgeBase;
+import openllet.mtcq.parser.MetricTemporalConjunctiveQueryParser;
+import openllet.mtcq.parser.ParseException;
 import openllet.query.sparqldl.model.AbstractCompositeQuery;
 import openllet.query.sparqldl.model.cq.ConjunctiveQuery;
 import openllet.shared.tools.Log;
@@ -12,10 +14,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 
-/**
- * TODO:
- *  - implement equals() both against String and MTCQFormula
- */
 public abstract class MTCQFormula extends AbstractCompositeQuery<ConjunctiveQuery, MetricTemporalConjunctiveQuery>
         implements MetricTemporalConjunctiveQuery
 {
@@ -108,5 +106,26 @@ public abstract class MTCQFormula extends AbstractCompositeQuery<ConjunctiveQuer
     public String toString()
     {
         return toString(null);
+    }
+
+    @Override
+    public boolean equals(Object other)
+    {
+        // Default implementation - overwritten by the concrete classes
+        if (other instanceof MTCQFormula formula)
+            return formula.toString().equals(toString());
+        else if (other instanceof String otherString)
+        {
+            try
+            {
+                return equals(MetricTemporalConjunctiveQueryParser.parse(otherString, getTemporalKB(), isDistinct()));
+            }
+            catch (ParseException e)
+            {
+                return false;
+            }
+        }
+        else
+            return false;
     }
 }

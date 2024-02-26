@@ -30,4 +30,13 @@ public class WeakNextFormula extends UnaryTemporalFormula
     {
         return new WeakNextFormula(getTemporalKB(), isDistinct(), getSubFormula().copy());
     }
+
+    @Override
+    public boolean equals(Object other)
+    {
+        if (other instanceof WeakNextFormula oX)
+            return getSubFormula().equals(oX.getSubFormula());
+        else
+            return false;
+    }
 }

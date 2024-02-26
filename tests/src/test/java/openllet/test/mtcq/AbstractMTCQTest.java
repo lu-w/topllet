@@ -169,6 +169,20 @@ public class AbstractMTCQTest extends AbstractQueryTest
         }
     }
 
+    public void simpleTKB3()
+    {
+        fillSimpleTKB(5);
+        int i = 0;
+        for (KnowledgeBase kb : _tkb)
+        {
+            if (i > 1)
+                kb.addType(_a, _A);
+            if (i > 3)
+                kb.addType(_a, _B);
+            i++;
+        }
+    }
+
     protected void fillSimpleTKB(int size)
     {
         timeSteps(size);

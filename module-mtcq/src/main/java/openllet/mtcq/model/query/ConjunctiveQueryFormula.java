@@ -93,4 +93,21 @@ public class ConjunctiveQueryFormula extends MTCQFormula
     {
         return new ConjunctiveQueryFormula(getTemporalKB(), isDistinct(), _cq.copy());
     }
+
+    @Override
+    public boolean equals(Object other)
+    {
+        if (other instanceof ConjunctiveQueryFormula oCq)
+        {
+            return getConjunctiveQuery().equals(oCq.getConjunctiveQuery());
+        }
+        else
+            return false;
+    }
+
+    @Override
+    public int hashCode()
+    {
+        return _cq.hashCode();
+    }
 }

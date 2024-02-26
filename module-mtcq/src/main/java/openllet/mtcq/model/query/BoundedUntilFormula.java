@@ -35,4 +35,20 @@ public class BoundedUntilFormula extends BoundedBinaryTemporalFormula
         return new BoundedUntilFormula(getTemporalKB(), isDistinct(), getLeftSubFormula().copy(),
                 getRightSubFormula().copy(), getLowerBound(), getUpperBound());
     }
+
+    @Override
+    public boolean equals(Object other)
+    {
+        if (other instanceof BoundedUntilFormula oU)
+        {
+            MetricTemporalConjunctiveQuery tL = getLeftSubFormula();
+            MetricTemporalConjunctiveQuery tR = getRightSubFormula();
+            MetricTemporalConjunctiveQuery oL = oU.getLeftSubFormula();
+            MetricTemporalConjunctiveQuery oR = oU.getRightSubFormula();
+            return (tL.equals(oL) && tR.equals(oR)) && getLowerBound() == oU.getLowerBound() &&
+                    getUpperBound() == oU.getUpperBound();
+        }
+        else
+            return false;
+    }
 }

@@ -2,8 +2,6 @@ package openllet.mtcq.engine.rewriting;
 
 import openllet.mtcq.model.query.*;
 
-// TODO build an extra visitor for simplifications (https://github.com/bpodgursky/jbool_expressions?tab=readme-ov-file#rules)
-
 public class DXNFTransformer implements MTCQVisitor
 {
     private MTCQFormula _newFormula;
@@ -19,6 +17,9 @@ public class DXNFTransformer implements MTCQVisitor
             transformer = new DXNFTransformer();
             mtcq = transformer.run(mtcq);
         } while(transformer.hasAppliedTransformationRules());
+        //System.out.println("Orig formula = " + mtcq);
+        mtcq = MTCQSimplifier.transform(mtcq);
+        //System.out.println("Simplified to = " + mtcq);
         return mtcq;
     }
 

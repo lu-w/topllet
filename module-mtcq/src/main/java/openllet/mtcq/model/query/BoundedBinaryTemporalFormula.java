@@ -44,4 +44,19 @@ public abstract class BoundedBinaryTemporalFormula extends BoundedTemporalFormul
     {
         return true;
     }
+
+    @Override
+    public int hashCode()
+    {
+        final int PRIME = 31;
+        int result = 1;
+        result = PRIME * result + _leftSubFormula.hashCode();
+        result = PRIME * result + _rightSubFormula.hashCode();
+        result = PRIME * result + getLowerBound();
+        result = PRIME * result + getUpperBound();
+        result = PRIME * result + _distVars.hashCode();
+        result = PRIME * result + _resultVars.hashCode();
+        result = PRIME * result + getUndistVars().hashCode();
+        return result;
+    }
 }

@@ -32,4 +32,14 @@ public class BoundedEventuallyFormula extends BoundedUnaryTemporalFormula
         return new BoundedEventuallyFormula(getTemporalKB(), isDistinct(), getSubFormula().copy(), getLowerBound(),
                 getUpperBound());
     }
+
+    @Override
+    public boolean equals(Object other)
+    {
+        if (other instanceof BoundedEventuallyFormula oF)
+            return getSubFormula().equals(oF.getSubFormula()) && getLowerBound() == oF.getLowerBound() &&
+                    getUpperBound() == oF.getUpperBound();
+        else
+            return false;
+    }
 }

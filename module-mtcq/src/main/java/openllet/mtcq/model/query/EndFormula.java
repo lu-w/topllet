@@ -30,4 +30,10 @@ public class EndFormula extends NullaryMTCQFormula
     {
         return new EndFormula(getTemporalKB(), isDistinct());
     }
+
+    @Override
+    public boolean equals(Object other)
+    {
+        return other instanceof EndFormula;
+    }
 }

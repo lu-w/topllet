@@ -31,4 +31,14 @@ public class UntilFormula extends BinaryTemporalFormula
     {
         return new UntilFormula(getTemporalKB(), isDistinct(), getLeftSubFormula().copy(), getRightSubFormula().copy());
     }
+
+    @Override
+    public boolean equals(Object other)
+    {
+        if (other instanceof UntilFormula oU)
+            return getLeftSubFormula().equals(oU.getLeftSubFormula()) &&
+                    getRightSubFormula().equals(oU.getRightSubFormula());
+        else
+            return false;
+    }
 }

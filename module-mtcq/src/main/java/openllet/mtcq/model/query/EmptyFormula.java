@@ -36,4 +36,10 @@ public class EmptyFormula extends MTCQFormula
     {
         return new EmptyFormula(getTemporalKB(), isDistinct());
     }
+
+    @Override
+    public boolean equals(Object other)
+    {
+        return other instanceof EmptyFormula;
+    }
 }

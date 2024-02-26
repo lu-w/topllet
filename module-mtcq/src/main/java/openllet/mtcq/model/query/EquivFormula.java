@@ -31,4 +31,19 @@ public class EquivFormula extends BinaryBooleanFormula
     {
         return new EquivFormula(getTemporalKB(), isDistinct(), getLeftSubFormula().copy(), getRightSubFormula().copy());
     }
+
+    @Override
+    public boolean equals(Object other)
+    {
+        if (other instanceof EquivFormula oAnd)
+        {
+            MetricTemporalConjunctiveQuery tL = getLeftSubFormula();
+            MetricTemporalConjunctiveQuery tR = getRightSubFormula();
+            MetricTemporalConjunctiveQuery oL = oAnd.getLeftSubFormula();
+            MetricTemporalConjunctiveQuery oR = oAnd.getRightSubFormula();
+            return (tL.equals(oL) && tR.equals(oR)) || (tL.equals(oR) && tR.equals(oL));
+        }
+        else
+            return false;
+    }
 }
