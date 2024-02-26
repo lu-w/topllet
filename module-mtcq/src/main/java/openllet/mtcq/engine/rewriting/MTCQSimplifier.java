@@ -9,6 +9,7 @@ public class MTCQSimplifier extends StandardTransformer
     {
         MetricTemporalConjunctiveQuery l = formula.getLeftSubFormula();
         MetricTemporalConjunctiveQuery r = formula.getRightSubFormula();
+        boolean onlyDidRecursion = false;
         // (A & true) -> A
         if (l instanceof LogicalTrueFormula || l instanceof PropositionalTrueFormula)
             _newFormula = run(r);
@@ -69,7 +70,12 @@ public class MTCQSimplifier extends StandardTransformer
         else if (r.equals(l))
             _newFormula = run(l);
         else
+        {
             super.visit(formula);
+            onlyDidRecursion = true;
+        }
+        if (!onlyDidRecursion)
+            appliedTransformationRule("AND");
     }
 
     @Override
@@ -77,6 +83,7 @@ public class MTCQSimplifier extends StandardTransformer
     {
         MetricTemporalConjunctiveQuery l = formula.getLeftSubFormula();
         MetricTemporalConjunctiveQuery r = formula.getRightSubFormula();
+        boolean onlyDidRecursion = false;
         // (A | true) -> true
         if (l instanceof LogicalTrueFormula || l instanceof PropositionalTrueFormula)
             _newFormula = l.copy();
@@ -135,7 +142,12 @@ public class MTCQSimplifier extends StandardTransformer
         else if (r.equals(l))
             _newFormula = run(l);
         else
+        {
             super.visit(formula);
+            onlyDidRecursion = true;
+        }
+        if (!onlyDidRecursion)
+            appliedTransformationRule("OR");
     }
 
     @Override
@@ -143,7 +155,10 @@ public class MTCQSimplifier extends StandardTransformer
     {
         // !(!(A)) -> A
         if (formula.getSubFormula() instanceof NotFormula subNot)
+        {
             _newFormula = run(subNot.getSubFormula());
+            appliedTransformationRule("NOT");
+        }
         else
             super.visit(formula);
     }

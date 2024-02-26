@@ -6,15 +6,39 @@ public abstract class StandardTransformer implements MTCQVisitor
 {
     protected MetricTemporalConjunctiveQuery _newFormula;
 
-    public static MetricTemporalConjunctiveQuery transform(MetricTemporalConjunctiveQuery formula)
+    private boolean _hasAppliedTransformationRules = false;
+
+    public MetricTemporalConjunctiveQuery transform(MetricTemporalConjunctiveQuery formula)
     {
-        return new MTCQSimplifier().run(formula);
+        MetricTemporalConjunctiveQuery mtcq = formula;
+        do
+        {
+            reset();
+            mtcq = run(mtcq);
+        }
+        while (hasAppliedTransformationRules());
+        return mtcq;
     }
 
     protected MetricTemporalConjunctiveQuery run(MetricTemporalConjunctiveQuery formula)
     {
         formula.accept(this);
         return this.getTransformedFormula();
+    }
+
+    protected void reset()
+    {
+        _hasAppliedTransformationRules = false;
+    }
+
+    protected void appliedTransformationRule(String rule)
+    {
+        _hasAppliedTransformationRules = true;
+    }
+
+    protected boolean hasAppliedTransformationRules()
+    {
+        return _hasAppliedTransformationRules;
     }
 
     protected MetricTemporalConjunctiveQuery getTransformedFormula()

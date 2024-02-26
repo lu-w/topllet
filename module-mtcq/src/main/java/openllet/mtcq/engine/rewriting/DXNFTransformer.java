@@ -17,10 +17,7 @@ public class DXNFTransformer implements MTCQVisitor
             transformer = new DXNFTransformer();
             mtcq = transformer.run(mtcq);
         } while(transformer.hasAppliedTransformationRules());
-        //System.out.println("Orig formula = " + mtcq);
-        mtcq = MTCQSimplifier.transform(mtcq);
-        //System.out.println("Simplified to = " + mtcq);
-        return mtcq;
+        return new MTCQSimplifier().transform(mtcq);
     }
 
     protected MTCQFormula run(MetricTemporalConjunctiveQuery formula)

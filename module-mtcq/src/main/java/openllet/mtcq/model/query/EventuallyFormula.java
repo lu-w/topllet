@@ -34,7 +34,7 @@ public class EventuallyFormula extends UnaryTemporalFormula
     @Override
     public boolean equals(Object other)
     {
-        if (other instanceof BoundedEventuallyFormula oF)
+        if (other instanceof EventuallyFormula oF)
             return getSubFormula().equals(oF.getSubFormula());
         else
             return false;

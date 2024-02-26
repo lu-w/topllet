@@ -34,8 +34,8 @@ public class GloballyFormula extends UnaryTemporalFormula
     @Override
     public boolean equals(Object other)
     {
-        if (other instanceof BoundedEventuallyFormula oF)
-            return getSubFormula().equals(oF.getSubFormula());
+        if (other instanceof GloballyFormula oG)
+            return getSubFormula().equals(oG.getSubFormula());
         else
             return false;
     }
