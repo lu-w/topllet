@@ -34,6 +34,8 @@ public class MTCQNormalFormEngine extends AbstractQueryEngine<MetricTemporalConj
 
         if (candidates == null || !candidates.isEmpty())
         {
+            if (candidates != null)
+                candidates = candidates.copy();
             if (q instanceof StrongNextFormula qNext)
             {
                 if (timePoint < q.getTemporalKB().size() - 1)
@@ -58,8 +60,17 @@ public class MTCQNormalFormEngine extends AbstractQueryEngine<MetricTemporalConj
                         qOrAtemporal = qOr.getLeftSubFormula();
                         qOrNext = qOr.getRightSubFormula();
                     }
-                    result = answerAtemporal(qOrAtemporal, timePoint, candidates, variables);
-                    QueryResult nextResult = answerTime(qOrNext, timePoint, candidates, variables);
+                    QueryResult atemporalResult = answerAtemporal(qOrAtemporal, timePoint, candidates, variables);
+                    QueryResult qOrNextCandidates;
+                    if (candidates != null && !candidates.isEmpty())
+                    {
+                        qOrNextCandidates = candidates.copy();
+                        qOrNextCandidates.removeAll(atemporalResult);
+                    }
+                    else
+                        qOrNextCandidates = candidates;
+                    QueryResult nextResult = answerTime(qOrNext, timePoint, qOrNextCandidates, variables);
+                    result.addAll(atemporalResult);
                     result.addAll(nextResult);
                 }
                 else
@@ -87,7 +98,7 @@ public class MTCQNormalFormEngine extends AbstractQueryEngine<MetricTemporalConj
         result.explicate();
         result.retainAll(candidates);
 
-        System.out.println("Answering " + q + " at time " + timePoint + " for candidates " + candidates);
+        System.out.println("Answering at time " + timePoint + " for candidates " + candidates + ": " + q);
         System.out.println("res = " + result);
 
         return result;
@@ -128,7 +139,7 @@ public class MTCQNormalFormEngine extends AbstractQueryEngine<MetricTemporalConj
         if (q instanceof LastFormula)
         {
             if (q.getTemporalKB().size() - 1 == timePoint)
-                return candidates;
+                return candidates.copy();
             else
                 return new QueryResultImpl(q);
         }
