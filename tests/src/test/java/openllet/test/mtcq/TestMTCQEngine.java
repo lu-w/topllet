@@ -197,8 +197,8 @@ public class TestMTCQEngine extends AbstractMTCQTest
     public void testMetricsOperators()
     {
         complexTKB();
-        //testQuery("G_[0,9] (!(D(?x)) | (E(?y)))", new ATermAppl[][] { { _a, _b } });
-        //testQuery("G_[0,10] (!(D(?x)) | (E(?y)))", new ATermAppl[][] { { _a, _b } });
+        testQuery("G_[0,9] (!(D(?x)) | (E(?y)))", new ATermAppl[][] { { _a, _b } });
+        testQuery("G_[0,10] (!(D(?x)) | (E(?y)))", new ATermAppl[][] { { _a, _b } });
         testQuery("F_[10,11] (!(D(?x)) | (E(?y)))");
         testQuery("F_<=3 !(C(?x) & r(?x,?y))", allResults(List.of(_a, _b, _c), 2, true));
         testQuery("F_<=9 (q(?y, ?z))", new ATermAppl[][] { { _b, _a }, { _c, _b } });
