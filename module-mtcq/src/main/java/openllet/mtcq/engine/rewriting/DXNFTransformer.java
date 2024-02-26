@@ -333,19 +333,33 @@ public class DXNFTransformer implements MTCQVisitor
     {
         if (!_isInsideNext)
         {
-            if (formula.getUpperBound() > 0)
+
+            if (formula.getLowerBound() == 0 && formula.getUpperBound() > 0)
                 _newFormula = run(new AndFormula(formula.getTemporalKB(), formula.isDistinct(),
                         formula.getSubFormula(),
                         new WeakNextFormula(formula.getTemporalKB(), formula.isDistinct(),
                                 new BoundedGloballyFormula(formula.getTemporalKB(), formula.isDistinct(),
                                         formula.getSubFormula(),
-                                        formula.getLowerBound(),
+                                        0,
                                         formula.getUpperBound() - 1
                                 )
                         )
                 ));
-            else
-                _newFormula = run(formula.getSubFormula());  // TODO maybe EndFormula | SubFormula to handle empty trace?
+            else if (formula.getLowerBound() > 0 && formula.getUpperBound() > 0)
+                _newFormula = run(
+                        new WeakNextFormula(formula.getTemporalKB(), formula.isDistinct(),
+                                new BoundedGloballyFormula(formula.getTemporalKB(), formula.isDistinct(),
+                                        formula.getSubFormula(),
+                                        formula.getLowerBound() - 1,
+                                        formula.getUpperBound() - 1
+                                )
+                        )
+                );
+            else // upper and lower bound == 0
+                _newFormula = run(new OrFormula(formula.getTemporalKB(), formula.isDistinct(),
+                        new EndFormula(formula.getTemporalKB(), formula.isDistinct()),
+                        formula.getSubFormula())
+                );
             appliedTransformationRule("12.6");
         }
         else
@@ -357,18 +371,28 @@ public class DXNFTransformer implements MTCQVisitor
     {
         if (!_isInsideNext)
         {
-            if (formula.getUpperBound() > 0)
+            if (formula.getLowerBound() == 0 && formula.getUpperBound() > 0)
                 _newFormula = run(new OrFormula(formula.getTemporalKB(), formula.isDistinct(),
                         formula.getSubFormula(),
                         new StrongNextFormula(formula.getTemporalKB(), formula.isDistinct(),
                                 new BoundedEventuallyFormula(formula.getTemporalKB(), formula.isDistinct(),
                                         formula.getSubFormula(),
-                                        formula.getLowerBound(),
+                                        0,
                                         formula.getUpperBound() - 1
                                 )
                         )
                 ));
-            else
+            else if (formula.getLowerBound() > 0 && formula.getUpperBound() > 0)
+                _newFormula = run(
+                        new StrongNextFormula(formula.getTemporalKB(), formula.isDistinct(),
+                                new BoundedEventuallyFormula(formula.getTemporalKB(), formula.isDistinct(),
+                                        formula.getSubFormula(),
+                                        formula.getLowerBound() - 1,
+                                        formula.getUpperBound() - 1
+                                )
+                        )
+                );
+            else // upper and lower bound == 0
                 _newFormula = run(formula.getSubFormula());
             appliedTransformationRule("12.7");
         }

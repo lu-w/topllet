@@ -9,16 +9,17 @@ public abstract class BoundedBinaryTemporalFormula extends BoundedTemporalFormul
     private final MetricTemporalConjunctiveQuery _rightSubFormula;
 
     public BoundedBinaryTemporalFormula(TemporalKnowledgeBase temporalKb, boolean isDistinct,
-                                        MetricTemporalConjunctiveQuery leftSubFormula, MetricTemporalConjunctiveQuery rightSubFormula, int lowerBound,
-                                        int upperBound)
+                                        MetricTemporalConjunctiveQuery left, MetricTemporalConjunctiveQuery right,
+                                        int lowerBound, int upperBound)
     {
         super(temporalKb, isDistinct, lowerBound, upperBound);
-        _leftSubFormula = leftSubFormula;
-        _rightSubFormula = rightSubFormula;
-        for (ConjunctiveQuery cq : leftSubFormula.getQueries())
+        assert(left != null && right != null);
+        _leftSubFormula = left;
+        _rightSubFormula = right;
+        for (ConjunctiveQuery cq : left.getQueries())
             if (!getQueries().contains(cq))
                 addQuery(cq);
-        for (ConjunctiveQuery cq : rightSubFormula.getQueries())
+        for (ConjunctiveQuery cq : right.getQueries())
             if (!getQueries().contains(cq))
                 addQuery(cq);
     }

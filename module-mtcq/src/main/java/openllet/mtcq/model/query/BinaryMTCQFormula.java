@@ -11,6 +11,7 @@ public abstract class BinaryMTCQFormula extends MTCQFormula
     public BinaryMTCQFormula(TemporalKnowledgeBase temporalKb, boolean isDistinct, MetricTemporalConjunctiveQuery left, MetricTemporalConjunctiveQuery right)
     {
         super(temporalKb, isDistinct);
+        assert(left != null && right != null);
         left.setParentFormula(this);
         right.setParentFormula(this);
         _leftSubFormula = left;

@@ -11,8 +11,7 @@ public abstract class BoundedTemporalFormula extends TemporalFormula
     {
         super(temporalKb, isDistinct);
         if (lowerBound > upperBound || lowerBound < 0)
-            throw new IllegalArgumentException("Invalid bound configuration [" + lowerBound + "," + upperBound +
-                    " in formula " + this);
+            throw new IllegalArgumentException("Invalid bound configuration [" + lowerBound + "," + upperBound + "]");
         _lowerBound = lowerBound;
         _upperBound = upperBound;
     }

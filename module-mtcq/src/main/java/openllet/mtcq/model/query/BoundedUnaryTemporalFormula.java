@@ -11,6 +11,7 @@ public abstract class BoundedUnaryTemporalFormula extends BoundedTemporalFormula
                                        int lowerBound, int upperBound)
     {
         super(temporalKb, isDistinct, lowerBound, upperBound);
+        assert(subFormula != null);
         _subFormula = subFormula;
         for (ConjunctiveQuery cq : subFormula.getQueries())
             if (!getQueries().contains(cq))

@@ -162,4 +162,8 @@ public class MTCQSimplifier extends StandardTransformer
         else
             super.visit(formula);
     }
+
+    // TODO
+    //  - (G A) & (G B) -> G (A & B)
+    //  - (a U b) & (c U b) -> (a & b) U c ?
 }
