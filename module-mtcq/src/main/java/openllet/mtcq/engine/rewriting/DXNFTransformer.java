@@ -12,12 +12,15 @@ public class DXNFTransformer implements MTCQVisitor
     {
         MetricTemporalConjunctiveQuery mtcq = formula;
         DXNFTransformer transformer;
+        MTCQSimplifier simplifier = new MTCQSimplifier();
         do
         {
             transformer = new DXNFTransformer();
+            mtcq = simplifier.transform(mtcq);
             mtcq = transformer.run(mtcq);
         } while(transformer.hasAppliedTransformationRules());
-        return new MTCQSimplifier().transform(mtcq);
+        mtcq = simplifier.transform(mtcq);
+        return mtcq;
     }
 
     protected MTCQFormula run(MetricTemporalConjunctiveQuery formula)
