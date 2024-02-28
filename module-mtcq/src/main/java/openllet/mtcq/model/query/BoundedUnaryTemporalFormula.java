@@ -1,5 +1,6 @@
 package openllet.mtcq.model.query;
 
+import openllet.core.KnowledgeBase;
 import openllet.mtcq.model.kb.TemporalKnowledgeBase;
 import openllet.query.sparqldl.model.cq.ConjunctiveQuery;
 
@@ -22,6 +23,20 @@ public abstract class BoundedUnaryTemporalFormula extends BoundedTemporalFormula
                                        int upperBound)
     {
         this(parentFormula.getTemporalKB(), parentFormula.isDistinct(), subFormula, lowerBound, upperBound);
+    }
+
+    @Override
+    public void setTemporalKB(TemporalKnowledgeBase tkb)
+    {
+        super.setTemporalKB(tkb);
+        _subFormula.setTemporalKB(tkb);
+    }
+
+    @Override
+    public void setKB(KnowledgeBase kb)
+    {
+        super.setKB(kb);
+        _subFormula.setKB(kb);
     }
 
     public MetricTemporalConjunctiveQuery getSubFormula()

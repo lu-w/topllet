@@ -1,6 +1,7 @@
 package openllet.mtcq.model.query;
 
 import openllet.aterm.ATermAppl;
+import openllet.core.KnowledgeBase;
 import openllet.mtcq.model.kb.TemporalKnowledgeBase;
 import openllet.query.sparqldl.model.cq.ConjunctiveQuery;
 import openllet.query.sparqldl.model.cq.QueryAtom;
@@ -21,6 +22,13 @@ public class ConjunctiveQueryFormula extends MTCQFormula
     public ConjunctiveQueryFormula(MTCQFormula parentFormula, ConjunctiveQuery conjunctiveQuery)
     {
         this(parentFormula.getTemporalKB(), parentFormula.isDistinct(), conjunctiveQuery);
+    }
+
+    @Override
+    public void setKB(KnowledgeBase kb)
+    {
+        super.setKB(kb);
+        _cq.setKB(kb);
     }
 
     @Override

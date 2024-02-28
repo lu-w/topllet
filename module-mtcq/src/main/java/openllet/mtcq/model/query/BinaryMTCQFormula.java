@@ -1,5 +1,6 @@
 package openllet.mtcq.model.query;
 
+import openllet.core.KnowledgeBase;
 import openllet.mtcq.model.kb.TemporalKnowledgeBase;
 import openllet.query.sparqldl.model.cq.ConjunctiveQuery;
 
@@ -27,6 +28,22 @@ public abstract class BinaryMTCQFormula extends MTCQFormula
     public BinaryMTCQFormula(MetricTemporalConjunctiveQuery parentFormula, MetricTemporalConjunctiveQuery left, MetricTemporalConjunctiveQuery right)
     {
         this(parentFormula.getTemporalKB(), parentFormula.isDistinct(), left, right);
+    }
+
+    @Override
+    public void setTemporalKB(TemporalKnowledgeBase tkb)
+    {
+        super.setTemporalKB(tkb);
+        _leftSubFormula.setTemporalKB(tkb);
+        _rightSubFormula.setTemporalKB(tkb);
+    }
+
+    @Override
+    public void setKB(KnowledgeBase kb)
+    {
+        super.setKB(kb);
+        _leftSubFormula.setKB(kb);
+        _rightSubFormula.setKB(kb);
     }
 
     public MetricTemporalConjunctiveQuery getLeftSubFormula()

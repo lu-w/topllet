@@ -11,6 +11,7 @@ import openllet.query.sparqldl.engine.AbstractQueryEngine;
 import openllet.query.sparqldl.engine.QueryBindingCandidateGenerator;
 import openllet.query.sparqldl.engine.QueryResultBasedBindingCandidateGenerator;
 import openllet.query.sparqldl.engine.cq.CombinedQueryEngine;
+import openllet.query.sparqldl.engine.cq.QueryEngine;
 import openllet.query.sparqldl.engine.ucq.UnionQueryEngineSimple;
 import openllet.query.sparqldl.model.AtomQuery;
 import openllet.query.sparqldl.model.cq.ConjunctiveQuery;
@@ -30,7 +31,8 @@ import static openllet.mtcq.engine.rewriting.MTCQSimplifier.flattenOr;
 
 public class BDQEngine extends AbstractQueryEngine<MetricTemporalConjunctiveQuery>
 {
-    private UnionQueryEngineSimple _ucqEngine = new UnionQueryEngineSimple();
+    private final UnionQueryEngineSimple _ucqEngine = new UnionQueryEngineSimple();
+    private final QueryEngine _cqEngine = new QueryEngine();
     private Map<ATermAppl, ATermAppl> _queryVarsToFreshInds = new HashMap<>();
     private ABoxChanges _changes;
 
@@ -54,9 +56,10 @@ public class BDQEngine extends AbstractQueryEngine<MetricTemporalConjunctiveQuer
     protected QueryResult execABoxQuery(MetricTemporalConjunctiveQuery q, QueryResult excludeBindings,
                                         QueryResult restrictToBindings)
     {
+        System.out.println("Answering BDQ: " + q);
         List<MetricTemporalConjunctiveQuery> disjuncts;
         if (q instanceof ConjunctiveQueryFormula cq)
-            return new CombinedQueryEngine().exec(cq.getConjunctiveQuery());
+            return _cqEngine.exec(cq.getConjunctiveQuery());
         if (q instanceof OrFormula)
             disjuncts = flattenOr(q);
         else if (q instanceof NotFormula)
@@ -87,6 +90,7 @@ public class BDQEngine extends AbstractQueryEngine<MetricTemporalConjunctiveQuer
             _bindingGenerator.restrictToBindings(restrictToBindings);
             for (ResultBinding candidateBinding : _bindingGenerator)
             {
+                System.out.println("Trying binding " + candidateBinding);
                 List<ConjunctiveQuery> appliedNegativeDisjuncts = new ArrayList<>();
                 for (ConjunctiveQuery negativeDisjunct : negativeDisjuncts)
                     appliedNegativeDisjuncts.add(negativeDisjunct.apply(candidateBinding));
@@ -104,6 +108,7 @@ public class BDQEngine extends AbstractQueryEngine<MetricTemporalConjunctiveQuer
             _bindingGenerator.doNotExcludeBindings();
             _bindingGenerator.doNotRestrictToBindings();
         }
+        System.out.println("Result: " + result);
         return result;
     }
 
