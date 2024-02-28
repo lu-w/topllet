@@ -109,6 +109,7 @@ public class BDQEngine extends AbstractQueryEngine<MetricTemporalConjunctiveQuer
                 }
                 QueryResult partialResult = execSemiBooleanBDQ(appliedNegativeDisjuncts, positiveDisjuncts,
                         candidateExcludeBindings, restrictToBindings);
+                System.out.println("  - Partial result: " + partialResult);
                 partialResult.removeAll(candidateExcludeBindings);  // TODO fix in UCQ engine (candidates are not excluded)
                 // We may have gotten n > 0 bindings from the semi-Boolean engine, create a copy and merge curr. binding
                 if (candidateBinding.getAllVariables().containsAll(partialResult.getResultVars()) ||
@@ -163,17 +164,25 @@ public class BDQEngine extends AbstractQueryEngine<MetricTemporalConjunctiveQuer
     private QueryResult computeEntailedBindings(UnionQuery query, QueryResult excludeBindings,
                                                 QueryResult restrictToBindings)
     {
+        System.out.println("computing entailed bindings.." + _abox.isConsistent());
+        QueryResult result;
         if (_abox.isConsistent())
         {
             if (!query.isEmpty())
-                return _ucqEngine.exec(query, excludeBindings, restrictToBindings);
+                result = _ucqEngine.exec(query, excludeBindings, restrictToBindings);
             else
-                return new QueryResultImpl(query);
+                result = new QueryResultImpl(query);
         }
         else
+            if (restrictToBindings == null)
             // If the ABox is inconsistent, we have put query atom from the negative part into the ABox causing this
             // -> an inconsistent knowledge base means that the query is entailed already by the negative disjuncts.
-            return new QueryResultImpl(query).invert();
+                result = new QueryResultImpl(query).invert();
+            else
+                result = restrictToBindings.copy();
+        if (excludeBindings != null)
+            result.removeAll(excludeBindings);
+        return result;
     }
 
     private void putQueryAtomsInABox(AtomQuery<?> query)

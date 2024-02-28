@@ -6,6 +6,7 @@ import openllet.query.sparqldl.engine.QueryBindingCandidateGenerator;
 import openllet.query.sparqldl.engine.QueryExec;
 import openllet.query.sparqldl.engine.QueryResultBasedBindingCandidateGenerator;
 import openllet.query.sparqldl.engine.cq.CombinedQueryEngine;
+import openllet.query.sparqldl.engine.cq.QueryEngine;
 import openllet.query.sparqldl.model.cq.ConjunctiveQuery;
 import openllet.query.sparqldl.model.results.MultiQueryResults;
 import openllet.query.sparqldl.model.results.QueryResult;
@@ -55,10 +56,10 @@ public class UnionQueryEngineSimple extends AbstractUnionQueryEngine
         if (q.getQueries().isEmpty())
             return new QueryResultImpl(q);
         else if (q.getQueries().size() == 1)
-            return new CombinedQueryEngine().exec(q.getQueries().get(0));
+            return new QueryEngine().exec(q.getQueries().get(0));
         else if (OpenlletOptions.UCQ_ENGINE_USE_UNDERAPPROXIMATING_SEMANTICS)
         {
-            QueryExec<ConjunctiveQuery> cqEngine = new CombinedQueryEngine();
+            QueryExec<ConjunctiveQuery> cqEngine = new QueryEngine();
             QueryResult disjunctAnswers = cqEngine.exec(q.getQueries().get(0));
             for (ConjunctiveQuery disjunct : q.getQueries().subList(1, q.getQueries().size()))
                 disjunctAnswers.addAll(cqEngine.exec(disjunct));

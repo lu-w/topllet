@@ -107,6 +107,7 @@ public class TestMTCQEngine extends AbstractMTCQTest
     public void testDisjunction()
     {
         complexTKB();
+        testQuery("(!(D(?x)) | (E(?y)))", new ATermAppl[][] { { _a, _b }, { _a, _c } });
         testQuery("((B(?x)) | (C(?x)))",  new ATermAppl[][] { { _a }, { _c } });
     }
 

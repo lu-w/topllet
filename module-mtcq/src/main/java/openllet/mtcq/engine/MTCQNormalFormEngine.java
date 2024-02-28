@@ -21,6 +21,7 @@ import static openllet.mtcq.engine.rewriting.MTCQSimplifier.makeOr;
 public class MTCQNormalFormEngine extends AbstractQueryEngine<MetricTemporalConjunctiveQuery>
 {
     private final Map<Pair<MetricTemporalConjunctiveQuery, Pair<Integer, QueryResult>>, QueryResult> _cachedResults = new HashMap<>();
+    private final BDQEngine _bdqEngine = new BDQEngine();
 
     @Override
     protected QueryResult execABoxQuery(MetricTemporalConjunctiveQuery q, QueryResult excludeBindings, QueryResult restrictToBindings)
@@ -129,6 +130,7 @@ public class MTCQNormalFormEngine extends AbstractQueryEngine<MetricTemporalConj
         if (!_cachedResults.containsKey(queryAtTime))
         {
             KnowledgeBase kb = q.getTemporalKB().get(timePoint);
+            q.setKB(kb);
             List<MetricTemporalConjunctiveQuery> cnf = CNFTransformer.transformToListOfConjuncts(q);
 
             if (candidates != null)
@@ -190,7 +192,7 @@ public class MTCQNormalFormEngine extends AbstractQueryEngine<MetricTemporalConj
             }
             else if (disjunct instanceof EndFormula)
             {
-                if (disjunct.getTemporalKB().size() >= timePoint)
+                if (timePoint >= disjunct.getTemporalKB().size())
                 {
                     if (candidates != null)
                         return candidates.copy();
@@ -219,7 +221,8 @@ public class MTCQNormalFormEngine extends AbstractQueryEngine<MetricTemporalConj
         if (cleanDisjuncts.size() > 1)
         {
             OrFormula orFormula = makeOr(cleanDisjuncts);
-            result = new BDQEngine().exec(orFormula);
+            orFormula.setKB(kb);  // TODO fix correct setting of KB in makeOr()
+            result = _bdqEngine.exec(orFormula);
         }
         else if (cleanDisjuncts.size() == 1)
         {
@@ -228,7 +231,7 @@ public class MTCQNormalFormEngine extends AbstractQueryEngine<MetricTemporalConj
                     one instanceof EmptyFormula)
                 result = new QueryResultImpl(one);
             else
-                result = new BDQEngine().exec(one);
+                result = _bdqEngine.exec(one);
         }
         else
             // we have a formula of the form "last v end v last v false v false ..." and are not at last or end point.
