@@ -9,6 +9,7 @@ import openllet.mtcq.engine.rewriting.DXNFTransformer;
 import openllet.mtcq.engine.rewriting.DXNFVerifier;
 import openllet.mtcq.model.query.*;
 import openllet.query.sparqldl.engine.AbstractQueryEngine;
+import openllet.query.sparqldl.model.results.MultiQueryResults;
 import openllet.query.sparqldl.model.results.QueryResult;
 import openllet.query.sparqldl.model.results.QueryResultImpl;
 
@@ -140,6 +141,8 @@ public class MTCQNormalFormEngine extends AbstractQueryEngine<MetricTemporalConj
                     result = queryResult;
                 else
                     result.retainAll(queryResult);
+                if (result instanceof MultiQueryResults mResult)
+                    result = mResult.toQueryResultImpl(query);
                 result.expandToAllVariables(q.getResultVars());
                 result.explicate();
                 result.retainAll(candidates);
