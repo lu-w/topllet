@@ -51,7 +51,7 @@ public class UnionQueryEngineSimple extends AbstractUnionQueryEngine
     @Override
     protected QueryResult execABoxQuery(UnionQuery q, QueryResult excludeBindings, QueryResult restrictToBindings)
     {
-        if (q.getQueries().size() == 0)
+        if (q.getQueries().isEmpty())
             return new QueryResultImpl(q);
         else if (q.getQueries().size() == 1)
             return new CombinedQueryEngine().exec(q.getQueries().get(0));

@@ -147,7 +147,7 @@ public class MTCQSimplifier extends StandardTransformer
             return new AndFormula(first.getTemporalKB(), first.isDistinct(), first, it.next());
     }
 
-    private OrFormula makeOr(Set<MetricTemporalConjunctiveQuery> disjuncts)
+    public static OrFormula makeOr(Collection<MetricTemporalConjunctiveQuery> disjuncts)
     {
         Iterator<MetricTemporalConjunctiveQuery> it = disjuncts.iterator();
         MetricTemporalConjunctiveQuery first = it.next();
