@@ -225,7 +225,7 @@ public class TestMTCQEngine extends AbstractMTCQTest
     }
 
     // TODO find out why performance is so bad here? but maybe do so after UBCQ engine is implemented...
-    //@Test
+    @Test
     public void testIllegCrossing()
     {
         useCaseTKBIllegCrossing(true, 5);

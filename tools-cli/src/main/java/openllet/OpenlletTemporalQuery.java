@@ -5,6 +5,7 @@ import openllet.core.KnowledgeBase;
 import openllet.core.exceptions.InconsistentOntologyException;
 import openllet.core.output.TableData;
 import openllet.core.utils.Timer;
+import openllet.mtcq.engine.MTCQNormalFormEngine;
 import openllet.query.sparqldl.engine.QueryExec;
 import openllet.query.sparqldl.model.results.QueryResult;
 import openllet.query.sparqldl.model.results.ResultBinding;
@@ -40,7 +41,7 @@ public class OpenlletTemporalQuery extends OpenlletCmdApp
     private String queryString;
     private MetricTemporalConjunctiveQuery query;
     private TemporalKnowledgeBase kb;
-    private final QueryExec<MetricTemporalConjunctiveQuery> queryEngine = new MTCQEngine();
+    private final QueryExec<MetricTemporalConjunctiveQuery> queryEngine = new MTCQNormalFormEngine();
     private OutputFormat outputFormat = OutputFormat.TABULAR;
 
     private enum OutputFormat

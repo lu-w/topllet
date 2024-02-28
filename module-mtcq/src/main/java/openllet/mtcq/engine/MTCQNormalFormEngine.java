@@ -19,6 +19,8 @@ import java.util.Map;
 
 public class MTCQNormalFormEngine extends AbstractQueryEngine<MetricTemporalConjunctiveQuery>
 {
+    private int _size = 0;
+
     private final Map<Pair<MetricTemporalConjunctiveQuery, Pair<Integer, QueryResult>>, QueryResult> _cachedResults = new HashMap<>();
 
     @Override
@@ -30,6 +32,9 @@ public class MTCQNormalFormEngine extends AbstractQueryEngine<MetricTemporalConj
 
     private QueryResult answerTime(MetricTemporalConjunctiveQuery query, int timePoint, QueryResult candidates, List<ATermAppl> variables)
     {
+        _size++;
+        System.out.println("size = " + _size);
+
         QueryResult result;
 
         MetricTemporalConjunctiveQuery q = DXNFTransformer.transform(query);
@@ -107,6 +112,8 @@ public class MTCQNormalFormEngine extends AbstractQueryEngine<MetricTemporalConj
         result.explicate();
         result.retainAll(candidates);
 
+        _size--;
+
         return result;
     }
 
@@ -125,7 +132,7 @@ public class MTCQNormalFormEngine extends AbstractQueryEngine<MetricTemporalConj
 
             List<MetricTemporalConjunctiveQuery> cnf = CNFTransformer.transformToListOfConjuncts(q);
 
-            // TODO sort conjuncts to front that consist of only one non-negated CQ
+            // TODO sort conjuncts to front that consist of only one non-negated CQ (or of UCQs that can be checked independently)
 
             for (MetricTemporalConjunctiveQuery query : cnf)
             {

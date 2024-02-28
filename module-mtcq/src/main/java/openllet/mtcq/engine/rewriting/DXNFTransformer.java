@@ -92,7 +92,7 @@ public class DXNFTransformer implements MTCQVisitor
             // Rule 5
             _isInsideNext = true;
             _newFormula = new StrongNextFormula(formula.getTemporalKB(), formula.isDistinct(),
-                    run(new NotFormula(formula.getTemporalKB(), formula.isDistinct(), subNext.getSubFormula()))
+                    new NotFormula(formula.getTemporalKB(), formula.isDistinct(), subNext.getSubFormula().copy())
             );
             _isInsideNext = false;
             appliedTransformationRule("5");
@@ -131,6 +131,7 @@ public class DXNFTransformer implements MTCQVisitor
             ));
             appliedTransformationRule("7");
         }
+        // TODO implement NNF rules for bounded temporal operators
         else
         {
             // No rule applicable (base case, e.g., CQ or tt/ff), just descent into sub-formula
@@ -444,7 +445,7 @@ public class DXNFTransformer implements MTCQVisitor
     {
         _isInsideNext = true;
         _newFormula = new StrongNextFormula(formula.getTemporalKB(), formula.isDistinct(),
-                run(formula.getSubFormula()));
+                formula.getSubFormula().copy());
         _isInsideNext = false;
     }
 

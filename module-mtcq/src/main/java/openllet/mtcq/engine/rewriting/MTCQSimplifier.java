@@ -55,6 +55,10 @@ public class MTCQSimplifier extends StandardTransformer
                     AndFormula simplifiedAnd = makeAnd(conjunts);
                     super.visit(simplifiedAnd);
                 }
+                // (X b | a) & (X c | a) & (X d | a) & (X e | x) -> X (b & c & d) | a) & X(e | x)
+
+                // (X b | (a1 | a2)) & (X c | a1) ->
+
                 else
                 {
                     onlyDidRecursion = true;
@@ -154,7 +158,7 @@ public class MTCQSimplifier extends StandardTransformer
             return new OrFormula(first.getTemporalKB(), first.isDistinct(), first, it.next());
     }
 
-    private List<MetricTemporalConjunctiveQuery> flattenAnd(MetricTemporalConjunctiveQuery formula)
+    public static List<MetricTemporalConjunctiveQuery> flattenAnd(MetricTemporalConjunctiveQuery formula)
     {
         List<MetricTemporalConjunctiveQuery> flattened = new ArrayList<>();
         Stack<MetricTemporalConjunctiveQuery> toResolve = new Stack<>();
@@ -179,7 +183,7 @@ public class MTCQSimplifier extends StandardTransformer
         return flattened;
     }
 
-    private List<MetricTemporalConjunctiveQuery> flattenOr(MetricTemporalConjunctiveQuery formula)
+    public static List<MetricTemporalConjunctiveQuery> flattenOr(MetricTemporalConjunctiveQuery formula)
     {
         List<MetricTemporalConjunctiveQuery> flattened = new ArrayList<>();
         Stack<MetricTemporalConjunctiveQuery> toResolve = new Stack<>();
@@ -218,8 +222,12 @@ public class MTCQSimplifier extends StandardTransformer
     }
 
     // TODO
-    //  think whether temporal simplification would also make sense. maybe only for X?
+    //  - F_[0,0] a -> a
+    //  - check for below 2 cases: if they are in a series of conjunctions... -> need to flatten this conjunction as well
+    //  - (X a | b) & (X c | b) -> X (a & c) | b  (no need for complicated cases with lots of nested | since DXNF pretty much ensures (X a | b) & (X c | d) & ... form - right??
+    //  - (X a | b) & (X a | c) -> X a | (b & c)
     //  - X a & X b -> X (a & b)
+    //  think whether other temporal simplification would also make sense. maybe only for X?
     //  - (X a) U (X b) -> X (a U b)
     //  - (X a) R (X b) -> X (a R b)
     //  - tt U Xa -> X (tt U a)
