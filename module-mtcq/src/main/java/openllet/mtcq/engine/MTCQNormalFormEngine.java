@@ -13,10 +13,7 @@ import openllet.query.sparqldl.model.results.MultiQueryResults;
 import openllet.query.sparqldl.model.results.QueryResult;
 import openllet.query.sparqldl.model.results.QueryResultImpl;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static openllet.mtcq.engine.rewriting.MTCQSimplifier.flattenOr;
 import static openllet.mtcq.engine.rewriting.MTCQSimplifier.makeOr;
@@ -42,12 +39,17 @@ public class MTCQNormalFormEngine extends AbstractQueryEngine<MetricTemporalConj
             throw new RuntimeException("Unexpected: After transformation, MTCQ is not in normal form. Reason is: " +
                     verifier.getReason());
 
+        System.out.println("Answering at time " + timePoint + " query " + q + " and candidates " + candidates);
         result = new QueryResultImpl(q);
 
         if (candidates == null || !candidates.isEmpty())
         {
             if (candidates != null)
+            {
                 candidates = candidates.copy();
+                candidates.setQuery(q);
+                candidates.explicate();
+            }
             if (q instanceof StrongNextFormula qNext)
             {
                 if (timePoint < q.getTemporalKB().size() - 1)
@@ -72,7 +74,7 @@ public class MTCQNormalFormEngine extends AbstractQueryEngine<MetricTemporalConj
                         qOrAtemporal = qOr.getLeftSubFormula();
                         qOrNext = qOr.getRightSubFormula();
                     }
-                    QueryResult atemporalResult = answerAtemporal(qOrAtemporal, timePoint, candidates);
+                    QueryResult atemporalResult = answerAtemporal(qOrAtemporal, timePoint, candidates, variables);
                     QueryResult qOrNextCandidates;
                     if (candidates != null && !candidates.isEmpty())
                     {
@@ -87,7 +89,7 @@ public class MTCQNormalFormEngine extends AbstractQueryEngine<MetricTemporalConj
                 }
                 else
                 {
-                    result = answerAtemporal(q, timePoint, candidates);
+                    result = answerAtemporal(q, timePoint, candidates, variables);
                 }
             }
             else if (q instanceof AndFormula qAnd)
@@ -102,7 +104,7 @@ public class MTCQNormalFormEngine extends AbstractQueryEngine<MetricTemporalConj
             }
             else
             {
-                result = answerAtemporal(q, timePoint, candidates);
+                result = answerAtemporal(q, timePoint, candidates, variables);
             }
         }
         //System.out.println("Answering at time " + timePoint + " query " + q + ": " + result);
@@ -114,7 +116,8 @@ public class MTCQNormalFormEngine extends AbstractQueryEngine<MetricTemporalConj
         return result;
     }
 
-    private QueryResult answerAtemporal(MetricTemporalConjunctiveQuery q, int timePoint, QueryResult candidates)
+    private QueryResult answerAtemporal(MetricTemporalConjunctiveQuery q, int timePoint, QueryResult candidates,
+                                        List<ATermAppl> variables)
     {
         if (q.isTemporal())
             throw new RuntimeException("Got temporal operator for answering an atemporal query: " + q);
@@ -128,10 +131,17 @@ public class MTCQNormalFormEngine extends AbstractQueryEngine<MetricTemporalConj
             KnowledgeBase kb = q.getTemporalKB().get(timePoint);
             List<MetricTemporalConjunctiveQuery> cnf = CNFTransformer.transformToListOfConjuncts(q);
 
+            if (candidates != null)
+            {
+                candidates = candidates.copy();
+                candidates.setQuery(q);
+                candidates.explicate();
+            }
+
             // TODO sort conjuncts to front that consist of only one non-negated CQ (or of UCQs that can be checked independently)
             //  or those that are of the form (A | last/true).
 
-            System.out.println("Answering at time " + timePoint + " for atemporal query " + q);
+            System.out.println("Answering at time " + timePoint + " for atemporal query " + q + " and candidates " + candidates);
 
             for (MetricTemporalConjunctiveQuery query : cnf)
             {
@@ -143,7 +153,7 @@ public class MTCQNormalFormEngine extends AbstractQueryEngine<MetricTemporalConj
                     result.retainAll(queryResult);
                 if (result instanceof MultiQueryResults mResult)
                     result = mResult.toQueryResultImpl(query);
-                result.expandToAllVariables(q.getResultVars());
+                result.expandToAllVariables(variables);
                 result.explicate();
                 result.retainAll(candidates);
             }

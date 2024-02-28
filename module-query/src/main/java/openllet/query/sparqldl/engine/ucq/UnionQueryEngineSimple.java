@@ -51,6 +51,7 @@ public class UnionQueryEngineSimple extends AbstractUnionQueryEngine
     @Override
     protected QueryResult execABoxQuery(UnionQuery q, QueryResult excludeBindings, QueryResult restrictToBindings)
     {
+        System.out.println("  -> Answering UCQ: " + q + " over candidates " + restrictToBindings + " but exclude " + excludeBindings);
         if (q.getQueries().isEmpty())
             return new QueryResultImpl(q);
         else if (q.getQueries().size() == 1)

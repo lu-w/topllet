@@ -10,16 +10,15 @@ import openllet.mtcq.model.query.OrFormula;
 import openllet.query.sparqldl.engine.AbstractQueryEngine;
 import openllet.query.sparqldl.engine.QueryBindingCandidateGenerator;
 import openllet.query.sparqldl.engine.QueryResultBasedBindingCandidateGenerator;
-import openllet.query.sparqldl.engine.cq.CombinedQueryEngine;
 import openllet.query.sparqldl.engine.cq.QueryEngine;
 import openllet.query.sparqldl.engine.ucq.UnionQueryEngineSimple;
 import openllet.query.sparqldl.model.AtomQuery;
 import openllet.query.sparqldl.model.cq.ConjunctiveQuery;
 import openllet.query.sparqldl.model.cq.QueryAtom;
-import openllet.query.sparqldl.model.results.MultiQueryResults;
 import openllet.query.sparqldl.model.results.QueryResult;
 import openllet.query.sparqldl.model.results.QueryResultImpl;
 import openllet.query.sparqldl.model.results.ResultBinding;
+import openllet.query.sparqldl.model.results.ResultBindingImpl;
 import openllet.query.sparqldl.model.ucq.UnionQuery;
 import openllet.query.sparqldl.model.ucq.UnionQueryImpl;
 
@@ -54,7 +53,7 @@ public class BDQEngine extends AbstractQueryEngine<MetricTemporalConjunctiveQuer
     protected QueryResult execABoxQuery(MetricTemporalConjunctiveQuery q, QueryResult excludeBindings,
                                         QueryResult restrictToBindings)
     {
-        System.out.println("Answering BDQ: " + q);
+        System.out.println("Answering BDQ: " + q + " over candidates " + restrictToBindings + " but exclude " + excludeBindings);
         List<MetricTemporalConjunctiveQuery> disjuncts;
         if (q instanceof ConjunctiveQueryFormula cq)
             return _cqEngine.exec(cq.getConjunctiveQuery());
@@ -92,8 +91,25 @@ public class BDQEngine extends AbstractQueryEngine<MetricTemporalConjunctiveQuer
                 List<ConjunctiveQuery> appliedNegativeDisjuncts = new ArrayList<>();
                 for (ConjunctiveQuery negativeDisjunct : negativeDisjuncts)
                     appliedNegativeDisjuncts.add(negativeDisjunct.apply(candidateBinding));
+                QueryResult candidateExcludeBindings;
+                if (excludeBindings != null)
+                    candidateExcludeBindings = excludeBindings.copy();
+                else
+                    candidateExcludeBindings = new QueryResultImpl(positiveDisjuncts);
+                for (ATermAppl var : candidateBinding.getAllVariables())
+                {
+                    for (ATermAppl answerVar : positiveDisjuncts.getVars())
+                    {
+                        QueryResult restriction = new QueryResultImpl(positiveDisjuncts);
+                        ResultBinding binding = new ResultBindingImpl();
+                        binding.setValue(answerVar, candidateBinding.getValue(var));
+                        restriction.add(binding);
+                        candidateExcludeBindings.addAll(restriction);
+                    }
+                }
                 QueryResult partialResult = execSemiBooleanBDQ(appliedNegativeDisjuncts, positiveDisjuncts,
-                        excludeBindings, restrictToBindings);
+                        candidateExcludeBindings, restrictToBindings);
+                partialResult.removeAll(candidateExcludeBindings);  // TODO fix in UCQ engine (candidates are not excluded)
                 // We may have gotten n > 0 bindings from the semi-Boolean engine, create a copy and merge curr. binding
                 if (candidateBinding.getAllVariables().containsAll(partialResult.getResultVars()) ||
                         Collections.disjoint(candidateBinding.getAllVariables(), partialResult.getResultVars()))
@@ -106,9 +122,11 @@ public class BDQEngine extends AbstractQueryEngine<MetricTemporalConjunctiveQuer
                 // Result is actually not "partial" at all - it is more specific than our candidate binding
                 else if (partialResult.getResultVars().containsAll(candidateBinding.getAllVariables()))
                     result = partialResult;
-                // Completely disjoint variable sets
+                // Overlapping variable sets (e.g., pos: x,y and neg: y,z) -> can never happen since y has been bound
+                // in the negative part and thus pos should only be over x.
                 else
-                    throw new RuntimeException("yikes - should not happen");
+                    throw new RuntimeException("Got overlapping variable sets for positive and negative part. " +
+                            "This should never happen.");
                 _bindingGenerator.informAboutResultForBinding(partialResult.isEmpty() ? Bool.FALSE : Bool.TRUE);
             }
             _bindingGenerator.doNotExcludeBindings();
