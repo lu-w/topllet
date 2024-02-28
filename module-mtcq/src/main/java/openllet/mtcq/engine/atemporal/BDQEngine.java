@@ -16,16 +16,14 @@ import openllet.query.sparqldl.engine.ucq.UnionQueryEngineSimple;
 import openllet.query.sparqldl.model.AtomQuery;
 import openllet.query.sparqldl.model.cq.ConjunctiveQuery;
 import openllet.query.sparqldl.model.cq.QueryAtom;
+import openllet.query.sparqldl.model.results.MultiQueryResults;
 import openllet.query.sparqldl.model.results.QueryResult;
 import openllet.query.sparqldl.model.results.QueryResultImpl;
 import openllet.query.sparqldl.model.results.ResultBinding;
 import openllet.query.sparqldl.model.ucq.UnionQuery;
 import openllet.query.sparqldl.model.ucq.UnionQueryImpl;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static openllet.mtcq.engine.rewriting.MTCQSimplifier.flattenOr;
 
@@ -82,10 +80,10 @@ public class BDQEngine extends AbstractQueryEngine<MetricTemporalConjunctiveQuer
             result = execSemiBooleanBDQ(List.of(), positiveDisjuncts, excludeBindings, restrictToBindings);
         else
         {
-            // FETCH AND APPLY BINDINGS TO NEGATIV PARTS
+            // FETCH AND APPLY BINDINGS TO NEGATIVE PARTS
             result = new QueryResultImpl(q);
             QueryBindingCandidateGenerator _bindingGenerator =
-                    new QueryResultBasedBindingCandidateGenerator(negativeDisjuncts.get(0));  // TODO check if 0 has all vars
+                    new QueryResultBasedBindingCandidateGenerator(negativeDisjuncts.get(0));  // TODO check if 0 has all vars w.r.t. to 1..negDis.size()
             _bindingGenerator.excludeBindings(excludeBindings);
             _bindingGenerator.restrictToBindings(restrictToBindings);
             for (ResultBinding candidateBinding : _bindingGenerator)
@@ -97,12 +95,20 @@ public class BDQEngine extends AbstractQueryEngine<MetricTemporalConjunctiveQuer
                 QueryResult partialResult = execSemiBooleanBDQ(appliedNegativeDisjuncts, positiveDisjuncts,
                         excludeBindings, restrictToBindings);
                 // We may have gotten n > 0 bindings from the semi-Boolean engine, create a copy and merge curr. binding
-                for (ResultBinding binding : partialResult)
-                {
-                    ResultBinding copyBinding = candidateBinding.duplicate();
-                    copyBinding.merge(binding);
-                    result.add(copyBinding);
-                }
+                if (candidateBinding.getAllVariables().containsAll(partialResult.getResultVars()) ||
+                        Collections.disjoint(candidateBinding.getAllVariables(), partialResult.getResultVars()))
+                    for (ResultBinding binding : partialResult)
+                    {
+                        ResultBinding copyBinding = candidateBinding.duplicate();
+                        copyBinding.merge(binding);
+                        result.add(copyBinding);
+                    }
+                // Result is actually not "partial" at all - it is more specific than our candidate binding
+                else if (partialResult.getResultVars().containsAll(candidateBinding.getAllVariables()))
+                    result = partialResult;
+                // Completely disjoint variable sets
+                else
+                    throw new RuntimeException("yikes - should not happen");
                 _bindingGenerator.informAboutResultForBinding(partialResult.isEmpty() ? Bool.FALSE : Bool.TRUE);
             }
             _bindingGenerator.doNotExcludeBindings();
@@ -125,6 +131,7 @@ public class BDQEngine extends AbstractQueryEngine<MetricTemporalConjunctiveQuer
         // 3. PUT NEGATIVE BOOLEAN ATOMS IN A-BOX
         for (ConjunctiveQuery negativeBooleanDisjunct : negativeBooleanDisjuncts)
             putQueryAtomsInABox(negativeBooleanDisjunct);
+        positiveDisjuncts.setKB(_abox.getKB());
 
         // 4. CHECK FOR ENTAILMENT
         QueryResult results = computeEntailedBindings(positiveDisjuncts, excludeBindings, restrictToBindings);
@@ -139,7 +146,12 @@ public class BDQEngine extends AbstractQueryEngine<MetricTemporalConjunctiveQuer
                                                 QueryResult restrictToBindings)
     {
         if (_abox.isConsistent())
-            return _ucqEngine.exec(query, excludeBindings, restrictToBindings);
+        {
+            if (!query.isEmpty())
+                return _ucqEngine.exec(query, excludeBindings, restrictToBindings);
+            else
+                return new QueryResultImpl(query);
+        }
         else
             // If the ABox is inconsistent, we have put query atom from the negative part into the ABox causing this
             // -> an inconsistent knowledge base means that the query is entailed already by the negative disjuncts.

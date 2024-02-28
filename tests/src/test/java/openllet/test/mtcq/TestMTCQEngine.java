@@ -28,6 +28,7 @@ public class TestMTCQEngine extends AbstractMTCQTest
     public void testSimpleQuery1()
     {
         simpleTKB();
+        testQuery("(!(B(?y))) | (r(?x,?y))", new ATermAppl[][] { { _b, _a } });
         testQuery("((A(?x)) & !(B(?y))) | (r(?x,?y))", new ATermAppl[][] { { _a, _b } });
         testQuery("G(A(?x) & B(?y)) & F(r(?x,?y))", new ATermAppl[][] { { _a, _b } });
         testQuery("G(A(?x))", new ATermAppl[][] { { _a } });
