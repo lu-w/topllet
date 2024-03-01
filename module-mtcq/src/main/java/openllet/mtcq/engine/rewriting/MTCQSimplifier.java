@@ -3,6 +3,7 @@ package openllet.mtcq.engine.rewriting;
 import openllet.mtcq.model.query.*;
 
 import java.util.*;
+import java.util.stream.Stream;
 
 public class MTCQSimplifier extends StandardTransformer
 {
@@ -24,6 +25,7 @@ public class MTCQSimplifier extends StandardTransformer
         // (false & A) -> false
         else if (r instanceof LogicalFalseFormula || r instanceof PropositionalFalseFormula)
             _newFormula = r.copy();
+        // TODO flatten also from here on...
         // (A & !A) -> false
         else if (l instanceof NotFormula lNot && lNot.getSubFormula().equals(r))
             _newFormula = new LogicalFalseFormula(formula.getTemporalKB(), formula.isDistinct());
@@ -55,9 +57,68 @@ public class MTCQSimplifier extends StandardTransformer
                     AndFormula simplifiedAnd = makeAnd(conjunts);
                     super.visit(simplifiedAnd);
                 }
-                // (X b | a) & (X c | a) & (X d | a) & (X e | x) -> X (b & c & d) | a) & X(e | x)
+                // (X b | a) & (X c | a) & x.. & (X d | a) -> (X (b & c & d) | a) & x..
+                // X a & X b & x.. & X c -> X (a & b & c) & x..
+                // TODO (X a | b) & (X a | c) & x.. & (X a | d) -> (X a | (b & c & d)) & x..
+                List<MetricTemporalConjunctiveQuery> subs = Stream.concat(ls.stream(), rs.stream()).toList();
+                HashMap<MetricTemporalConjunctiveQuery, List<MetricTemporalConjunctiveQuery>> sameNonTemporalSide =
+                        new HashMap<>();
+                HashMap<MetricTemporalConjunctiveQuery, List<MetricTemporalConjunctiveQuery>> sameTemporalSide =
+                        new HashMap<>();
+                List<MetricTemporalConjunctiveQuery> inSomeNext = new ArrayList<>();
+                for (MetricTemporalConjunctiveQuery sub : subs)
+                    if (sub instanceof StrongNextFormula subX)
+                        inSomeNext.add(subX.getSubFormula());
+                    else if (sub instanceof OrFormula subOr)
+                    {
+                        MetricTemporalConjunctiveQuery subNonTemp = null;
+                        MetricTemporalConjunctiveQuery subTempInner = null;
+                        if (subOr.getLeftSubFormula() instanceof StrongNextFormula subX)
+                        {
+                            subTempInner = subX.getSubFormula();
+                            subNonTemp = subOr.getRightSubFormula();
+                        }
+                        else if (subOr.getRightSubFormula() instanceof StrongNextFormula subX)
+                        {
+                            subNonTemp = subOr.getLeftSubFormula();
+                            subTempInner = subX.getSubFormula();
+                        }
+                        if (subNonTemp != null && subTempInner != null)
+                        {
+                            if (sameNonTemporalSide.containsKey(subNonTemp))
+                                sameNonTemporalSide.get(subNonTemp).add(subTempInner);
+                            else
+                            {
+                                List<MetricTemporalConjunctiveQuery> mapped = new ArrayList<>();
+                                mapped.add(subTempInner);
+                                sameNonTemporalSide.put(subNonTemp, mapped);
+                            }
+                        }
+                    }
 
-                // (X b | (a1 | a2)) & (X c | a1) ->
+                List<MetricTemporalConjunctiveQuery> newAnd = new ArrayList<>();
+                if (inSomeNext.size() > 1)
+                    newAnd.add(new StrongNextFormula(formula.getTemporalKB(), formula.isDistinct(), makeAnd(inSomeNext)));
+                else if (inSomeNext.size() == 1)
+                    newAnd.add(new StrongNextFormula(formula.getTemporalKB(), formula.isDistinct(), inSomeNext.get(0)));
+                for (MetricTemporalConjunctiveQuery nonTemp : sameNonTemporalSide.keySet())
+                {
+                    MetricTemporalConjunctiveQuery collapsed;
+                    if (sameNonTemporalSide.get(nonTemp).size() > 1)
+                        collapsed = makeAnd(sameNonTemporalSide.get(nonTemp));
+                    else
+                        collapsed = sameNonTemporalSide.get(nonTemp).get(0);
+                    newAnd.add(new OrFormula(formula.getTemporalKB(), formula.isDistinct(), run(nonTemp),
+                            new StrongNextFormula(formula.getTemporalKB(), formula.isDistinct(), run(collapsed))
+                    ));
+                }
+                if (newAnd.size() > 1)
+                    _newFormula = makeAnd(newAnd);
+                else
+                    _newFormula = newAnd.get(0);
+                System.out.println(formula);
+                System.out.println("---> " + _newFormula);
+
 
                 else
                 {
@@ -65,6 +126,7 @@ public class MTCQSimplifier extends StandardTransformer
                     super.visit(formula);
                 }
 
+                // TODO (X b | (a1 | a2)) & (X c | a1) -> ??
                 // TODO what if both are applicable?
                 // TODO? ((A | B | D) & (A | B | C)) -> (A | B) | (C & D)
             }
@@ -136,7 +198,7 @@ public class MTCQSimplifier extends StandardTransformer
             appliedTransformationRule("OR");
     }
 
-    private AndFormula makeAnd(Set<MetricTemporalConjunctiveQuery> conjuncts)
+    private AndFormula makeAnd(Collection<MetricTemporalConjunctiveQuery> conjuncts)
     {
         Iterator<MetricTemporalConjunctiveQuery> it = conjuncts.iterator();
         MetricTemporalConjunctiveQuery first = it.next();
@@ -223,9 +285,6 @@ public class MTCQSimplifier extends StandardTransformer
 
     // TODO
     //  - F_[0,0] a -> a
-    //  - check for below 2 cases: if they are in a series of conjunctions... -> need to flatten this conjunction as well
-    //  - (X a | b) & (X c | b) -> X (a & c) | b  (no need for complicated cases with lots of nested | since DXNF pretty much ensures (X a | b) & (X c | d) & ... form - right??
-    //  - (X a | b) & (X a | c) -> X a | (b & c)
     //  - X a & X b -> X (a & b)
     //  think whether other temporal simplification would also make sense. maybe only for X?
     //  - (X a) U (X b) -> X (a U b)

@@ -53,7 +53,6 @@ public class BDQEngine extends AbstractQueryEngine<MetricTemporalConjunctiveQuer
     protected QueryResult execABoxQuery(MetricTemporalConjunctiveQuery q, QueryResult excludeBindings,
                                         QueryResult restrictToBindings)
     {
-        System.out.println("Answering BDQ: " + q + " over candidates " + restrictToBindings + " but exclude " + excludeBindings);
         List<MetricTemporalConjunctiveQuery> disjuncts;
         if (q instanceof ConjunctiveQueryFormula cq)
             return _cqEngine.exec(cq.getConjunctiveQuery());
@@ -87,7 +86,6 @@ public class BDQEngine extends AbstractQueryEngine<MetricTemporalConjunctiveQuer
             _bindingGenerator.restrictToBindings(restrictToBindings);
             for (ResultBinding candidateBinding : _bindingGenerator)
             {
-                System.out.println("Trying binding " + candidateBinding);
                 List<ConjunctiveQuery> appliedNegativeDisjuncts = new ArrayList<>();
                 for (ConjunctiveQuery negativeDisjunct : negativeDisjuncts)
                     appliedNegativeDisjuncts.add(negativeDisjunct.apply(candidateBinding));
@@ -109,7 +107,6 @@ public class BDQEngine extends AbstractQueryEngine<MetricTemporalConjunctiveQuer
                 }
                 QueryResult partialResult = execSemiBooleanBDQ(appliedNegativeDisjuncts, positiveDisjuncts,
                         candidateExcludeBindings, restrictToBindings);
-                System.out.println("  - Partial result: " + partialResult);
                 partialResult.removeAll(candidateExcludeBindings);  // TODO fix in UCQ engine (candidates are not excluded)
                 // We may have gotten n > 0 bindings from the semi-Boolean engine, create a copy and merge curr. binding
                 if (candidateBinding.getAllVariables().containsAll(partialResult.getResultVars()) ||
@@ -133,7 +130,6 @@ public class BDQEngine extends AbstractQueryEngine<MetricTemporalConjunctiveQuer
             _bindingGenerator.doNotExcludeBindings();
             _bindingGenerator.doNotRestrictToBindings();
         }
-        System.out.println("Result: " + result);
         return result;
     }
 
@@ -164,7 +160,6 @@ public class BDQEngine extends AbstractQueryEngine<MetricTemporalConjunctiveQuer
     private QueryResult computeEntailedBindings(UnionQuery query, QueryResult excludeBindings,
                                                 QueryResult restrictToBindings)
     {
-        System.out.println("computing entailed bindings.." + _abox.isConsistent());
         QueryResult result;
         if (_abox.isConsistent())
         {

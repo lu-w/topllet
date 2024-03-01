@@ -3,11 +3,9 @@ package openllet.test.mtcq;
 import openllet.aterm.ATermAppl;
 import openllet.core.KnowledgeBase;
 import openllet.core.OpenlletOptions;
-import openllet.mtcq.engine.MTCQEngine;
 import org.junit.Test;
 
 import java.util.List;
-import java.util.logging.Level;
 
 import static openllet.core.utils.TermFactory.or;
 import static openllet.core.utils.TermFactory.term;
@@ -28,7 +26,7 @@ public class TestMTCQEngine extends AbstractMTCQTest
     public void testSimpleQuery1()
     {
         simpleTKB();
-        /*testQuery("(!(B(?y))) | (r(?x,?y))", new ATermAppl[][] { { _b, _a } });
+        testQuery("(!(B(?y))) | (r(?x,?y))", new ATermAppl[][] { { _b, _a } });
         testQuery("((A(?x)) & !(B(?y))) | (r(?x,?y))", new ATermAppl[][] { { _a, _b } });
         testQuery("G(A(?x) & B(?y)) & F(r(?x,?y))", new ATermAppl[][] { { _a, _b } });
         testQuery("G(A(?x))", new ATermAppl[][] { { _a } });
@@ -36,7 +34,6 @@ public class TestMTCQEngine extends AbstractMTCQTest
         testQuery("G(A(?x) & B(?y)) & F!(r(?x,?y))");
         testQuery("G(A(?x) & B(?y)) & G!(r(?x,?y))");
         testQuery("G((A(?x)) & (B(?y))) & G!(r(?x,?y))");
-         */
         testQuery("G(A(?x)) & G(r(?x,?y))", new ATermAppl[][] { { _a, _b } });
         testQuery("G(A(?x)) & F(p(?x,?y))");
         testQuery("G(A(?x)) & F(r(?x,?y))", new ATermAppl[][] { { _a, _b } });
@@ -51,11 +48,10 @@ public class TestMTCQEngine extends AbstractMTCQTest
         testQuery("((A(?x)) U (B(?y))) | X(C(?y))", new ATermAppl[][] { { _a, _b }, { _c, _b } });
     }
 
-    //@Test
+    @Test
     public void testTautologicalQuery()
     {
         simpleTKB();
-        // TODO MTCQEngine seems to be problematic on tautological queries.
         testQuery("((!(A(?x))) & (B(?y))) | ((A(?x)) & (B(?y)))", new ATermAppl[][] { { _a, _b }, { _c, _b } });
     }
 
@@ -111,7 +107,7 @@ public class TestMTCQEngine extends AbstractMTCQTest
         testQuery("((B(?x)) | (C(?x)))",  new ATermAppl[][] { { _a }, { _c } });
     }
 
-    //@Test
+    @Test
     public void testSimpleQuery8()
     {
         // TODO debug (works when CQ engine is disabled)
@@ -227,7 +223,6 @@ public class TestMTCQEngine extends AbstractMTCQTest
         testQuery("((A(?x))) U_[0,3] (B(?y))", new ATermAppl[][] { { _a, _b }, { _a, _c } });
     }
 
-    // TODO find out why performance is so bad here? but maybe do so after UBCQ engine is implemented...
     @Test
     public void testIllegCrossing()
     {
@@ -292,7 +287,7 @@ public class TestMTCQEngine extends AbstractMTCQTest
         //testQuery(mtcqString);
     }
 
-    // TODO find out why performance is so bad here? but maybe do so after UBCQ engine is implemented...
+    // TODO find out why performance is so bad here?
     //@Test
     public void testLeftTurnOnc()
     {
@@ -355,7 +350,6 @@ public class TestMTCQEngine extends AbstractMTCQTest
         testQuery(mtcqString);
     }
 
-    // TODO find out why performance is so bad here? but maybe do so after UBCQ engine is implemented...
     @Test
     public void testPassingParkingVehicles()
     {
