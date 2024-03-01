@@ -57,6 +57,7 @@ public class MTCQSimplifier extends StandardTransformer
                     AndFormula simplifiedAnd = makeAnd(conjunts);
                     super.visit(simplifiedAnd);
                 }
+                /*
                 // (X b | a) & (X c | a) & x.. & (X d | a) -> (X (b & c & d) | a) & x..
                 // X a & X b & x.. & X c -> X (a & b & c) & x..
                 // TODO (X a | b) & (X a | c) & x.. & (X a | d) -> (X a | (b & c & d)) & x..
@@ -118,7 +119,7 @@ public class MTCQSimplifier extends StandardTransformer
                     _newFormula = newAnd.get(0);
                 System.out.println(formula);
                 System.out.println("---> " + _newFormula);
-
+                */
 
                 else
                 {
