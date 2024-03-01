@@ -97,7 +97,7 @@ public class MTCQNormalFormEngine extends AbstractQueryEngine<MetricTemporalConj
                                 if (atempOrResult != null)
                                     nextCandidates.removeAll(atempOrResult); // already found answer - no need to check anymore
                             }
-                            todoList.add(new Pair<>(XtempPart.getSubFormula(),
+                            nextTodoList.add(new Pair<>(XtempPart.getSubFormula(),
                                     new Pair<>(nextCandidates, newTemporalResult)));
                         }
                         else
@@ -146,6 +146,7 @@ public class MTCQNormalFormEngine extends AbstractQueryEngine<MetricTemporalConj
             return true;
     }
 
+    // TODO caching! also with subsets of candidates
     private QueryResult answerUCQWithNegations(MetricTemporalConjunctiveQuery q, int timePoint, QueryResult candidates,
                                                Set<ATermAppl> variables)
     {
@@ -210,6 +211,8 @@ public class MTCQNormalFormEngine extends AbstractQueryEngine<MetricTemporalConj
             // we have a formula of the form "last v end v last v false v false ..." and are not at last or end point.
             //   -> nothing can entail this formula
             result = new QueryResultImpl(q);
+        if (result instanceof MultiQueryResults m)
+            result = m.toQueryResultImpl(q);
         // expands to all variables (can probably be done more efficiently) - suffices for now
         if (!variables.equals(result.getResultVars()))
         {
