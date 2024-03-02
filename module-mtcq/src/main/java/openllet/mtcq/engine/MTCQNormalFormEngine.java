@@ -127,7 +127,10 @@ public class MTCQNormalFormEngine extends AbstractQueryEngine<MetricTemporalConj
             else if (answerableByCQ(conjunct))
                 sorted.add(0, conjunct);
             else if (!sorted.isEmpty())
-                sorted.add(1, conjunct);
+                if (sorted.get(0).isTemporal())
+                    sorted.add(0, conjunct);
+                else
+                    sorted.add(1, conjunct);
             else
                 sorted.add(0, conjunct);
         return sorted;
