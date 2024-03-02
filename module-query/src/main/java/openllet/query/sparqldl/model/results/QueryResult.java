@@ -118,6 +118,8 @@ public interface QueryResult extends Iterable<ResultBinding>
 	 */
 	boolean contains(ResultBinding binding);
 
+	QueryResult getRestOfPartialBinding(ResultBinding binding, Query<?> query);
+
 	/**
 	 * @param binding Binding to check whether it is partial or fully explicated.
 	 * @return True iff. there are result variables of this query result that are not mapped within the given binding

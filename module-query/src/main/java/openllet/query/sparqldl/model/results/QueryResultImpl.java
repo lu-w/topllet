@@ -403,6 +403,27 @@ public class QueryResultImpl implements QueryResult
 	}
 
 	@Override
+	public QueryResult getRestOfPartialBinding(ResultBinding binding, Query<?> query)
+	{
+		if (Collections.disjoint(query.getResultVars(), binding.getAllVariables()))
+		{
+			Collection<ResultBinding> explicated = explicate(binding);
+			QueryResult res = new QueryResultImpl(query);
+			for (ResultBinding explBinding : explicated)
+				if ((!_isInverted && _bindings.contains(explBinding)) || (_isInverted && !_bindings.contains(explBinding)))
+				{
+					ResultBinding explReducedBinding = new ResultBindingImpl();
+					for (ATermAppl var : query.getResultVars())
+						explReducedBinding.setValue(var, explBinding.getValue(var));
+					res.add(explReducedBinding);
+				}
+			return res;
+		}
+		else
+			throw new UnsupportedOperationException("Can not examine partial binding that is not disjoint with query result");
+	}
+
+	@Override
 	public boolean isPartialBinding(ResultBinding binding)
 	{
 		return isPartialBinding(binding, _resultVars);

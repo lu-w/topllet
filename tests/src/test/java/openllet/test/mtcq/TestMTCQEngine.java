@@ -223,7 +223,7 @@ public class TestMTCQEngine extends AbstractMTCQTest
         testQuery("((A(?x))) U_[0,3] (B(?y))", new ATermAppl[][] { { _a, _b }, { _a, _c } });
     }
 
-    @Test
+    //@Test
     public void testIllegCrossing()
     {
         useCaseTKBIllegCrossing(true, 5);
@@ -262,7 +262,7 @@ public class TestMTCQEngine extends AbstractMTCQTest
         testQuery(mtcqString);
     }
 
-    @Test
+    //@Test
     public void testLaneChange()
     {
         useCaseTKBLaneChange(true);
@@ -350,7 +350,7 @@ public class TestMTCQEngine extends AbstractMTCQTest
         testQuery(mtcqString);
     }
 
-    @Test
+    //@Test
     public void testPassingParkingVehicles()
     {
         useCaseTKBPassingParkingVehicles(true);

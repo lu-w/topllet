@@ -126,7 +126,7 @@ public class MultiQueryResults implements QueryResult
 	@Override
 	public int getMaxSize()
 	{
-		if (_queryResults.size() > 0)
+		if (!_queryResults.isEmpty())
 			return (int) Math.pow(_queryResults.get(0).getQuery().getKB().getIndividuals().stream().toList().size(),
 					getResultVars().size());
 		else
@@ -136,7 +136,7 @@ public class MultiQueryResults implements QueryResult
 	@Override
 	public Query<?> getQuery()
 	{
-		if (_queryResults.size() > 0)
+		if (!_queryResults.isEmpty())
 			return _queryResults.get(0).getQuery();
 		else
 			return null;
@@ -263,6 +263,13 @@ public class MultiQueryResults implements QueryResult
 				return true;
 
 		return false;
+	}
+
+	@Override
+	public QueryResult getRestOfPartialBinding(ResultBinding binding, Query<?> query)
+	{
+		// TODO implement
+		throw new UnsupportedOperationException();
 	}
 
 	@Override

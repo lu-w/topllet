@@ -51,11 +51,12 @@ public class MTCQNormalFormEngine extends AbstractQueryEngine<MetricTemporalConj
                     throw new RuntimeException("Unexpected: After transformation, MTCQ is not in normal form. Reason is: " +
                             verifier.getReason());
 
-                System.out.println("Answering at time " + t + " query: " + transformed);
+                System.out.println("Answering at time " + t + " query: " + transformed.toPropositionalAbstractionString());
                 List<MetricTemporalConjunctiveQuery> flattenedCNF = sort(flattenAnd(transformed));
 
                 for (MetricTemporalConjunctiveQuery conjunct : flattenedCNF)
                 {
+                    System.out.println("   -> Answering conjunct " + conjunct.toPropositionalAbstractionString() + " over # candidates: " + (candidates != null ? candidates.size() : "all"));
                     if (!conjunct.isTemporal())
                     {
                         QueryResult atempResult = answerUCQWithNegations(conjunct, t, candidates, vars);
@@ -64,6 +65,7 @@ public class MTCQNormalFormEngine extends AbstractQueryEngine<MetricTemporalConj
                             candidates.retainAll(atempResult);
                         else
                             candidates = atempResult.copy();
+                        System.out.println("          -> fully atemporal part. result size is: " + atempResult.size());
                     }
                     else
                     {
@@ -83,6 +85,7 @@ public class MTCQNormalFormEngine extends AbstractQueryEngine<MetricTemporalConj
                                 atempoOrPart = or.getRightSubFormula();
                             }
                             atempOrResult = answerUCQWithNegations(atempoOrPart, t, candidates, vars);
+                            System.out.println("          -> atemporal part in or. result size is: " + atempOrResult.size());
                         }
                         else  // must be of StrongNextFormula
                             tempPart = conjunct;
@@ -151,74 +154,79 @@ public class MTCQNormalFormEngine extends AbstractQueryEngine<MetricTemporalConj
                                                Set<ATermAppl> variables)
     {
         QueryResult result;
-        KnowledgeBase kb = q.getTemporalKB().get(timePoint);
-        List<MetricTemporalConjunctiveQuery> cleanDisjuncts = new ArrayList<>();
-        for (MetricTemporalConjunctiveQuery disjunct : flattenOr(q))
+        if (candidates == null || (candidates != null && !candidates.isEmpty()))
         {
-            if (disjunct instanceof LastFormula)
+            KnowledgeBase kb = q.getTemporalKB().get(timePoint);
+            List<MetricTemporalConjunctiveQuery> cleanDisjuncts = new ArrayList<>();
+            for (MetricTemporalConjunctiveQuery disjunct : flattenOr(q))
             {
-                if (disjunct.getTemporalKB().size() - 1 == timePoint)
+                if (disjunct instanceof LastFormula)
+                {
+                    if (disjunct.getTemporalKB().size() - 1 == timePoint)
+                    {
+                        if (candidates != null)
+                            return candidates.copy();
+                        else
+                            return new QueryResultImpl(disjunct).invert();
+                    }
+                }
+                else if (disjunct instanceof EndFormula)
+                {
+                    if (timePoint >= disjunct.getTemporalKB().size())
+                    {
+                        if (candidates != null)
+                            return candidates.copy();
+                        else
+                            return new QueryResultImpl(disjunct).invert();
+                    }
+                }
+                else if (disjunct instanceof PropositionalTrueFormula || disjunct instanceof LogicalTrueFormula)
                 {
                     if (candidates != null)
                         return candidates.copy();
                     else
                         return new QueryResultImpl(disjunct).invert();
                 }
-            }
-            else if (disjunct instanceof EndFormula)
-            {
-                if (timePoint >= disjunct.getTemporalKB().size())
+                else if (disjunct instanceof ConjunctiveQueryFormula ||
+                        (disjunct instanceof NotFormula not && not.getSubFormula() instanceof ConjunctiveQueryFormula))
                 {
-                    if (candidates != null)
-                        return candidates.copy();
-                    else
-                        return new QueryResultImpl(disjunct).invert();
+                    cleanDisjuncts.add(disjunct);
+                    disjunct.setKB(kb);
                 }
+                else if (!(disjunct instanceof LogicalFalseFormula || disjunct instanceof EmptyFormula ||
+                        disjunct instanceof PropositionalFalseFormula))
+                    throw new RuntimeException("Invalid query for checking UCQs with negation: " + q);
             }
-            else if (disjunct instanceof PropositionalTrueFormula || disjunct instanceof LogicalTrueFormula)
+            if (cleanDisjuncts.size() > 1)
             {
-                if (candidates != null)
-                    return candidates.copy();
+                OrFormula orFormula = makeOr(cleanDisjuncts);
+                orFormula.setKB(kb);  // TODO fix correct setting of KB in makeOr()
+                result = _bdqEngine.exec(orFormula, null, candidates);
+            }
+            else if (cleanDisjuncts.size() == 1)
+            {
+                MetricTemporalConjunctiveQuery one = cleanDisjuncts.get(0);
+                if (one instanceof LogicalFalseFormula || one instanceof PropositionalFalseFormula ||
+                        one instanceof EmptyFormula)
+                    result = new QueryResultImpl(one);
                 else
-                    return new QueryResultImpl(disjunct).invert();
+                    result = _bdqEngine.exec(one, null, candidates);
             }
-            else if (disjunct instanceof ConjunctiveQueryFormula ||
-                    (disjunct instanceof NotFormula not && not.getSubFormula() instanceof ConjunctiveQueryFormula))
-            {
-                cleanDisjuncts.add(disjunct);
-                disjunct.setKB(kb);
-            }
-            else if (!(disjunct instanceof LogicalFalseFormula || disjunct instanceof EmptyFormula ||
-                    disjunct instanceof PropositionalFalseFormula))
-                throw new RuntimeException("Invalid query for checking UCQs with negation: " + q);
-        }
-        if (cleanDisjuncts.size() > 1)
-        {
-            OrFormula orFormula = makeOr(cleanDisjuncts);
-            orFormula.setKB(kb);  // TODO fix correct setting of KB in makeOr()
-            result = _bdqEngine.exec(orFormula);
-        }
-        else if (cleanDisjuncts.size() == 1)
-        {
-            MetricTemporalConjunctiveQuery one = cleanDisjuncts.get(0);
-            if (one instanceof LogicalFalseFormula || one instanceof PropositionalFalseFormula ||
-                    one instanceof EmptyFormula)
-                result = new QueryResultImpl(one);
             else
-                result = _bdqEngine.exec(one);
+                // we have a formula of the form "last v end v last v false v false ..." and are not at last or end point.
+                //   -> nothing can entail this formula
+                result = new QueryResultImpl(q);
+            if (result instanceof MultiQueryResults m)
+                result = m.toQueryResultImpl(q);
+            // expands to all variables (can probably be done more efficiently) - suffices for now
+            if (!variables.equals(result.getResultVars()))
+            {
+                result.expandToAllVariables(variables);
+                result.explicate();
+            }
         }
         else
-            // we have a formula of the form "last v end v last v false v false ..." and are not at last or end point.
-            //   -> nothing can entail this formula
             result = new QueryResultImpl(q);
-        if (result instanceof MultiQueryResults m)
-            result = m.toQueryResultImpl(q);
-        // expands to all variables (can probably be done more efficiently) - suffices for now
-        if (!variables.equals(result.getResultVars()))
-        {
-            result.expandToAllVariables(variables);
-            result.explicate();
-        }
         return result;
     }
 }
