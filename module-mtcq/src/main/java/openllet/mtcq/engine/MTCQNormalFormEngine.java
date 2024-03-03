@@ -57,7 +57,7 @@ public class MTCQNormalFormEngine extends AbstractQueryEngine<MetricTemporalConj
                 for (MetricTemporalConjunctiveQuery conjunct : flattenedCNF)
                 {
                     System.out.println("   -> Answering conjunct " + conjunct.toPropositionalAbstractionString() + " over # candidates: " + (candidates != null ? candidates.size() : "all"));
-                    if (!conjunct.isTemporal())
+                    if (!conjunct.isTemporal())  // TODO || conjunct instanceof OrFormula or && or.isOverDifferentResultVars()
                     {
                         QueryResult atempResult = answerUCQWithNegations(conjunct, t, candidates, vars);
                         result.addNewConjunct(atempResult);
@@ -65,7 +65,7 @@ public class MTCQNormalFormEngine extends AbstractQueryEngine<MetricTemporalConj
                             candidates.retainAll(atempResult);
                         else
                             candidates = atempResult.copy();
-                        System.out.println("          -> fully atemporal part. result size is: " + atempResult.size());
+                        System.out.println("          -> fully atemporal part. " + conjunct + " result size is: " + atempResult.size());
                     }
                     else
                     {
@@ -85,7 +85,7 @@ public class MTCQNormalFormEngine extends AbstractQueryEngine<MetricTemporalConj
                                 atempoOrPart = or.getRightSubFormula();
                             }
                             atempOrResult = answerUCQWithNegations(atempoOrPart, t, candidates, vars);
-                            System.out.println("          -> atemporal part in or. result size is: " + atempOrResult.size());
+                            System.out.println("          -> atemporal part " + atempoOrPart + " in or. result size is: " + atempOrResult.size());
                         }
                         else  // must be of StrongNextFormula
                             tempPart = conjunct;
@@ -134,6 +134,7 @@ public class MTCQNormalFormEngine extends AbstractQueryEngine<MetricTemporalConj
             else
                 sorted.add(0, conjunct);
         return sorted;
+        // TODO adapt sorted s.t. atmeporal parts with disjunctions that are supersets of other disjunctions are answered first?
     }
 
     private boolean answerableByCQ(MetricTemporalConjunctiveQuery mtcq)
@@ -152,7 +153,7 @@ public class MTCQNormalFormEngine extends AbstractQueryEngine<MetricTemporalConj
             return true;
     }
 
-    // TODO caching! also with subsets of candidates
+    // TODO caching! also with subsets of candidates + check if a disjunciton was already contained in a previously cached disjunction (e.g. cached: a|b|c and we now check a|b -> use candidates from a|b|c at most)
     private QueryResult answerUCQWithNegations(MetricTemporalConjunctiveQuery q, int timePoint, QueryResult candidates,
                                                Set<ATermAppl> variables)
     {
