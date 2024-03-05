@@ -8,6 +8,15 @@ import java.util.stream.Stream;
 
 public class MTCQSimplifier extends StandardTransformer
 {
+    private boolean _isInCXNFNormalForm = false;
+
+    @Override
+    protected MetricTemporalConjunctiveQuery run(MetricTemporalConjunctiveQuery formula)
+    {
+        _isInCXNFNormalForm = new DXNFVerifier().verify(formula);
+        return super.run(formula);
+    }
+
     @Override
     public void visit(AndFormula formula)
     {
@@ -33,7 +42,6 @@ public class MTCQSimplifier extends StandardTransformer
             List<MetricTemporalConjunctiveQuery> both = new ArrayList<>(Stream.concat(lhs.stream(), rhs.stream()).toList());
             List<MetricTemporalConjunctiveQuery> toRemove = new ArrayList<>();
             List<MetricTemporalConjunctiveQuery> toAdd = new ArrayList<>();
-            System.out.println("orig = " + both);
             for (MetricTemporalConjunctiveQuery A : both)
             {
                 List<MetricTemporalConjunctiveQuery> fNoA = new ArrayList<>(both);
@@ -75,9 +83,10 @@ public class MTCQSimplifier extends StandardTransformer
                             break;
                         }
                     }
-                    // A == X b | a resp. a | X b
-                    if (A instanceof OrFormula AOr && ((AOr.getLeftSubFormula() instanceof StrongNextFormula) ||
-                            (AOr.getRightSubFormula() instanceof StrongNextFormula)))
+                    // A == X b | a resp. a | X b - rules only applicable in normal form
+                    if (_isInCXNFNormalForm &&
+                            (A instanceof OrFormula AOr && ((AOr.getLeftSubFormula() instanceof StrongNextFormula) ||
+                            (AOr.getRightSubFormula() instanceof StrongNextFormula))))
                     {
                         StrongNextFormula AX;
                         MetricTemporalConjunctiveQuery AO;
@@ -136,11 +145,12 @@ public class MTCQSimplifier extends StandardTransformer
                     break;
             }
             newFormula = assembleAndFormula(both, toRemove, toAdd);
-            System.out.println("new = " + newFormula);
         }
         if (newFormula != null)
         {
-            appliedTransformationRule("OR");
+            System.out.println("orig = " + formula.toPropositionalAbstractionString());
+            System.out.println("new = " + newFormula.toPropositionalAbstractionString());
+            appliedTransformationRule("AND");
             _newFormula = run(newFormula);
         }
         else
