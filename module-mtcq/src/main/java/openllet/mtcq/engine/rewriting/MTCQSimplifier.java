@@ -1,5 +1,6 @@
 package openllet.mtcq.engine.rewriting;
 
+import openllet.core.utils.Pair;
 import openllet.mtcq.model.query.*;
 
 import java.util.*;
@@ -12,128 +13,198 @@ public class MTCQSimplifier extends StandardTransformer
     {
         MetricTemporalConjunctiveQuery l = formula.getLeftSubFormula();
         MetricTemporalConjunctiveQuery r = formula.getRightSubFormula();
-        boolean onlyDidRecursion = false;
+        MetricTemporalConjunctiveQuery newFormula;
         // (A & true) -> A
         if (l instanceof LogicalTrueFormula || l instanceof PropositionalTrueFormula)
-            _newFormula = run(r);
+            newFormula = run(r);
         // (true & A) -> A
         else if (r instanceof LogicalTrueFormula || r instanceof PropositionalTrueFormula)
-            _newFormula = run(l);
+            newFormula = run(l);
         // (A & false) -> false
-        if (l instanceof LogicalFalseFormula || l instanceof PropositionalFalseFormula)
-            _newFormula = l.copy();
+        else if (l instanceof LogicalFalseFormula || l instanceof PropositionalFalseFormula)
+            newFormula = l.copy();
         // (false & A) -> false
         else if (r instanceof LogicalFalseFormula || r instanceof PropositionalFalseFormula)
-            _newFormula = r.copy();
-        // TODO flatten also from here on...
-        // (A & !A) -> false
-        else if (l instanceof NotFormula lNot && lNot.getSubFormula().equals(r))
-            _newFormula = new LogicalFalseFormula(formula.getTemporalKB(), formula.isDistinct());
-        // (!A & A) -> false
-        else if (r instanceof NotFormula rNot && rNot.getSubFormula().equals(l))
-            _newFormula = new LogicalFalseFormula(formula.getTemporalKB(), formula.isDistinct());
-        // (A & A) -> A
-        else if (r.equals(l))
-            _newFormula = run(l);
+            newFormula = r.copy();
         else
         {
-            List<MetricTemporalConjunctiveQuery> ls = flattenOr(l);
-            List<MetricTemporalConjunctiveQuery> rs = flattenOr(r);
-            // ((A | B | C) & (A | B)) -> (A | B)
-            if (ls.containsAll(rs))
-                _newFormula = run(r);
-            // ((A | B) & (A | B | C)) -> (A | B)
-            else if (rs.containsAll(ls))
-                _newFormula = run(l);
-            else
+            List<MetricTemporalConjunctiveQuery> lhs = flattenAnd(l);
+            List<MetricTemporalConjunctiveQuery> rhs = flattenAnd(r);
+            List<MetricTemporalConjunctiveQuery> both = new ArrayList<>(Stream.concat(lhs.stream(), rhs.stream()).toList());
+            List<MetricTemporalConjunctiveQuery> toRemove = new ArrayList<>();
+            List<MetricTemporalConjunctiveQuery> toAdd = new ArrayList<>();
+            System.out.println("orig = " + both);
+            for (MetricTemporalConjunctiveQuery A : both)
             {
-                // ((A & C) & (A & B)) -> (A & B & C)
-                ls = flattenAnd(l);
-                rs = flattenAnd(r);
-                if (!Collections.disjoint(ls, rs))
+                List<MetricTemporalConjunctiveQuery> fNoA = new ArrayList<>(both);
+                fNoA.remove(A);
+                // (A & ... & !A) -> false
+                if (fNoA.contains(new NotFormula(formula.getTemporalKB(), formula.isDistinct(), A)))
                 {
-                    Set<MetricTemporalConjunctiveQuery> conjunts = new HashSet<>(ls);
-                    conjunts.addAll(rs);
-                    AndFormula simplifiedAnd = makeAnd(conjunts);
-                    super.visit(simplifiedAnd);
+                    System.out.println("applied rule (A & ... & !A) -> false");
+                    toAdd.add(new LogicalFalseFormula(formula.getTemporalKB(), formula.isDistinct()));
                 }
-                /*
-                // (X b | a) & (X c | a) & x.. & (X d | a) -> (X (b & c & d) | a) & x..
-                // X a & X b & x.. & X c -> X (a & b & c) & x..
-                // TODO (X a | b) & (X a | c) & x.. & (X a | d) -> (X a | (b & c & d)) & x..
-                List<MetricTemporalConjunctiveQuery> subs = Stream.concat(ls.stream(), rs.stream()).toList();
-                HashMap<MetricTemporalConjunctiveQuery, List<MetricTemporalConjunctiveQuery>> sameNonTemporalSide =
-                        new HashMap<>();
-                HashMap<MetricTemporalConjunctiveQuery, List<MetricTemporalConjunctiveQuery>> sameTemporalSide =
-                        new HashMap<>();
-                List<MetricTemporalConjunctiveQuery> inSomeNext = new ArrayList<>();
-                for (MetricTemporalConjunctiveQuery sub : subs)
-                    if (sub instanceof StrongNextFormula subX)
-                        inSomeNext.add(subX.getSubFormula());
-                    else if (sub instanceof OrFormula subOr)
+                // X a & ... & X b -> X (a & b) ...
+                else if (A instanceof StrongNextFormula AX)
+                {
+                    StrongNextFormula otherX = findFirstStrongNext(fNoA);
+                    if (otherX != null)
                     {
-                        MetricTemporalConjunctiveQuery subNonTemp = null;
-                        MetricTemporalConjunctiveQuery subTempInner = null;
-                        if (subOr.getLeftSubFormula() instanceof StrongNextFormula subX)
+                        toRemove.add(A);
+                        toRemove.add(otherX);
+                        toAdd.add(new StrongNextFormula(formula.getTemporalKB(), formula.isDistinct(),
+                                new AndFormula(formula.getTemporalKB(), formula.isDistinct(),
+                                        AX.getSubFormula(),
+                                        otherX.getSubFormula()))
+                        );
+                        System.out.println("applied rule X a & ... & X b -> X (a & b) ...");
+                    }
+                }
+                else
+                {
+                    // ((A | ... | B) & ... & (A | ... | B | ...)) -> (A | ... | B) & ...
+                    //   special case included: A & ... & A -> A & ...
+                    List<MetricTemporalConjunctiveQuery> aOrs = flattenOr(A);
+                    for (MetricTemporalConjunctiveQuery B : fNoA)
+                    {
+                        List<MetricTemporalConjunctiveQuery> bOrs = flattenOr(B);
+                        if (new HashSet<>(bOrs).containsAll(aOrs))
                         {
-                            subTempInner = subX.getSubFormula();
-                            subNonTemp = subOr.getRightSubFormula();
+                            toRemove.add(B);
+                            System.out.println("applied rule ((A | ... | B) & ... & (A | ... | B | ...)) -> (A | ... | B) & ...");
+                            break;
                         }
-                        else if (subOr.getRightSubFormula() instanceof StrongNextFormula subX)
+                    }
+                    // A == X b | a resp. a | X b
+                    if (A instanceof OrFormula AOr && ((AOr.getLeftSubFormula() instanceof StrongNextFormula) ||
+                            (AOr.getRightSubFormula() instanceof StrongNextFormula)))
+                    {
+                        StrongNextFormula AX;
+                        MetricTemporalConjunctiveQuery AO;
+                        if (AOr.getLeftSubFormula() instanceof StrongNextFormula AOrX)
                         {
-                            subNonTemp = subOr.getLeftSubFormula();
-                            subTempInner = subX.getSubFormula();
+                            AX = AOrX;
+                            AO = AOr.getRightSubFormula();
                         }
-                        if (subNonTemp != null && subTempInner != null)
+                        else
                         {
-                            if (sameNonTemporalSide.containsKey(subNonTemp))
-                                sameNonTemporalSide.get(subNonTemp).add(subTempInner);
-                            else
+                            AX = (StrongNextFormula) AOr.getRightSubFormula();
+                            AO = AOr.getLeftSubFormula();
+                        }
+                        // (X b | a) & ... & (X c | a) -> (X (b & c) | a) & ...
+                        Pair<MetricTemporalConjunctiveQuery, StrongNextFormula> a_or_Xb_same_a =
+                                getFirstSameAInAOrXbSequence(fNoA, AO);
+                        if (a_or_Xb_same_a != null)
+                        {
+                            toRemove.add(A);
+                            toRemove.add(new OrFormula(formula.getTemporalKB(), formula.isDistinct(),
+                                    a_or_Xb_same_a.first, a_or_Xb_same_a.second));
+                            toAdd.add(new OrFormula(formula.getTemporalKB(), formula.isDistinct(),
+                                    new StrongNextFormula(formula.getTemporalKB(), formula.isDistinct(),
+                                        new AndFormula(formula.getTemporalKB(), formula.isDistinct(),
+                                                AX.getSubFormula(),
+                                                a_or_Xb_same_a.second.getSubFormula())
+                                    ),
+                                    AO
+                            ));
+                            System.out.println("applied rule (X b | a) & ... & (X c | a) -> (X (b & c) | a) & ...");
+                        }
+                        // (X b | a) & ... & (X b | c) -> (X b | (a & c)) & ...
+                        else
+                        {
+                            Pair<MetricTemporalConjunctiveQuery, StrongNextFormula> a_or_Xb_same_Xb =
+                                    getFirstSameXbInAOrXbSequence(fNoA, AX);
+                            if (a_or_Xb_same_Xb != null)
                             {
-                                List<MetricTemporalConjunctiveQuery> mapped = new ArrayList<>();
-                                mapped.add(subTempInner);
-                                sameNonTemporalSide.put(subNonTemp, mapped);
+                                toRemove.add(A);
+                                toRemove.add(new OrFormula(formula.getTemporalKB(), formula.isDistinct(),
+                                        a_or_Xb_same_Xb.first, a_or_Xb_same_Xb.second));
+                                toAdd.add(new OrFormula(formula.getTemporalKB(), formula.isDistinct(),
+                                                AX,
+                                                new OrFormula(formula.getTemporalKB(), formula.isDistinct(),
+                                                        AO,
+                                                        a_or_Xb_same_Xb.first
+                                                )
+                                ));
+                                System.out.println("applied rule (X b | a) & ... & (X b | c) -> (X b | (a & c)) & ...");
                             }
                         }
                     }
-
-                List<MetricTemporalConjunctiveQuery> newAnd = new ArrayList<>();
-                if (inSomeNext.size() > 1)
-                    newAnd.add(new StrongNextFormula(formula.getTemporalKB(), formula.isDistinct(), makeAnd(inSomeNext)));
-                else if (inSomeNext.size() == 1)
-                    newAnd.add(new StrongNextFormula(formula.getTemporalKB(), formula.isDistinct(), inSomeNext.get(0)));
-                for (MetricTemporalConjunctiveQuery nonTemp : sameNonTemporalSide.keySet())
-                {
-                    MetricTemporalConjunctiveQuery collapsed;
-                    if (sameNonTemporalSide.get(nonTemp).size() > 1)
-                        collapsed = makeAnd(sameNonTemporalSide.get(nonTemp));
-                    else
-                        collapsed = sameNonTemporalSide.get(nonTemp).get(0);
-                    newAnd.add(new OrFormula(formula.getTemporalKB(), formula.isDistinct(), run(nonTemp),
-                            new StrongNextFormula(formula.getTemporalKB(), formula.isDistinct(), run(collapsed))
-                    ));
                 }
-                if (newAnd.size() > 1)
-                    _newFormula = makeAnd(newAnd);
-                else
-                    _newFormula = newAnd.get(0);
-                System.out.println(formula);
-                System.out.println("---> " + _newFormula);
-                */
+                // only do one rule at a time
+                if (!toAdd.isEmpty() || !toRemove.isEmpty())
+                    break;
+            }
+            newFormula = assembleAndFormula(both, toRemove, toAdd);
+            System.out.println("new = " + newFormula);
+        }
+        if (newFormula != null)
+        {
+            appliedTransformationRule("OR");
+            _newFormula = run(newFormula);
+        }
+        else
+            super.visit(formula);
+    }
 
-                else
-                {
-                    onlyDidRecursion = true;
-                    super.visit(formula);
-                }
+    private Pair<MetricTemporalConjunctiveQuery, StrongNextFormula> getFirstSameXbInAOrXbSequence(
+            List<MetricTemporalConjunctiveQuery> queries, StrongNextFormula Xb)
+    {
+        for (MetricTemporalConjunctiveQuery q : queries)
+            if (q instanceof OrFormula qOr && qOr.getLeftSubFormula() instanceof StrongNextFormula qOrX &&
+                    qOrX.equals(Xb))
+                return new Pair<>(qOr.getRightSubFormula(), qOrX);
+            else if (q instanceof OrFormula qOr && qOr.getRightSubFormula() instanceof StrongNextFormula qOrX
+                    && qOrX.equals(Xb))
+                return new Pair<>(qOr.getLeftSubFormula(), qOrX);
+        return null;
+    }
 
-                // TODO (X b | (a1 | a2)) & (X c | a1) -> ??
-                // TODO what if both are applicable?
-                // TODO? ((A | B | D) & (A | B | C)) -> (A | B) | (C & D)
+    private Pair<MetricTemporalConjunctiveQuery, StrongNextFormula> getFirstSameAInAOrXbSequence(
+            List<MetricTemporalConjunctiveQuery> queries, MetricTemporalConjunctiveQuery A)
+    {
+        for (MetricTemporalConjunctiveQuery q : queries)
+            if (q instanceof OrFormula qOr && qOr.getLeftSubFormula() instanceof StrongNextFormula qOrX &&
+                    qOr.getRightSubFormula().equals(A))
+                return new Pair<>(qOr.getRightSubFormula(), qOrX);
+            else if (q instanceof OrFormula qOr && qOr.getRightSubFormula() instanceof StrongNextFormula qOrX &&
+                    qOr.getLeftSubFormula().equals(A))
+                return new Pair<>(qOr.getLeftSubFormula(), qOrX);
+        return null;
+    }
+
+    private MetricTemporalConjunctiveQuery assembleAndFormula(List<MetricTemporalConjunctiveQuery> andFormula,
+                                                              List<MetricTemporalConjunctiveQuery> toRemove,
+                                                              List<MetricTemporalConjunctiveQuery> toAdd)
+    {
+        MetricTemporalConjunctiveQuery query = null;
+        if (!(toRemove.isEmpty() && toAdd.isEmpty()) && !andFormula.isEmpty())
+        {
+            MetricTemporalConjunctiveQuery falseFormula = new LogicalFalseFormula(andFormula.get(0).getTemporalKB(),
+                    andFormula.get(0).isDistinct());
+            if (toAdd.contains(falseFormula))
+                query = falseFormula;
+            else
+            {
+                andFormula.removeAll(toRemove);
+                andFormula.addAll(toAdd);
+                if (andFormula.size() > 1)
+                    query = makeAnd(andFormula);
+                else if (andFormula.size() == 1)
+                    query = andFormula.get(0);
+                else
+                    query = falseFormula;
             }
         }
-        if (!onlyDidRecursion)
-            appliedTransformationRule("OR");
+        return query;
+    }
+
+    private StrongNextFormula findFirstStrongNext(List<MetricTemporalConjunctiveQuery> queries)
+    {
+        for (MetricTemporalConjunctiveQuery q : queries)
+            if (q instanceof StrongNextFormula x)
+                return x;
+        return null;
     }
 
     @Override
