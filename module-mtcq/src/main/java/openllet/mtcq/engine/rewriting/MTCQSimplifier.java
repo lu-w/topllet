@@ -49,7 +49,7 @@ public class MTCQSimplifier extends StandardTransformer
                 // (A & ... & !A) -> false
                 if (fNoA.contains(new NotFormula(formula.getTemporalKB(), formula.isDistinct(), A)))
                 {
-                    System.out.println("applied rule (A & ... & !A) -> false");
+                    //System.out.println("applied rule (A & ... & !A) -> false");
                     toAdd.add(new LogicalFalseFormula(formula.getTemporalKB(), formula.isDistinct()));
                 }
                 // X a & ... & X b -> X (a & b) ...
@@ -65,7 +65,7 @@ public class MTCQSimplifier extends StandardTransformer
                                         AX.getSubFormula(),
                                         otherX.getSubFormula()))
                         );
-                        System.out.println("applied rule X a & ... & X b -> X (a & b) ...");
+                        //System.out.println("applied rule X a & ... & X b -> X (a & b) ...");
                     }
                 }
                 else
@@ -79,7 +79,7 @@ public class MTCQSimplifier extends StandardTransformer
                         if (new HashSet<>(bOrs).containsAll(aOrs))
                         {
                             toRemove.add(B);
-                            System.out.println("applied rule ((A | ... | B) & ... & (A | ... | B | ...)) -> (A | ... | B) & ...");
+                            //System.out.println("applied rule ((A | ... | B) & ... & (A | ... | B | ...)) -> (A | ... | B) & ...");
                             break;
                         }
                     }
@@ -116,7 +116,7 @@ public class MTCQSimplifier extends StandardTransformer
                                     ),
                                     AO
                             ));
-                            System.out.println("applied rule (X b | a) & ... & (X c | a) -> (X (b & c) | a) & ...");
+                            //System.out.println("applied rule (X b | a) & ... & (X c | a) -> (X (b & c) | a) & ...");
                         }
                         // (X b | a) & ... & (X b | c) -> (X b | (a & c)) & ...
                         else
@@ -135,7 +135,7 @@ public class MTCQSimplifier extends StandardTransformer
                                                         a_or_Xb_same_Xb.first
                                                 )
                                 ));
-                                System.out.println("applied rule (X b | a) & ... & (X b | c) -> (X b | (a & c)) & ...");
+                                //System.out.println("applied rule (X b | a) & ... & (X b | c) -> (X b | (a & c)) & ...");
                             }
                         }
                     }
@@ -148,8 +148,8 @@ public class MTCQSimplifier extends StandardTransformer
         }
         if (newFormula != null)
         {
-            System.out.println("orig = " + formula.toPropositionalAbstractionString());
-            System.out.println("new = " + newFormula.toPropositionalAbstractionString());
+            //System.out.println("orig = " + formula.toPropositionalAbstractionString());
+            //System.out.println("new = " + newFormula.toPropositionalAbstractionString());
             appliedTransformationRule("AND");
             _newFormula = run(newFormula);
         }
@@ -368,6 +368,9 @@ public class MTCQSimplifier extends StandardTransformer
     // TODO
     //  - F_[0,0] a -> a
     //  - X a & X b -> X (a & b)
+    //  - F(a) | F(b & Fa) -> Fa
+    //  - a | Fa -> Fa
+    //  - a & Fa -> a
     //  think whether other temporal simplification would also make sense. maybe only for X?
     //  - (X a) U (X b) -> X (a U b)
     //  - (X a) R (X b) -> X (a R b)

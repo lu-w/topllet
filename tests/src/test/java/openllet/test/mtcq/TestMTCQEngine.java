@@ -223,6 +223,13 @@ public class TestMTCQEngine extends AbstractMTCQTest
         testQuery("((A(?x))) U_[0,3] (B(?y))", new ATermAppl[][] { { _a, _b }, { _a, _c } });
     }
 
+    @Test
+    public void testExpUnfolding()
+    {
+        simpleTKB2();
+        testQuery("F(A(?x) & (B(?x)))");
+    }
+
     //@Test
     public void testIllegCrossing()
     {
@@ -287,7 +294,6 @@ public class TestMTCQEngine extends AbstractMTCQTest
         //testQuery(mtcqString);
     }
 
-    // TODO find out why performance is so bad here?
     //@Test
     public void testLeftTurnOnc()
     {

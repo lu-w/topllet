@@ -7,19 +7,32 @@ public class DXNFTransformer implements MTCQVisitor
     private MTCQFormula _newFormula;
     private boolean _hasAppliedTransformationRule = false;
     private boolean _isInsideNext = false;
+    private static long _timeTr = 0;
+    private static long _timeSi = 0;
 
     public static MetricTemporalConjunctiveQuery transform(MetricTemporalConjunctiveQuery formula)
     {
         MetricTemporalConjunctiveQuery mtcq = formula;
         DXNFTransformer transformer;
         MTCQSimplifier simplifier = new MTCQSimplifier();
+        long t = 0;
+        long ttr = System.currentTimeMillis();
         do
         {
             transformer = new DXNFTransformer();
-            mtcq = simplifier.transform(mtcq);
             mtcq = transformer.run(mtcq);
+            long t1 = System.currentTimeMillis();
+            mtcq = simplifier.transform(mtcq);
+            t += System.currentTimeMillis() - t1;
         } while(transformer.hasAppliedTransformationRules());
-        mtcq = simplifier.transform(mtcq);
+        long ttr1 = System.currentTimeMillis() - ttr;
+        _timeTr += ttr1 - t;
+        _timeSi += t;
+        //System.out.println("Time for simplification: " + t + " ms");
+        //System.out.println("Time for total transformation: " + ttr1 + " ms");
+        //System.out.println("TOTAL TIME UNTIL NOW SPENT FOR SIMPLIFICATION: " + _timeSi + " ms");
+        //System.out.println("TOTAL TIME UNTIL NOW SPENT FOR TRANSFORMATION: " + _timeTr + " ms");
+        //System.out.println("TOTAL TIME UNTIL NOW SPENT FOR TRANSFORMATION+SIMPLIFICATION: " + (_timeSi + _timeTr) + " ms");
         return mtcq;
     }
 

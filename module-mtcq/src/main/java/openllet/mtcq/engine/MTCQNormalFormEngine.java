@@ -4,7 +4,6 @@ import openllet.aterm.ATermAppl;
 import openllet.core.KnowledgeBase;
 import openllet.core.utils.Pair;
 import openllet.mtcq.engine.atemporal.BDQEngine;
-import openllet.mtcq.engine.rewriting.CNFTransformer;
 import openllet.mtcq.engine.rewriting.DXNFTransformer;
 import openllet.mtcq.engine.rewriting.DXNFVerifier;
 import openllet.mtcq.model.query.*;
@@ -29,43 +28,61 @@ public class MTCQNormalFormEngine extends AbstractQueryEngine<MetricTemporalConj
         return answerTime(q);
     }
 
+    static class ToDo
+    {
+        MetricTemporalConjunctiveQuery query;
+        QueryResult candidates;
+        TemporalQueryResult temporalQueryResult;
+        ToDo(MetricTemporalConjunctiveQuery query, QueryResult candidates, TemporalQueryResult temporalQueryResult)
+        {
+            this.query = query;
+            this.candidates = candidates;
+            this.temporalQueryResult = temporalQueryResult;
+        }
+        ToDo(MetricTemporalConjunctiveQuery query, TemporalQueryResult temporalQueryResult)
+        {
+            this.query = query;
+            this.candidates = null;
+            this.temporalQueryResult = temporalQueryResult;
+        }
+    }
+
     private QueryResult answerTime(MetricTemporalConjunctiveQuery query)
     {
         Set<ATermAppl> vars = query.getVars();
         TemporalQueryResult temporalResultAt0 = new TemporalQueryResult();
         // elements are of the form: query, candidates to check against, temporal result to write to.
-        List<Pair<MetricTemporalConjunctiveQuery, Pair<QueryResult, TemporalQueryResult>>> todoList = new ArrayList<>();
-        todoList.add(new Pair<>(query, new Pair<>(null, temporalResultAt0)));
+        List<ToDo> todoList = new ArrayList<>();
+        todoList.add(new ToDo(query, temporalResultAt0));
 
         for (int t = 0; t < query.getTemporalKB().size(); t++)
         {
-            List<Pair<MetricTemporalConjunctiveQuery, Pair<QueryResult, TemporalQueryResult>>> nextTodoList = new ArrayList<>();
-            for (Pair<MetricTemporalConjunctiveQuery, Pair<QueryResult, TemporalQueryResult>> todo : todoList)
+            List<ToDo> nextTodoList = new ArrayList<>();
+            for (ToDo todo : todoList)
             {
-                MetricTemporalConjunctiveQuery q = todo.first;
-                QueryResult candidates = todo.second.first;
-                TemporalQueryResult result = todo.second.second;
-                MetricTemporalConjunctiveQuery transformed = DXNFTransformer.transform(q);
+                QueryResult candidates = todo.candidates;
+                //System.out.println("Answering at time " + t + " query: " + q);
+                MetricTemporalConjunctiveQuery transformed = DXNFTransformer.transform(todo.query);
                 DXNFVerifier verifier = new DXNFVerifier();
                 if (!verifier.verify(transformed))
                     throw new RuntimeException("Unexpected: After transformation, MTCQ is not in normal form. Reason is: " +
                             verifier.getReason());
 
-                System.out.println("Answering at time " + t + " query: " + transformed.toPropositionalAbstractionString());
+                //System.out.println("Transformed to: " + transformed);
                 List<MetricTemporalConjunctiveQuery> flattenedCNF = sort(flattenAnd(transformed));
 
                 for (MetricTemporalConjunctiveQuery conjunct : flattenedCNF)
                 {
-                    System.out.println("   -> Answering conjunct " + conjunct.toPropositionalAbstractionString() + " over # candidates: " + (candidates != null ? candidates.size() : "all"));
+                    //System.out.println("   -> Answering conjunct " + conjunct.toPropositionalAbstractionString() + " over # candidates: " + (candidates != null ? candidates.size() : "all"));
                     if (!conjunct.isTemporal())  // TODO || conjunct instanceof OrFormula or && or.isOverDifferentResultVars()
                     {
                         QueryResult atempResult = answerUCQWithNegations(conjunct, t, candidates, vars);
-                        result.addNewConjunct(atempResult);
+                        todo.temporalQueryResult.addNewConjunct(atempResult);
                         if (candidates != null)
                             candidates.retainAll(atempResult);
                         else
                             candidates = atempResult.copy();
-                        System.out.println("          -> fully atemporal part. " + conjunct + " result size is: " + atempResult.size());
+                        //System.out.println("          -> fully atemporal part. " + conjunct + " result size is: " + atempResult.size());
                     }
                     else
                     {
@@ -85,14 +102,13 @@ public class MTCQNormalFormEngine extends AbstractQueryEngine<MetricTemporalConj
                                 atempoOrPart = or.getRightSubFormula();
                             }
                             atempOrResult = answerUCQWithNegations(atempoOrPart, t, candidates, vars);
-                            System.out.println("          -> atemporal part " + atempoOrPart + " in or. result size is: " + atempOrResult.size());
+                            //System.out.println("          -> atemporal part " + atempoOrPart + " in or. result size is: " + atempOrResult.size());
                         }
                         else  // must be of StrongNextFormula
                             tempPart = conjunct;
                         if (tempPart instanceof StrongNextFormula XtempPart)
                         {
-                            TemporalQueryResult newTemporalResult = new TemporalQueryResult();
-                            result.addNewConjunct(atempOrResult, newTemporalResult);
+                            // assembles candidates for inner part of next formula
                             QueryResult nextCandidates = null;
                             if (candidates != null)
                             {
@@ -100,20 +116,37 @@ public class MTCQNormalFormEngine extends AbstractQueryEngine<MetricTemporalConj
                                 if (atempOrResult != null)
                                     nextCandidates.removeAll(atempOrResult); // already found answer - no need to check anymore
                             }
-                            nextTodoList.add(new Pair<>(XtempPart.getSubFormula(),
-                                    new Pair<>(nextCandidates, newTemporalResult)));
+                            // check if we can merge with some existing todos - then we just use the existing temporal query result
+                            TemporalQueryResult nextTemporalQueryResult = null;
+                            for (ToDo existingToDo : nextTodoList)
+                                if (XtempPart.getSubFormula().equals(existingToDo.query))
+                                {
+                                    if (existingToDo.candidates != null)
+                                        existingToDo.candidates.addAll(nextCandidates);
+                                    nextTemporalQueryResult = existingToDo.temporalQueryResult;
+                                    break;
+                                }
+                            // TQR not found - assembles new temporal query result and creates new entry in todo list
+                            if (nextTemporalQueryResult == null)
+                            {
+                                nextTemporalQueryResult = new TemporalQueryResult();
+                                nextTodoList.add(new ToDo(XtempPart.getSubFormula(), nextCandidates, todo.temporalQueryResult));
+                            }
+                            // adds assembled temporal query result and atemporal query result to current todo
+                            todo.temporalQueryResult.addNewConjunct(atempOrResult, nextTemporalQueryResult);
                         }
                         else
                             throw new RuntimeException("Unexpected temporal operator: " + tempPart.getClass());
                     }
                 }
             }
+            System.out.println("Next TODO list size = " + nextTodoList.size());
             todoList = nextTodoList;
         }
 
         // adds empty query result for all things still in to-do list (they exceeded the trace length)
-        for (Pair<MetricTemporalConjunctiveQuery, Pair<QueryResult, TemporalQueryResult>> todo : todoList)
-            todo.second.second.addNewConjunct(new QueryResultImpl(todo.first));
+        for (ToDo todo : todoList)
+            todo.temporalQueryResult.addNewConjunct(new QueryResultImpl(todo.query));
 
         return temporalResultAt0.collapse();
     }
@@ -158,7 +191,7 @@ public class MTCQNormalFormEngine extends AbstractQueryEngine<MetricTemporalConj
                                                Set<ATermAppl> variables)
     {
         QueryResult result;
-        if (candidates == null || (candidates != null && !candidates.isEmpty()))
+        if (candidates == null || !candidates.isEmpty())
         {
             KnowledgeBase kb = q.getTemporalKB().get(timePoint);
             List<MetricTemporalConjunctiveQuery> cleanDisjuncts = new ArrayList<>();
