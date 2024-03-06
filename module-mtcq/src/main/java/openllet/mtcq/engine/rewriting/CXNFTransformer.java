@@ -2,7 +2,7 @@ package openllet.mtcq.engine.rewriting;
 
 import openllet.mtcq.model.query.*;
 
-public class DXNFTransformer implements MTCQVisitor
+public class CXNFTransformer implements MTCQVisitor
 {
     private MTCQFormula _newFormula;
     private boolean _hasAppliedTransformationRule = false;
@@ -13,13 +13,13 @@ public class DXNFTransformer implements MTCQVisitor
     public static MetricTemporalConjunctiveQuery transform(MetricTemporalConjunctiveQuery formula)
     {
         MetricTemporalConjunctiveQuery mtcq = formula;
-        DXNFTransformer transformer;
+        CXNFTransformer transformer;
         MTCQSimplifier simplifier = new MTCQSimplifier();
         long t = 0;
         long ttr = System.currentTimeMillis();
         do
         {
-            transformer = new DXNFTransformer();
+            transformer = new CXNFTransformer();
             mtcq = transformer.run(mtcq);
             long t1 = System.currentTimeMillis();
             mtcq = simplifier.transform(mtcq);

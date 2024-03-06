@@ -13,7 +13,7 @@ public class MTCQSimplifier extends StandardTransformer
     @Override
     protected MetricTemporalConjunctiveQuery run(MetricTemporalConjunctiveQuery formula)
     {
-        _isInCXNFNormalForm = new DXNFVerifier().verify(formula);
+        _isInCXNFNormalForm = new CXNFVerifier().verify(formula);
         return super.run(formula);
     }
 
@@ -130,12 +130,12 @@ public class MTCQSimplifier extends StandardTransformer
                                         a_or_Xb_same_Xb.first, a_or_Xb_same_Xb.second));
                                 toAdd.add(new OrFormula(formula.getTemporalKB(), formula.isDistinct(),
                                                 AX,
-                                                new OrFormula(formula.getTemporalKB(), formula.isDistinct(),
+                                                new AndFormula(formula.getTemporalKB(), formula.isDistinct(),
                                                         AO,
                                                         a_or_Xb_same_Xb.first
                                                 )
                                 ));
-                                //System.out.println("applied rule (X b | a) & ... & (X b | c) -> (X b | (a & c)) & ...");
+                                //System.out.println("applied rule (X b | a) & ... & (X b | c) -> (X b | (a & c)) & ... on " + formula.toPropositionalAbstractionString());
                             }
                         }
                     }
@@ -148,8 +148,7 @@ public class MTCQSimplifier extends StandardTransformer
         }
         if (newFormula != null)
         {
-            //System.out.println("orig = " + formula.toPropositionalAbstractionString());
-            //System.out.println("new = " + newFormula.toPropositionalAbstractionString());
+            //System.out.println("   -> result is: " + newFormula.toPropositionalAbstractionString());
             appliedTransformationRule("AND");
             _newFormula = run(newFormula);
         }
@@ -220,6 +219,7 @@ public class MTCQSimplifier extends StandardTransformer
     @Override
     public void visit(OrFormula formula)
     {
+        // TODO improve similar to AndFormula visitor
         MetricTemporalConjunctiveQuery l = formula.getLeftSubFormula();
         MetricTemporalConjunctiveQuery r = formula.getRightSubFormula();
         boolean onlyDidRecursion = false;
@@ -250,10 +250,18 @@ public class MTCQSimplifier extends StandardTransformer
             List<MetricTemporalConjunctiveQuery> rs = flattenAnd(r);
             // ((A & B & C) | (A & B)) -> (A & B)
             if (ls.containsAll(rs))
+            {
                 _newFormula = run(r);
+                //System.out.println("applied rule ((A & B & C) | (A & B)) -> (A & B) on " + formula.toPropositionalAbstractionString());
+                //System.out.println("   -> result is: " + _newFormula.toPropositionalAbstractionString());
+            }
             // ((A & B) | (A & B & C)) -> (A & B)
             else if (rs.containsAll(ls))
+            {
                 _newFormula = run(l);
+                //System.out.println("applied rule ((A & B) | (A & B & C)) -> (A & B) on " + formula.toPropositionalAbstractionString());
+                //System.out.println("   -> result is: " + _newFormula.toPropositionalAbstractionString());
+            }
             else
             {
                 // ((A | C) | (A | B)) -> (A | B | C)
@@ -265,6 +273,8 @@ public class MTCQSimplifier extends StandardTransformer
                     disjuncts.addAll(rs);
                     OrFormula simplifiedOr = makeOr(disjuncts);
                     super.visit(simplifiedOr);
+                    //System.out.println("applied rule ((A | C) | (A | B)) -> (A | B | C) on " + formula.toPropositionalAbstractionString());
+                    //System.out.println("   -> result is: " + _newFormula.toPropositionalAbstractionString());
                 }
                 else
                 {
@@ -371,6 +381,7 @@ public class MTCQSimplifier extends StandardTransformer
     //  - F(a) | F(b & Fa) -> Fa
     //  - a | Fa -> Fa
     //  - a & Fa -> a
+    //  - F(a U b) -> Fb
     //  think whether other temporal simplification would also make sense. maybe only for X?
     //  - (X a) U (X b) -> X (a U b)
     //  - (X a) R (X b) -> X (a R b)

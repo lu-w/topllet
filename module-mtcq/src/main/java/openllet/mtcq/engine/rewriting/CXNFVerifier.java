@@ -2,7 +2,7 @@ package openllet.mtcq.engine.rewriting;
 
 import openllet.mtcq.model.query.*;
 
-public class DXNFVerifier implements MTCQVisitor
+public class CXNFVerifier implements MTCQVisitor
 {
     private boolean _isValid = true;
     private OrFormula _reason = null;

@@ -1,8 +1,7 @@
 package openllet.test.mtcq;
 
-import openllet.mtcq.engine.rewriting.DXNFTransformer;
-import openllet.mtcq.engine.rewriting.DXNFVerifier;
-import openllet.mtcq.model.query.MTCQFormula;
+import openllet.mtcq.engine.rewriting.CXNFTransformer;
+import openllet.mtcq.engine.rewriting.CXNFVerifier;
 import openllet.mtcq.model.query.MetricTemporalConjunctiveQuery;
 import org.junit.Test;
 
@@ -12,8 +11,8 @@ public class MTCQTransformerTest extends AbstractMTCQTest
 {
     protected void testTransformation(String input, String expected)
     {
-        MetricTemporalConjunctiveQuery actual = DXNFTransformer.transform(temporalQuery(input));
-        DXNFVerifier verifier = new DXNFVerifier();
+        MetricTemporalConjunctiveQuery actual = CXNFTransformer.transform(temporalQuery(input));
+        CXNFVerifier verifier = new CXNFVerifier();
         if (!verifier.verify(actual))
         {
             fail("Transformed formula is " + actual + ", but this is not in DXNF due to: " +
