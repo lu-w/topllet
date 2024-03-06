@@ -358,23 +358,25 @@ public class TestMTCQEngine extends AbstractMTCQTest
     @Test
     public void testPassingParkingVehicles()
     {
-        //useCaseTKBPassingParkingVehicles(true);
+        useCaseTKBPassingParkingVehicles(true);
         String mtcqString = """
         # A=Vehicle, B=2_Lane_Road, C=Parking_Vehicle, r=is_in_front_of, q=sfIntersects, s=is_to_the_side_of,
         # t=is_in_proximity, u=phy:is_behind
-        # G (A(?x) & B(z) & q(z,?x) & C(?y))
-        #    &
+        G (A(?x) & B(z) & q(z,?x) & C(?y))
+            &
         F
         (
+            (r(?y,?x))
+                &
             X[!]
             (
-                (t(?x,?y))
+                (t(?x,?y) & s(?y,?x))
                     U
                 (u(?y,?x))
             )
         )
         """;
-        //testQuery(mtcqString, new ATermAppl[][] { { _a, _c } });
+        testQuery(mtcqString, new ATermAppl[][] { { _a, _c } });
         initializeKB();
         useCaseTKBPassingParkingVehicles(false);
         testQuery(mtcqString);
