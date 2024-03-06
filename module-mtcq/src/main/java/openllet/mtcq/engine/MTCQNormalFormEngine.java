@@ -61,23 +61,36 @@ public class MTCQNormalFormEngine extends AbstractQueryEngine<MetricTemporalConj
             for (ToDo todo : todoList)
             {
                 QueryResult candidates = todo.candidates;
-                //System.out.println("Answering at time " + t + " query: " + todo.query.toPropositionalAbstractionString());
+                System.out.println("Answering at time " + t + " query: " + todo.query.toPropositionalAbstractionString());
                 MetricTemporalConjunctiveQuery transformed = CXNFTransformer.transform(todo.query);
                 CXNFVerifier verifier = new CXNFVerifier();
                 if (!verifier.verify(transformed))
                     throw new RuntimeException("Unexpected: After transformation, MTCQ is not in normal form. Reason is: " +
                             verifier.getReason());
 
-                //System.out.println("Transformed to: " + transformed.toPropositionalAbstractionString());
+                System.out.println("Transformed to: " + transformed.toPropositionalAbstractionString());
                 List<MetricTemporalConjunctiveQuery> flattenedCNF = sort(flattenAnd(transformed));
 
                 for (MetricTemporalConjunctiveQuery conjunct : flattenedCNF)
                 {
-                    //System.out.println("   -> Answering conjunct " + conjunct.toPropositionalAbstractionString() + " over # candidates: " + (candidates != null ? candidates.size() : "all"));
+                    System.out.println("   -> Answering conjunct " + conjunct.toPropositionalAbstractionString() + " over # candidates: " + (candidates != null ? candidates.size() : "all"));
                     if (!conjunct.isTemporal())  // TODO || conjunct instanceof OrFormula or && or.isOverDifferentResultVars()
                     {
-                        todo.temporalQueryResult.addNewConjunct(answerAtemporalCNF(conjunct, t, candidates, vars, true));
-                        //System.out.println("          -> fully atemporal part. " + conjunct + " result size is: " + atempResult.size());
+                        QueryResult atempResult = null;
+                        for (MetricTemporalConjunctiveQuery ucq : flattenAnd(conjunct))
+                        {
+                            QueryResult ucqResult = answerUCQWithNegations(ucq, t, candidates, vars);
+                            if (atempResult == null)
+                                atempResult = ucqResult;
+                            else
+                                atempResult.retainAll(ucqResult);
+                            if (candidates == null)
+                                candidates = atempResult.copy();
+                            else
+                                candidates.retainAll(ucqResult);
+                        }
+                        todo.temporalQueryResult.addNewConjunct(atempResult);
+                        System.out.println("          -> fully atemporal part. " + conjunct + " result size is: " + atempResult.size());
                     }
                     else
                     {
@@ -96,8 +109,22 @@ public class MTCQNormalFormEngine extends AbstractQueryEngine<MetricTemporalConj
                                 tempPart = or.getLeftSubFormula();
                                 atempoOrPart = or.getRightSubFormula();
                             }
-                            atempOrResult = answerAtemporalCNF(atempoOrPart, t, candidates, vars, false);
-                            //System.out.println("          -> atemporal part " + atempoOrPart + " in or. result size is: " + atempOrResult.size());
+                            QueryResult localCandidates = null;
+                            if (candidates != null)
+                                localCandidates = candidates.copy();
+                            for (MetricTemporalConjunctiveQuery ucq : flattenAnd(atempoOrPart))
+                            {
+                                QueryResult ucqResult = answerUCQWithNegations(ucq, t, localCandidates, vars);
+                                if (atempOrResult == null)
+                                    atempOrResult = ucqResult;
+                                else
+                                    atempOrResult.retainAll(ucqResult);
+                                if (localCandidates == null)
+                                    localCandidates = atempOrResult.copy();
+                                else
+                                    localCandidates.retainAll(ucqResult);
+                            }
+                            System.out.println("          -> atemporal part " + atempoOrPart + " in or. result size is: " + atempOrResult.size());
                         }
                         else  // must be of StrongNextFormula
                             tempPart = conjunct;
@@ -128,7 +155,7 @@ public class MTCQNormalFormEngine extends AbstractQueryEngine<MetricTemporalConj
                                 nextTodoList.add(new ToDo(XtempPart.getSubFormula(), nextCandidates, nextTemporalQueryResult));
                             }
                             // adds assembled temporal query result and atemporal query result to current todo
-                            //System.out.println("          -> to check next time point: " + XtempPart);
+                            System.out.println("          -> to check next time point: " + XtempPart);
                             todo.temporalQueryResult.addNewConjunct(atempOrResult, nextTemporalQueryResult);
                         }
                         else
@@ -148,31 +175,6 @@ public class MTCQNormalFormEngine extends AbstractQueryEngine<MetricTemporalConj
         QueryResult res = temporalResultAt0.collapse();
         System.out.println(res);
         return res;
-    }
-
-    private QueryResult answerAtemporalCNF(MetricTemporalConjunctiveQuery conjunct, int t, QueryResult candidates,
-                                           Collection<ATermAppl> vars, boolean modifyCandidates)
-    {
-        // conjunct is in CNF (i.e., a conjunction of UCQs with negations).
-        QueryResult localCandidates = null;
-        if (!modifyCandidates && candidates != null)
-            localCandidates = candidates.copy();
-        else
-            localCandidates = candidates;
-        QueryResult atempResult = null;
-        for (MetricTemporalConjunctiveQuery ucq : flattenAnd(conjunct))
-        {
-            QueryResult ucqResult = answerUCQWithNegations(ucq, t, localCandidates, vars);
-            if (atempResult == null)
-                atempResult = ucqResult;
-            else
-                atempResult.retainAll(ucqResult);
-            if (localCandidates == null)
-                localCandidates = atempResult.copy();
-            else
-                localCandidates.retainAll(ucqResult);
-        }
-        return atempResult;
     }
 
     private List<MetricTemporalConjunctiveQuery> sort(List<MetricTemporalConjunctiveQuery> cnf)
