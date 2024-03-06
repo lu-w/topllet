@@ -49,7 +49,7 @@ public class MTCQNormalFormEngine extends AbstractQueryEngine<MetricTemporalConj
 
     private QueryResult answerTime(MetricTemporalConjunctiveQuery query)
     {
-        Set<ATermAppl> vars = query.getVars();
+        Collection<ATermAppl> vars = query.getResultVars();
         TemporalQueryResult temporalResultAt0 = new TemporalQueryResult();
         // elements are of the form: query, candidates to check against, temporal result to write to.
         List<ToDo> todoList = new ArrayList<>();
@@ -61,7 +61,7 @@ public class MTCQNormalFormEngine extends AbstractQueryEngine<MetricTemporalConj
             for (ToDo todo : todoList)
             {
                 QueryResult candidates = todo.candidates;
-                //System.out.println("Answering at time " + t + " query: " + q);
+                //System.out.println("Answering at time " + t + " query: " + todo.query);
                 MetricTemporalConjunctiveQuery transformed = DXNFTransformer.transform(todo.query);
                 DXNFVerifier verifier = new DXNFVerifier();
                 if (!verifier.verify(transformed))
@@ -130,9 +130,10 @@ public class MTCQNormalFormEngine extends AbstractQueryEngine<MetricTemporalConj
                             if (nextTemporalQueryResult == null)
                             {
                                 nextTemporalQueryResult = new TemporalQueryResult();
-                                nextTodoList.add(new ToDo(XtempPart.getSubFormula(), nextCandidates, todo.temporalQueryResult));
+                                nextTodoList.add(new ToDo(XtempPart.getSubFormula(), nextCandidates, nextTemporalQueryResult));
                             }
                             // adds assembled temporal query result and atemporal query result to current todo
+                            System.out.println("Adding new conjunct for query " + tempPart);
                             todo.temporalQueryResult.addNewConjunct(atempOrResult, nextTemporalQueryResult);
                         }
                         else
@@ -148,7 +149,10 @@ public class MTCQNormalFormEngine extends AbstractQueryEngine<MetricTemporalConj
         for (ToDo todo : todoList)
             todo.temporalQueryResult.addNewConjunct(new QueryResultImpl(todo.query));
 
-        return temporalResultAt0.collapse();
+        System.out.println("Collapsing temporal query results...");
+        QueryResult res = temporalResultAt0.collapse();
+        System.out.println(res);
+        return res;
     }
 
     private List<MetricTemporalConjunctiveQuery> sort(List<MetricTemporalConjunctiveQuery> cnf)
@@ -188,7 +192,7 @@ public class MTCQNormalFormEngine extends AbstractQueryEngine<MetricTemporalConj
 
     // TODO caching! also with subsets of candidates + check if a disjunciton was already contained in a previously cached disjunction (e.g. cached: a|b|c and we now check a|b -> use candidates from a|b|c at most)
     private QueryResult answerUCQWithNegations(MetricTemporalConjunctiveQuery q, int timePoint, QueryResult candidates,
-                                               Set<ATermAppl> variables)
+                                               Collection<ATermAppl> variables)
     {
         QueryResult result;
         if (candidates == null || !candidates.isEmpty())

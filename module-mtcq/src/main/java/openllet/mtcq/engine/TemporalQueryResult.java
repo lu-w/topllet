@@ -9,7 +9,8 @@ import java.util.List;
 
 public class TemporalQueryResult
 {
-    private final List<Pair<QueryResult, TemporalQueryResult>> _conjunctionOfDisjunctions = new ArrayList<>();
+    private List<Pair<QueryResult, TemporalQueryResult>> _conjunctionOfDisjunctions = new ArrayList<>();
+    private QueryResult _collapsed = null;
 
     public void addNewConjunct(QueryResult atemporalResult)
     {
@@ -29,25 +30,30 @@ public class TemporalQueryResult
     @Nullable
     public QueryResult collapse()
     {
-        QueryResult finalResult = null;
-        for (Pair<QueryResult, TemporalQueryResult> conjunction : _conjunctionOfDisjunctions)
+        if (_collapsed == null)
         {
-            QueryResult conjunctionRes;
-            if (conjunction.first != null)
+            QueryResult finalResult = null;
+            for (Pair<QueryResult, TemporalQueryResult> conjunction : _conjunctionOfDisjunctions)
             {
-                conjunctionRes = conjunction.first;
-                if (conjunction.second != null)
-                    conjunctionRes.addAll(conjunction.second.collapse());
+                QueryResult conjunctionRes;
+                if (conjunction.first != null)
+                {
+                    conjunctionRes = conjunction.first;
+                    if (conjunction.second != null)
+                        conjunctionRes.addAll(conjunction.second.collapse());
+                }
+                else
+                {
+                    conjunctionRes = conjunction.second.collapse();
+                }
+                if (finalResult == null)
+                    finalResult = conjunctionRes;
+                else
+                    finalResult.retainAll(conjunctionRes);
             }
-            else
-            {
-                conjunctionRes = conjunction.second.collapse();
-            }
-            if (finalResult == null)
-                finalResult = conjunctionRes;
-            else
-                finalResult.retainAll(conjunctionRes);
+            _collapsed = finalResult;
+            _conjunctionOfDisjunctions = null;
         }
-        return finalResult;
+        return  _collapsed;
     }
 }

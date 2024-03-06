@@ -260,7 +260,6 @@ public class DXNFTransformer implements MTCQVisitor
     {
         if (!_isInsideNext)
         {
-            System.out.println(formula.getLowerBound() + ", " + formula.getUpperBound());
             if (formula.getLowerBound() == 0 && formula.getUpperBound() == 0)
             {
                 _newFormula = run(formula.getRightSubFormula());
@@ -285,7 +284,6 @@ public class DXNFTransformer implements MTCQVisitor
             }
             else
             {
-                System.out.println("-> else");
                 _newFormula =
                         run(new StrongNextFormula(formula.getTemporalKB(), formula.isDistinct(),
                                 new BoundedUntilFormula(formula.getTemporalKB(), formula.isDistinct(),
