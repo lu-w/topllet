@@ -42,10 +42,11 @@ public class MTCQSimplifier extends StandardTransformer
             List<MetricTemporalConjunctiveQuery> both = new ArrayList<>(Stream.concat(lhs.stream(), rhs.stream()).toList());
             List<MetricTemporalConjunctiveQuery> toRemove = new ArrayList<>();
             List<MetricTemporalConjunctiveQuery> toAdd = new ArrayList<>();
-            for (MetricTemporalConjunctiveQuery A : both)
+            List<MetricTemporalConjunctiveQuery> fNoA = new ArrayList<>(both);
+            for (int i = 0; i < both.size(); i++)
             {
-                List<MetricTemporalConjunctiveQuery> fNoA = new ArrayList<>(both);
-                fNoA.remove(A);
+                MetricTemporalConjunctiveQuery A = both.get(i);
+                fNoA.remove(i);
                 // (A & ... & !A) -> false
                 if (fNoA.contains(new NotFormula(formula.getTemporalKB(), formula.isDistinct(), A)))
                 {
@@ -76,7 +77,7 @@ public class MTCQSimplifier extends StandardTransformer
                     for (MetricTemporalConjunctiveQuery B : fNoA)
                     {
                         List<MetricTemporalConjunctiveQuery> bOrs = flattenOr(B);
-                        if (new HashSet<>(bOrs).containsAll(aOrs))
+                        if (bOrs.containsAll(aOrs))
                         {
                             toRemove.add(B);
                             //System.out.println("applied rule ((A | ... | B) & ... & (A | ... | B | ...)) -> (A | ... | B) & ...");
@@ -143,6 +144,7 @@ public class MTCQSimplifier extends StandardTransformer
                 // only do one rule at a time
                 if (!toAdd.isEmpty() || !toRemove.isEmpty())
                     break;
+                fNoA.add(i, A);
             }
             newFormula = assembleAndFormula(both, toRemove, toAdd);
         }

@@ -144,7 +144,44 @@ public class CXNFTransformer implements MTCQVisitor
             ));
             appliedTransformationRule("7");
         }
-        // TODO implement NNF rules for bounded temporal operators
+        else if (sub instanceof BoundedUntilFormula subU)
+        {
+            // Rule 6
+            _newFormula = run(new BoundedReleaseFormula(formula.getTemporalKB(), formula.isDistinct(),
+                    new NotFormula(formula.getTemporalKB(), formula.isDistinct(), subU.getLeftSubFormula()),
+                    new NotFormula(formula.getTemporalKB(), formula.isDistinct(), subU.getRightSubFormula()),
+                    subU.getLowerBound(), subU.getUpperBound())
+            );
+            appliedTransformationRule("6.1");
+        }
+        else if (sub instanceof BoundedEventuallyFormula subF)
+        {
+            // Rule 6.1
+            _newFormula = run(new BoundedGloballyFormula(formula.getTemporalKB(), formula.isDistinct(),
+                    new NotFormula(formula.getTemporalKB(), formula.isDistinct(), subF.getSubFormula()),
+                    subF.getLowerBound(), subF.getUpperBound())
+            );
+            appliedTransformationRule("6.2");
+        }
+        else if (sub instanceof BoundedGloballyFormula subG)
+        {
+            // Rule 6.2
+            _newFormula = run(new BoundedEventuallyFormula(formula.getTemporalKB(), formula.isDistinct(),
+                    new NotFormula(formula.getTemporalKB(), formula.isDistinct(), subG.getSubFormula()),
+                    subG.getLowerBound(), subG.getUpperBound())
+            );
+            appliedTransformationRule("6.3");
+        }
+        else if (sub instanceof BoundedReleaseFormula subR)
+        {
+            // Rule 7
+            _newFormula = run(new BoundedUntilFormula(formula.getTemporalKB(), formula.isDistinct(),
+                    new NotFormula(formula.getTemporalKB(), formula.isDistinct(), subR.getLeftSubFormula()),
+                    new NotFormula(formula.getTemporalKB(), formula.isDistinct(), subR.getRightSubFormula()),
+                    subR.getLowerBound(), subR.getUpperBound())
+            );
+            appliedTransformationRule("7");
+        }
         else
         {
             // No rule applicable (base case, e.g., CQ or tt/ff), just descent into sub-formula
