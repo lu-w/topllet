@@ -77,7 +77,7 @@ public class MTCQNormalFormEngine extends AbstractQueryEngine<MetricTemporalConj
                     if (!conjunct.isTemporal())  // TODO || conjunct instanceof OrFormula or && or.isOverDifferentResultVars()
                     {
                         QueryResult atempResult = null;
-                        for (MetricTemporalConjunctiveQuery ucq : flattenAnd(conjunct))
+                        for (MetricTemporalConjunctiveQuery ucq : sort(flattenAnd(conjunct)))
                         {
                             QueryResult ucqResult = answerUCQWithNegations(ucq, t, candidates, vars);
                             if (atempResult == null)
@@ -112,7 +112,7 @@ public class MTCQNormalFormEngine extends AbstractQueryEngine<MetricTemporalConj
                             QueryResult localCandidates = null;
                             if (candidates != null)
                                 localCandidates = candidates.copy();
-                            for (MetricTemporalConjunctiveQuery ucq : flattenAnd(atempoOrPart))
+                            for (MetricTemporalConjunctiveQuery ucq : sort(flattenAnd(atempoOrPart)))
                             {
                                 QueryResult ucqResult = answerUCQWithNegations(ucq, t, localCandidates, vars);
                                 if (atempOrResult == null)
