@@ -2,37 +2,43 @@ package openllet.mtcq.engine.rewriting;
 
 import openllet.mtcq.model.query.*;
 
+import java.util.HashMap;
+
 public class CXNFTransformer implements MTCQVisitor
 {
     private MTCQFormula _newFormula;
     private boolean _hasAppliedTransformationRule = false;
     private boolean _isInsideNext = false;
-    private static long _timeTr = 0;
-    private static long _timeSi = 0;
+    private static HashMap<MetricTemporalConjunctiveQuery, MetricTemporalConjunctiveQuery> _cache = new HashMap<>();
+
+    public static void resetCache()
+    {
+        _cache = new HashMap<>();
+    }
 
     public static MetricTemporalConjunctiveQuery transform(MetricTemporalConjunctiveQuery formula)
     {
-        MetricTemporalConjunctiveQuery mtcq = formula;
-        CXNFTransformer transformer;
-        MTCQSimplifier simplifier = new MTCQSimplifier();
-        long t = 0;
-        long ttr = System.currentTimeMillis();
-        do
+        MetricTemporalConjunctiveQuery mtcq;
+        if (!_cache.containsKey(formula))
         {
-            transformer = new CXNFTransformer();
-            mtcq = transformer.run(mtcq);
-            long t1 = System.currentTimeMillis();
-            mtcq = simplifier.transform(mtcq);
-            t += System.currentTimeMillis() - t1;
-        } while(transformer.hasAppliedTransformationRules());
-        long ttr1 = System.currentTimeMillis() - ttr;
-        _timeTr += ttr1 - t;
-        _timeSi += t;
-        //System.out.println("Time for simplification: " + t + " ms");
-        //System.out.println("Time for total transformation: " + ttr1 + " ms");
-        //System.out.println("TOTAL TIME UNTIL NOW SPENT FOR SIMPLIFICATION: " + _timeSi + " ms");
-        //System.out.println("TOTAL TIME UNTIL NOW SPENT FOR TRANSFORMATION: " + _timeTr + " ms");
-        //System.out.println("TOTAL TIME UNTIL NOW SPENT FOR TRANSFORMATION+SIMPLIFICATION: " + (_timeSi + _timeTr) + " ms");
+            mtcq = formula;
+            CXNFTransformer transformer;
+            MTCQSimplifier simplifier = new MTCQSimplifier();
+            long t = 0;
+            long ttr = System.currentTimeMillis();
+            do
+            {
+                transformer = new CXNFTransformer();
+                mtcq = transformer.run(mtcq);
+                long t1 = System.currentTimeMillis();
+                mtcq = simplifier.transform(mtcq);
+                t += System.currentTimeMillis() - t1;
+            }
+            while (transformer.hasAppliedTransformationRules());
+            _cache.put(formula, mtcq);
+        }
+        else
+            mtcq = _cache.get(formula).copy();
         return mtcq;
     }
 
