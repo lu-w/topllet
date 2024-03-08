@@ -18,8 +18,72 @@ import static openllet.mtcq.engine.rewriting.MTCQSimplifier.*;
 
 public class MTCQNormalFormEngine extends AbstractQueryEngine<MetricTemporalConjunctiveQuery>
 {
-    private final Map<Pair<MetricTemporalConjunctiveQuery, Pair<Integer, QueryResult>>, QueryResult> _cachedResults = new HashMap<>();
+    protected class QueryCache
+    {
+        private Map<MetricTemporalConjunctiveQuery, Pair<QueryResult, QueryResult>> _cachedResults = new HashMap<>();
+
+        /**
+         *
+         * @param query
+         * @param candidates can be null (indicating everything)
+         * @param result
+         */
+        protected void add(MetricTemporalConjunctiveQuery query, QueryResult candidates, QueryResult result)
+        {
+            if (_cachedResults.containsKey(query))
+            {
+                _cachedResults.get(query).first.addAll(candidates);
+                _cachedResults.get(query).second.addAll(result);
+            }
+            else
+                _cachedResults.put(query, new Pair<>(candidates, result));
+        }
+
+        /**
+         *
+         * @param query
+         * @param candidates can be null (indicating everything)
+         * @return the cached results (first entry), and the candidates for which no cached result could be obtained
+         *         (second entry).
+         */
+        protected Pair<QueryResult, QueryResult> fetch(MetricTemporalConjunctiveQuery query, QueryResult candidates)
+        {
+            if (_cachedResults.containsKey(query))
+            {
+                QueryResult cachedCandidates = _cachedResults.get(query).first;
+                QueryResult candidatesWithNoCache;
+                if (cachedCandidates == null) // everything was cached
+                    candidatesWithNoCache = new QueryResultImpl(query);
+                else
+                {
+                    if (candidates != null)
+                    {
+                        candidatesWithNoCache = candidates.copy();
+                        candidatesWithNoCache.removeAll(cachedCandidates);
+                    }
+                    else // user wants to retrieve over all candidates, we have only cached over a subset of that
+                        candidatesWithNoCache = cachedCandidates.invert();
+                }
+                return new Pair<>(_cachedResults.get(query).second.copy(), candidatesWithNoCache);
+            }
+            else if (candidates == null)
+                return new Pair<>(new QueryResultImpl(query), new QueryResultImpl(query).invert());
+            else
+                return new Pair<>(new QueryResultImpl(query), candidates); // copy? probably not required
+        }
+
+        /**
+         * Invalidates the cache (empties it). To be called after every time step (since the cache does not store
+         * information on the temporal validity of the cached entries!).
+         */
+        protected void invalidate()
+        {
+            _cachedResults = new HashMap<>();
+        }
+    }
+
     private final BDQEngine _bdqEngine = new BDQEngine();
+    private final QueryCache _queryCache = new QueryCache();
 
     @Override
     protected QueryResult execABoxQuery(MetricTemporalConjunctiveQuery q, QueryResult excludeBindings, QueryResult restrictToBindings)
@@ -165,6 +229,7 @@ public class MTCQNormalFormEngine extends AbstractQueryEngine<MetricTemporalConj
             }
             System.out.println("Next TODO list size = " + nextTodoList.size());
             todoList = nextTodoList;
+            _queryCache.invalidate();
         }
 
         // adds empty query result for all things still in to-do list (they exceeded the trace length)
@@ -212,85 +277,62 @@ public class MTCQNormalFormEngine extends AbstractQueryEngine<MetricTemporalConj
             return true;
     }
 
-    // TODO caching! also with subsets of candidates + check if a disjunciton was already contained in a previously cached disjunction (e.g. cached: a|b|c and we now check a|b -> use candidates from a|b|c at most)
     private QueryResult answerUCQWithNegations(MetricTemporalConjunctiveQuery q, int timePoint, QueryResult candidates,
                                                Collection<ATermAppl> variables)
     {
-        QueryResult result;
-        if (candidates == null || !candidates.isEmpty())
+        Pair<QueryResult, QueryResult> cache = _queryCache.fetch(q, candidates);
+        QueryResult result = cache.first;
+        candidates = cache.second;
+        if (!candidates.isEmpty())
         {
+            QueryResult newResult;
             KnowledgeBase kb = q.getTemporalKB().get(timePoint);
             List<MetricTemporalConjunctiveQuery> cleanDisjuncts = new ArrayList<>();
             for (MetricTemporalConjunctiveQuery disjunct : flattenOr(q))
             {
-                if (disjunct instanceof LastFormula)
-                {
-                    if (disjunct.getTemporalKB().size() - 1 == timePoint)
-                    {
-                        if (candidates != null)
-                            return candidates.copy();
-                        else
-                            return new QueryResultImpl(disjunct).invert();
-                    }
-                }
-                else if (disjunct instanceof EndFormula)
-                {
-                    if (timePoint >= disjunct.getTemporalKB().size())
-                    {
-                        if (candidates != null)
-                            return candidates.copy();
-                        else
-                            return new QueryResultImpl(disjunct).invert();
-                    }
-                }
+                if (disjunct instanceof LastFormula && disjunct.getTemporalKB().size() - 1 == timePoint)
+                    return candidates.copy();
+                else if (disjunct instanceof EndFormula && timePoint >= disjunct.getTemporalKB().size())
+                    return candidates.copy();
                 else if (disjunct instanceof PropositionalTrueFormula || disjunct instanceof LogicalTrueFormula)
-                {
-                    if (candidates != null)
-                        return candidates.copy();
-                    else
-                        return new QueryResultImpl(disjunct).invert();
-                }
+                    return candidates.copy();
                 else if (disjunct instanceof ConjunctiveQueryFormula ||
                         (disjunct instanceof NotFormula not && not.getSubFormula() instanceof ConjunctiveQueryFormula))
                 {
                     cleanDisjuncts.add(disjunct);
                     disjunct.setKB(kb);
                 }
-                else if (!(disjunct instanceof LogicalFalseFormula || disjunct instanceof EmptyFormula ||
-                        disjunct instanceof PropositionalFalseFormula))
-                    throw new RuntimeException("Invalid disjunct " + disjunct +
-                            " for checking UCQs with negation in query " + q);
             }
             if (cleanDisjuncts.size() > 1)
             {
                 OrFormula orFormula = makeOr(cleanDisjuncts);
                 orFormula.setKB(kb);  // TODO fix correct setting of KB in makeOr()
-                result = _bdqEngine.exec(orFormula, null, candidates);
+                newResult = _bdqEngine.exec(orFormula, null, candidates);
             }
             else if (cleanDisjuncts.size() == 1)
             {
                 MetricTemporalConjunctiveQuery one = cleanDisjuncts.get(0);
                 if (one instanceof LogicalFalseFormula || one instanceof PropositionalFalseFormula ||
                         one instanceof EmptyFormula)
-                    result = new QueryResultImpl(one);
+                    newResult = new QueryResultImpl(one);
                 else
-                    result = _bdqEngine.exec(one, null, candidates);
+                    newResult = _bdqEngine.exec(one, null, candidates);
             }
             else
                 // we have a formula of the form "last v end v last v false v false ..." and are not at last or end point.
                 //   -> nothing can entail this formula
-                result = new QueryResultImpl(q);
-            if (result instanceof MultiQueryResults m)
-                result = m.toQueryResultImpl(q);
+                newResult = new QueryResultImpl(q);
+            if (newResult instanceof MultiQueryResults m)
+                newResult = m.toQueryResultImpl(q);
+            result.addAll(newResult);
             // expands to all variables (can probably be done more efficiently) - suffices for now
             if (!variables.equals(result.getResultVars()))
             {
                 result.expandToAllVariables(variables);
                 result.explicate();
             }
+            _queryCache.add(q, candidates, result);  // TODO maybe add overwrite() functionality?
         }
-        else
-            result = new QueryResultImpl(q);
         return result;
     }
 }
