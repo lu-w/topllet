@@ -24,15 +24,11 @@ public class CXNFTransformer implements MTCQVisitor
             mtcq = formula;
             CXNFTransformer transformer;
             MTCQSimplifier simplifier = new MTCQSimplifier();
-            long t = 0;
-            long ttr = System.currentTimeMillis();
             do
             {
                 transformer = new CXNFTransformer();
                 mtcq = transformer.run(mtcq);
-                long t1 = System.currentTimeMillis();
                 mtcq = simplifier.transform(mtcq);
-                t += System.currentTimeMillis() - t1;
             }
             while (transformer.hasAppliedTransformationRules());
             _cache.put(formula, mtcq);

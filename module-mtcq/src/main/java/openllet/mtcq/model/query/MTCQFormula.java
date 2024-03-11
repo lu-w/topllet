@@ -32,7 +32,7 @@ public abstract class MTCQFormula extends AbstractCompositeQuery<ConjunctiveQuer
 
     public MTCQFormula(TemporalKnowledgeBase temporalKb, boolean isDistinct)
     {
-        super(temporalKb.get(0), isDistinct);
+        super(temporalKb.getLastLoadedKB(), isDistinct);
         _temporalKb = temporalKb;
     }
 

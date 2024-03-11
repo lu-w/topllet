@@ -57,6 +57,12 @@ public class OptimizedQueryEngine2 extends AbstractABoxEngineWrapper
 		return !q.isNegated() && !q.hasCycle();
 	}
 
+	@Override
+	public QueryResult exec(ConjunctiveQuery q, QueryResult excludeBindings, QueryResult restrictToBindings)
+	{
+		return exec(q);
+	}
+
 	private void exec(final ConjunctiveQuery q, final ResultBinding binding, final boolean first)
 	{
 		if (q.getDistVars().isEmpty())

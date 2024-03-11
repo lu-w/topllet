@@ -54,12 +54,18 @@ public class InMemoryTemporalKnowledgeBaseImpl extends ArrayList<KnowledgeBase> 
     }
 
     @Override
+    public KnowledgeBase getLastLoadedKB()
+    {
+        return get(0);
+    }
+
+    @Override
     public boolean add(KnowledgeBase kb)
     {
         if (this.size() > 0 && kb != null)
         {
             KnowledgeBase prevKb = this.get(this.size() - 1);
-            if (!kb.getIndividuals().equals(prevKb.getIndividuals()))
+            if (false && !kb.getIndividuals().equals(prevKb.getIndividuals()))
             {
                 Set<ATermAppl> mis1 = new HashSet<>(prevKb.getIndividuals());
                 Set<ATermAppl> mis2 = new HashSet<>(kb.getIndividuals());

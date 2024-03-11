@@ -35,4 +35,6 @@ public interface TemporalKnowledgeBase extends List<KnowledgeBase>
 
     @Nullable
     Collection<ATerm> getConnectedClassesAndRolesInAxiomGraph(Collection<ATerm> classesAndRoles);
+
+    KnowledgeBase getLastLoadedKB();
 }

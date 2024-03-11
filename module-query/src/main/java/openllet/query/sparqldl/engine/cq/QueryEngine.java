@@ -104,16 +104,29 @@ public class QueryEngine implements QueryExec<ConjunctiveQuery>
 		return result;
 	}
 
-	public static QueryResult execQuery(final ConjunctiveQuery query, final KnowledgeBase kb)
+	@Override
+	public QueryResult exec(ConjunctiveQuery q, QueryResult excludeBindings, QueryResult restrictToBindings)
+	{
+		return execQuery(q, excludeBindings, restrictToBindings);
+	}
+
+	public static QueryResult execQuery(final ConjunctiveQuery query, final KnowledgeBase kb,
+										QueryResult excludeBindings, QueryResult restrictToBindings)
 	{
 		final KnowledgeBase queryKB = query.getKB();
 		query.setKB(kb);
-		final QueryResult result = execQuery(query);
+		final QueryResult result = execQuery(query, excludeBindings, restrictToBindings);
 		query.setKB(queryKB);
 		return result;
 	}
 
 	public static QueryResult execQuery(final ConjunctiveQuery query)
+	{
+		return execQuery(query, null, null);
+	}
+
+	public static QueryResult execQuery(final ConjunctiveQuery query, QueryResult excludeBindings,
+										QueryResult restrictToBindings)
 	{
 		if (query.getAtoms().isEmpty())
 		{
@@ -145,12 +158,12 @@ public class QueryEngine implements QueryExec<ConjunctiveQuery>
 			throw new InternalReasonerException("Splitting query returned no results!");
 		else
 			if (queries.size() == 1)
-				r = execSingleQuery(queries.get(0));
+				r = execSingleQuery(queries.get(0), excludeBindings, restrictToBindings);
 			else
 			{
 				final List<QueryResult> results = new ArrayList<>(queries.size());
 				for (final ConjunctiveQuery q : queries)
-					results.add(execSingleQuery(q));
+					results.add(execSingleQuery(q, excludeBindings, restrictToBindings));
 
 				r = new MultiQueryResults(query.getResultVars(), results);
 			}
@@ -326,12 +339,13 @@ public class QueryEngine implements QueryExec<ConjunctiveQuery>
 		return hasUndefinedTerm(query.getAtoms(), query.getKB());
 	}
 
-	private static QueryResult execSingleQuery(final ConjunctiveQuery query)
+	private static QueryResult execSingleQuery(final ConjunctiveQuery query, QueryResult excludeBindings,
+											   QueryResult restrictToBindings)
 	{
 		if (hasUndefinedTerm(query))
 			return new QueryResultImpl(query);
 
-		return getQueryExec().exec(query);
+		return getQueryExec().exec(query, excludeBindings, restrictToBindings);
 	}
 
 	/**

@@ -126,7 +126,7 @@ public class MTCQNormalFormEngine extends AbstractQueryEngine<MetricTemporalConj
             for (ToDo todo : todoList)
             {
                 QueryResult candidates = todo.candidates;
-                // System.out.println("Answering at time " + t + " query: " + todo.query.toPropositionalAbstractionString());
+                System.out.println("Answering at time " + t + " query: " + todo.query.toPropositionalAbstractionString());
                 MetricTemporalConjunctiveQuery transformed = CXNFTransformer.transform(todo.query);
                 CXNFVerifier verifier = new CXNFVerifier();
                 if (!verifier.verify(transformed))
@@ -138,7 +138,7 @@ public class MTCQNormalFormEngine extends AbstractQueryEngine<MetricTemporalConj
 
                 for (MetricTemporalConjunctiveQuery conjunct : flattenedCNF)
                 {
-                    // System.out.println("   -> Answering conjunct " + conjunct.toPropositionalAbstractionString() + " over # candidates: " + (candidates != null ? candidates.size() : "all"));
+                    System.out.println("   -> Answering conjunct " + conjunct.toPropositionalAbstractionString() + " over # candidates: " + (candidates != null ? candidates.size() : "all"));
                     if (!conjunct.isTemporal())  // TODO || conjunct instanceof OrFormula or && or.isOverDifferentResultVars()
                     {
                         QueryResult atempResult = null;
@@ -155,7 +155,7 @@ public class MTCQNormalFormEngine extends AbstractQueryEngine<MetricTemporalConj
                                 candidates.retainAll(ucqResult);
                         }
                         todo.temporalQueryResult.addNewConjunct(atempResult);
-                        // System.out.println("          -> fully atemporal part. " + conjunct + " result size is: " + atempResult.size());
+                        System.out.println("          -> fully atemporal part. " + conjunct + " result size is: " + atempResult.size());
                     }
                     else
                     {
@@ -189,7 +189,7 @@ public class MTCQNormalFormEngine extends AbstractQueryEngine<MetricTemporalConj
                                 else
                                     localCandidates.retainAll(ucqResult);
                             }
-                            // System.out.println("          -> atemporal part " + atempoOrPart + " in or. result size is: " + atempOrResult.size());
+                            System.out.println("          -> atemporal part " + atempoOrPart + " in or. result size is: " + atempOrResult.size());
                         }
                         else  // must be of StrongNextFormula
                             tempPart = conjunct;
@@ -220,7 +220,7 @@ public class MTCQNormalFormEngine extends AbstractQueryEngine<MetricTemporalConj
                                 nextTodoList.add(new ToDo(XtempPart.getSubFormula(), nextCandidates, nextTemporalQueryResult));
                             }
                             // adds assembled temporal query result and atemporal query result to current todo
-                            // System.out.println("          -> to check next time point: " + XtempPart);
+                            System.out.println("          -> to check next time point: " + XtempPart);
                             todo.temporalQueryResult.addNewConjunct(atempOrResult, nextTemporalQueryResult);
                         }
                         else
@@ -228,7 +228,7 @@ public class MTCQNormalFormEngine extends AbstractQueryEngine<MetricTemporalConj
                     }
                 }
             }
-            // System.out.println("Next TODO list size = " + nextTodoList.size());
+            System.out.println("Next TODO list size = " + nextTodoList.size());
             todoList = nextTodoList;
             _queryCache.invalidate();
         }

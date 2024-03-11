@@ -25,6 +25,7 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import openllet.aterm.ATerm;
 import openllet.aterm.ATermAppl;
 import openllet.atom.OpenError;
 import openllet.core.KnowledgeBase;
@@ -34,10 +35,7 @@ import openllet.core.exceptions.InternalReasonerException;
 import openllet.core.exceptions.UnsupportedQueryException;
 import openllet.core.taxonomy.Taxonomy;
 import openllet.core.taxonomy.TaxonomyNode;
-import openllet.core.utils.ATermUtils;
-import openllet.core.utils.CandidateSet;
-import openllet.core.utils.DisjointSet;
-import openllet.core.utils.Timer;
+import openllet.core.utils.*;
 import openllet.query.sparqldl.engine.QueryExec;
 import openllet.query.sparqldl.model.results.QueryResult;
 import openllet.query.sparqldl.model.results.QueryResultImpl;
@@ -80,6 +78,10 @@ public class CombinedQueryEngine implements QueryExec<ConjunctiveQuery>
 	private QueryResult _result;
 
 	private Set<ATermAppl> _downMonotonic;
+
+	private QueryResult _excludeBindings;
+
+	private QueryResult _restrictToBindings;
 
 	private void prepare(final ConjunctiveQuery query)
 	{
@@ -245,6 +247,17 @@ public class CombinedQueryEngine implements QueryExec<ConjunctiveQuery>
 		return result;
 	}
 
+	@Override
+	public QueryResult exec(ConjunctiveQuery q, QueryResult excludeBindings, QueryResult restrictToBindings)
+	{
+		_excludeBindings = excludeBindings;
+		_restrictToBindings = restrictToBindings;
+		QueryResult result = exec(q);
+		_excludeBindings = null;
+		_restrictToBindings = null;
+		return result;
+	}
+
 	/**
 	 * {@inheritDoc}
 	 */
@@ -272,54 +285,58 @@ public class CombinedQueryEngine implements QueryExec<ConjunctiveQuery>
 
 	private void exec(final ResultBinding bindingParam)
 	{
-		ResultBinding binding = bindingParam;
-
-		if (_logger.isLoggable(Level.FINE))
-			branches++;
-
-		if (!_plan.hasNext())
+		if ((_excludeBindings == null || !_excludeBindings.contains(bindingParam, true)) &&
+				(_restrictToBindings == null || _restrictToBindings.possiblyContains(bindingParam)))
 		{
-			// TODO if _result vars are not same as dist vars.
-			if (!binding.isEmpty() || _result.isEmpty())
-			{
-				if (_logger.isLoggable(Level.FINE))
-					_logger.fine("Found binding: " + binding);
-
-				if (!new HashSet<>(_result.getResultVars()).containsAll(binding.getAllVariables()))
-				{
-					final ResultBinding newBinding = new ResultBindingImpl();
-					for (final ATermAppl var : _result.getResultVars())
-					{
-						final ATermAppl value = binding.getValue(var);
-
-						newBinding.setValue(var, value);
-					}
-					binding = newBinding;
-				}
-
-				_result.add(binding);
-			}
+			ResultBinding binding = bindingParam;
 
 			if (_logger.isLoggable(Level.FINE))
-				_logger.finer("Returning ... binding=" + binding);
-			return;
+				branches++;
+
+			if (!_plan.hasNext())
+			{
+				// TODO if _result vars are not same as dist vars.
+				if (!binding.isEmpty() || _result.isEmpty())
+				{
+					if (_logger.isLoggable(Level.FINE))
+						_logger.fine("Found binding: " + binding);
+
+					if (!new HashSet<>(_result.getResultVars()).containsAll(binding.getAllVariables()))
+					{
+						final ResultBinding newBinding = new ResultBindingImpl();
+						for (final ATermAppl var : _result.getResultVars())
+						{
+							final ATermAppl value = binding.getValue(var);
+
+							newBinding.setValue(var, value);
+						}
+						binding = newBinding;
+					}
+
+					_result.add(binding);
+				}
+
+				if (_logger.isLoggable(Level.FINE))
+					_logger.finer("Returning ... binding=" + binding);
+				return;
+			}
+
+			final QueryAtom current = _plan.next(binding);
+
+			_logger.finer(() -> "Evaluating " + current);
+
+			if (current.isGround() && !current.getPredicate().equals(QueryPredicate.UndistVarCore))
+			{
+				if (QueryEngine.checkGround(current, _kb))
+					exec(binding);
+			}
+			else
+				exec(current, binding);
+
+			if (_logger.isLoggable(Level.FINE))
+				_logger.finer("Returning ... " + binding);
+			_plan.back();
 		}
-
-		final QueryAtom current = _plan.next(binding);
-
-		_logger.finer(() -> "Evaluating " + current);
-
-		if (current.isGround() && !current.getPredicate().equals(QueryPredicate.UndistVarCore))
-		{
-			if (QueryEngine.checkGround(current, _kb))
-				exec(binding);
-		}
-		else
-			exec(current, binding);
-
-		if (_logger.isLoggable(Level.FINE))
-			_logger.finer("Returning ... " + binding);
-		_plan.back();
 	}
 
 	private void exec(final QueryAtom current, final ResultBinding binding)
@@ -339,12 +356,20 @@ public class CombinedQueryEngine implements QueryExec<ConjunctiveQuery>
 				final ATermAppl tI = arguments.get(0);
 				final ATermAppl tC = arguments.get(1);
 
+				Set<ATermAppl> restrictToInstances = null;
+				if (_restrictToBindings != null && ATermUtils.isVar(tI))
+				{
+					restrictToInstances = new HashSet<>();
+					for (ResultBinding restrictToBinding : _restrictToBindings)
+						restrictToInstances.add(restrictToBinding.getValue(tI));
+				}
+
 				Set<ATermAppl> instanceCandidates = null;
 				if (tI.equals(tC))
 				{
 					instanceCandidates = _kb.getIndividualsCount() < _kb.getClasses().size() ? _kb.getIndividuals() : _kb.getClasses();
 					for (final ATermAppl ic : instanceCandidates)
-						if (direct ? _kb.getInstances(ic, direct).contains(ic) : _kb.isType(ic, ic))
+						if (direct ? _kb.getInstances(ic, direct, restrictToInstances).contains(ic) : _kb.isType(ic, ic))
 						{
 							final ResultBinding candidateBinding = binding.duplicate();
 
@@ -361,7 +386,7 @@ public class CombinedQueryEngine implements QueryExec<ConjunctiveQuery>
 					if (!ATermUtils.isVar(tC))
 					{
 						classCandidates = Collections.singleton(tC);
-						instanceCandidates = _kb.getInstances(tC, direct);
+						instanceCandidates = _kb.getInstances(tC, direct, restrictToInstances);
 					}
 					else
 						if (!ATermUtils.isVar(tI))
@@ -378,7 +403,7 @@ public class CombinedQueryEngine implements QueryExec<ConjunctiveQuery>
 					for (final ATermAppl cls : classCandidates)
 					{
 						if (loadInstances)
-							instanceCandidates = _kb.getInstances(cls, direct);
+							instanceCandidates = _kb.getInstances(cls, direct, restrictToInstances);
 						if (instanceCandidates != null)
 							for (final ATermAppl inst : instanceCandidates)
 								runNext(binding, arguments, inst, cls);
@@ -387,9 +412,19 @@ public class CombinedQueryEngine implements QueryExec<ConjunctiveQuery>
 				break;
 
 			case PropertyValue: // TODO implementation of _downMonotonic vars
+
 				final ATermAppl pvI = arguments.get(0);
 				final ATermAppl pvP = arguments.get(1);
 				final ATermAppl pvIL = arguments.get(2);
+
+				Set<Pair<ATermAppl, ATermAppl>> restrictToInstancesSubjObj = null;
+				if (_restrictToBindings != null)
+				{
+					restrictToInstancesSubjObj = new HashSet<>();
+					for (ResultBinding restrictToBinding : _restrictToBindings)
+						restrictToInstancesSubjObj.add(new Pair<>(restrictToBinding.getValue(pvI),
+								restrictToBinding.getValue(pvIL)));
+				}
 
 				Collection<ATermAppl> propertyCandidates = null;
 				Collection<ATermAppl> subjectCandidates = null;
@@ -470,10 +505,14 @@ public class CombinedQueryEngine implements QueryExec<ConjunctiveQuery>
 											continue;
 										runNext(binding, arguments, i, property, property);
 									}
-								else
+								else if (restrictToInstancesSubjObj == null)
 									for (final ATermAppl subject : _kb.getIndividuals())
 										for (final ATermAppl object : _kb.getPropertyValues(property, subject))
 											runNext(binding, arguments, subject, property, object);
+								else
+									for (final Pair<ATermAppl, ATermAppl> subjObj : restrictToInstancesSubjObj)
+										if (_kb.hasPropertyValue(subjObj.first, property, subjObj.second))
+											runNext(binding, arguments, subjObj.first, property, subjObj.second);
 					}
 					else
 						if (loadObjects)

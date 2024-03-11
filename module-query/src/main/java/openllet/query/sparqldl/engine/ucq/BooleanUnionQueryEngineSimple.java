@@ -239,4 +239,10 @@ public class BooleanUnionQueryEngineSimple extends AbstractBooleanUnionQueryEngi
         }
         return result;
     }
+
+    @Override
+    public QueryResult exec(UnionQuery q, QueryResult excludeBindings, QueryResult restrictToBindings)
+    {
+        return exec(q);
+    }
 }

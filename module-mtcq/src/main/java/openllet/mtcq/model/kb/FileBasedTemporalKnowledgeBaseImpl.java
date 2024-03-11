@@ -101,7 +101,7 @@ public class FileBasedTemporalKnowledgeBaseImpl extends ArrayList<KnowledgeBase>
                 _curKbIndex = index;
                 if (_curKb != null && _prevInds == null)
                     _prevInds = _curKb.getIndividuals();
-                else if (_curKb != null && !_curKb.getIndividuals().equals(_prevInds))
+                else if (false && _curKb != null && !_curKb.getIndividuals().equals(_prevInds))
                 {
                     Set<ATermAppl> mis1 = new HashSet<>(_prevInds);
                     Set<ATermAppl> mis2 = new HashSet<>(_curKb.getIndividuals());
@@ -245,6 +245,12 @@ public class FileBasedTemporalKnowledgeBaseImpl extends ArrayList<KnowledgeBase>
                         connected.add(vertex);
                 }
         return connected;
+    }
+
+    @Override
+    public KnowledgeBase getLastLoadedKB()
+    {
+        return _curKb;
     }
 
     protected static Collection<ATerm> computeReachableSetDirected(DefaultDirectedGraph<ATerm, DefaultEdge> graph, ATerm node)

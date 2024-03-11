@@ -258,10 +258,24 @@ public class MultiQueryResults implements QueryResult
 	@Override
 	public boolean contains(ResultBinding binding)
 	{
-		for (final QueryResult result : _queryResults)
-			if (result.contains(binding))
-				return true;
+		return contains(binding, false);
+	}
 
+	@Override
+	public boolean contains(ResultBinding binding, boolean considerPartials)
+	{
+		for (final QueryResult result : _queryResults)
+			if (result.contains(binding, considerPartials))
+				return true;
+		return false;
+	}
+
+	@Override
+	public boolean possiblyContains(ResultBinding binding)
+	{
+		for (final QueryResult result : _queryResults)
+			if (result.possiblyContains(binding))
+				return true;
 		return false;
 	}
 

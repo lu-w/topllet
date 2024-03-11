@@ -32,4 +32,6 @@ public interface QueryExec<QueryType extends Query<QueryType>>
     QueryResult exec(QueryType q, ABox abox);
 
     QueryResult exec(QueryType q, ABox abox, Timer timer);
+
+    QueryResult exec(QueryType q, QueryResult excludeBindings, QueryResult restrictToBindings);
 }

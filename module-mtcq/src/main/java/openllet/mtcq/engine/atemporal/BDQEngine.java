@@ -53,7 +53,7 @@ public class BDQEngine extends AbstractQueryEngine<MetricTemporalConjunctiveQuer
     {
         List<MetricTemporalConjunctiveQuery> disjuncts;
         if (q instanceof ConjunctiveQueryFormula cq)
-            return _cqEngine.exec(cq.getConjunctiveQuery());
+            return _cqEngine.exec(cq.getConjunctiveQuery(), excludeBindings, restrictToBindings);
         if (q instanceof OrFormula)
             disjuncts = flattenOr(q);
         else if (q instanceof NotFormula)

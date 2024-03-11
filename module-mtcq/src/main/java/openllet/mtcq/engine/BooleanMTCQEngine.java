@@ -5,6 +5,7 @@ import openllet.query.sparqldl.engine.AbstractBooleanQueryEngine;
 import openllet.query.sparqldl.engine.QueryExec;
 import openllet.query.sparqldl.engine.bcq.BCQQueryEngineSimple;
 import openllet.query.sparqldl.model.bcq.BCQQuery;
+import openllet.query.sparqldl.model.results.QueryResult;
 import openllet.shared.tools.Log;
 import openllet.mtcq.engine.automaton.MLTL2DFA;
 import openllet.mtcq.model.automaton.DFA;
@@ -167,5 +168,11 @@ public class BooleanMTCQEngine extends AbstractBooleanQueryEngine<MetricTemporal
             // No initial state -> L(A) is empty
             return false;
         }
+    }
+
+    @Override
+    public QueryResult exec(MetricTemporalConjunctiveQuery q, QueryResult excludeBindings, QueryResult restrictToBindings)
+    {
+        return exec(q);
     }
 }
