@@ -58,13 +58,18 @@ public class UnionQueryEngineSimple extends AbstractUnionQueryEngine
             return new QueryEngine().exec(q.getQueries().get(0));
         else if (OpenlletOptions.UCQ_ENGINE_USE_UNDERAPPROXIMATING_SEMANTICS)
         {
+            // TODO caching for CQ engine?
             QueryExec<ConjunctiveQuery> cqEngine = new QueryEngine();
-            QueryResult disjunctAnswers = cqEngine.exec(q.getQueries().get(0));
+            QueryResult disjunctAnswers = cqEngine.exec(q.getQueries().get(0), excludeBindings, restrictToBindings);
             for (ConjunctiveQuery disjunct : q.getQueries().subList(1, q.getQueries().size()))
-                disjunctAnswers.addAll(cqEngine.exec(disjunct));
-            QueryResult missingAnswers = disjunctAnswers.invert();
-            if (restrictToBindings != null)
-                restrictToBindings.addAll(missingAnswers);
+                disjunctAnswers.addAll(cqEngine.exec(disjunct, excludeBindings, restrictToBindings));
+            QueryResult missingAnswers;
+            if (restrictToBindings == null)
+                missingAnswers = new QueryResultImpl(q).invert();
+            else
+                missingAnswers = restrictToBindings.copy();
+            missingAnswers.removeAll(disjunctAnswers);
+            restrictToBindings = missingAnswers;
         }
         return switch (_bindingTime)
         {

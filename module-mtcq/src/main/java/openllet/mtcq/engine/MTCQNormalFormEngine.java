@@ -8,6 +8,8 @@ import openllet.mtcq.engine.rewriting.CXNFTransformer;
 import openllet.mtcq.engine.rewriting.CXNFVerifier;
 import openllet.mtcq.model.query.*;
 import openllet.query.sparqldl.engine.AbstractQueryEngine;
+import openllet.query.sparqldl.engine.QueryCache;
+import openllet.query.sparqldl.engine.cq.QueryEngine;
 import openllet.query.sparqldl.model.results.MultiQueryResults;
 import openllet.query.sparqldl.model.results.QueryResult;
 import openllet.query.sparqldl.model.results.QueryResultImpl;
@@ -18,70 +20,6 @@ import static openllet.mtcq.engine.rewriting.MTCQSimplifier.*;
 
 public class MTCQNormalFormEngine extends AbstractQueryEngine<MetricTemporalConjunctiveQuery>
 {
-    protected static class QueryCache
-    {
-        private Map<MetricTemporalConjunctiveQuery, Pair<QueryResult, QueryResult>> _cachedResults = new HashMap<>();
-
-        /**
-         *
-         * @param query
-         * @param candidates can be null (indicating everything)
-         * @param result
-         */
-        protected void add(MetricTemporalConjunctiveQuery query, QueryResult candidates, QueryResult result)
-        {
-            if (_cachedResults.containsKey(query))
-            {
-                _cachedResults.get(query).first.addAll(candidates);
-                _cachedResults.get(query).second.addAll(result);
-            }
-            else
-                _cachedResults.put(query, new Pair<>(candidates, result));
-        }
-
-        /**
-         *
-         * @param query
-         * @param candidates can be null (indicating everything)
-         * @return the cached results (first entry), and the candidates for which no cached result could be obtained
-         *         (second entry).
-         */
-        protected Pair<QueryResult, QueryResult> fetch(MetricTemporalConjunctiveQuery query, QueryResult candidates)
-        {
-            if (_cachedResults.containsKey(query))
-            {
-                QueryResult cachedCandidates = _cachedResults.get(query).first;
-                QueryResult candidatesWithNoCache;
-                if (cachedCandidates == null) // everything was cached
-                    candidatesWithNoCache = new QueryResultImpl(query);
-                else
-                {
-                    if (candidates != null)
-                    {
-                        candidatesWithNoCache = candidates.copy();
-                        candidatesWithNoCache.removeAll(cachedCandidates);
-                    }
-                    else // user wants to retrieve over all candidates, we have only cached over a subset of that
-                        candidatesWithNoCache = cachedCandidates.invert();
-                }
-                return new Pair<>(_cachedResults.get(query).second.copy(), candidatesWithNoCache);
-            }
-            else if (candidates == null)
-                return new Pair<>(new QueryResultImpl(query), new QueryResultImpl(query).invert());
-            else
-                return new Pair<>(new QueryResultImpl(query), candidates); // copy? probably not required
-        }
-
-        /**
-         * Invalidates the cache (empties it). To be called after every time step (since the cache does not store
-         * information on the temporal validity of the cached entries!).
-         */
-        protected void invalidate()
-        {
-            _cachedResults = new HashMap<>();
-        }
-    }
-
     private final BDQEngine _bdqEngine = new BDQEngine();
     private final QueryCache _queryCache = new QueryCache();
 
@@ -231,6 +169,7 @@ public class MTCQNormalFormEngine extends AbstractQueryEngine<MetricTemporalConj
             System.out.println("Next TODO list size = " + nextTodoList.size());
             todoList = nextTodoList;
             _queryCache.invalidate();
+            QueryEngine.getCache().invalidate();
         }
 
         // adds empty query result for all things still in to-do list (they exceeded the trace length)

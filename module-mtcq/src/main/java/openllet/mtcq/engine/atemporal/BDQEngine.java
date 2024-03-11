@@ -185,8 +185,6 @@ public class BDQEngine extends AbstractQueryEngine<MetricTemporalConjunctiveQuer
                 result = new QueryResultImpl(query).invert();
             else
                 result = restrictToBindings.copy();
-        if (excludeBindings != null)
-            result.removeAll(excludeBindings);
         return result;
     }
 

@@ -32,10 +32,8 @@ import openllet.core.boxes.rbox.Role;
 import openllet.core.datatypes.DatatypeReasoner;
 import openllet.core.datatypes.exceptions.DatatypeReasonerException;
 import openllet.core.exceptions.InternalReasonerException;
-import openllet.core.utils.ATermUtils;
-import openllet.core.utils.Bool;
-import openllet.core.utils.SetUtils;
-import openllet.core.utils.Timer;
+import openllet.core.utils.*;
+import openllet.query.sparqldl.engine.QueryCache;
 import openllet.query.sparqldl.engine.QueryExec;
 import openllet.query.sparqldl.model.results.MultiQueryResults;
 import openllet.query.sparqldl.model.cq.NotKnownQueryAtom;
@@ -66,6 +64,7 @@ import openllet.shared.tools.Log;
 public class QueryEngine implements QueryExec<ConjunctiveQuery>
 {
 	public static Logger _logger = Log.getLogger(QueryEngine.class);
+	private final static QueryCache _cache = new QueryCache();
 
 	public static CoreStrategy STRATEGY = CoreStrategy.ALLFAST;
 
@@ -128,47 +127,59 @@ public class QueryEngine implements QueryExec<ConjunctiveQuery>
 	public static QueryResult execQuery(final ConjunctiveQuery query, QueryResult excludeBindings,
 										QueryResult restrictToBindings)
 	{
-		if (query.getAtoms().isEmpty())
+		Pair<QueryResult, QueryResult> cachedResults = _cache.fetch(query, restrictToBindings);
+		QueryResult result = cachedResults.first;
+		QueryResult candidates = cachedResults.second;
+
+		if (!candidates.isEmpty())
 		{
-			final QueryResultImpl results = new QueryResultImpl(query);
-			results.add(new ResultBindingImpl());
-			return results;
-		}
-		query.getKB().ensureConsistency();
-
-		// PREPROCESSING
-		_logger.fine(() -> "Preprocessing:\n" + query);
-		final ConjunctiveQuery preprocessed = preprocess(query);
-
-		// SIMPLIFICATION
-		if (OpenlletOptions.SIMPLIFY_QUERY)
-		{
-			_logger.fine(() -> "Simplifying:\n" + preprocessed);
-
-			simplify(preprocessed);
-		}
-
-		// SPLITTING
-		_logger.fine(() -> "Splitting:\n" + preprocessed);
-
-		final List<ConjunctiveQuery> queries = split(preprocessed);
-
-		QueryResult r = null;
-		if (queries.isEmpty())
-			throw new InternalReasonerException("Splitting query returned no results!");
-		else
-			if (queries.size() == 1)
-				r = execSingleQuery(queries.get(0), excludeBindings, restrictToBindings);
-			else
+			if (query.getAtoms().isEmpty())
 			{
-				final List<QueryResult> results = new ArrayList<>(queries.size());
-				for (final ConjunctiveQuery q : queries)
-					results.add(execSingleQuery(q, excludeBindings, restrictToBindings));
+				final QueryResultImpl results = new QueryResultImpl(query);
+				results.add(new ResultBindingImpl());
+				return results;
+			}
+			query.getKB().ensureConsistency();
 
-				r = new MultiQueryResults(query.getResultVars(), results);
+			// PREPROCESSING
+			_logger.fine(() -> "Preprocessing:\n" + query);
+			final ConjunctiveQuery preprocessed = preprocess(query);
+
+			// SIMPLIFICATION
+			if (OpenlletOptions.SIMPLIFY_QUERY)
+			{
+				_logger.fine(() -> "Simplifying:\n" + preprocessed);
+
+				simplify(preprocessed);
 			}
 
-		return r;
+			// SPLITTING
+			_logger.fine(() -> "Splitting:\n" + preprocessed);
+
+			final List<ConjunctiveQuery> queries = split(preprocessed);
+
+			if (queries.isEmpty())
+				throw new InternalReasonerException("Splitting query returned no results!");
+			else
+				if (queries.size() == 1)
+					result = execSingleQuery(queries.get(0), excludeBindings, candidates);
+				else
+				{
+					final List<QueryResult> results = new ArrayList<>(queries.size());
+					for (final ConjunctiveQuery q : queries)
+						results.add(execSingleQuery(q, excludeBindings, candidates));
+
+					result = new MultiQueryResults(query.getResultVars(), results);
+				}
+			_cache.add(query, candidates, result);
+		}
+
+		return result;
+	}
+
+	public static QueryCache getCache()
+	{
+		return _cache;
 	}
 
 	private static boolean isObjectProperty(final ATermAppl t, final KnowledgeBase kb)
