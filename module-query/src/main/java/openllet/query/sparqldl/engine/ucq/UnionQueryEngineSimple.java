@@ -57,18 +57,18 @@ public class UnionQueryEngineSimple extends AbstractUnionQueryEngine
         if (q.getQueries().isEmpty())
             return new QueryResultImpl(q);
         else if (q.getQueries().size() == 1)
-            return new QueryEngine().exec(q.getQueries().get(0));
+            return new QueryEngine().exec(q.getQueries().get(0), excludeBindings, restrictToBindings);
         // If all disjuncts are over separate result variables, we can safely check them separately by CQ answering.
         boolean isOverDisjointResultVars = q.isOverDisjointResultVars();
         if (OpenlletOptions.UCQ_ENGINE_USE_UNDERAPPROXIMATING_SEMANTICS || isOverDisjointResultVars)
         {
             QueryExec<ConjunctiveQuery> cqEngine = new QueryEngine();
-            cqEngineResults = cqEngine.exec(q.getQueries().get(0), null, restrictToBindings);
+            cqEngineResults = cqEngine.exec(q.getQueries().get(0), excludeBindings, restrictToBindings);
             cqEngineResults.expandToAllVariables(q.getResultVars());
             for (ConjunctiveQuery disjunct : q.getQueries().subList(1, q.getQueries().size()))
             {
                 // TODO remove cqEngineResults from restrictToBindings
-                QueryResult cqAnswer = cqEngine.exec(disjunct, null, restrictToBindings);
+                QueryResult cqAnswer = cqEngine.exec(disjunct, excludeBindings, restrictToBindings);
                 cqAnswer.expandToAllVariables(q.getResultVars());
                 cqEngineResults.addAll(cqAnswer);
             }
