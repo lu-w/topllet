@@ -22,11 +22,11 @@ public class QueryCache
     {
         if (_cachedResults.containsKey(query))
         {
-            _cachedResults.get(query).first.addAll(candidates);
-            _cachedResults.get(query).second.addAll(result);
+            _cachedResults.get(query).first.addAll(candidates.copy());
+            _cachedResults.get(query).second.addAll(result.copy());
         }
         else
-            _cachedResults.put(query, new Pair<>(candidates, result));
+            _cachedResults.put(query, new Pair<>(candidates.copy(), result.copy()));
     }
 
     /**
@@ -59,7 +59,7 @@ public class QueryCache
         else if (candidates == null)
             return new Pair<>(new QueryResultImpl(query), new QueryResultImpl(query).invert());
         else
-            return new Pair<>(new QueryResultImpl(query), candidates); // copy? probably not required
+            return new Pair<>(new QueryResultImpl(query), candidates.copy());
     }
 
     /**

@@ -442,7 +442,7 @@ public class OpenlletOptions
 	 * The UCQ engine can check whether all the disjuncts are entailed separately. If this is the case, it can return
 	 * true directly, otherwise it has to run the expensive full semantics check.
 	 */
-	public static boolean UCQ_ENGINE_USE_UNDERAPPROXIMATING_SEMANTICS = false;
+	public static boolean UCQ_ENGINE_USE_UNDERAPPROXIMATING_SEMANTICS = true;
 
 	/**
 	 * The UCQ engine can check whether all the disjuncts are entailed separately. If this is the case, it can return

@@ -266,7 +266,7 @@ public interface ClassesBase extends MessageBase, Logging, Base
 	 */
 	default boolean isType(final List<Pair<ATermAppl, ATermAppl>> xcs) {
 
-		if (xcs.size() == 0)
+		if (xcs.isEmpty())
 			return false;
 
 		for (Pair<ATermAppl, ATermAppl> p : xcs)

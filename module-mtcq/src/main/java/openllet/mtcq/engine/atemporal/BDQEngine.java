@@ -51,9 +51,14 @@ public class BDQEngine extends AbstractQueryEngine<MetricTemporalConjunctiveQuer
     protected QueryResult execABoxQuery(MetricTemporalConjunctiveQuery q, QueryResult excludeBindings,
                                         QueryResult restrictToBindings)
     {
+        System.out.println("Execing " + q + " over candidates # " + restrictToBindings.size());
+
         List<MetricTemporalConjunctiveQuery> disjuncts;
         if (q instanceof ConjunctiveQueryFormula cq)
+        {
+            System.out.println(" ... by CQ answering");
             return _cqEngine.exec(cq.getConjunctiveQuery(), excludeBindings, restrictToBindings);
+        }
         if (q instanceof OrFormula)
             disjuncts = flattenOr(q);
         else if (q instanceof NotFormula)
@@ -147,6 +152,7 @@ public class BDQEngine extends AbstractQueryEngine<MetricTemporalConjunctiveQuer
                                            UnionQuery positiveDisjuncts, QueryResult excludeBindings,
                                            QueryResult restrictToBindings)
     {
+        System.out.println(" ... by UCQ answering");
         // 1. PRELIMINARY CONSISTENCY CHECK
         positiveDisjuncts.getKB().ensureConsistency();
 

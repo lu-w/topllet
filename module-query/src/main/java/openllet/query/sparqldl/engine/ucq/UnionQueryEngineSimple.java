@@ -52,30 +52,43 @@ public class UnionQueryEngineSimple extends AbstractUnionQueryEngine
     @Override
     protected QueryResult execABoxQuery(UnionQuery q, QueryResult excludeBindings, QueryResult restrictToBindings)
     {
+        QueryResult cqEngineResults = null;
+        QueryResult candidates = restrictToBindings;
         if (q.getQueries().isEmpty())
             return new QueryResultImpl(q);
         else if (q.getQueries().size() == 1)
             return new QueryEngine().exec(q.getQueries().get(0));
-        else if (OpenlletOptions.UCQ_ENGINE_USE_UNDERAPPROXIMATING_SEMANTICS)
+        // If all disjuncts are over separate result variables, we can safely check them separately by CQ answering.
+        boolean isOverDisjointResultVars = q.isOverDisjointResultVars();
+        if (OpenlletOptions.UCQ_ENGINE_USE_UNDERAPPROXIMATING_SEMANTICS || isOverDisjointResultVars)
         {
-            // TODO caching for CQ engine?
             QueryExec<ConjunctiveQuery> cqEngine = new QueryEngine();
-            QueryResult disjunctAnswers = cqEngine.exec(q.getQueries().get(0), excludeBindings, restrictToBindings);
+            cqEngineResults = cqEngine.exec(q.getQueries().get(0), null, restrictToBindings);
+            cqEngineResults.expandToAllVariables(q.getResultVars());
             for (ConjunctiveQuery disjunct : q.getQueries().subList(1, q.getQueries().size()))
-                disjunctAnswers.addAll(cqEngine.exec(disjunct, excludeBindings, restrictToBindings));
-            QueryResult missingAnswers;
-            if (restrictToBindings == null)
-                missingAnswers = new QueryResultImpl(q).invert();
-            else
-                missingAnswers = restrictToBindings.copy();
-            missingAnswers.removeAll(disjunctAnswers);
-            restrictToBindings = missingAnswers;
+            {
+                // TODO remove cqEngineResults from restrictToBindings
+                QueryResult cqAnswer = cqEngine.exec(disjunct, null, restrictToBindings);
+                cqAnswer.expandToAllVariables(q.getResultVars());
+                cqEngineResults.addAll(cqAnswer);
+            }
+            candidates = restrictToBindings.copy();
+            candidates.removeAll(cqEngineResults);
         }
-        return switch (_bindingTime)
+        QueryResult result;
+        if (isOverDisjointResultVars)
+            result = cqEngineResults;
+        else
         {
-            case BEFORE_CNF -> execABoxQueryBindingBeforeCNF(q, excludeBindings, restrictToBindings);
-            case AFTER_CNF -> execABoxQueryBindingAfterCNF(q, excludeBindings, restrictToBindings);
-        };
+            result = switch (_bindingTime)
+            {
+                case BEFORE_CNF -> execABoxQueryBindingBeforeCNF(q, excludeBindings, candidates);
+                case AFTER_CNF -> execABoxQueryBindingAfterCNF(q, excludeBindings, candidates);
+            };
+            if (cqEngineResults != null)
+                result.addAll(cqEngineResults);
+        }
+        return result;
     }
 
     protected QueryResult execABoxQueryBindingBeforeCNF(UnionQuery q, QueryResult excludeBindings,

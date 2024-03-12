@@ -153,7 +153,6 @@ public class QueryResultImpl implements QueryResult
 				_maxSize = -1;
 				explicate();
 			}
-			//_resultVars = new HashSet<>(variables); // TODO this seems not required anymore?
 		}
 	}
 
