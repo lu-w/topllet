@@ -18,6 +18,7 @@ import openllet.mtcq.parser.MetricTemporalConjunctiveQueryParser;
 import org.apache.jena.atlas.RuntimeIOException;
 import org.apache.jena.query.*;
 import org.apache.jena.shared.NotFoundException;
+import org.semanticweb.owlapi.model.OWLAxiom;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -48,9 +49,6 @@ public class OpenlletTemporalQuery extends OpenlletCmdApp
     {
         TABULAR, XML, JSON
     }
-
-    // TODO: remove input format from options (maybe a posteriori remove()?)
-    // TODO: what about ignore imports in options?
 
     @Override
     public String getAppId()

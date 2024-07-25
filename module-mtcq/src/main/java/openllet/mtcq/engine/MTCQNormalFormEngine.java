@@ -64,12 +64,12 @@ public class MTCQNormalFormEngine extends AbstractQueryEngine<MetricTemporalConj
             for (ToDo todo : todoList)
             {
                 QueryResult candidates = todo.candidates;
-                System.out.println("Answering at time " + t + " query: " + todo.query.toPropositionalAbstractionString());
                 MetricTemporalConjunctiveQuery transformed = CXNFTransformer.transform(todo.query);
+                System.out.println("Answering at time " + t + " query: " + transformed.toPropositionalAbstractionString());
                 CXNFVerifier verifier = new CXNFVerifier();
                 if (!verifier.verify(transformed))
-                    throw new RuntimeException("Unexpected: After transformation, MTCQ is not in normal form. Reason is: " +
-                            verifier.getReason());
+                    throw new RuntimeException("Unexpected: After transformation, MTCQ is not in normal form. " +
+                            "Reason is: " + verifier.getReason());
 
                 // System.out.println("Transformed to: " + transformed.toPropositionalAbstractionString());
                 List<MetricTemporalConjunctiveQuery> flattenedCNF = sort(flattenAnd(transformed));

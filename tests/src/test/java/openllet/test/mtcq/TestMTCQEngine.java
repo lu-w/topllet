@@ -175,6 +175,15 @@ public class TestMTCQEngine extends AbstractMTCQTest
     }
 
     @Test
+    public void testEventuallyDisjunction()
+    {
+        simpleTKB4();
+        testQuery("(A(?x) | B(?x))", new ATermAppl[][] { { _a } });
+        testQuery("F(A(?x) & X[!] (B(?x)))", new ATermAppl[][] { { _a } });
+        testQuery("A(?x) & X[!] (B(?x))");
+    }
+
+    @Test
     public void testNotEntailedAndNegationNotEntailedQuery()
     {
         fillSimpleTKB(2);
