@@ -59,19 +59,6 @@ public class InMemoryTemporalKnowledgeBaseImpl extends ArrayList<KnowledgeBase> 
         if (this.size() > 0 && kb != null)
         {
             KnowledgeBase prevKb = this.get(this.size() - 1);
-            if (!kb.getIndividuals().equals(prevKb.getIndividuals()))
-            {
-                Set<ATermAppl> mis1 = new HashSet<>(prevKb.getIndividuals());
-                Set<ATermAppl> mis2 = new HashSet<>(kb.getIndividuals());
-                mis1.removeAll(kb.getIndividuals());
-                mis2.removeAll(prevKb.getIndividuals());
-                throw new RuntimeException("Individuals of ABox base at time " + this.size() + " and " +
-                        "previously added one do not match." +
-                        (!mis2.isEmpty() ? " " + mis2.size() +
-                                " individuals present in new ABox but not in previous: " + mis2 + "." : "") +
-                        (!mis1.isEmpty() ? " " + mis1.size() +
-                                " individuals present in previous ABox but not in new: " + mis1 + "." : ""));
-            }
             if (kb.getExpressivity().hasNominal())
             {
                 throw new RuntimeException("Nominals are not allowed in components TKBs.");
