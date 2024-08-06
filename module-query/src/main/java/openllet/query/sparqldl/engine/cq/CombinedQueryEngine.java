@@ -63,6 +63,8 @@ import openllet.shared.tools.Log;
  */
 public class CombinedQueryEngine implements QueryExec<ConjunctiveQuery>
 {
+	public static long calls = 0;
+
 	public static final Logger _logger = Log.getLogger(CombinedQueryEngine.class);
 
 	public static final QueryOptimizer _optimizer = new QueryOptimizer();
@@ -267,6 +269,7 @@ public class CombinedQueryEngine implements QueryExec<ConjunctiveQuery>
 		if (!supports(q))
 			throw new UnsupportedOperationException("Unsupported query " + q);
 
+		calls++;
 		_logger.fine(() -> "Executing query " + q);
 
 		final Timer timer = new Timer("CombinedQueryEngine");
