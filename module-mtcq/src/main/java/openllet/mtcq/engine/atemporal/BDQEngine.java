@@ -179,7 +179,10 @@ public class BDQEngine extends AbstractQueryEngine<MetricTemporalConjunctiveQuer
             if (!query.isEmpty())
                 result = _ucqEngine.exec(query, excludeBindings, restrictToBindings);
             else
+            {
+                BooleanUnionQueryEngineSimple.calls++;
                 result = new QueryResultImpl(query);
+            }
         }
         else
         {
