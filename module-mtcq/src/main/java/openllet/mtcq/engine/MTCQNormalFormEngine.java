@@ -226,7 +226,9 @@ public class MTCQNormalFormEngine extends AbstractQueryEngine<MetricTemporalConj
         if (!candidates.isEmpty())
         {
             QueryResult newResult;
+            _timer.stop(); // timer shall not consider loading of KBs
             KnowledgeBase kb = q.getTemporalKB().get(timePoint);
+            _timer.start();
             List<MetricTemporalConjunctiveQuery> cleanDisjuncts = new ArrayList<>();
             for (MetricTemporalConjunctiveQuery disjunct : flattenOr(q))
             {
