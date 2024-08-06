@@ -60,11 +60,7 @@ public class BDQEngine extends AbstractQueryEngine<MetricTemporalConjunctiveQuer
         if (q instanceof ConjunctiveQueryFormula cq)
         {
             cqCalls++;
-            System.out.println("CALLING CQ ENGINE ON " + q + " - " + restrictToBindings.size());
-            if (restrictToBindings != null)
-                cqCandidates += restrictToBindings.size();
-            else
-                cqCandidates += new QueryResultImpl(q).getMaxSize();
+            cqCandidates += restrictToBindings.size();
             return _cqEngine.exec(cq.getConjunctiveQuery(), excludeBindings, restrictToBindings);
         }
         if (q instanceof OrFormula)
