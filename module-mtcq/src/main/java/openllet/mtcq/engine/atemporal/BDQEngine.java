@@ -8,6 +8,7 @@ import openllet.query.sparqldl.engine.AbstractQueryEngine;
 import openllet.query.sparqldl.engine.QueryBindingCandidateGenerator;
 import openllet.query.sparqldl.engine.QueryResultBasedBindingCandidateGenerator;
 import openllet.query.sparqldl.engine.cq.QueryEngine;
+import openllet.query.sparqldl.engine.ucq.BooleanUnionQueryEngineSimple;
 import openllet.query.sparqldl.engine.ucq.UnionQueryEngineSimple;
 import openllet.query.sparqldl.model.AtomQuery;
 import openllet.query.sparqldl.model.cq.ConjunctiveQuery;
@@ -181,12 +182,15 @@ public class BDQEngine extends AbstractQueryEngine<MetricTemporalConjunctiveQuer
                 result = new QueryResultImpl(query);
         }
         else
+        {
+            BooleanUnionQueryEngineSimple.calls++;
             if (restrictToBindings == null)
-            // If the ABox is inconsistent, we have put query atom from the negative part into the ABox causing this
-            // -> an inconsistent knowledge base means that the query is entailed already by the negative disjuncts.
+                // If the ABox is inconsistent, we have put query atom from the negative part into the ABox causing this
+                // -> an inconsistent knowledge base means that the query is entailed already by the negative disjuncts.
                 result = new QueryResultImpl(query).invert();
             else
                 result = restrictToBindings.copy();
+        }
         return result;
     }
 
