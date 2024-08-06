@@ -27,7 +27,7 @@ public class MTCQTransformerTest extends AbstractMTCQTest
         simpleTKB();
         testTransformation(
                 "!X[!](A(a) | ((B(b)) & (C(c))))",
-                "(last) | (X[!] ((!(A(a))) & ((!(B(b))) | (!(C(c))))))"
+                "(last) | (X[!] (!((A(a)) | ((B(b)) & (C(c))))))"
         );
     }
 
@@ -87,7 +87,7 @@ public class MTCQTransformerTest extends AbstractMTCQTest
         simpleTKB();
         testTransformation(
                 "X[!] (A(a)) | (X[!] (B(b)) | (X[!] ( C(c) | X[!] D(d))))",
-                "X[!] ((X[!] (D(d))) | (((B(b)) | (A(a))) | (C(c))))"
+                "X[!] (((B(b)) | (A(a))) | ((C(c)) | (X[!] (D(d)))))"
         );
     }
 
@@ -139,6 +139,20 @@ public class MTCQTransformerTest extends AbstractMTCQTest
         testTransformation(
                 "((s(?x,?r1)) | (s(?y,c))) | (((last) | (!(s(?x,?r1)))) | (X[!] (s(?x,?r2))))",
                 "(X[!] (s(?x,?r2))) | (((s(?x,?r1)) | (s(?y,c))) | ((last) | (!(s(?x,?r1)))))"
+        );
+    }
+
+    @Test
+    public void testUntilInEventually()
+    {
+        useCaseTKBPassingParkingVehicles(false);
+        testTransformation(
+                "F (D(?x) U E(?x))",
+                "(E(?x)) | (X[!] (F (E(?x))))"
+        );
+        testTransformation(
+                "F (D(?x) U_[2,4] E(?x))",
+                "X[!] (F_[1,1](F (E(?x))))"
         );
     }
 }

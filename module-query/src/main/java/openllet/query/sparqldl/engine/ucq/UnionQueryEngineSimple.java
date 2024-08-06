@@ -64,16 +64,23 @@ public class UnionQueryEngineSimple extends AbstractUnionQueryEngine
         {
             QueryExec<ConjunctiveQuery> cqEngine = new QueryEngine();
             cqEngineResults = cqEngine.exec(q.getQueries().get(0), excludeBindings, restrictToBindings);
+            if (cqEngineResults instanceof MultiQueryResults mqr)
+                cqEngineResults = mqr.toQueryResultImpl(q.getQueries().get(0));
             cqEngineResults.expandToAllVariables(q.getResultVars());
             for (ConjunctiveQuery disjunct : q.getQueries().subList(1, q.getQueries().size()))
             {
                 // TODO remove cqEngineResults from restrictToBindings
                 QueryResult cqAnswer = cqEngine.exec(disjunct, excludeBindings, restrictToBindings);
+                if (cqAnswer instanceof MultiQueryResults mqr)
+                    cqAnswer = mqr.toQueryResultImpl(disjunct);
                 cqAnswer.expandToAllVariables(q.getResultVars());
                 cqEngineResults.addAll(cqAnswer);
             }
-            candidates = restrictToBindings.copy();
-            candidates.removeAll(cqEngineResults);
+            if (restrictToBindings != null)
+            {
+                candidates = restrictToBindings.copy();
+                candidates.removeAll(cqEngineResults);
+            }
         }
         QueryResult result;
         if (isOverDisjointResultVars)

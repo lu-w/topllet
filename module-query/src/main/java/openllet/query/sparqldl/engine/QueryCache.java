@@ -2,6 +2,7 @@ package openllet.query.sparqldl.engine;
 
 import openllet.core.utils.Pair;
 import openllet.query.sparqldl.model.Query;
+import openllet.query.sparqldl.model.results.MultiQueryResults;
 import openllet.query.sparqldl.model.results.QueryResult;
 import openllet.query.sparqldl.model.results.QueryResultImpl;
 
@@ -20,6 +21,8 @@ public class QueryCache
      */
     public void add(Query<?> query, QueryResult candidates, QueryResult result)
     {
+        if (result instanceof MultiQueryResults mqr)
+            result = mqr.toQueryResultImpl(query);
         if (_cachedResults.containsKey(query))
         {
             _cachedResults.get(query).first.addAll(candidates.copy());

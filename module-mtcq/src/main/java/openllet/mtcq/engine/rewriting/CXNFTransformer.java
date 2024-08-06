@@ -24,6 +24,7 @@ public class CXNFTransformer implements MTCQVisitor
             mtcq = formula;
             CXNFTransformer transformer;
             MTCQSimplifier simplifier = new MTCQSimplifier();
+            mtcq = simplifier.transform(mtcq);
             do
             {
                 transformer = new CXNFTransformer();
@@ -389,7 +390,6 @@ public class CXNFTransformer implements MTCQVisitor
     {
         if (!_isInsideNext)
         {
-
             if (formula.getLowerBound() == 0 && formula.getUpperBound() > 0)
                 _newFormula = run(new AndFormula(formula.getTemporalKB(), formula.isDistinct(),
                         formula.getSubFormula(),

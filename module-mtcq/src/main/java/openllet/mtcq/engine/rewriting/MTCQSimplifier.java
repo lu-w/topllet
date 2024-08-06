@@ -377,13 +377,35 @@ public class MTCQSimplifier extends StandardTransformer
             super.visit(formula);
     }
 
+    @Override
+    public void visit(EventuallyFormula formula)
+    {
+        if (formula.getSubFormula() instanceof UntilFormula sub)
+        {
+            _newFormula = run(new EventuallyFormula(formula.getTemporalKB(), formula.isDistinct(),
+                    sub.getRightSubFormula()));
+            appliedTransformationRule("EVENTUALLY_UNTIL");
+        }
+        else if (formula.getSubFormula() instanceof BoundedUntilFormula sub)
+        {
+            _newFormula = run(
+                    new BoundedEventuallyFormula(formula.getTemporalKB(), formula.isDistinct(),
+                            new EventuallyFormula(formula.getTemporalKB(), formula.isDistinct(),
+                                    sub.getRightSubFormula()),
+                            sub.getLowerBound(), sub.getLowerBound())
+            );
+            appliedTransformationRule("EVENTUALLY_BOUNDED_UNTIL");
+        }
+        else
+            super.visit(formula);
+    }
+
+
     // TODO
-    //  - F_[0,0] a -> a
     //  - X a & X b -> X (a & b)
     //  - F(a) | F(b & Fa) -> Fa
     //  - a | Fa -> Fa
     //  - a & Fa -> a
-    //  - F(a U b) -> Fb
     //  think whether other temporal simplification would also make sense. maybe only for X?
     //  - (X a) U (X b) -> X (a U b)
     //  - (X a) R (X b) -> X (a R b)
