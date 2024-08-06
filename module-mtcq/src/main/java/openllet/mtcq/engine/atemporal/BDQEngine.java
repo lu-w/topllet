@@ -31,6 +31,8 @@ public class BDQEngine extends AbstractQueryEngine<MetricTemporalConjunctiveQuer
     private final QueryEngine _cqEngine = new QueryEngine();
     private Map<ATermAppl, ATermAppl> _queryVarsToFreshInds = new HashMap<>();
     private ABoxChanges _changes;
+    public static long cqCalls = 0;
+    public static long cqCandidates = 0;
 
     @Override
     public boolean supports(MetricTemporalConjunctiveQuery q)
@@ -56,7 +58,15 @@ public class BDQEngine extends AbstractQueryEngine<MetricTemporalConjunctiveQuer
 
         List<MetricTemporalConjunctiveQuery> disjuncts;
         if (q instanceof ConjunctiveQueryFormula cq)
+        {
+            cqCalls++;
+            System.out.println("CALLING CQ ENGINE ON " + q + " - " + restrictToBindings.size());
+            if (restrictToBindings != null)
+                cqCandidates += restrictToBindings.size();
+            else
+                cqCandidates += new QueryResultImpl(q).getMaxSize();
             return _cqEngine.exec(cq.getConjunctiveQuery(), excludeBindings, restrictToBindings);
+        }
         if (q instanceof OrFormula)
             disjuncts = flattenOr(q);
         else if (q instanceof NotFormula)

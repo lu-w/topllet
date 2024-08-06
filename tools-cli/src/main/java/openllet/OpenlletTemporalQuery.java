@@ -6,6 +6,7 @@ import openllet.core.exceptions.InconsistentOntologyException;
 import openllet.core.output.TableData;
 import openllet.core.utils.Timer;
 import openllet.mtcq.engine.MTCQNormalFormEngine;
+import openllet.mtcq.engine.atemporal.BDQEngine;
 import openllet.query.sparqldl.engine.QueryExec;
 import openllet.query.sparqldl.engine.cq.CombinedQueryEngine;
 import openllet.query.sparqldl.engine.ucq.BooleanUnionQueryEngineSimple;
@@ -136,7 +137,8 @@ public class OpenlletTemporalQuery extends OpenlletCmdApp
         execQuery();
         printQueryResults();
         System.out.println("Number of UCQ entailment checks: " + BooleanUnionQueryEngineSimple.calls);
-        System.out.println("Number of CQ answer calls: " + CombinedQueryEngine.calls);
+        System.out.println("Number of CQ answer calls: " + BDQEngine.cqCalls);
+        System.out.println("Number of CQ candidates: " + BDQEngine.cqCandidates);
     }
 
     public void setQueryFile(final String s)
