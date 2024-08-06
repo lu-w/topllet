@@ -36,6 +36,8 @@ public class BooleanUnionQueryEngineSimple extends AbstractBooleanUnionQueryEngi
 {
     public static final Logger _logger = Log.getLogger(BooleanUnionQueryEngineSimple.class);
 
+    public static long calls = 0;
+
     @Override
     protected boolean execBooleanABoxQuery(CNFQuery q, ABox abox)
     {
@@ -111,6 +113,7 @@ public class BooleanUnionQueryEngineSimple extends AbstractBooleanUnionQueryEngi
      */
     private boolean isEntailed(CNFQuery cnfQuery, KnowledgeBase kb)
     {
+        calls++;
         boolean isEntailed = true;
         // Query is entailed iff. all conjuncts are entailed
         for (DisjunctiveQuery disjunctiveQuery : cnfQuery.getQueries())

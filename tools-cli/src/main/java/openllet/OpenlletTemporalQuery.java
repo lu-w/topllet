@@ -7,6 +7,7 @@ import openllet.core.output.TableData;
 import openllet.core.utils.Timer;
 import openllet.mtcq.engine.MTCQNormalFormEngine;
 import openllet.query.sparqldl.engine.QueryExec;
+import openllet.query.sparqldl.engine.ucq.BooleanUnionQueryEngineSimple;
 import openllet.query.sparqldl.model.results.QueryResult;
 import openllet.query.sparqldl.model.results.ResultBinding;
 import openllet.mtcq.engine.MTCQEngine;
@@ -133,6 +134,7 @@ public class OpenlletTemporalQuery extends OpenlletCmdApp
         loadQuery();
         execQuery();
         printQueryResults();
+        System.out.println("Number of UCQ entailment checks: " + BooleanUnionQueryEngineSimple.calls);
     }
 
     public void setQueryFile(final String s)
