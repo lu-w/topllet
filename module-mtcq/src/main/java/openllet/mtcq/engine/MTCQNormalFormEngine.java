@@ -226,9 +226,11 @@ public class MTCQNormalFormEngine extends AbstractQueryEngine<MetricTemporalConj
         if (!candidates.isEmpty())
         {
             QueryResult newResult;
-            _timer.stop(); // timer shall not consider loading of KBs
+            if (_timer != null)
+                _timer.stop(); // timer shall not consider loading of KBs
             KnowledgeBase kb = q.getTemporalKB().get(timePoint);
-            _timer.start();
+            if (_timer != null)
+                _timer.start();
             List<MetricTemporalConjunctiveQuery> cleanDisjuncts = new ArrayList<>();
             for (MetricTemporalConjunctiveQuery disjunct : flattenOr(q))
             {
@@ -249,7 +251,7 @@ public class MTCQNormalFormEngine extends AbstractQueryEngine<MetricTemporalConj
             {
                 OrFormula orFormula = makeOr(cleanDisjuncts);
                 orFormula.setKB(kb);  // TODO fix correct setting of KB in makeOr()
-                newResult = _bdqEngine.exec(orFormula, null, candidates);
+                newResult = _bdqEngine.execABoxQuery(orFormula, null, candidates);
             }
             else if (cleanDisjuncts.size() == 1)
             {
@@ -258,7 +260,7 @@ public class MTCQNormalFormEngine extends AbstractQueryEngine<MetricTemporalConj
                         one instanceof EmptyFormula)
                     newResult = new QueryResultImpl(one);
                 else
-                    newResult = _bdqEngine.exec(one, null, candidates);
+                    newResult = _bdqEngine.execABoxQuery(one, null, candidates);
             }
             else
                 // we have a formula of the form "last v end v last v false v false ..." and are not at last or end point.
