@@ -36,7 +36,6 @@ public class BooleanUnionQueryEngineSimple extends AbstractBooleanUnionQueryEngi
     public static final Logger _logger = Log.getLogger(BooleanUnionQueryEngineSimple.class);
 
     public static long calls = 0;
-    public static Timer ucqTimer = new Timer();
 
     @Override
     protected boolean execBooleanABoxQuery(CNFQuery q, ABox abox)
@@ -114,7 +113,6 @@ public class BooleanUnionQueryEngineSimple extends AbstractBooleanUnionQueryEngi
     private boolean isEntailed(CNFQuery cnfQuery, KnowledgeBase kb)
     {
         calls++;
-        ucqTimer.start();
         boolean isEntailed = true;
         // Query is entailed iff. all conjuncts are entailed
         for (DisjunctiveQuery disjunctiveQuery : cnfQuery.getQueries())
@@ -211,7 +209,6 @@ public class BooleanUnionQueryEngineSimple extends AbstractBooleanUnionQueryEngi
             if (!isEntailed) // Early break if we find that the query can not be entailed anymore.
                 break;
         }
-        ucqTimer.stop();
         return isEntailed;
     }
 

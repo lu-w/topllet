@@ -35,6 +35,7 @@ public class BDQEngine extends AbstractQueryEngine<MetricTemporalConjunctiveQuer
     public static long cqCalls = 0;
     public static long cqCandidates = 0;
     public static Timer cqTimer = new Timer();
+    public static Timer ucqTimer = new Timer();
 
     @Override
     public boolean supports(MetricTemporalConjunctiveQuery q)
@@ -92,6 +93,7 @@ public class BDQEngine extends AbstractQueryEngine<MetricTemporalConjunctiveQuer
             positiveDisjuncts.removeResultVar(answerVarInNegation);
 
         QueryResult result;
+        ucqTimer.start();
         if (negativeDisjuncts.isEmpty())
             result = execSemiBooleanBDQ(List.of(), positiveDisjuncts, excludeBindings, restrictToBindings);
         else
@@ -154,6 +156,7 @@ public class BDQEngine extends AbstractQueryEngine<MetricTemporalConjunctiveQuer
             _bindingGenerator.doNotExcludeBindings();
             _bindingGenerator.doNotRestrictToBindings();
         }
+        ucqTimer.stop();
         return result;
     }
 
