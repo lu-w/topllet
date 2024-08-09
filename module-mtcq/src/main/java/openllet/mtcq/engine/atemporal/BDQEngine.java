@@ -3,6 +3,7 @@ package openllet.mtcq.engine.atemporal;
 import openllet.aterm.ATermAppl;
 import openllet.core.boxes.abox.ABoxChanges;
 import openllet.core.utils.Bool;
+import openllet.core.utils.Timer;
 import openllet.mtcq.model.query.*;
 import openllet.query.sparqldl.engine.AbstractQueryEngine;
 import openllet.query.sparqldl.engine.QueryBindingCandidateGenerator;
@@ -33,6 +34,7 @@ public class BDQEngine extends AbstractQueryEngine<MetricTemporalConjunctiveQuer
     private ABoxChanges _changes;
     public static long cqCalls = 0;
     public static long cqCandidates = 0;
+    public static Timer cqTimer = new Timer();
 
     @Override
     public boolean supports(MetricTemporalConjunctiveQuery q)
@@ -61,7 +63,10 @@ public class BDQEngine extends AbstractQueryEngine<MetricTemporalConjunctiveQuer
         {
             cqCalls++;
             cqCandidates += restrictToBindings.size();
-            return _cqEngine.exec(cq.getConjunctiveQuery(), excludeBindings, restrictToBindings);
+            cqTimer.start();
+            QueryResult res = _cqEngine.exec(cq.getConjunctiveQuery(), excludeBindings, restrictToBindings);
+            cqTimer.stop();
+            return res;
         }
         if (q instanceof OrFormula)
             disjuncts = flattenOr(q);

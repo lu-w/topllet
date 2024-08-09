@@ -139,6 +139,8 @@ public class OpenlletTemporalQuery extends OpenlletCmdApp
         System.out.println("Number of UCQ entailment checks: " + BooleanUnionQueryEngineSimple.calls);
         System.out.println("Number of CQ answer calls: " + BDQEngine.cqCalls);
         System.out.println("Number of CQ candidates: " + BDQEngine.cqCandidates);
+        System.out.println("Time CQ checks: " + BDQEngine.cqTimer.getTotal());
+        System.out.println("Time UCQ checks: " + BooleanUnionQueryEngineSimple.ucqTimer.getTotal());
     }
 
     public void setQueryFile(final String s)

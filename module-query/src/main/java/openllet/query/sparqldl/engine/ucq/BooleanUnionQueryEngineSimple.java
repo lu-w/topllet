@@ -8,6 +8,7 @@ import openllet.core.boxes.abox.ABox;
 import openllet.core.boxes.rbox.Role;
 import openllet.core.utils.ATermUtils;
 import openllet.core.utils.Pair;
+import openllet.core.utils.Timer;
 import openllet.query.sparqldl.engine.cq.CombinedQueryEngine;
 import openllet.query.sparqldl.engine.cq.QueryEngine;
 import openllet.query.sparqldl.model.cq.ConjunctiveQuery;
@@ -21,11 +22,9 @@ import openllet.query.sparqldl.model.ucq.CNFQuery;
 import openllet.query.sparqldl.model.ucq.UnionQuery;
 import openllet.shared.tools.Log;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.List;
-import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -37,6 +36,7 @@ public class BooleanUnionQueryEngineSimple extends AbstractBooleanUnionQueryEngi
     public static final Logger _logger = Log.getLogger(BooleanUnionQueryEngineSimple.class);
 
     public static long calls = 0;
+    public static Timer ucqTimer = new Timer();
 
     @Override
     protected boolean execBooleanABoxQuery(CNFQuery q, ABox abox)
@@ -114,6 +114,7 @@ public class BooleanUnionQueryEngineSimple extends AbstractBooleanUnionQueryEngi
     private boolean isEntailed(CNFQuery cnfQuery, KnowledgeBase kb)
     {
         calls++;
+        ucqTimer.start();
         boolean isEntailed = true;
         // Query is entailed iff. all conjuncts are entailed
         for (DisjunctiveQuery disjunctiveQuery : cnfQuery.getQueries())
@@ -210,6 +211,7 @@ public class BooleanUnionQueryEngineSimple extends AbstractBooleanUnionQueryEngi
             if (!isEntailed) // Early break if we find that the query can not be entailed anymore.
                 break;
         }
+        ucqTimer.stop();
         return isEntailed;
     }
 
