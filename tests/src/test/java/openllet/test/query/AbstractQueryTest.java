@@ -217,7 +217,7 @@ public abstract class AbstractQueryTest extends AbstractKBTests
 	 */
 
 	private QueryResult execQuery(Query<?> query)
-	{
+	{ 
 		QueryResult result = null;
 		if (query instanceof ConjunctiveQuery)
 			result = new QueryEngine().exec((ConjunctiveQuery) query);

@@ -15,10 +15,7 @@ import openllet.query.sparqldl.model.AtomQuery;
 import openllet.query.sparqldl.model.cq.ConjunctiveQuery;
 import openllet.query.sparqldl.model.cq.ConjunctiveQueryImpl;
 import openllet.query.sparqldl.model.cq.QueryAtom;
-import openllet.query.sparqldl.model.results.QueryResult;
-import openllet.query.sparqldl.model.results.QueryResultImpl;
-import openllet.query.sparqldl.model.results.ResultBinding;
-import openllet.query.sparqldl.model.results.ResultBindingImpl;
+import openllet.query.sparqldl.model.results.*;
 import openllet.query.sparqldl.model.ucq.UnionQuery;
 import openllet.query.sparqldl.model.ucq.UnionQueryImpl;
 
@@ -67,6 +64,8 @@ public class BDQEngine extends AbstractQueryEngine<MetricTemporalConjunctiveQuer
             cqTimer.start();
             QueryResult res = _cqEngine.exec(cq.getConjunctiveQuery(), excludeBindings, restrictToBindings);
             cqTimer.stop();
+            if (res instanceof MultiQueryResults mqr)
+                res = mqr.toQueryResultImpl(cq.getConjunctiveQuery());
             return res;
         }
         if (q instanceof OrFormula)

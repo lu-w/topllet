@@ -343,7 +343,8 @@ public class MultiQueryResults implements QueryResult
 	{
 		QueryResultImpl qr = new QueryResultImpl(originalQuery);
 		for (ResultBinding binding : this)
-			qr.add(binding);
+			if (!originalQuery.isDistinct() || binding.isDistinct())
+				qr.add(binding);
 		return qr;
 	}
 }

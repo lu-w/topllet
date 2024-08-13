@@ -56,7 +56,7 @@ public class OpenlletTemporalQuery extends OpenlletCmdApp
     @Override
     public String getAppId()
     {
-        return "Topplet: An Engine for Answering Metric Temporal Conjunctive Queries";
+        return "Topplet: An Engine for Answering Metric Temporal Conjunctive Queries (Rewriting-Based)";
     }
 
     @Override
