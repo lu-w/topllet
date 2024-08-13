@@ -222,8 +222,7 @@ public abstract class AbstractQueryTest extends AbstractKBTests
 		if (query instanceof ConjunctiveQuery)
 			result = new QueryEngine().exec((ConjunctiveQuery) query);
 		else if (query instanceof UnionQuery)
-			result = new UnionQueryEngineSimple(UnionQueryEngineSimple.BindingTime.AFTER_CNF).
-					exec((UnionQuery) query);
+			result = new UnionQueryEngineSimple(UnionQueryEngineSimple.BindingTime.AFTER_CNF).exec((UnionQuery) query);
 		else if (query instanceof BCQQuery)
 			result = new BCQQueryEngineSimple().exec((BCQQuery) query);
 		else if (query instanceof MetricTemporalConjunctiveQuery)

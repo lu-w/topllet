@@ -52,6 +52,7 @@ public abstract class UnaryMTCQFormula extends MTCQFormula
         result = PRIME * result + _distVars.hashCode();
         result = PRIME * result + _resultVars.hashCode();
         result = PRIME * result + getUndistVars().hashCode();
+        result = PRIME * result + _temporalKb.hashCode();
         return result;
     }
 }

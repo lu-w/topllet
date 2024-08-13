@@ -486,6 +486,7 @@ public class ConjunctiveQueryImpl extends AbstractAtomQuery<ConjunctiveQuery> im
 		result = PRIME * result + _resultVars.hashCode();
 		result = PRIME * result + getUndistVars().hashCode();
 		result = PRIME * result + (_isNegated ? 1 : 2);
+		result = PRIME * result + _kb.hashCode();
 		return result;
 	}
 }

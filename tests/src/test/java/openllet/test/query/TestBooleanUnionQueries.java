@@ -1,7 +1,13 @@
 package openllet.test.query;
 
 import openllet.aterm.ATermAppl;
+import openllet.core.KnowledgeBase;
+import openllet.core.KnowledgeBaseImpl;
+import openllet.mtcq.engine.MTCQNormalFormEngine;
+import openllet.mtcq.model.query.MetricTemporalConjunctiveQuery;
 import openllet.query.sparqldl.engine.ucq.BooleanUnionQueryEngineSimple;
+import openllet.query.sparqldl.engine.ucq.UnionQueryEngineSimple;
+import openllet.query.sparqldl.model.cq.ConjunctiveQuery;
 import openllet.query.sparqldl.model.ucq.UnionQuery;
 import org.junit.Test;
 
@@ -161,9 +167,10 @@ public class TestBooleanUnionQueries extends AbstractQueryTest
     @Test
     public void sharedUndistinguishedVarTest()
     {
-        classes(_A, _B, _C);
-        individuals(_a, _b);
-
+        _kb.addClass(_A);
+        _kb.addClass(_B);
+        _kb.addIndividual(_a);
+        _kb.addIndividual(_b);
         _kb.addType(_a, _A);
         _kb.addType(_b, _B);
 
@@ -177,7 +184,11 @@ public class TestBooleanUnionQueries extends AbstractQueryTest
                                      query(TypeAtom(_b, _B)));
         UnionQuery ucq4 = unionQuery(query(TypeAtom(x, _A)),
                                      query(TypeAtom(_b, _B)));
-        UnionQuery ucq5 = unionQuery(query(TypeAtom(_b, _A)),
+        UnionQuery ucq5 = unionQuery(query(TypeAtom(_a, _B)));
+        UnionQuery ucq6 = unionQuery(query(TypeAtom(_b, _A)));
+        UnionQuery ucq7 = unionQuery(query(TypeAtom(_a, _B)),
+                                     query(TypeAtom(_b, _A)));
+        UnionQuery ucq8 = unionQuery(query(TypeAtom(_b, _A)),
                                      query(TypeAtom(_a, _B)));
 
         testQuery(ucq1, true);
@@ -185,6 +196,9 @@ public class TestBooleanUnionQueries extends AbstractQueryTest
         testQuery(ucq3, true);
         testQuery(ucq4, true);
         testQuery(ucq5, false);
+        testQuery(ucq6, false);
+        testQuery(ucq7, false);
+        testQuery(ucq8, false);
     }
 
     @Test

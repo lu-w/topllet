@@ -8,7 +8,6 @@ import openllet.core.boxes.abox.ABox;
 import openllet.core.boxes.rbox.Role;
 import openllet.core.utils.ATermUtils;
 import openllet.core.utils.Pair;
-import openllet.core.utils.Timer;
 import openllet.query.sparqldl.engine.cq.CombinedQueryEngine;
 import openllet.query.sparqldl.engine.cq.QueryEngine;
 import openllet.query.sparqldl.model.cq.ConjunctiveQuery;
