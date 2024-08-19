@@ -8,11 +8,9 @@ import openllet.core.utils.Timer;
 import openllet.mtcq.engine.MTCQNormalFormEngine;
 import openllet.mtcq.engine.atemporal.BDQEngine;
 import openllet.query.sparqldl.engine.QueryExec;
-import openllet.query.sparqldl.engine.cq.CombinedQueryEngine;
 import openllet.query.sparqldl.engine.ucq.BooleanUnionQueryEngineSimple;
 import openllet.query.sparqldl.model.results.QueryResult;
 import openllet.query.sparqldl.model.results.ResultBinding;
-import openllet.mtcq.engine.MTCQEngine;
 import openllet.mtcq.model.kb.TemporalKnowledgeBase;
 import openllet.mtcq.model.kb.FileBasedTemporalKnowledgeBaseImpl;
 import openllet.mtcq.model.query.MetricTemporalConjunctiveQuery;
@@ -21,7 +19,6 @@ import openllet.mtcq.parser.MetricTemporalConjunctiveQueryParser;
 import org.apache.jena.atlas.RuntimeIOException;
 import org.apache.jena.query.*;
 import org.apache.jena.shared.NotFoundException;
-import org.semanticweb.owlapi.model.OWLAxiom;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -242,14 +239,7 @@ public class OpenlletTemporalQuery extends OpenlletCmdApp
     private void execQuery()
     {
         Timer timer = _timers.createTimer("query execution (w/o loading & initial consistency check)");
-        try
-        {
-            queryResults = queryEngine.exec(query, null, timer);
-        }
-        catch (RuntimeException e)
-        {
-            throw new OpenlletCmdException(e);
-        }
+        queryResults = queryEngine.exec(query, null, timer);
     }
 
     private void printQueryResults()

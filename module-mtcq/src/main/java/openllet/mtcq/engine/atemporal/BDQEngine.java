@@ -62,7 +62,7 @@ public class BDQEngine extends AbstractQueryEngine<MetricTemporalConjunctiveQuer
             cqCalls++;
             cqCandidates += restrictToBindings.size();
             cqTimer.start();
-            QueryResult res = _cqEngine.exec(cq.getConjunctiveQuery(), excludeBindings, restrictToBindings);
+            QueryResult res = new QueryEngine().exec(cq.getConjunctiveQuery(), excludeBindings, restrictToBindings);
             cqTimer.stop();
             if (res instanceof MultiQueryResults mqr)
                 res = mqr.toQueryResultImpl(cq.getConjunctiveQuery());
