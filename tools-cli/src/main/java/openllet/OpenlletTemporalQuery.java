@@ -7,6 +7,7 @@ import openllet.core.output.TableData;
 import openllet.core.utils.Timer;
 import openllet.mtcq.engine.MTCQNormalFormEngine;
 import openllet.mtcq.engine.atemporal.BDQEngine;
+import openllet.mtcq.model.kb.InMemoryTemporalKnowledgeBaseImpl;
 import openllet.query.sparqldl.engine.QueryExec;
 import openllet.query.sparqldl.engine.ucq.BooleanUnionQueryEngineSimple;
 import openllet.query.sparqldl.model.results.QueryResult;
@@ -26,10 +27,7 @@ import java.io.StringWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 
 import static openllet.OpenlletCmdOptionArg.*;
 
@@ -37,12 +35,12 @@ public class OpenlletTemporalQuery extends OpenlletCmdApp
 {
     private String queryFile;
     private String catalogFile;
+    private boolean streamingMode = false;
     private boolean equalAnswersAllowed;
     private QueryResult queryResults;
     private String queryString;
     private MetricTemporalConjunctiveQuery query;
     private TemporalKnowledgeBase kb;
-    private final QueryExec<MetricTemporalConjunctiveQuery> queryEngine = new MTCQNormalFormEngine();
     private OutputFormat outputFormat = OutputFormat.TABULAR;
 
     private enum OutputFormat
@@ -168,17 +166,27 @@ public class OpenlletTemporalQuery extends OpenlletCmdApp
         try
         {
             List<String> inputFiles = Arrays.asList(getInputFiles());
+            List<String> kbsFiles;
             if (inputFiles.size() == 2)
             {
                 setQueryFile(inputFiles.get(0));
                 // tries to parse from input files. if unsuccessful, the original input file is returned.
-                inputFiles = parseInputFilesFromFile(inputFiles.get(1));
+                try
+                {
+                    kbsFiles = FileBasedTemporalKnowledgeBaseImpl.parseKBSFile(inputFiles.get(1));
+                }
+                catch (FileNotFoundException e)
+                {
+                    // streaming mode is enabled if not a .KBS file is given but just a single OWL file (a TBox)
+                    streamingMode = true;
+                    kbsFiles = Collections.singletonList(inputFiles.get(1));
+                }
             }
             else
                 throw new OpenlletCmdException("Expected two required input arguments. Received " + inputFiles.size());
-            kb = new FileBasedTemporalKnowledgeBaseImpl(inputFiles, catalogFile, timer);
             try
             {
+                kb = new FileBasedTemporalKnowledgeBaseImpl(kbsFiles, catalogFile, timer);
                 KnowledgeBase firstKb = kb.get(0);
                 if (firstKb != null)
                 {
@@ -239,7 +247,7 @@ public class OpenlletTemporalQuery extends OpenlletCmdApp
     private void execQuery()
     {
         Timer timer = _timers.createTimer("query execution (w/o loading & initial consistency check)");
-        queryResults = queryEngine.exec(query, null, timer);
+        queryResults = new MTCQNormalFormEngine(streamingMode).exec(query, null, timer);
     }
 
     private void printQueryResults()

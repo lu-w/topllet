@@ -7,6 +7,7 @@ import org.zeromq.SocketType;
 import openllet.aterm.ATermAppl;
 import openllet.core.KnowledgeBase;
 import openllet.core.utils.ATermUtils;
+import openllet.core.utils.Timer;
 
 import java.util.*;
 import java.util.logging.Logger;
@@ -21,6 +22,7 @@ public class KnowledgeBaseUpdater
     private final HashMap<String, String> _prefixes = new HashMap<>();
     private boolean _isLast = false;
     private final ZMQ.Socket _socket;
+    private Timer _timer = null;
 
     public KnowledgeBaseUpdater(KnowledgeBase kb)
     {
@@ -29,10 +31,20 @@ public class KnowledgeBaseUpdater
         _socket.bind("tcp://localhost:5555");
     }
 
+    public KnowledgeBaseUpdater(KnowledgeBase kb, Timer timer)
+    {
+        this(kb);
+        _timer = timer;
+    }
+
     public void waitAndUpdateKB()
     {
+        if (_timer != null)
+            _timer.start();
         String message = _socket.recvStr();
         processMessage(message);
+        if (_timer != null)
+            _timer.stop();
     }
 
     public boolean isLast()
@@ -101,18 +113,15 @@ public class KnowledgeBaseUpdater
             String value = replacePrefix(matcher.group(2));
             if (value.contains(","))
             {
+                validateProperty(dataList.get(0));
                 String[] inds = value.split(",");
                 dataList.add(ATermUtils.makeTermAppl(replacePrefix(inds[0].trim())));
                 dataList.add(ATermUtils.makeTermAppl(replacePrefix(inds[1].trim())));
-                validateProperty(dataList.get(0));
-                validateIndividual(dataList.get(1));
-                validateIndividual(dataList.get(2));
             }
             else
             {
-                dataList.add(ATermUtils.makeTermAppl(replacePrefix(value.trim())));
                 validateConcept(dataList.get(0));
-                validateIndividual(dataList.get(1));
+                dataList.add(ATermUtils.makeTermAppl(replacePrefix(value.trim())));
             }
         }
         else
@@ -130,12 +139,6 @@ public class KnowledgeBaseUpdater
                 break;
             }
         return replaced;
-    }
-
-    private void validateIndividual(ATermAppl i)
-    {
-        if (!_kb.isIndividual(i))
-             throw new IllegalArgumentException("Invalid individual: " + i);
     }
 
     private void validateConcept(ATermAppl c)

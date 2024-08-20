@@ -86,10 +86,8 @@ public abstract class AbstractQueryEngine<QueryType extends Query<QueryType>> im
             // Use the Boolean engine if we can
             if (q.getResultVars().isEmpty() && _booleanEngine != null)
                 results = _booleanEngine.exec(q, _abox);
-            else if (q.getKB().getIndividualsCount() > 0)
-                results = execABoxQuery(q, excludeBindings, restrictToBindings);
             else
-                _logger.warning("Got non-Boolean query on a knowledge base with no individuals. Nothing to do here.");
+                results = execABoxQuery(q, excludeBindings, restrictToBindings);
         }
         else
             results.add(new ResultBindingImpl());

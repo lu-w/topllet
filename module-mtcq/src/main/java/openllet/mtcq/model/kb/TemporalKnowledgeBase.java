@@ -2,6 +2,7 @@ package openllet.mtcq.model.kb;
 
 import openllet.aterm.ATerm;
 import openllet.core.KnowledgeBase;
+import openllet.core.utils.Timer;
 import openllet.modularity.OntologyDiff;
 import org.jgrapht.graph.DefaultDirectedGraph;
 import org.jgrapht.graph.DefaultEdge;
@@ -36,5 +37,13 @@ public interface TemporalKnowledgeBase extends List<KnowledgeBase>
     @Nullable
     Collection<ATerm> getConnectedClassesAndRolesInAxiomGraph(Collection<ATerm> classesAndRoles);
 
+    /**
+     * @return The knowledge base loaded previously (via get()). null if no loading was done.
+     */
     KnowledgeBase getLastLoadedKB();
+
+    /**
+     * @return The timer used for timing the loading of knowledge bases. Might be null if no timer was given.
+     */
+    Timer getTimer();
 }

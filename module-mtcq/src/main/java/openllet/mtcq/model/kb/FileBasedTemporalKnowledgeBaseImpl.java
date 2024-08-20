@@ -41,8 +41,8 @@ public class FileBasedTemporalKnowledgeBaseImpl extends ArrayList<KnowledgeBase>
     private KnowledgeBase _curKb;
     private int _curKbIndex = -1;
     private final String _catalogFile;
-    private final Timer _timer;
     private DefaultDirectedGraph<ATerm, DefaultEdge> _axiomGraph;
+    private final Timer _timer;
     private Set<ATermAppl> _prevInds = null;
 
     static public List<String> parseKBSFile(String kbsFile) throws FileNotFoundException
@@ -251,6 +251,12 @@ public class FileBasedTemporalKnowledgeBaseImpl extends ArrayList<KnowledgeBase>
     public KnowledgeBase getLastLoadedKB()
     {
         return _curKb;
+    }
+
+    @Override
+    public Timer getTimer()
+    {
+        return _timer;
     }
 
     protected static Collection<ATerm> computeReachableSetDirected(DefaultDirectedGraph<ATerm, DefaultEdge> graph, ATerm node)

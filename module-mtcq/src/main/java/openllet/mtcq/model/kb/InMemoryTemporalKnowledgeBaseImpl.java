@@ -3,6 +3,7 @@ package openllet.mtcq.model.kb;
 import openllet.aterm.ATerm;
 import openllet.aterm.ATermAppl;
 import openllet.core.KnowledgeBase;
+import openllet.core.utils.Timer;
 import openllet.modularity.OntologyDiff;
 import openllet.shared.tools.Log;
 import org.jgrapht.graph.DefaultDirectedGraph;
@@ -22,6 +23,19 @@ import java.util.logging.Logger;
 public class InMemoryTemporalKnowledgeBaseImpl extends ArrayList<KnowledgeBase> implements TemporalKnowledgeBase
 {
     public static final Logger _logger = Log.getLogger(InMemoryTemporalKnowledgeBaseImpl.class);
+
+    private final Timer _timer;
+
+    public InMemoryTemporalKnowledgeBaseImpl()
+    {
+        super();
+        _timer = null;
+    }
+
+    public InMemoryTemporalKnowledgeBaseImpl(Timer timer)
+    {
+        _timer = timer;
+    }
 
     @Nullable
     @Override
@@ -57,6 +71,12 @@ public class InMemoryTemporalKnowledgeBaseImpl extends ArrayList<KnowledgeBase> 
     public KnowledgeBase getLastLoadedKB()
     {
         return get(0);
+    }
+
+    @Override
+    public Timer getTimer()
+    {
+        return _timer;
     }
 
     @Override

@@ -23,6 +23,18 @@ public class MTCQNormalFormEngine extends AbstractQueryEngine<MetricTemporalConj
 {
     private final BDQEngine _bdqEngine = new BDQEngine();
     private final QueryCache _queryCache = new QueryCache();
+    private boolean _streaming = false;
+
+    public MTCQNormalFormEngine()
+    {
+        super();
+    }
+
+    public MTCQNormalFormEngine(boolean streaming)
+    {
+        super();
+        _streaming = streaming;
+    }
 
     @Override
     protected QueryResult execABoxQuery(MetricTemporalConjunctiveQuery q, QueryResult excludeBindings, QueryResult restrictToBindings)
@@ -55,19 +67,42 @@ public class MTCQNormalFormEngine extends AbstractQueryEngine<MetricTemporalConj
     {
         Collection<ATermAppl> vars = query.getResultVars();
         TemporalQueryResult temporalResultAt0 = new TemporalQueryResult();
-        // elements are of the form: query, candidates to check against, temporal result to write to.
+        // Elements are of the form: query, candidates to check against, temporal result to write to.
         List<ToDo> todoList = new ArrayList<>();
         todoList.add(new ToDo(query, temporalResultAt0));
 
-        int t = 0;
-        KnowledgeBase kb = query.getKB();  // points to the 0th KB of the TKB... not ideal but okay for now.
-        KnowledgeBaseUpdater updater = new KnowledgeBaseUpdater(kb);
-        while (true)
+        long maxTime;
+        boolean isLast;
+        KnowledgeBase kb;
+        KnowledgeBaseUpdater updater;
+        if (_streaming)
         {
-            System.out.println("WAITING FOR DATA...");
-            updater.waitAndUpdateKB();
-            System.out.println("EXECING QUERY...");
-            boolean isLast = updater.isLast();
+            kb = query.getTemporalKB().get(0);
+            updater = new KnowledgeBaseUpdater(kb, query.getTemporalKB().getTimer());
+            maxTime = Long.MAX_VALUE;
+        }
+        else
+        {
+            kb = query.getTemporalKB().get(0);
+            updater = null;
+            maxTime =  query.getTemporalKB().size();
+        }
+        for (int t = 0; t < maxTime; t++)
+        {
+            if (_timer != null)
+                _timer.stop(); // Timer shall not consider loading of KBs
+            if (_streaming)
+            {
+                updater.waitAndUpdateKB();
+                isLast = updater.isLast();
+            }
+            else
+            {
+                kb = query.getTemporalKB().get(t);
+                isLast = t == (maxTime - 1);
+            }
+            if (_timer != null)
+                _timer.start();
             List<ToDo> nextTodoList = new ArrayList<>();
             for (ToDo todo : todoList)
             {
@@ -171,9 +206,8 @@ public class MTCQNormalFormEngine extends AbstractQueryEngine<MetricTemporalConj
             todoList = nextTodoList;
             _queryCache.invalidate();
             QueryEngine.getCache().invalidate();
-            t++;
-            if (isLast)
-                break;
+            if (_streaming && isLast)
+                maxTime = t;
         }
 
         // adds empty query result for all things still in to-do list (they exceeded the trace length)
@@ -230,9 +264,8 @@ public class MTCQNormalFormEngine extends AbstractQueryEngine<MetricTemporalConj
             List<MetricTemporalConjunctiveQuery> cleanDisjuncts = new ArrayList<>();
             for (MetricTemporalConjunctiveQuery disjunct : flattenOr(q))
             {
+                // Note: EndFormula always unsatisfiable before or at last KB -> skip
                 if (disjunct instanceof LastFormula && isLastKB)
-                    return candidates.copy();
-                else if (disjunct instanceof EndFormula && isLastKB)  // TODO correct?
                     return candidates.copy();
                 else if (disjunct instanceof PropositionalTrueFormula || disjunct instanceof LogicalTrueFormula)
                     return candidates.copy();
