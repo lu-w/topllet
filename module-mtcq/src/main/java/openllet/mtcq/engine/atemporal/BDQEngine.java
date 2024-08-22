@@ -54,8 +54,6 @@ public class BDQEngine extends AbstractQueryEngine<MetricTemporalConjunctiveQuer
     public QueryResult execABoxQuery(MetricTemporalConjunctiveQuery q, QueryResult excludeBindings,
                                         QueryResult restrictToBindings)
     {
-        System.out.println("Execing " + q + " over candidates # " + restrictToBindings.size());
-
         List<MetricTemporalConjunctiveQuery> disjuncts;
         if (q instanceof ConjunctiveQueryFormula cq)
         {

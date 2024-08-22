@@ -1,30 +1,42 @@
 package openllet.mtcq.engine;
 
 import openllet.core.utils.Pair;
+import openllet.mtcq.model.query.ConjunctiveQueryFormula;
+import openllet.mtcq.model.query.MetricTemporalConjunctiveQuery;
+import openllet.mtcq.model.query.OrFormula;
 import openllet.query.sparqldl.model.results.QueryResult;
+import openllet.query.sparqldl.model.ucq.DisjunctiveQuery;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class TemporalQueryResult
 {
     private List<Pair<QueryResult, TemporalQueryResult>> _conjunctionOfDisjunctions = new ArrayList<>();
     private QueryResult _collapsed = null;
+    private final MetricTemporalConjunctiveQuery _query;
+
+    public TemporalQueryResult(MetricTemporalConjunctiveQuery query)
+    {
+        _query = query;
+    }
 
     public void addNewConjunct(QueryResult atemporalResult)
     {
         _conjunctionOfDisjunctions.add(new Pair<>(atemporalResult, null));
     }
 
-    public void addNewConjunct(TemporalQueryResult temporalResult)
-    {
-        _conjunctionOfDisjunctions.add(new Pair<>(null, temporalResult));
-    }
-
     public void addNewConjunct(QueryResult atemporalResult, TemporalQueryResult temporalResult)
     {
         _conjunctionOfDisjunctions.add(new Pair<>(atemporalResult, temporalResult));
+    }
+
+    public MetricTemporalConjunctiveQuery getQuery()
+    {
+        return _query;
     }
 
     @Nullable
@@ -52,8 +64,33 @@ public class TemporalQueryResult
                     finalResult.retainAll(conjunctionRes);
             }
             _collapsed = finalResult;
-            _conjunctionOfDisjunctions = null;
+            //_conjunctionOfDisjunctions = null;
         }
         return  _collapsed;
+    }
+
+    public Map<MetricTemporalConjunctiveQuery, QueryResult> collapseFirstLevel()
+    {
+        Map<MetricTemporalConjunctiveQuery, QueryResult> result = new HashMap<>();
+        if (_conjunctionOfDisjunctions != null)
+            for (Pair<QueryResult, TemporalQueryResult> conjunction : _conjunctionOfDisjunctions)
+            {
+                QueryResult conjunctionRes;
+                if (conjunction.first != null)
+                {
+                    conjunctionRes = conjunction.first;
+                    if (conjunction.second != null)
+                        conjunctionRes.addAll(conjunction.second.collapse());
+                }
+                else
+                {
+                    conjunctionRes = conjunction.second.collapse();
+                }
+                if (conjunction.second != null)
+                {
+                    result.put(conjunction.second.getQuery(), conjunctionRes);
+                }
+            }
+        return result;
     }
 }

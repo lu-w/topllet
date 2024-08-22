@@ -1,5 +1,10 @@
 package openllet.mtcq.engine;
 
+import com.googlecode.lanterna.TextCharacter;
+import com.googlecode.lanterna.graphics.TextGraphics;
+import com.googlecode.lanterna.screen.TerminalScreen;
+import com.googlecode.lanterna.terminal.ansi.UnixLikeTerminal;
+import com.googlecode.lanterna.terminal.ansi.UnixTerminal;
 import openllet.aterm.ATermAppl;
 import openllet.core.KnowledgeBase;
 import openllet.core.utils.Pair;
@@ -14,7 +19,16 @@ import openllet.query.sparqldl.engine.cq.QueryEngine;
 import openllet.query.sparqldl.model.results.MultiQueryResults;
 import openllet.query.sparqldl.model.results.QueryResult;
 import openllet.query.sparqldl.model.results.QueryResultImpl;
+import com.googlecode.lanterna.SGR;
+import com.googlecode.lanterna.TerminalSize;
+import com.googlecode.lanterna.TextColor;
+import com.googlecode.lanterna.screen.Screen;
+import com.googlecode.lanterna.terminal.DefaultTerminalFactory;
+import com.googlecode.lanterna.terminal.Terminal;
 
+import java.io.IOException;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 import static openllet.mtcq.engine.rewriting.MTCQSimplifier.*;
@@ -24,6 +38,8 @@ public class MTCQNormalFormEngine extends AbstractQueryEngine<MetricTemporalConj
     private final BDQEngine _bdqEngine = new BDQEngine();
     private final QueryCache _queryCache = new QueryCache();
     private boolean _streaming = false;
+    private Terminal _terminal;
+    private Screen _screen;
 
     public MTCQNormalFormEngine()
     {
@@ -39,7 +55,6 @@ public class MTCQNormalFormEngine extends AbstractQueryEngine<MetricTemporalConj
     @Override
     protected QueryResult execABoxQuery(MetricTemporalConjunctiveQuery q, QueryResult excludeBindings, QueryResult restrictToBindings)
     {
-        System.out.println("======= ANSWERING MTCQ " + q + " =================");
         CXNFTransformer.resetCache();
         return answerTime(q);
     }
@@ -66,7 +81,7 @@ public class MTCQNormalFormEngine extends AbstractQueryEngine<MetricTemporalConj
     private QueryResult answerTime(MetricTemporalConjunctiveQuery query)
     {
         Collection<ATermAppl> vars = query.getResultVars();
-        TemporalQueryResult temporalResultAt0 = new TemporalQueryResult();
+        TemporalQueryResult temporalResultAt0 = new TemporalQueryResult(query);
         // Elements are of the form: query, candidates to check against, temporal result to write to.
         List<ToDo> todoList = new ArrayList<>();
         todoList.add(new ToDo(query, temporalResultAt0));
@@ -80,6 +95,7 @@ public class MTCQNormalFormEngine extends AbstractQueryEngine<MetricTemporalConj
             kb = query.getTemporalKB().get(0);
             updater = new KnowledgeBaseUpdater(kb, query.getTemporalKB().getTimer());
             maxTime = Long.MAX_VALUE;
+            setupOutput();
         }
         else
         {
@@ -108,7 +124,6 @@ public class MTCQNormalFormEngine extends AbstractQueryEngine<MetricTemporalConj
             {
                 QueryResult candidates = todo.candidates;
                 MetricTemporalConjunctiveQuery transformed = CXNFTransformer.transform(todo.query);
-                System.out.println("Answering at time " + t + " query: " + transformed.toPropositionalAbstractionString());
                 CXNFVerifier verifier = new CXNFVerifier();
                 if (!verifier.verify(transformed))
                     throw new RuntimeException("Unexpected: After transformation, MTCQ is not in normal form. " +
@@ -192,7 +207,7 @@ public class MTCQNormalFormEngine extends AbstractQueryEngine<MetricTemporalConj
                             // TQR not found - assembles new temporal query result and creates new entry in todo list
                             if (nextTemporalQueryResult == null)
                             {
-                                nextTemporalQueryResult = new TemporalQueryResult();
+                                nextTemporalQueryResult = new TemporalQueryResult(XtempPart.getSubFormula());
                                 nextTodoList.add(new ToDo(XtempPart.getSubFormula(), nextCandidates, nextTemporalQueryResult));
                             }
                             // adds assembled temporal query result and atemporal query result to current todo
@@ -206,15 +221,59 @@ public class MTCQNormalFormEngine extends AbstractQueryEngine<MetricTemporalConj
             todoList = nextTodoList;
             _queryCache.invalidate();
             QueryEngine.getCache().invalidate();
-            if (_streaming && isLast)
-                maxTime = t;
+            if (_streaming)
+            {
+                printResults(temporalResultAt0);
+                if (isLast)
+                    maxTime = t;
+            }
         }
 
-        // adds empty query result for all things still in to-do list (they exceeded the trace length)
+        // Adds empty query result for all things still in to-do list (they exceeded the trace length).
         for (ToDo todo : todoList)
             todo.temporalQueryResult.addNewConjunct(new QueryResultImpl(todo.query));
 
         return temporalResultAt0.collapse();
+    }
+
+    private void printResults(TemporalQueryResult result)
+    {
+        Map<MetricTemporalConjunctiveQuery, QueryResult> firstLevelResults = result.collapseFirstLevel();
+        QueryResult overallResult = result.collapse();
+        _screen.clear();
+        int row = 0;
+        for (MetricTemporalConjunctiveQuery q : firstLevelResults.keySet()) {
+            String line = q.toPropositionalAbstractionString() + ": " + firstLevelResults.get(q);
+            _screen.newTextGraphics().putString(0, row, line);
+            row++;
+        }
+        _screen.newTextGraphics().putString(0, row, "------------------------");
+        String overallLine = "Current overall result: " + overallResult;
+        _screen.newTextGraphics().putString(0, row + 1, overallLine);
+        try
+        {
+            _screen.refresh();
+            _screen.readInput();
+        }
+        catch (IOException e)
+        {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private void setupOutput()
+    {
+        try
+        {
+            _terminal = new UnixTerminal(System.in, System.out, StandardCharsets.UTF_8,
+                    UnixLikeTerminal.CtrlCBehaviour.CTRL_C_KILLS_APPLICATION);
+            _screen = new TerminalScreen(_terminal);
+            _screen.startScreen();
+        }
+        catch (IOException e)
+        {
+            throw new RuntimeException(e);
+        }
     }
 
     private List<MetricTemporalConjunctiveQuery> sort(List<MetricTemporalConjunctiveQuery> cnf)
