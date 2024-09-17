@@ -26,7 +26,6 @@ import static openllet.mtcq.engine.rewriting.MTCQSimplifier.flattenOr;
 public class BDQEngine extends AbstractQueryEngine<MetricTemporalConjunctiveQuery>
 {
     private final UnionQueryEngineSimple _ucqEngine = new UnionQueryEngineSimple();
-    private final QueryEngine _cqEngine = new QueryEngine();
     private Map<ATermAppl, ATermAppl> _queryVarsToFreshInds = new HashMap<>();
     private ABoxChanges _changes;
     public static long cqCalls = 0;

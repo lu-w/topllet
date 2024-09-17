@@ -192,7 +192,7 @@ public interface ABox extends Logging
 
 	/**
 	 * Remove the given node from the node map which maps names to nodes. Also removes the node from the node list.
-	 * Does not remove the node from other nodes' edge list. TODO Lukas: check if this holds up
+	 * Does not remove the node from other nodes' edge list.
 	 *
 	 * @param x is a node.
 	 * @return true if the removal occurred

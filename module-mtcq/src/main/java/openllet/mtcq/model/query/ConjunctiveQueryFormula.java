@@ -69,7 +69,7 @@ public class ConjunctiveQueryFormula extends MTCQFormula
                             append(")");
                 }
                 else
-                    _logger.warning("Encountered unsupported query atom for textual representation: " + atom);
+                    _logger.fine("Encountered unsupported query atom for textual representation: " + atom);
                 if (i < _cq.getAtoms().size() - 1)
                     cqString.append(" & ");
             }

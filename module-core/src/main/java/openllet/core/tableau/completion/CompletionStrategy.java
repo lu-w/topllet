@@ -1093,6 +1093,8 @@ public abstract class CompletionStrategy
 		{
 			final ATermAppl a = nodeList.get(i); // get the node name
 			final Node node = _abox.getNode(a); // and the corresponding node
+			if (node == null)
+				System.out.println(a);
 
 			// node dependency tells us if the node was created after the _branch
 			// and if that is the case we remove it completely

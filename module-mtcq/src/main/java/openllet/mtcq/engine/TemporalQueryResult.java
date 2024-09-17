@@ -5,13 +5,11 @@ import openllet.mtcq.model.query.ConjunctiveQueryFormula;
 import openllet.mtcq.model.query.MetricTemporalConjunctiveQuery;
 import openllet.mtcq.model.query.OrFormula;
 import openllet.query.sparqldl.model.results.QueryResult;
+import openllet.query.sparqldl.model.results.QueryResultImpl;
 import openllet.query.sparqldl.model.ucq.DisjunctiveQuery;
 
 import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class TemporalQueryResult
 {
@@ -27,11 +25,23 @@ public class TemporalQueryResult
     public void addNewConjunct(QueryResult atemporalResult)
     {
         _conjunctionOfDisjunctions.add(new Pair<>(atemporalResult, null));
+        _collapsed = null;
     }
 
     public void addNewConjunct(QueryResult atemporalResult, TemporalQueryResult temporalResult)
     {
         _conjunctionOfDisjunctions.add(new Pair<>(atemporalResult, temporalResult));
+        _collapsed = null;
+    }
+
+    public void removeConjunct(QueryResult result)
+    {
+        Set<Pair<QueryResult, TemporalQueryResult>> toRemove = new HashSet<>();
+        for (Pair<QueryResult, TemporalQueryResult> conjunction : _conjunctionOfDisjunctions)
+            if (conjunction.second != null && conjunction.second.equals(result))
+                toRemove.add(conjunction);
+        _conjunctionOfDisjunctions.removeAll(toRemove);
+        _collapsed = null;
     }
 
     public MetricTemporalConjunctiveQuery getQuery()
@@ -67,30 +77,5 @@ public class TemporalQueryResult
             //_conjunctionOfDisjunctions = null;
         }
         return  _collapsed;
-    }
-
-    public Map<MetricTemporalConjunctiveQuery, QueryResult> collapseFirstLevel()
-    {
-        Map<MetricTemporalConjunctiveQuery, QueryResult> result = new HashMap<>();
-        if (_conjunctionOfDisjunctions != null)
-            for (Pair<QueryResult, TemporalQueryResult> conjunction : _conjunctionOfDisjunctions)
-            {
-                QueryResult conjunctionRes;
-                if (conjunction.first != null)
-                {
-                    conjunctionRes = conjunction.first;
-                    if (conjunction.second != null)
-                        conjunctionRes.addAll(conjunction.second.collapse());
-                }
-                else
-                {
-                    conjunctionRes = conjunction.second.collapse();
-                }
-                if (conjunction.second != null)
-                {
-                    result.put(conjunction.second.getQuery(), conjunctionRes);
-                }
-            }
-        return result;
     }
 }
