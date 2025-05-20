@@ -92,7 +92,8 @@ public class MTCQNormalFormEngine extends AbstractQueryEngine<MetricTemporalConj
         boolean isLast;
         KnowledgeBase kb;
         KnowledgeBaseUpdater updater;
-        _timer.stop();
+        if (_timer != null)
+            _timer.stop();
         if (_streaming)
         {
             kb = query.getTemporalKB().get(0);
@@ -107,7 +108,8 @@ public class MTCQNormalFormEngine extends AbstractQueryEngine<MetricTemporalConj
             updater = null;
             maxTime =  query.getTemporalKB().size();
         }
-        _timer.start();
+        if (_timer != null)
+            _timer.start();
         for (int t = 0; t < maxTime; t++)
         {
             if (_timer != null)
@@ -228,7 +230,8 @@ public class MTCQNormalFormEngine extends AbstractQueryEngine<MetricTemporalConj
             QueryEngine.getCache().invalidate();
             if (_streaming)
             {
-                _timer.stop();
+                if (_timer != null)
+                    _timer.stop();
                 if (_displayOutput)
                     printResults(t, kb);
                 else
@@ -239,7 +242,8 @@ public class MTCQNormalFormEngine extends AbstractQueryEngine<MetricTemporalConj
                     maxTime = t;
                     break;
                 }
-                _timer.start();
+                if (_timer != null)
+                    _timer.start();
             }
         }
 
