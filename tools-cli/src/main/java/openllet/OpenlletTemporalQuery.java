@@ -35,7 +35,7 @@ public class OpenlletTemporalQuery extends OpenlletCmdApp
     private String queryFile;
     private String catalogFile;
     private boolean streamingMode = false;
-    private int zmqPort = OpenlletOptions.MTCQ_ENGINE_STREAMING_ZMQ_PORT;
+    private int zmqPort = 5555;
     private boolean equalAnswersAllowed;
     private QueryResult queryResults;
     private String queryString;
