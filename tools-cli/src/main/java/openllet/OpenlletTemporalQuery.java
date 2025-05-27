@@ -123,7 +123,8 @@ public class OpenlletTemporalQuery extends OpenlletCmdApp
 
     private void setPort(Integer p)
     {
-        zmqPort = p;
+        if (p > 0)
+            zmqPort = p;
     }
 
     protected List<String> parseInputFilesFromFile(String inputFile)
