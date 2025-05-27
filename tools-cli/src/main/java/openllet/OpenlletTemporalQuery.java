@@ -35,7 +35,7 @@ public class OpenlletTemporalQuery extends OpenlletCmdApp
     private String queryFile;
     private String catalogFile;
     private boolean streamingMode = false;
-    private int zmqPort = 5555;
+    private int zmqPort = OpenlletOptions.MTCQ_ENGINE_STREAMING_ZMQ_PORT;
     private boolean equalAnswersAllowed;
     private QueryResult queryResults;
     private String queryString;
@@ -84,8 +84,8 @@ public class OpenlletTemporalQuery extends OpenlletCmdApp
         final OpenlletCmdOption sendingOption = new OpenlletCmdOption("port");
         sendingOption.setShortOption("p");
         sendingOption.setDescription("The 0MQ port to use when in streaming mode (which is activated giving only a " +
-                "single .owl instead of a .kbs file). Default: " + zmqPort);
-        sendingOption.setArg(OPTIONAL);
+                "single .owl instead of a .kbs file). Default: " + OpenlletOptions.MTCQ_ENGINE_STREAMING_ZMQ_PORT);
+        sendingOption.setArg(REQUIRED);
         sendingOption.setIsMandatory(false);
         options.add(sendingOption);
 
@@ -107,7 +107,8 @@ public class OpenlletTemporalQuery extends OpenlletCmdApp
             super.parseArgs(args);
         setCatalogFile(_options.getOption("catalog").getValueAsString());
         setEqualAnswers(_options.getOption("equal").getValueAsBoolean());
-        setPort(_options.getOption("send").getValueAsNonNegativeInteger());
+        if (_options.getOption("port") != null)
+            setPort(_options.getOption("port").getValueAsNonNegativeInteger());
         setOutputFormat("Tabular"); // Currently, no other output format is supported, so no option for it.
     }
 

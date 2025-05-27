@@ -700,7 +700,7 @@ public class OpenlletOptions
 
 		MTCQ_ENGINE_TEMPORAL_BCQ_TRANSFER = getBooleanProperty(newOptions, "MTCQ_ENGINE_USE_CQ_ENGINE", MTCQ_ENGINE_TEMPORAL_BCQ_TRANSFER, oldOptions);
 
-		MTCQ_ENGINE_STREAMING_ZMQ_PORT = getIntProperty(newOptions, "MTCQ_ENGINE_USE_CQ_ENGINE", MTCQ_ENGINE_STREAMING_ZMQ_PORT, oldOptions);
+		MTCQ_ENGINE_STREAMING_ZMQ_PORT = getIntProperty(newOptions, "MTCQ_ENGINE_STREAMING_ZMQ_PORT", MTCQ_ENGINE_STREAMING_ZMQ_PORT, oldOptions);
 
 		return oldOptions;
 	}
