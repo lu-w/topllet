@@ -234,7 +234,6 @@ public class TestBooleanUnionQueries extends AbstractQueryTest
         _kb.addSubClass(_A, or(_B, _C));
         _kb.addType(_a, _A);
         _kb.addPropertyValue(_q, _a, literal(10));
-        System.out.println(literal(10.1));
 
         UnionQuery ucq1 = unionQuery(query(PropertyValueAtom(_a, _q, literal(10)), TypeAtom(_a, _A)));
         UnionQuery ucq2 = unionQuery(query(PropertyValueAtom(_a, _q, literal(10))));

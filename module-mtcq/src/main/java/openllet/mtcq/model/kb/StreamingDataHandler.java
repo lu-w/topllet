@@ -2,6 +2,7 @@ package openllet.mtcq.model.kb;
 
 import openllet.core.boxes.abox.Node;
 import openllet.core.datatypes.Datatypes;
+import openllet.query.sparqldl.model.results.QueryResult;
 import openllet.shared.tools.Log;
 import org.zeromq.ZMQ;
 import org.zeromq.ZContext;
@@ -18,9 +19,9 @@ import java.util.regex.Pattern;
 
 import static openllet.core.utils.TermFactory.literal;
 
-public class KnowledgeBaseUpdater
+public class StreamingDataHandler
 {
-    public static final Logger _logger = Log.getLogger(KnowledgeBaseUpdater.class);
+    public static final Logger _logger = Log.getLogger(StreamingDataHandler.class);
 
     private final KnowledgeBase _kb;
     private final HashMap<String, String> _prefixes = new HashMap<>();
@@ -29,17 +30,22 @@ public class KnowledgeBaseUpdater
     private final ZMQ.Socket _socket;
     private Timer _timer = null;
 
-    public KnowledgeBaseUpdater(KnowledgeBase kb)
+    public StreamingDataHandler(KnowledgeBase kb, int port)
     {
         this._kb = kb;
         _socket = new ZContext().createSocket(SocketType.PULL);
-        _socket.bind("tcp://localhost:5555");
+        _socket.bind("tcp://localhost:" + port);
     }
 
-    public KnowledgeBaseUpdater(KnowledgeBase kb, Timer timer)
+    public StreamingDataHandler(KnowledgeBase kb, int port, Timer timer)
     {
-        this(kb);
+        this(kb, port);
         _timer = timer;
+    }
+
+    public void sendResult(QueryResult result)
+    {
+        _socket.send(result.toString());
     }
 
     public void waitAndUpdateKB()

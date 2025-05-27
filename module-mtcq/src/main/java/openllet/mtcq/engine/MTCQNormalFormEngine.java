@@ -7,11 +7,12 @@ import com.googlecode.lanterna.terminal.ansi.UnixLikeTerminal;
 import com.googlecode.lanterna.terminal.ansi.UnixTerminal;
 import openllet.aterm.ATermAppl;
 import openllet.core.KnowledgeBase;
+import openllet.core.OpenlletOptions;
 import openllet.core.utils.Pair;
 import openllet.mtcq.engine.atemporal.BDQEngine;
 import openllet.mtcq.engine.rewriting.CXNFTransformer;
 import openllet.mtcq.engine.rewriting.CXNFVerifier;
-import openllet.mtcq.model.kb.KnowledgeBaseUpdater;
+import openllet.mtcq.model.kb.StreamingDataHandler;
 import openllet.mtcq.model.query.*;
 import openllet.query.sparqldl.engine.AbstractQueryEngine;
 import openllet.query.sparqldl.engine.QueryCache;
@@ -37,6 +38,7 @@ public class MTCQNormalFormEngine extends AbstractQueryEngine<MetricTemporalConj
     private final BDQEngine _bdqEngine = new BDQEngine();
     private final QueryCache _queryCache = new QueryCache();
     private boolean _streaming = false;
+    private int _port = 0; // 0: don't send results via 0MQ; >0: send results
     private Screen _screen;
     private Window _window;
     private MultiWindowTextGUI _gui;
@@ -52,6 +54,13 @@ public class MTCQNormalFormEngine extends AbstractQueryEngine<MetricTemporalConj
     {
         super();
         _streaming = streaming;
+    }
+
+    public MTCQNormalFormEngine(boolean streaming, int port)
+    {
+        super();
+        _streaming = streaming;
+        _port = port;
     }
 
     @Override
@@ -91,13 +100,13 @@ public class MTCQNormalFormEngine extends AbstractQueryEngine<MetricTemporalConj
         int maxTime;
         boolean isLast;
         KnowledgeBase kb;
-        KnowledgeBaseUpdater updater;
+        StreamingDataHandler streamer;
         if (_timer != null)
             _timer.stop();
         if (_streaming)
         {
             kb = query.getTemporalKB().get(0);
-            updater = new KnowledgeBaseUpdater(kb, query.getTemporalKB().getTimer());
+            streamer = new StreamingDataHandler(kb, _port, query.getTemporalKB().getTimer());
             maxTime = Integer.MAX_VALUE;
             if (_displayOutput)
                 setupOutput();
@@ -105,7 +114,7 @@ public class MTCQNormalFormEngine extends AbstractQueryEngine<MetricTemporalConj
         else
         {
             kb = query.getTemporalKB().get(0);
-            updater = null;
+            streamer = null;
             maxTime =  query.getTemporalKB().size();
         }
         if (_timer != null)
@@ -116,8 +125,8 @@ public class MTCQNormalFormEngine extends AbstractQueryEngine<MetricTemporalConj
                 _timer.stop(); // Timer shall not consider loading of KBs
             if (_streaming)
             {
-                updater.waitAndUpdateKB();
-                isLast = updater.isLast();
+                streamer.waitAndUpdateKB();
+                isLast = streamer.isLast();
             }
             else
             {
@@ -252,24 +261,26 @@ public class MTCQNormalFormEngine extends AbstractQueryEngine<MetricTemporalConj
             todo.temporalQueryResult.addNewConjunct(new QueryResultImpl(todo.query));
 
         QueryResult res = temporalResultAt0.collapse();
-        if (_streaming && _displayOutput)
+        if (_streaming)
         {
-            _resultsToPrintInStreamingMode.put(query, res);
-            printResults(maxTime, kb);
-            try
+            if (_displayOutput)
             {
-                TimeUnit.SECONDS.sleep(10);
-            }
-            catch (InterruptedException e)
-            {
-                throw new RuntimeException(e);
-            }
+                _resultsToPrintInStreamingMode.put(query, res);
+                printResults(maxTime, kb);
+                try
+                {
+                    TimeUnit.SECONDS.sleep(10);
+                } catch (InterruptedException e)
+                {
+                    throw new RuntimeException(e);
+                }
+            } else if (_port > 0)
+                streamer.sendResult(res);
         }
         return res;
     }
 
-    private void printResults(int t, KnowledgeBase kb)
-    {
+    private void printResults(int t, KnowledgeBase kb) {
         Panel panel = new Panel();
         panel.setSize(_screen.getTerminalSize());
         panel.setLayoutManager(new LinearLayout(Direction.VERTICAL));
@@ -293,8 +304,7 @@ public class MTCQNormalFormEngine extends AbstractQueryEngine<MetricTemporalConj
 
         List<MetricTemporalConjunctiveQuery> queries = new ArrayList<>(_resultsToPrintInStreamingMode.keySet().stream().toList());
         queries.sort(Comparator.comparing(Object::toString));
-        for (MetricTemporalConjunctiveQuery q : queries)
-        {
+        for (MetricTemporalConjunctiveQuery q : queries) {
             String text = printSimpleResult(_resultsToPrintInStreamingMode.get(q));
             Panel p = new Panel();
             p.setSize(_screen.getTerminalSize());
@@ -312,13 +322,10 @@ public class MTCQNormalFormEngine extends AbstractQueryEngine<MetricTemporalConj
             p.addComponent(lr);
             panel.addComponent(p.withBorder(Borders.doubleLine()));
         }
-        try
-        {
+        try {
             _screen.doResizeIfNecessary();
             _gui.getGUIThread().processEventsAndUpdate();
-        }
-        catch (IOException e)
-        {
+        } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }

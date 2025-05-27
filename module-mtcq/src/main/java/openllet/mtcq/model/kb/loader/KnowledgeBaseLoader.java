@@ -107,7 +107,7 @@ public class KnowledgeBaseLoader
     protected OWLOntology loadOntology(String fileName) throws OWLOntologyCreationException, FileNotFoundException
     {
         OWLOntologyManager man = OWLManager.createOWLOntologyManager();
-        OWLOntologyLoaderConfiguration config = man.getOntologyLoaderConfiguration();
+        //OWLOntologyLoaderConfiguration config = man.getOntologyLoaderConfiguration();
         //config = config.setMissingImportHandlingStrategy(MissingImportHandlingStrategy.SILENT);
         //man.setOntologyLoaderConfiguration(config);
         man.setIRIMappers(_catalogs);

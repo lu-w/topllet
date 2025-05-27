@@ -480,6 +480,11 @@ public class OpenlletOptions
 	 */
 	public static boolean MTCQ_ENGINE_TEMPORAL_BCQ_TRANSFER = false;
 
+	/**
+	 * The port which to use for 0MQ when MTCQ engine is in stremaing mode.
+	 */
+	public static int MTCQ_ENGINE_STREAMING_ZMQ_PORT = 5555;
+
 	static
 	{
 		final String configFile = System.getProperty("openllet.configuration");
@@ -694,6 +699,8 @@ public class OpenlletOptions
 		MTCQ_ENGINE_USE_CQ_ENGINE = getBooleanProperty(newOptions, "MTCQ_ENGINE_USE_CQ_ENGINE", MTCQ_ENGINE_USE_CQ_ENGINE, oldOptions);
 
 		MTCQ_ENGINE_TEMPORAL_BCQ_TRANSFER = getBooleanProperty(newOptions, "MTCQ_ENGINE_USE_CQ_ENGINE", MTCQ_ENGINE_TEMPORAL_BCQ_TRANSFER, oldOptions);
+
+		MTCQ_ENGINE_STREAMING_ZMQ_PORT = getIntProperty(newOptions, "MTCQ_ENGINE_USE_CQ_ENGINE", MTCQ_ENGINE_STREAMING_ZMQ_PORT, oldOptions);
 
 		return oldOptions;
 	}

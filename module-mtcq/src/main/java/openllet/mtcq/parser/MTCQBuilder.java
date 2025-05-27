@@ -57,6 +57,7 @@ public class MTCQBuilder extends AbstractParseTreeVisitor<MTCQFormula> implement
             else
             {
                 // Role atom
+                // TODO add support for data properties (literals as objects)
                 String role = replacePrefix(parsedAtom.role_atom().term().getText());
                 String indString0 = replacePrefix(parsedAtom.role_atom().subject(0).getText());
                 String indString1 = replacePrefix(parsedAtom.role_atom().subject(1).getText());

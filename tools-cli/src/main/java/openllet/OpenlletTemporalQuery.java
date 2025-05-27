@@ -2,13 +2,12 @@ package openllet;
 
 import openllet.aterm.ATermAppl;
 import openllet.core.KnowledgeBase;
+import openllet.core.OpenlletOptions;
 import openllet.core.exceptions.InconsistentOntologyException;
 import openllet.core.output.TableData;
 import openllet.core.utils.Timer;
 import openllet.mtcq.engine.MTCQNormalFormEngine;
 import openllet.mtcq.engine.atemporal.BDQEngine;
-import openllet.mtcq.model.kb.InMemoryTemporalKnowledgeBaseImpl;
-import openllet.query.sparqldl.engine.QueryExec;
 import openllet.query.sparqldl.engine.ucq.BooleanUnionQueryEngineSimple;
 import openllet.query.sparqldl.model.results.QueryResult;
 import openllet.query.sparqldl.model.results.ResultBinding;
@@ -36,6 +35,7 @@ public class OpenlletTemporalQuery extends OpenlletCmdApp
     private String queryFile;
     private String catalogFile;
     private boolean streamingMode = false;
+    private int zmqPort = OpenlletOptions.MTCQ_ENGINE_STREAMING_ZMQ_PORT;
     private boolean equalAnswersAllowed;
     private QueryResult queryResults;
     private String queryString;
@@ -81,6 +81,14 @@ public class OpenlletTemporalQuery extends OpenlletCmdApp
         distinctOption.setIsMandatory(false);
         options.add(distinctOption);
 
+        final OpenlletCmdOption sendingOption = new OpenlletCmdOption("port");
+        sendingOption.setShortOption("p");
+        sendingOption.setDescription("The 0MQ port to use when in streaming mode (which is activated giving only a " +
+                "single .owl instead of a .kbs file). Default: " + zmqPort);
+        sendingOption.setArg(OPTIONAL);
+        sendingOption.setIsMandatory(false);
+        options.add(sendingOption);
+
         return options;
     }
 
@@ -99,6 +107,7 @@ public class OpenlletTemporalQuery extends OpenlletCmdApp
             super.parseArgs(args);
         setCatalogFile(_options.getOption("catalog").getValueAsString());
         setEqualAnswers(_options.getOption("equal").getValueAsBoolean());
+        setPort(_options.getOption("send").getValueAsNonNegativeInteger());
         setOutputFormat("Tabular"); // Currently, no other output format is supported, so no option for it.
     }
 
@@ -110,6 +119,11 @@ public class OpenlletTemporalQuery extends OpenlletCmdApp
     private void setEqualAnswers(Boolean e)
     {
         equalAnswersAllowed = e;
+    }
+
+    private void setPort(Integer p)
+    {
+        zmqPort = p;
     }
 
     protected List<String> parseInputFilesFromFile(String inputFile)
@@ -131,11 +145,6 @@ public class OpenlletTemporalQuery extends OpenlletCmdApp
         loadQuery();
         execQuery();
         printQueryResults();
-        System.out.println("Number of UCQ entailment checks: " + BooleanUnionQueryEngineSimple.calls);
-        System.out.println("Number of CQ answer calls: " + BDQEngine.cqCalls);
-        System.out.println("Number of CQ candidates: " + BDQEngine.cqCandidates);
-        System.out.println("Time CQ checks: " + BDQEngine.cqTimer.getTotal());
-        System.out.println("Time UCQ checks: " + BDQEngine.ucqTimer.getTotal());
     }
 
     public void setQueryFile(final String s)
@@ -247,7 +256,7 @@ public class OpenlletTemporalQuery extends OpenlletCmdApp
     private void execQuery()
     {
         Timer timer = _timers.createTimer("query execution (w/o loading & initial consistency check)");
-        queryResults = new MTCQNormalFormEngine(streamingMode).exec(query, null, timer);
+        queryResults = new MTCQNormalFormEngine(streamingMode, zmqPort).exec(query, null, timer);
     }
 
     private void printQueryResults()
