@@ -7,8 +7,6 @@ import openllet.core.exceptions.InconsistentOntologyException;
 import openllet.core.output.TableData;
 import openllet.core.utils.Timer;
 import openllet.mtcq.engine.MTCQNormalFormEngine;
-import openllet.mtcq.engine.atemporal.BDQEngine;
-import openllet.query.sparqldl.engine.ucq.BooleanUnionQueryEngineSimple;
 import openllet.query.sparqldl.model.results.QueryResult;
 import openllet.query.sparqldl.model.results.ResultBinding;
 import openllet.mtcq.model.kb.TemporalKnowledgeBase;
@@ -107,7 +105,7 @@ public class OpenlletTemporalQuery extends OpenlletCmdApp
             super.parseArgs(args);
         setCatalogFile(_options.getOption("catalog").getValueAsString());
         setEqualAnswers(_options.getOption("equal").getValueAsBoolean());
-        if (_options.getOption("port") != null)
+        if (_options.getOption("port").exists())
             setPort(_options.getOption("port").getValueAsNonNegativeInteger());
         setOutputFormat("Tabular"); // Currently, no other output format is supported, so no option for it.
     }
