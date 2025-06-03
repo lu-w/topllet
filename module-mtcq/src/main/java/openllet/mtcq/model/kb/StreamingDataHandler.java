@@ -33,7 +33,7 @@ public class StreamingDataHandler
     public StreamingDataHandler(KnowledgeBase kb, int port)
     {
         this._kb = kb;
-        _socket = new ZContext().createSocket(SocketType.PULL);
+        _socket = new ZContext().createSocket(SocketType.REP);
         _socket.bind("tcp://localhost:" + port);
     }
 
@@ -46,6 +46,11 @@ public class StreamingDataHandler
     public void sendResult(QueryResult result)
     {
         _socket.send(result.toString());
+    }
+
+    public void sendAck()
+    {
+        _socket.send("ACK");
     }
 
     public void waitAndUpdateKB()

@@ -7,7 +7,6 @@ import com.googlecode.lanterna.terminal.ansi.UnixLikeTerminal;
 import com.googlecode.lanterna.terminal.ansi.UnixTerminal;
 import openllet.aterm.ATermAppl;
 import openllet.core.KnowledgeBase;
-import openllet.core.OpenlletOptions;
 import openllet.core.utils.Pair;
 import openllet.mtcq.engine.atemporal.BDQEngine;
 import openllet.mtcq.engine.rewriting.CXNFTransformer;
@@ -43,7 +42,7 @@ public class MTCQNormalFormEngine extends AbstractQueryEngine<MetricTemporalConj
     private Window _window;
     private MultiWindowTextGUI _gui;
     private final Map<MetricTemporalConjunctiveQuery, QueryResult> _resultsToPrintInStreamingMode = new HashMap<>();
-    private final boolean _displayOutput = true;
+    private final boolean _displayGUI = false; // TODO make command line option for GUI
 
     public MTCQNormalFormEngine()
     {
@@ -108,7 +107,7 @@ public class MTCQNormalFormEngine extends AbstractQueryEngine<MetricTemporalConj
             kb = query.getTemporalKB().get(0);
             streamer = new StreamingDataHandler(kb, _port, query.getTemporalKB().getTimer());
             maxTime = Integer.MAX_VALUE;
-            if (_displayOutput)
+            if (_displayGUI)
                 setupOutput();
         }
         else
@@ -241,7 +240,7 @@ public class MTCQNormalFormEngine extends AbstractQueryEngine<MetricTemporalConj
             {
                 if (_timer != null)
                     _timer.stop();
-                if (_displayOutput)
+                if (_displayGUI)
                     printResults(t, kb);
                 else
                     System.out.println("t = " + t);
@@ -253,8 +252,11 @@ public class MTCQNormalFormEngine extends AbstractQueryEngine<MetricTemporalConj
                 }
                 if (_timer != null)
                     _timer.start();
+                streamer.sendAck();
             }
         }
+
+
 
         // Adds empty query result for all things still in to-do list (they exceeded the trace length).
         for (ToDo todo : todoList)
@@ -263,7 +265,7 @@ public class MTCQNormalFormEngine extends AbstractQueryEngine<MetricTemporalConj
         QueryResult res = temporalResultAt0.collapse();
         if (_streaming)
         {
-            if (_displayOutput)
+            if (_displayGUI)
             {
                 _resultsToPrintInStreamingMode.put(query, res);
                 printResults(maxTime, kb);
@@ -274,8 +276,8 @@ public class MTCQNormalFormEngine extends AbstractQueryEngine<MetricTemporalConj
                 {
                     throw new RuntimeException(e);
                 }
-            } else if (_port > 0)
-                streamer.sendResult(res);
+            }
+            streamer.sendResult(res);
         }
         return res;
     }
