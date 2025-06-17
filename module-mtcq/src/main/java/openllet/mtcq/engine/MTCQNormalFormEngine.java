@@ -242,8 +242,6 @@ public class MTCQNormalFormEngine extends AbstractQueryEngine<MetricTemporalConj
                     _timer.stop();
                 if (_displayGUI)
                     printResults(t, kb);
-                else
-                    System.out.println("t = " + t);
                 _resultsToPrintInStreamingMode.clear();
                 if (isLast)
                 {
