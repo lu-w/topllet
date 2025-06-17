@@ -11,6 +11,7 @@ package openllet;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.StringWriter;
+import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -20,6 +21,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.logging.Logger;
+import java.util.Properties;
 
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
@@ -58,6 +60,21 @@ public abstract class OpenlletCmdApp implements Logging
 	public static final Logger _logger = Log.getLogger(OpenlletCmdApp.class);
 	private final static String LINE_BREAK = System.getProperty("line.separator");
 	private final static RDFReaderF READER_FACTORY = ModelFactory.createDefaultModel();
+	private static String _version = "undetermined";
+
+	static {
+		try (InputStream in = OpenlletCmdApp.class.getResourceAsStream("/git.properties")) {
+			if (in != null) {
+				Properties props = new Properties();
+				props.load(in);
+				_version = props.getProperty("git.commit.id.describe", "undetermined");
+			}
+			else
+				System.out.println("Cannot open stream because null");
+		} catch (Exception e) {
+			System.out.println("Could not app determine version:\n" + e);
+		}
+	}
 
 	protected String _appId;
 	protected String _appCmd;
@@ -311,6 +328,7 @@ public abstract class OpenlletCmdApp implements Logging
 		final HelpTable table = new HelpTable(_options);
 
 		u.append(_appId + LINE_BREAK + LINE_BREAK);
+		u.append("Version: " + _version + LINE_BREAK + LINE_BREAK);
 		u.append("Usage: " + _appCmd + LINE_BREAK + LINE_BREAK);
 		u.append(table.print() + LINE_BREAK);
 
