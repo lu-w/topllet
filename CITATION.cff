@@ -1,0 +1,11 @@
+cff-version: 1.2.0
+message: "If you use Topllet in your work, please cite it as follows."
+authors:
+  - family-names: "Westhofen"
+    given-names: "Lukas"
+    orcid: "https://orcid.org/0000-0003-1065-4182"
+title: "Topllet: An engine for answering Metric Temporal Conjunctive Queries"
+version: "0.0.2"
+date-released: "2023-12-15"
+url: "https://github.com/lu-w/topllet"
+license: "Apache-2.0"
