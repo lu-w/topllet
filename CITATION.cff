@@ -9,3 +9,34 @@ version: "0.0.2"
 date-released: "2023-12-15"
 url: "https://github.com/lu-w/topllet"
 license: "Apache-2.0"
+preferred-citation:
+  type: conference-paper
+  authors:
+    - family-names: "Westhofen"
+      given-names: "Lukas"
+    - family-names: "Neurohr"
+      given-names: "Christian"
+    - family-names: "Jung"
+      given-names: "Jean Christoph"
+    - family-names: "Neider"
+      given-names: "Daniel"
+  title: "Topllet: An Optimized Engine for Answering Metric Temporal Conjunctive Queries"
+  collection-title: "Lecture Notes in Computer Science"
+  volume: 14627
+  month: 5
+  year: 2024
+  conference:
+  	- name: "NASA Formal Methods"
+  editors:
+    - family-names: "Benz"
+      given-names: "Nathaniel"
+    - family-names: "Gopinath"
+      given-names: "Divya"
+    - family-names: "Shi"
+      given-names: "Nija"
+  publisher: "Springer Nature Switzerland"
+  isbn: 978-3-031-60698-4
+  start: 314
+  end: 321
+  doi: "10.1007/978-3-031-60698-4_18"
+  url: "https://link.springer.com/chapter/10.1007/978-3-031-60698-4_18"
