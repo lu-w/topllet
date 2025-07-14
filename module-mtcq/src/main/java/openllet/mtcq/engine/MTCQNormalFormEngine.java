@@ -280,6 +280,7 @@ public class MTCQNormalFormEngine extends AbstractQueryEngine<MetricTemporalConj
         return res;
     }
 
+    // TODO move out of engine
     private void printResults(int t, KnowledgeBase kb) {
         Panel panel = new Panel();
         panel.setSize(_screen.getTerminalSize());
