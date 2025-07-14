@@ -1,7 +1,7 @@
 package openllet.examples;
 import openllet.core.KnowledgeBase;
 import openllet.core.KnowledgeBaseImpl;
-import openllet.mtcq.engine.MTCQEngine;
+import openllet.mtcq.engine.MTCQNormalFormEngine;
 import openllet.mtcq.model.kb.InMemoryTemporalKnowledgeBaseImpl;
 import openllet.mtcq.model.kb.TemporalKnowledgeBase;
 import openllet.mtcq.model.query.MetricTemporalConjunctiveQuery;
@@ -32,7 +32,7 @@ public class MTCQExample
         for (KnowledgeBase kb : tkb)
         {
             kb.addIndividual(term("a"));
-            kb.addType(term("a"), term("A"));
+            kb.addType(term("a"), term("B"));
         }
 
         // MTCQ
@@ -42,7 +42,7 @@ public class MTCQExample
 
         // Answering
         System.out.println("Answering MTCQ " + formula);
-        MTCQEngine eng = new MTCQEngine();
+        MTCQNormalFormEngine eng = new MTCQNormalFormEngine();
         QueryResult res = eng.exec(mtcq);
         System.out.println(res);
     }
