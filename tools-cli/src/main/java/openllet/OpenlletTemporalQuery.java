@@ -7,6 +7,9 @@ import openllet.core.exceptions.InconsistentOntologyException;
 import openllet.core.output.TableData;
 import openllet.core.utils.Timer;
 import openllet.mtcq.engine.MTCQNormalFormEngine;
+import openllet.mtcq.ui.LanternaUI;
+import openllet.mtcq.ui.SimplePrintUI;
+import openllet.mtcq.ui.StreamingUIHandler;
 import openllet.query.sparqldl.model.results.QueryResult;
 import openllet.query.sparqldl.model.results.ResultBinding;
 import openllet.mtcq.model.kb.TemporalKnowledgeBase;
@@ -40,6 +43,7 @@ public class OpenlletTemporalQuery extends OpenlletCmdApp
     private MetricTemporalConjunctiveQuery query;
     private TemporalKnowledgeBase kb;
     private OutputFormat outputFormat = OutputFormat.TABULAR;
+    private StreamingUIHandler ui = null;
 
     private enum OutputFormat
     {
@@ -87,6 +91,13 @@ public class OpenlletTemporalQuery extends OpenlletCmdApp
         sendingOption.setIsMandatory(false);
         options.add(sendingOption);
 
+        final OpenlletCmdOption uiOption = new OpenlletCmdOption("ui");
+        uiOption.setShortOption("u");
+        uiOption.setDescription("The UI, if one shall be used. Options: print, graphical.");
+        uiOption.setArg(REQUIRED);
+        uiOption.setIsMandatory(false);
+        options.add(uiOption);
+
         return options;
     }
 
@@ -107,6 +118,8 @@ public class OpenlletTemporalQuery extends OpenlletCmdApp
         setEqualAnswers(_options.getOption("equal").getValueAsBoolean());
         if (_options.getOption("port").exists())
             setPort(_options.getOption("port").getValueAsNonNegativeInteger());
+        if (_options.getOption("ui").exists())
+            setUi(_options.getOption("ui").getValueAsString());
         setOutputFormat("Tabular"); // Currently, no other output format is supported, so no option for it.
     }
 
@@ -118,6 +131,16 @@ public class OpenlletTemporalQuery extends OpenlletCmdApp
     private void setEqualAnswers(Boolean e)
     {
         equalAnswersAllowed = e;
+    }
+
+    private void setUi(final String uiString)
+    {
+        if ("graphical".equals(uiString))
+            ui = new LanternaUI();
+        else if ("print".equals(uiString))
+            ui = new SimplePrintUI();
+        else
+            throw new OpenlletCmdException("Unknown UI: " + uiString + ". Please choose one of: print, graphical.");
     }
 
     private void setPort(Integer p)
@@ -256,7 +279,10 @@ public class OpenlletTemporalQuery extends OpenlletCmdApp
     private void execQuery()
     {
         Timer timer = _timers.createTimer("query execution (w/o loading & initial consistency check)");
-        queryResults = new MTCQNormalFormEngine(streamingMode, zmqPort).exec(query, null, timer);
+        if (ui != null) ui.setup(query);
+        queryResults = new MTCQNormalFormEngine(streamingMode, ui, zmqPort).
+                exec(query, null, timer);
+        if (ui != null) ui.tearDown();
     }
 
     private void printQueryResults()

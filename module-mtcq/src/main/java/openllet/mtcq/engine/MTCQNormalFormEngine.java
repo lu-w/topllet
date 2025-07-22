@@ -1,10 +1,5 @@
 package openllet.mtcq.engine;
 
-import com.googlecode.lanterna.TextColor;
-import com.googlecode.lanterna.gui2.Label;
-import com.googlecode.lanterna.screen.TerminalScreen;
-import com.googlecode.lanterna.terminal.ansi.UnixLikeTerminal;
-import com.googlecode.lanterna.terminal.ansi.UnixTerminal;
 import openllet.aterm.ATermAppl;
 import openllet.core.KnowledgeBase;
 import openllet.core.utils.Pair;
@@ -13,23 +8,16 @@ import openllet.mtcq.engine.rewriting.CXNFTransformer;
 import openllet.mtcq.engine.rewriting.CXNFVerifier;
 import openllet.mtcq.model.kb.StreamingDataHandler;
 import openllet.mtcq.model.query.*;
+import openllet.mtcq.ui.StreamingUIHandler;
 import openllet.query.sparqldl.engine.AbstractQueryEngine;
 import openllet.query.sparqldl.engine.QueryCache;
 import openllet.query.sparqldl.engine.cq.QueryEngine;
 import openllet.query.sparqldl.model.results.MultiQueryResults;
 import openllet.query.sparqldl.model.results.QueryResult;
 import openllet.query.sparqldl.model.results.QueryResultImpl;
-import com.googlecode.lanterna.screen.Screen;
-import com.googlecode.lanterna.terminal.Terminal;
-import com.googlecode.lanterna.gui2.*;
-import openllet.query.sparqldl.model.results.ResultBinding;
 
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.*;
-import java.util.concurrent.TimeUnit;
 
-import static java.lang.Math.max;
 import static openllet.mtcq.engine.rewriting.MTCQSimplifier.*;
 
 public class MTCQNormalFormEngine extends AbstractQueryEngine<MetricTemporalConjunctiveQuery>
@@ -38,11 +26,7 @@ public class MTCQNormalFormEngine extends AbstractQueryEngine<MetricTemporalConj
     private final QueryCache _queryCache = new QueryCache();
     private boolean _streaming = false;
     private int _port = 0; // 0: don't send results via 0MQ; >0: send results
-    private Screen _screen;
-    private Window _window;
-    private MultiWindowTextGUI _gui;
-    private final Map<MetricTemporalConjunctiveQuery, QueryResult> _resultsToPrintInStreamingMode = new HashMap<>();
-    private final boolean _displayGUI = false; // TODO make command line option for GUI
+    private StreamingUIHandler _ui = null;
 
     public MTCQNormalFormEngine()
     {
@@ -55,10 +39,24 @@ public class MTCQNormalFormEngine extends AbstractQueryEngine<MetricTemporalConj
         _streaming = streaming;
     }
 
+    public MTCQNormalFormEngine(boolean streaming, StreamingUIHandler ui)
+    {
+        super();
+        _streaming = streaming;
+        _ui = ui;
+    }
+
     public MTCQNormalFormEngine(boolean streaming, int port)
     {
         super();
         _streaming = streaming;
+        _port = port;
+    }
+    public MTCQNormalFormEngine(boolean streaming, StreamingUIHandler ui, int port)
+    {
+        super();
+        _streaming = streaming;
+        _ui = ui;
         _port = port;
     }
 
@@ -95,20 +93,17 @@ public class MTCQNormalFormEngine extends AbstractQueryEngine<MetricTemporalConj
         // Elements are of the form: query, candidates to check against, temporal result to write to.
         List<ToDo> todoList = new ArrayList<>();
         todoList.add(new ToDo(query, temporalResultAt0));
-
         int maxTime;
         boolean isLast;
         KnowledgeBase kb;
         StreamingDataHandler streamer;
-        if (_timer != null)
-            _timer.stop();
+
+        if (_timer != null) _timer.stop();
         if (_streaming)
         {
             kb = query.getTemporalKB().get(0);
             streamer = new StreamingDataHandler(kb, _port, query.getTemporalKB().getTimer());
             maxTime = Integer.MAX_VALUE;
-            if (_displayGUI)
-                setupOutput();
         }
         else
         {
@@ -116,12 +111,12 @@ public class MTCQNormalFormEngine extends AbstractQueryEngine<MetricTemporalConj
             streamer = null;
             maxTime =  query.getTemporalKB().size();
         }
-        if (_timer != null)
-            _timer.start();
+        if (_timer != null) _timer.start();
+
         for (int t = 0; t < maxTime; t++)
         {
-            if (_timer != null)
-                _timer.stop(); // Timer shall not consider loading of KBs
+            if (_timer != null) _timer.stop(); // Timer shall not consider loading of KBs
+            if (_ui != null) _ui.informAboutStartOfIteration(t);
             if (_streaming)
             {
                 streamer.waitAndUpdateKB();
@@ -132,8 +127,7 @@ public class MTCQNormalFormEngine extends AbstractQueryEngine<MetricTemporalConj
                 kb = query.getTemporalKB().get(t);
                 isLast = t == (maxTime - 1);
             }
-            if (_timer != null)
-                _timer.start();
+            if (_timer != null) _timer.start();
             List<ToDo> nextTodoList = new ArrayList<>();
             for (ToDo todo : todoList)
             {
@@ -236,156 +230,36 @@ public class MTCQNormalFormEngine extends AbstractQueryEngine<MetricTemporalConj
             todoList = nextTodoList;
             _queryCache.invalidate();
             QueryEngine.getCache().invalidate();
+            if (_timer != null) _timer.stop();
+            if (_ui != null)
+            {
+                _ui.informAboutResults(t, kb, query, null); // we cannot pass a result due to lazy evaluation
+                _ui.informAboutEndOfIteration(t);
+            }
             if (_streaming)
             {
-                if (_timer != null)
-                    _timer.stop();
-                if (_displayGUI)
-                    printResults(t, kb);
-                _resultsToPrintInStreamingMode.clear();
                 if (isLast)
                 {
                     maxTime = t;
                     break;
                 }
-                if (_timer != null)
-                    _timer.start();
                 streamer.sendAck();
             }
+            if (_timer != null) _timer.start();
         }
-
-
 
         // Adds empty query result for all things still in to-do list (they exceeded the trace length).
         for (ToDo todo : todoList)
             todo.temporalQueryResult.addNewConjunct(new QueryResultImpl(todo.query));
 
         QueryResult res = temporalResultAt0.collapse();
-        if (_streaming)
-        {
-            if (_displayGUI)
-            {
-                _resultsToPrintInStreamingMode.put(query, res);
-                printResults(maxTime, kb);
-                try
-                {
-                    TimeUnit.SECONDS.sleep(10);
-                } catch (InterruptedException e)
-                {
-                    throw new RuntimeException(e);
-                }
-            }
-            streamer.sendResult(res);
+        if (_ui != null) {
+            _ui.informAboutResults(query.getTemporalKB().size() - 1, query.getTemporalKB().getLastLoadedKB(),
+                    query, res);
+            _ui.clear();
         }
+        if (_streaming) streamer.sendResult(res);
         return res;
-    }
-
-    // TODO move out of engine
-    private void printResults(int t, KnowledgeBase kb) {
-        Panel panel = new Panel();
-        panel.setSize(_screen.getTerminalSize());
-        panel.setLayoutManager(new LinearLayout(Direction.VERTICAL));
-        _window.setComponent(panel);
-        Label toplletLabel = new Label("Topllet Stream Reasoner");
-        panel.addComponent(toplletLabel);
-
-        String aboxText = printAboxInfo(kb) + (_timer != null ? "\nTimer: " + _timer.getTotal() + " ms" : "");
-        Panel aboxP = new Panel();
-        aboxP.setSize(_screen.getTerminalSize());
-        aboxP.setLayoutManager(new LinearLayout(Direction.VERTICAL));
-        Label aboxLabel = new Label("");
-        aboxLabel.setLabelWidth(150);
-        aboxLabel.setText(aboxText);
-        Label aboxHead = new Label("");
-        aboxHead.setLabelWidth(150);
-        aboxHead.setText("ABox Stats (t = " + t + "):");
-        aboxP.addComponent(aboxHead);
-        aboxP.addComponent(aboxLabel);
-        panel.addComponent(aboxP.withBorder(Borders.doubleLine()));
-
-        List<MetricTemporalConjunctiveQuery> queries = new ArrayList<>(_resultsToPrintInStreamingMode.keySet().stream().toList());
-        queries.sort(Comparator.comparing(Object::toString));
-        for (MetricTemporalConjunctiveQuery q : queries) {
-            String text = printSimpleResult(_resultsToPrintInStreamingMode.get(q));
-            Panel p = new Panel();
-            p.setSize(_screen.getTerminalSize());
-            p.setLayoutManager(new LinearLayout(Direction.VERTICAL));
-            Label lr = new Label("");
-            lr.setLabelWidth(150);
-            lr.setText(text);
-            Label le = new Label("");
-            le.setLabelWidth(150);
-            Label lq = new Label("");
-            lq.setLabelWidth(150);
-            lq.setText(q.toString());
-            p.addComponent(lq);
-            p.addComponent(le);
-            p.addComponent(lr);
-            panel.addComponent(p.withBorder(Borders.doubleLine()));
-        }
-        try {
-            _screen.doResizeIfNecessary();
-            _gui.getGUIThread().processEventsAndUpdate();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    private String printAboxInfo(KnowledgeBase kb)
-    {
-        int relCount = 0;
-        int clsCount = 0;
-        int indCount = 0;
-        int litCount = 0;
-        for (ATermAppl i : kb.getIndividuals())
-        {
-            indCount++;
-            clsCount += max(0, kb.getABox().getIndividual(i).getTypes().size() - 2); // -2 due to _TOP_ and FunValue(i)
-            relCount += kb.getABox().getIndividual(i).getOutEdges().size();
-        }
-        for (ATermAppl n : kb.getABox().getNodeList())
-            if (kb.getABox().getLiteral(n) != null)
-                litCount++;
-        return "Individuals: " + indCount + "\nLiterals: " + litCount + "\nTypes: " + clsCount + "\nRelations: " +
-                relCount + "\n";
-    }
-
-    private String printSimpleResult(QueryResult resultBindings)
-    {
-        StringBuilder res = new StringBuilder("{");
-        for (ResultBinding binding : resultBindings)
-        {
-            res.append("(");
-            for (ATermAppl var : resultBindings.getQuery().getResultVars())
-                res.append(binding.getValue(var)).append(", ");
-            if (res.length() > 2)
-                res.delete(res.length() - 2, res.length());
-            res.append("), ");
-        }
-        if (res.length() > 2)
-            res.delete(res.length() - 2, res.length());
-        res.append("}");
-        return res.toString();
-    }
-
-    private void setupOutput()
-    {
-        try
-        {
-            Terminal _terminal = new UnixTerminal(System.in, System.out, StandardCharsets.UTF_8,
-                    UnixLikeTerminal.CtrlCBehaviour.CTRL_C_KILLS_APPLICATION);
-            _screen = new TerminalScreen(_terminal);
-            _screen.startScreen();
-            _window = new BasicWindow();
-            _gui = new MultiWindowTextGUI(_screen, new DefaultWindowManager(), new EmptySpace(TextColor.ANSI.BLUE));
-            _gui.addWindow(_window);
-            _screen.doResizeIfNecessary();
-            _gui.getGUIThread().processEventsAndUpdate();
-        }
-        catch (IOException e)
-        {
-            throw new RuntimeException(e);
-        }
     }
 
     private List<MetricTemporalConjunctiveQuery> sort(List<MetricTemporalConjunctiveQuery> cnf)
@@ -481,8 +355,7 @@ public class MTCQNormalFormEngine extends AbstractQueryEngine<MetricTemporalConj
                 result.explicate();
             }
             _queryCache.add(q, candidates, result);  // TODO maybe add overwrite() functionality?
-            if (toPrint != null)
-                _resultsToPrintInStreamingMode.put(toPrint, result);
+            if (_ui != null) _ui.informAboutResults(-1, kb, q, result);
         }
         return result;
     }
