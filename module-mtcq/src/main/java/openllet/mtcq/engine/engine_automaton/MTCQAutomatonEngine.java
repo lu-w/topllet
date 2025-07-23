@@ -1,4 +1,4 @@
-package openllet.mtcq.engine;
+package openllet.mtcq.engine.engine_automaton;
 
 import openllet.core.OpenlletOptions;
 import openllet.query.sparqldl.engine.AbstractQueryEngine;
@@ -15,21 +15,21 @@ import java.util.*;
 import java.util.logging.Logger;
 
 /**
- * Query engine for answering non-Boolean metric temporal conjunctive queries.
+ * Query engine for answering non-Boolean metric temporal conjunctive queries via finite automata (FA).
  * It basically steps through the FA corresponding to the given formula and propagates (un)satisfiability knowledge
  * along the breadth-first state traversal.
  * As an optimization, it uses CQ answering in a pre-processing run to efficiently generate (partial)
  * (un)satisfiability knowledge.
  */
 @Deprecated
-public class MTCQEngine extends AbstractQueryEngine<MetricTemporalConjunctiveQuery>
+public class MTCQAutomatonEngine extends AbstractQueryEngine<MetricTemporalConjunctiveQuery>
         implements QueryExec<MetricTemporalConjunctiveQuery>
 {
-    public static final Logger _logger = Log.getLogger(MTCQEngine.class);
+    public static final Logger _logger = Log.getLogger(MTCQAutomatonEngine.class);
 
     private EdgeConstraintChecker _edgeChecker;
 
-    public MTCQEngine()
+    public MTCQAutomatonEngine()
     {
         _booleanEngine = null; // Enforces this engine also as the Boolean engine.
     }

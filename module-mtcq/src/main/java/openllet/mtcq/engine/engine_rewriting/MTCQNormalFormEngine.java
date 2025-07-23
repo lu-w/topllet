@@ -1,12 +1,10 @@
-package openllet.mtcq.engine;
+package openllet.mtcq.engine.engine_rewriting;
 
 import openllet.aterm.ATermAppl;
-import openllet.core.KnowledgeBase;
 import openllet.core.utils.Pair;
 import openllet.mtcq.engine.atemporal.BDQEngine;
 import openllet.mtcq.engine.rewriting.CXNFTransformer;
 import openllet.mtcq.engine.rewriting.CXNFVerifier;
-import openllet.mtcq.model.kb.StreamingDataHandler;
 import openllet.mtcq.model.query.*;
 import openllet.mtcq.ui.StreamingUIHandler;
 import openllet.query.sparqldl.engine.AbstractQueryEngine;
@@ -15,43 +13,56 @@ import openllet.query.sparqldl.engine.cq.QueryEngine;
 import openllet.query.sparqldl.model.results.MultiQueryResults;
 import openllet.query.sparqldl.model.results.QueryResult;
 import openllet.query.sparqldl.model.results.QueryResultImpl;
+import openllet.shared.tools.Log;
 
 import java.util.*;
+import java.util.logging.Logger;
 
 import static openllet.mtcq.engine.rewriting.MTCQSimplifier.*;
 
+/**
+ * Query engine for answering non-Boolean metric temporal conjunctive queries via rewriting into a normal form.
+ * TODO:
+ *   - add logging
+ *   - comments & docstrings
+ */
 public class MTCQNormalFormEngine extends AbstractQueryEngine<MetricTemporalConjunctiveQuery>
 {
-    private final BDQEngine _bdqEngine = new BDQEngine();
-    private final QueryCache _queryCache = new QueryCache();
-    private boolean _streaming = false;
-    private int _port = 0; // 0: don't send results via 0MQ; >0: send results
-    private StreamingUIHandler _ui = null;
+    public static final Logger _logger = Log.getLogger(MTCQNormalFormEngine.class);
 
+    private final BDQEngine _bdqEngine = new BDQEngine(); // For answering non-temporal queries
+    private final QueryCache _queryCache = new QueryCache(); // Caches intermediate answers
+    private final SortingStrategy _sorter = new SimpleSortingStrategy(); // To reorder conjunctions for efficiency
+    private boolean _streaming = false; // Whether to fetch the input data from the 0MQ port
+    private int _port = -1; // The port used for 0MQ (when in streaming mode)
+    private StreamingUIHandler _ui = null; // If null: Do not print results in UI
+
+    /**
+     * Creates a new MTCQ engine for answering MTCQs via rewriting into normal form.
+     */
     public MTCQNormalFormEngine()
     {
         super();
     }
 
-    public MTCQNormalFormEngine(boolean streaming)
-    {
-        super();
-        _streaming = streaming;
-    }
-
-    public MTCQNormalFormEngine(boolean streaming, StreamingUIHandler ui)
-    {
-        super();
-        _streaming = streaming;
-        _ui = ui;
-    }
-
+    /**
+     * Creates a new MTCQ engine for answering MTCQs via rewriting into normal form.
+     * @param streaming If true, listens to the specified port for 0MQ messages containing the data.
+     * @param port The 0MQ port when in streaming mode.
+     */
     public MTCQNormalFormEngine(boolean streaming, int port)
     {
         super();
         _streaming = streaming;
         _port = port;
     }
+
+    /**
+     * Creates a new MTCQ engine for answering MTCQs via rewriting into normal form.
+     * @param streaming If true, listens to the specified port for 0MQ messages containing the data.
+     * @param ui The UI to pass (intermediate) results to, which are then printed to the user.
+     * @param port The 0MQ port when in streaming mode.
+     */
     public MTCQNormalFormEngine(boolean streaming, StreamingUIHandler ui, int port)
     {
         super();
@@ -61,75 +72,43 @@ public class MTCQNormalFormEngine extends AbstractQueryEngine<MetricTemporalConj
     }
 
     @Override
-    protected QueryResult execABoxQuery(MetricTemporalConjunctiveQuery q, QueryResult excludeBindings, QueryResult restrictToBindings)
+    protected QueryResult execABoxQuery(MetricTemporalConjunctiveQuery q, QueryResult excludeBindings,
+                                        QueryResult restrictToBindings)
     {
         CXNFTransformer.resetCache();
-        return answerTime(q);
+        QueryResult result = answer(q);
+        // If required, consider result restriction after computing bindings. This is no primary use case of the MTCQ
+        // engine and thus does not matter from a performance perspective.
+        if (restrictToBindings != null && !restrictToBindings.isEmpty())
+            result.retainAll(restrictToBindings);
+        return result;
     }
 
-    static class ToDo
-    {
-        MetricTemporalConjunctiveQuery query;
-        QueryResult candidates;
-        TemporalQueryResult temporalQueryResult;
-        ToDo(MetricTemporalConjunctiveQuery query, QueryResult candidates, TemporalQueryResult temporalQueryResult)
-        {
-            this.query = query;
-            this.candidates = candidates;
-            this.temporalQueryResult = temporalQueryResult;
-        }
-        ToDo(MetricTemporalConjunctiveQuery query, TemporalQueryResult temporalQueryResult)
-        {
-            this.query = query;
-            this.candidates = null;
-            this.temporalQueryResult = temporalQueryResult;
-        }
-    }
-
-    private QueryResult answerTime(MetricTemporalConjunctiveQuery query)
+    /**
+     * Core functionality of the query engine. Answers the MTCQ by implementing the rewriting-based algorithm presented
+     * in 'Temporal Conjunctive Query Answering via Rewriting'.
+     * Allows for both a streaming and offline setting, which is configured in the constructor of this class.
+     * The global timer, if given, is stopped on loading of knowledge bases.
+     * @param query The MTCQ to answer, containing a pointer to the temporal knowledge base to reason over.
+     * @return The certain answers of the query w.r.t. the temporal knowledge base.
+     */
+    private QueryResult answer(MetricTemporalConjunctiveQuery query)
     {
         Collection<ATermAppl> vars = query.getResultVars();
         TemporalQueryResult temporalResultAt0 = new TemporalQueryResult(query);
-        // Elements are of the form: query, candidates to check against, temporal result to write to.
-        List<ToDo> todoList = new ArrayList<>();
-        todoList.add(new ToDo(query, temporalResultAt0));
-        int maxTime;
-        boolean isLast;
-        KnowledgeBase kb;
-        StreamingDataHandler streamer;
+        TemporalIterationState iteration = new TemporalIterationState(query, _streaming, _port, _timer);
+        List<MTCQAnsweringToDo> todoList = new ArrayList<>();
+        todoList.add(new MTCQAnsweringToDo(query, temporalResultAt0));
 
-        if (_timer != null) _timer.stop();
-        if (_streaming)
+        // Main loop: Iteration over all timestamps in the database until last knowledge base.
+        while (true)
         {
-            kb = query.getTemporalKB().get(0);
-            streamer = new StreamingDataHandler(kb, _port, query.getTemporalKB().getTimer());
-            maxTime = Integer.MAX_VALUE;
-        }
-        else
-        {
-            kb = query.getTemporalKB().get(0);
-            streamer = null;
-            maxTime =  query.getTemporalKB().size();
-        }
-        if (_timer != null) _timer.start();
+            System.out.println(iteration.getTimePoint());
+            System.out.println(iteration.getMaxTime());
+            System.out.println();
 
-        for (int t = 0; t < maxTime; t++)
-        {
-            if (_timer != null) _timer.stop(); // Timer shall not consider loading of KBs
-            if (_ui != null) _ui.informAboutStartOfIteration(t);
-            if (_streaming)
-            {
-                streamer.waitAndUpdateKB();
-                isLast = streamer.isLast();
-            }
-            else
-            {
-                kb = query.getTemporalKB().get(t);
-                isLast = t == (maxTime - 1);
-            }
-            if (_timer != null) _timer.start();
-            List<ToDo> nextTodoList = new ArrayList<>();
-            for (ToDo todo : todoList)
+            List<MTCQAnsweringToDo> nextTodoList = new ArrayList<>();
+            for (MTCQAnsweringToDo todo : todoList)
             {
                 QueryResult candidates = todo.candidates;
                 MetricTemporalConjunctiveQuery transformed = CXNFTransformer.transform(todo.query);
@@ -138,15 +117,16 @@ public class MTCQNormalFormEngine extends AbstractQueryEngine<MetricTemporalConj
                     throw new RuntimeException("Unexpected: After transformation, MTCQ is not in normal form. " +
                             "Reason is: " + verifier.getReason());
 
-                List<MetricTemporalConjunctiveQuery> flattenedCNF = sort(flattenAnd(transformed));
+                List<MetricTemporalConjunctiveQuery> flattenedCNF = _sorter.sort(flattenAnd(transformed));
                 for (MetricTemporalConjunctiveQuery conjunct : flattenedCNF)
                 {
-                    if (!conjunct.isTemporal())  // TODO || conjunct instanceof OrFormula or && or.isOverDifferentResultVars()
+                    // TODO || conjunct instanceof OrFormula or && or.isOverDifferentResultVars()
+                    if (!conjunct.isTemporal())
                     {
                         QueryResult atempResult = null;
-                        for (MetricTemporalConjunctiveQuery ucq : sort(flattenAnd(conjunct)))
+                        for (MetricTemporalConjunctiveQuery ucq : _sorter.sort(flattenAnd(conjunct)))
                         {
-                            QueryResult ucqResult = answerUCQWithNegations(ucq, kb, isLast, candidates, vars, t);
+                            QueryResult ucqResult = answerUCQWithNegations(ucq, iteration, candidates, vars);
                             if (atempResult == null)
                                 atempResult = ucqResult;
                             else
@@ -178,10 +158,9 @@ public class MTCQNormalFormEngine extends AbstractQueryEngine<MetricTemporalConj
                             QueryResult localCandidates = null;
                             if (candidates != null)
                                 localCandidates = candidates.copy();
-                            for (MetricTemporalConjunctiveQuery ucq : sort(flattenAnd(atempoOrPart)))
+                            for (MetricTemporalConjunctiveQuery ucq : _sorter.sort(flattenAnd(atempoOrPart)))
                             {
-                                QueryResult ucqResult = answerUCQWithNegations(ucq, kb, isLast, localCandidates, vars,
-                                        t);
+                                QueryResult ucqResult = answerUCQWithNegations(ucq, iteration, localCandidates, vars);
                                 if (atempOrResult == null)
                                     atempOrResult = ucqResult;
                                 else
@@ -202,11 +181,13 @@ public class MTCQNormalFormEngine extends AbstractQueryEngine<MetricTemporalConj
                             {
                                 nextCandidates = candidates.copy();
                                 if (atempOrResult != null)
-                                    nextCandidates.removeAll(atempOrResult); // already found answer - no need to check anymore
+                                    // already found answer - no need to check anymore
+                                    nextCandidates.removeAll(atempOrResult);
                             }
-                            // check if we can merge with some existing todos - then we just use the existing temporal query result
+                            // check if we can merge with some existing todos
+                            //  -> then we just use the existing temporal query result
                             TemporalQueryResult nextTemporalQueryResult = null;
-                            for (ToDo existingToDo : nextTodoList)
+                            for (MTCQAnsweringToDo existingToDo : nextTodoList)
                                 if (XtempPart.getSubFormula().equals(existingToDo.query))
                                 {
                                     if (existingToDo.candidates != null)
@@ -218,7 +199,8 @@ public class MTCQNormalFormEngine extends AbstractQueryEngine<MetricTemporalConj
                             if (nextTemporalQueryResult == null)
                             {
                                 nextTemporalQueryResult = new TemporalQueryResult(XtempPart.getSubFormula());
-                                nextTodoList.add(new ToDo(XtempPart.getSubFormula(), nextCandidates, nextTemporalQueryResult));
+                                nextTodoList.add(new MTCQAnsweringToDo(
+                                        XtempPart.getSubFormula(), nextCandidates, nextTemporalQueryResult));
                             }
                             // adds assembled temporal query result and atemporal query result to current todo
                             todo.temporalQueryResult.addNewConjunct(atempOrResult, nextTemporalQueryResult);
@@ -231,75 +213,35 @@ public class MTCQNormalFormEngine extends AbstractQueryEngine<MetricTemporalConj
             todoList = nextTodoList;
             _queryCache.invalidate();
             QueryEngine.getCache().invalidate();
-            if (_timer != null) _timer.stop();
-            if (_ui != null)
-            {
-                _ui.informAboutResults(t, kb, query, null); // we cannot pass a result due to lazy evaluation
-                _ui.informAboutEndOfIteration(t);
-            }
-            if (_streaming)
-            {
-                if (isLast)
-                {
-                    maxTime = t;
-                    break;
-                }
-                streamer.sendAck();
-            }
-            if (_timer != null) _timer.start();
+            iteration.notifyUIAndStreamingAboutIterationEnd();
+            if (iteration.hasNext())
+                iteration = iteration.loadNextIteration();
+            else
+                break;
         }
 
-        // Adds empty query result for all things still in to-do list (they exceeded the trace length).
-        for (ToDo todo : todoList)
+        // Assembles final results and notifies all listeners.
+        // For this, adds empty query result for all things still in to-do list (they exceeded the trace length).
+        for (MTCQAnsweringToDo todo : todoList)
             todo.temporalQueryResult.addNewConjunct(new QueryResultImpl(todo.query));
-
         QueryResult res = temporalResultAt0.collapse();
-        if (_ui != null) {
-            _ui.informAboutResults(query.getTemporalKB().size() - 1, query.getTemporalKB().getLastLoadedKB(),
-                    query, res);
-            _ui.clear();
-        }
-        if (_streaming) streamer.sendResult(res);
+        iteration.notifyUIAndStreamingAboutResult(res);
         return res;
     }
 
-    private List<MetricTemporalConjunctiveQuery> sort(List<MetricTemporalConjunctiveQuery> cnf)
-    {
-        List<MetricTemporalConjunctiveQuery> sorted = new ArrayList<>();
-        for (MetricTemporalConjunctiveQuery conjunct : cnf)
-            if (conjunct.isTemporal())
-                sorted.add(conjunct);
-            else if (answerableByCQ(conjunct))
-                sorted.add(0, conjunct);
-            else if (!sorted.isEmpty())
-                if (sorted.get(0).isTemporal())
-                    sorted.add(0, conjunct);
-                else
-                    sorted.add(1, conjunct);
-            else
-                sorted.add(0, conjunct);
-        return sorted;
-        // TODO adapt sorted s.t. atmeporal parts with disjunctions that are supersets of other disjunctions are answered first?
-    }
-
-    private boolean answerableByCQ(MetricTemporalConjunctiveQuery mtcq)
-    {
-        if (mtcq instanceof ConjunctiveQueryFormula)
-            return true;
-        else if (mtcq instanceof OrFormula or)
-        {
-            int numberOfCQs = 0;
-            for (MetricTemporalConjunctiveQuery disjunct : flattenOr(or))
-                if (disjunct instanceof ConjunctiveQueryFormula)
-                    numberOfCQs++;
-            return numberOfCQs <= 1;
-        }
-        else
-            return true;
-    }
-
-    private QueryResult answerUCQWithNegations(MetricTemporalConjunctiveQuery q, KnowledgeBase kb, boolean isLastKB,
-                                               QueryResult candidates, Collection<ATermAppl> variables, int t)
+    /**
+     * Non-temporal base case of the MTCQ rewriting engine. Answers UCQs with possible negated CQs in it.
+     * Essentially wraps the {@code BDQEngine} and handles non-temporal non-CQ formulae such as last or end.
+     * @param q An MTCQ that is a UCQ with only basic atoms (end, last, true, false), CQs, or negated CQs in it.
+     * @param kb The non-temporal knowledge base to answer the query over.
+     * @param candidates A set of candidates. If not empty, only these candidates will be considered as possible
+     *                   answers.
+     * @param variables A set of all variables, in case the overall MTCQ contains more variables than the given UCQ.
+     *                  If this is the case, the function extends its generated answers to cover all variables.
+     * @return The answers to the given query.
+     */
+    private QueryResult answerUCQWithNegations(MetricTemporalConjunctiveQuery q, TemporalIterationState kb,
+                                               QueryResult candidates, Collection<ATermAppl> variables)
     {
         Pair<QueryResult, QueryResult> cache = _queryCache.fetch(q, candidates);
         QueryResult result = cache.first;
@@ -312,7 +254,7 @@ public class MTCQNormalFormEngine extends AbstractQueryEngine<MetricTemporalConj
             for (MetricTemporalConjunctiveQuery disjunct : flattenOr(q))
             {
                 // Note: EndFormula always unsatisfiable before or at last KB -> skip
-                if (disjunct instanceof LastFormula && isLastKB)
+                if (disjunct instanceof LastFormula && kb.isLast())
                     return candidates.copy();
                 else if (disjunct instanceof PropositionalTrueFormula || disjunct instanceof LogicalTrueFormula)
                     return candidates.copy();
@@ -320,13 +262,13 @@ public class MTCQNormalFormEngine extends AbstractQueryEngine<MetricTemporalConj
                         (disjunct instanceof NotFormula not && not.getSubFormula() instanceof ConjunctiveQueryFormula))
                 {
                     cleanDisjuncts.add(disjunct);
-                    disjunct.setKB(kb);
+                    disjunct.setKB(kb.getKB());
                 }
             }
             if (cleanDisjuncts.size() > 1)
             {
                 OrFormula orFormula = makeOr(cleanDisjuncts);
-                orFormula.setKB(kb);  // TODO fix correct setting of KB in makeOr()
+                orFormula.setKB(kb.getKB());  // TODO fix correct setting of KB in makeOr()
                 newResult = _bdqEngine.execABoxQuery(orFormula, null, candidates);
                 toPrint = orFormula;
             }
@@ -343,20 +285,20 @@ public class MTCQNormalFormEngine extends AbstractQueryEngine<MetricTemporalConj
                 }
             }
             else
-                // we have a formula of the form "last v end v last v false v false ..." and are not at last or end point.
-                //   -> nothing can entail this formula
+                // We have a formula of the form "last v end v last v false ..." and are not at last or end point.
+                //   -> Nothing can entail this formula
                 newResult = new QueryResultImpl(q);
             if (newResult instanceof MultiQueryResults m)
                 newResult = m.toQueryResultImpl(q);
             result.addAll(newResult);
-            // expands to all variables (can probably be done more efficiently) - suffices for now
+            // Expands to all variables
             if (!variables.equals(result.getResultVars()))
             {
                 result.expandToAllVariables(variables);
                 result.explicate();
             }
             _queryCache.add(q, candidates, result);  // TODO maybe add overwrite() functionality?
-            if (_ui != null) _ui.informAboutResults(t, kb, q, result);
+            if (_ui != null) _ui.informAboutResults(kb.getTimePoint(), kb.getKB(), q, result);
         }
         return result;
     }

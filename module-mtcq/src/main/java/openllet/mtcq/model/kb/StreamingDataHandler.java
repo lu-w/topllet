@@ -12,6 +12,7 @@ import openllet.core.KnowledgeBase;
 import openllet.core.utils.ATermUtils;
 import openllet.core.utils.Timer;
 
+import javax.annotation.Nullable;
 import java.util.*;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
@@ -19,6 +20,10 @@ import java.util.regex.Pattern;
 
 import static openllet.core.utils.TermFactory.literal;
 
+/**
+ * Manages sending and receiving data when MTCQ engine is in the streaming mode. Implemented via 0MQ. Parses and adds
+ * resp. updates the received data in the configured knowledge base.
+ */
 public class StreamingDataHandler
 {
     public static final Logger _logger = Log.getLogger(StreamingDataHandler.class);
@@ -43,9 +48,10 @@ public class StreamingDataHandler
         _timer = timer;
     }
 
-    public void sendResult(QueryResult result)
+    public void sendResult(@Nullable QueryResult result)
     {
-        _socket.send(result.toString());
+        if (result != null)
+            _socket.send(result.toString());
     }
 
     public void sendAck()

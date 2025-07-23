@@ -23,6 +23,10 @@ import java.util.*;
 
 import static openllet.mtcq.engine.rewriting.MTCQSimplifier.flattenOr;
 
+/**
+ * Engine for answering Boolean Disjunctive Queries (BDQs), i.e., a union of (possibly negated) CQs.
+ * Required by the {@code MTCQNormalFormEngine}.
+ */
 public class BDQEngine extends AbstractQueryEngine<MetricTemporalConjunctiveQuery>
 {
     private final UnionQueryEngineSimple _ucqEngine = new UnionQueryEngineSimple();

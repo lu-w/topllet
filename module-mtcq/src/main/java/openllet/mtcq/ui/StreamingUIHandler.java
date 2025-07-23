@@ -7,6 +7,10 @@ import openllet.query.sparqldl.model.results.QueryResult;
 
 import javax.annotation.Nullable;
 
+/**
+ * Interface for UIs that can be used by the {@code MTCQNormalFormEngine}. The engine will execute the callbacks at
+ * their corresponding times during execution of the query answering algorithm.
+ */
 public interface StreamingUIHandler {
 
     /**

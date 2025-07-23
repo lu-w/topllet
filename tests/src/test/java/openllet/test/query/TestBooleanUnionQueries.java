@@ -1,13 +1,7 @@
 package openllet.test.query;
 
 import openllet.aterm.ATermAppl;
-import openllet.core.KnowledgeBase;
-import openllet.core.KnowledgeBaseImpl;
-import openllet.mtcq.engine.MTCQNormalFormEngine;
-import openllet.mtcq.model.query.MetricTemporalConjunctiveQuery;
 import openllet.query.sparqldl.engine.ucq.BooleanUnionQueryEngineSimple;
-import openllet.query.sparqldl.engine.ucq.UnionQueryEngineSimple;
-import openllet.query.sparqldl.model.cq.ConjunctiveQuery;
 import openllet.query.sparqldl.model.ucq.UnionQuery;
 import org.junit.Test;
 

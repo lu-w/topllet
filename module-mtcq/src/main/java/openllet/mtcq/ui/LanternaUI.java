@@ -79,7 +79,7 @@ public class LanternaUI implements StreamingUIHandler {
     public void informAboutResults(int timePoint, KnowledgeBase kb, Query<?> query, QueryResult result) {
         if (result != null && query instanceof MetricTemporalConjunctiveQuery q) {
             _resultsToPrintInStreamingMode.put(q, result);
-            refresh(timePoint, kb); // TODO check if refresh can be done on every result information (performance)
+            refresh(timePoint, kb);
         }
     }
 
