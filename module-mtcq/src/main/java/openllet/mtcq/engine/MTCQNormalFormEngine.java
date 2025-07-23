@@ -146,7 +146,7 @@ public class MTCQNormalFormEngine extends AbstractQueryEngine<MetricTemporalConj
                         QueryResult atempResult = null;
                         for (MetricTemporalConjunctiveQuery ucq : sort(flattenAnd(conjunct)))
                         {
-                            QueryResult ucqResult = answerUCQWithNegations(ucq, kb, isLast, candidates, vars);
+                            QueryResult ucqResult = answerUCQWithNegations(ucq, kb, isLast, candidates, vars, t);
                             if (atempResult == null)
                                 atempResult = ucqResult;
                             else
@@ -180,7 +180,8 @@ public class MTCQNormalFormEngine extends AbstractQueryEngine<MetricTemporalConj
                                 localCandidates = candidates.copy();
                             for (MetricTemporalConjunctiveQuery ucq : sort(flattenAnd(atempoOrPart)))
                             {
-                                QueryResult ucqResult = answerUCQWithNegations(ucq, kb, isLast, localCandidates, vars);
+                                QueryResult ucqResult = answerUCQWithNegations(ucq, kb, isLast, localCandidates, vars,
+                                        t);
                                 if (atempOrResult == null)
                                     atempOrResult = ucqResult;
                                 else
@@ -298,7 +299,7 @@ public class MTCQNormalFormEngine extends AbstractQueryEngine<MetricTemporalConj
     }
 
     private QueryResult answerUCQWithNegations(MetricTemporalConjunctiveQuery q, KnowledgeBase kb, boolean isLastKB,
-                                               QueryResult candidates, Collection<ATermAppl> variables)
+                                               QueryResult candidates, Collection<ATermAppl> variables, int t)
     {
         Pair<QueryResult, QueryResult> cache = _queryCache.fetch(q, candidates);
         QueryResult result = cache.first;
@@ -355,7 +356,7 @@ public class MTCQNormalFormEngine extends AbstractQueryEngine<MetricTemporalConj
                 result.explicate();
             }
             _queryCache.add(q, candidates, result);  // TODO maybe add overwrite() functionality?
-            if (_ui != null) _ui.informAboutResults(-1, kb, q, result);
+            if (_ui != null) _ui.informAboutResults(t, kb, q, result);
         }
         return result;
     }
