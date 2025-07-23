@@ -15,6 +15,7 @@ import openllet.query.sparqldl.model.results.QueryResult;
 import openllet.query.sparqldl.model.results.QueryResultImpl;
 import openllet.shared.tools.Log;
 
+import javax.annotation.Nullable;
 import java.util.*;
 import java.util.logging.Logger;
 
@@ -116,62 +117,39 @@ public class MTCQNormalFormEngine extends AbstractQueryEngine<MetricTemporalConj
                 {
                     // Two cases:
                     // 1. a conjunct is non-temporal (can be answered directly)
-                    // 2. it is temporal
+                    // 2. it is temporal (required recursive answering)
                     if (!conjunct.isTemporal())
                         answerNonTemporalConjunct(conjunct, candidates, query.getResultVars(), todo, iteration);
                     else
                     {
+                        MetricTemporalConjunctiveQuery temporalFormula;
+                        QueryResult atemporalOrResult;
                         // According to the normal form, the formula can either be a StrongNextFormula or an OrFormula
-                        MetricTemporalConjunctiveQuery tempPart = null;
-                        QueryResult atempOrResult = null;
-                        // Case OrFormula
                         if (conjunct instanceof OrFormula or)
                         {
                             Pair<MetricTemporalConjunctiveQuery, MetricTemporalConjunctiveQuery> parts =
                                     or.splitIntoTemporalAndNonTemporalPart();
-                            atempOrResult = answerNonTemporalPartOfNormalFormOr(parts.first, candidates, iteration,
+                            atemporalOrResult = answerNonTemporalPartOfNormalFormOr(parts.first, candidates, iteration,
                                     query.getResultVars());
-                            tempPart = parts.second;
+                            temporalFormula = parts.second;
                         }
-                        // Case StrongNextFormula
                         else
-                            tempPart = conjunct;
-                        // Sanity check; we should never run into this (otherwise, the normal form is broken).
-                        if (!(tempPart instanceof StrongNextFormula XTempPart))
-                            throw new RuntimeException("Unexpected temporal operator: " + tempPart.getClass());
-
+                        {
+                            atemporalOrResult = null;
+                            temporalFormula = conjunct;
+                        }
+                        // Sanity check; we should never run into this (otherwise, the normal form is broken)
+                        if (!(temporalFormula instanceof StrongNextFormula nextFormula))
+                            throw new RuntimeException("Unexpected temporal operator: " + temporalFormula.getClass());
                         // Assembles candidates for inner part of next formula
-                        QueryResult nextCandidates = null;
-                        if (candidates != null)
-                        {
-                            nextCandidates = candidates.copy();
-                            if (atempOrResult != null)
-                                // already found answer - no need to check anymore
-                                nextCandidates.removeAll(atempOrResult);
-                        }
-                        // check if we can merge with some existing todos
-                        //  -> then we just use the existing temporal query result
-                        TemporalQueryResult nextTemporalQueryResult = null;
-                        for (MTCQAnsweringToDo existingToDo : nextTodoList)
-                            if (XTempPart.getSubFormula().equals(existingToDo.query))
-                            {
-                                if (existingToDo.candidates != null)
-                                    existingToDo.candidates.addAll(nextCandidates);
-                                nextTemporalQueryResult = existingToDo.temporalQueryResult;
-                                break;
-                            }
-                        // TQR not found - assembles new temporal query result and creates new entry in todo list
-                        if (nextTemporalQueryResult == null)
-                        {
-                            nextTemporalQueryResult = new TemporalQueryResult(XTempPart.getSubFormula());
-                            nextTodoList.add(new MTCQAnsweringToDo(
-                                    XTempPart.getSubFormula(), nextCandidates, nextTemporalQueryResult));
-                        }
-                        // adds assembled temporal query result and atemporal query result to current todo
-                        todo.temporalQueryResult.addNewConjunct(atempOrResult, nextTemporalQueryResult);
+                        TemporalQueryResult nextTemporalQueryResult = answerTemporalPartOfNormalFormOr(nextFormula,
+                                atemporalOrResult, candidates, nextTodoList);
+                        // Adds assembled temporal query result and atemporal query result to current To-Do
+                        todo.temporalQueryResult.addNewConjunct(atemporalOrResult, nextTemporalQueryResult);
                     }
                 }
             }
+            // Prepare for next iteration (and check if it is required).
             todoList = nextTodoList;
             _queryCache.invalidate();
             QueryEngine.getCache().invalidate();
@@ -191,6 +169,58 @@ public class MTCQNormalFormEngine extends AbstractQueryEngine<MetricTemporalConj
         return res;
     }
 
+    /**
+     * TODO
+     * Can, for efficiency reasons, modify existing temporal query results in the To-Do list.
+     * @param nextFormula StrongNextFormula contained in the OrFormula according to the normal form.
+     * @param atempOrResult Result of the nontemporal part of the OrFormula.
+     * @param candidates Already gathered candidates that have to be examined. If null, no candidates exist.
+     * @param nextTodoList To-Do list for the next iteration. Required for performance reasons.
+     *                     Warning: Can be modified!
+     * @return The temporal query result representing the result for the temporal OrFormula.
+     */
+    private TemporalQueryResult answerTemporalPartOfNormalFormOr(StrongNextFormula nextFormula,
+                                                                 QueryResult atempOrResult,
+                                                                 @Nullable QueryResult candidates,
+                                                                 List<MTCQAnsweringToDo> nextTodoList)
+    {
+        QueryResult nextCandidates = null;
+        if (candidates != null)
+        {
+            nextCandidates = candidates.copy();
+            if (atempOrResult != null)
+                // Already found answer - no need to check anymore
+                nextCandidates.removeAll(atempOrResult);
+        }
+        // Check if we can merge with some existing todos
+        //  -> then we just use the existing temporal query result
+        TemporalQueryResult nextTemporalQueryResult = null;
+        for (MTCQAnsweringToDo existingToDo : nextTodoList)
+            if (nextFormula.getSubFormula().equals(existingToDo.query))
+            {
+                if (existingToDo.candidates != null)
+                    existingToDo.candidates.addAll(nextCandidates);
+                nextTemporalQueryResult = existingToDo.temporalQueryResult;
+                break;
+            }
+        // TQR not found - assembles new temporal query result and creates new entry in todo list
+        if (nextTemporalQueryResult == null)
+        {
+            nextTemporalQueryResult = new TemporalQueryResult(nextFormula.getSubFormula());
+            nextTodoList.add(new MTCQAnsweringToDo(
+                    nextFormula.getSubFormula(), nextCandidates, nextTemporalQueryResult));
+        }
+        return nextTemporalQueryResult;
+    }
+
+    /**
+     * TODO
+     * @param nonTemporalFormula
+     * @param candidates
+     * @param iteration
+     * @param vars
+     * @return
+     */
     private QueryResult answerNonTemporalPartOfNormalFormOr(MetricTemporalConjunctiveQuery nonTemporalFormula,
                                                             QueryResult candidates, TemporalIterationState iteration,
                                                             Collection<ATermAppl> vars)
