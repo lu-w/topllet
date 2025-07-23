@@ -4,7 +4,7 @@ import openllet.core.KnowledgeBase;
 import openllet.core.utils.Timer;
 import openllet.mtcq.model.kb.StreamingDataHandler;
 import openllet.mtcq.model.query.MetricTemporalConjunctiveQuery;
-import openllet.mtcq.ui.StreamingUIHandler;
+import openllet.mtcq.ui.MTCQEngineUI;
 import openllet.query.sparqldl.model.results.QueryResult;
 
 import javax.annotation.Nullable;
@@ -18,7 +18,7 @@ public class TemporalIterationState {
     private KnowledgeBase _kb = null;
     private int _t = 0;
     private int _maxTime = 0;
-    private StreamingUIHandler _ui = null;
+    private MTCQEngineUI _ui = null;
     private StreamingDataHandler _streamer = null;
     private Timer _timer;
     private MetricTemporalConjunctiveQuery _query;
@@ -87,8 +87,8 @@ public class TemporalIterationState {
      * @param timer The timer to exclude loading times for, if required.
      */
     private TemporalIterationState(MetricTemporalConjunctiveQuery query, KnowledgeBase kb, int t, int maxTime,
-                                  @Nullable StreamingUIHandler ui, @Nullable StreamingDataHandler streamer,
-                                  @Nullable Timer timer)
+                                   @Nullable MTCQEngineUI ui, @Nullable StreamingDataHandler streamer,
+                                   @Nullable Timer timer)
     {
         _kb = kb;
         _t = t;
@@ -183,5 +183,10 @@ public class TemporalIterationState {
         }
         if (_streamer != null)
             _streamer.sendResult(result);
+    }
+
+    public void notifyUIAboutResult(QueryResult result) {
+        if (_ui != null)
+            _ui.informAboutResults(_t, _kb, _query, result);
     }
 }

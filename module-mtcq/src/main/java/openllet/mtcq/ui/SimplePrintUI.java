@@ -5,7 +5,7 @@ import openllet.mtcq.model.query.MetricTemporalConjunctiveQuery;
 import openllet.query.sparqldl.model.Query;
 import openllet.query.sparqldl.model.results.QueryResult;
 
-public class SimplePrintUI implements StreamingUIHandler {
+public class SimplePrintUI implements MTCQEngineUI {
 
     @Override
     public void setup(MetricTemporalConjunctiveQuery query) {

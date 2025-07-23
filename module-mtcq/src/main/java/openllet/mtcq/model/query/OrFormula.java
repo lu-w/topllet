@@ -1,5 +1,7 @@
 package openllet.mtcq.model.query;
 
+import openllet.core.rules.rete.Tuple;
+import openllet.core.utils.Pair;
 import openllet.mtcq.model.kb.TemporalKnowledgeBase;
 
 public class OrFormula extends BinaryBooleanFormula

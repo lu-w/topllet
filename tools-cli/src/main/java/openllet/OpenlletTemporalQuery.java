@@ -9,7 +9,7 @@ import openllet.core.utils.Timer;
 import openllet.mtcq.engine.engine_rewriting.MTCQNormalFormEngine;
 import openllet.mtcq.ui.LanternaUI;
 import openllet.mtcq.ui.SimplePrintUI;
-import openllet.mtcq.ui.StreamingUIHandler;
+import openllet.mtcq.ui.MTCQEngineUI;
 import openllet.query.sparqldl.model.results.QueryResult;
 import openllet.query.sparqldl.model.results.ResultBinding;
 import openllet.mtcq.model.kb.TemporalKnowledgeBase;
@@ -43,7 +43,7 @@ public class OpenlletTemporalQuery extends OpenlletCmdApp
     private MetricTemporalConjunctiveQuery query;
     private TemporalKnowledgeBase kb;
     private OutputFormat outputFormat = OutputFormat.TABULAR;
-    private StreamingUIHandler ui = null;
+    private MTCQEngineUI ui = null;
 
     private enum OutputFormat
     {

@@ -23,7 +23,7 @@ import java.util.concurrent.TimeUnit;
 
 import static java.lang.Math.max;
 
-public class LanternaUI implements StreamingUIHandler {
+public class LanternaUI implements MTCQEngineUI {
 
     private Screen _screen;
     private Window _window;
