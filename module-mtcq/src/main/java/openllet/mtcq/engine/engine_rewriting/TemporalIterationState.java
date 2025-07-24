@@ -102,6 +102,7 @@ public class TemporalIterationState {
             _kb = query.getTemporalKB().get(0);
             _maxTime =  query.getTemporalKB().size() - 1;
         }
+        if (_ui != null) _ui.informAboutStartOfIteration(_t);
         if (_timer != null) _timer.start();
     }
 
@@ -126,17 +127,21 @@ public class TemporalIterationState {
         _streamer = streamer;
         _timer = timer;
         _query = query;
+        if (_ui != null) _ui.informAboutStartOfIteration(t);
     }
 
-    public int getTimePoint() {
+    public int getTimePoint()
+    {
         return _t;
     }
 
-    public int getMaxTime() {
+    public int getMaxTime()
+    {
         return _maxTime;
     }
 
-    public KnowledgeBase getKB() {
+    public KnowledgeBase getKB()
+    {
         return _kb;
     }
 
@@ -170,7 +175,6 @@ public class TemporalIterationState {
         if (_timer != null) _timer.stop();
         boolean isLast;
         KnowledgeBase kb = _kb;
-        if (_ui != null) _ui.informAboutStartOfIteration(t);
         if (_streamer != null)
         {
             _streamer.waitAndUpdateKB();
@@ -207,7 +211,7 @@ public class TemporalIterationState {
     public void notifyUIAndStreamingAboutResult(QueryResult result)
     {
         if (_ui != null) {
-            _ui.informAboutResults(_maxTime - 1, _kb, _query, result);
+            _ui.informAboutResults(_t, _kb, _query, result);
             _ui.clear();
         }
         if (_streamer != null)

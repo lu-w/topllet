@@ -24,6 +24,8 @@ import java.util.concurrent.TimeUnit;
 import static java.lang.Math.max;
 
 public class LanternaUI implements MTCQEngineUI {
+    private final String _HEADER_TITLE = "Topllet Reasoner";
+    private final int _FREEZE_BEFORE_TEARDOWN = 10; // seconds
 
     private Screen _screen;
     private Window _window;
@@ -31,7 +33,8 @@ public class LanternaUI implements MTCQEngineUI {
     private final Map<MetricTemporalConjunctiveQuery, QueryResult> _resultsToPrintInStreamingMode = new HashMap<>();
 
     @Override
-    public void setup(MetricTemporalConjunctiveQuery query) {
+    public void setup(MetricTemporalConjunctiveQuery query)
+    {
         try
         {
             Terminal _terminal = new UnixTerminal(System.in, System.out, StandardCharsets.UTF_8,
@@ -51,14 +54,16 @@ public class LanternaUI implements MTCQEngineUI {
     }
 
     @Override
-    public void clear() {
+    public void clear()
+    {
     }
 
     @Override
-    public void tearDown() {
+    public void tearDown()
+    {
         try
         {
-            TimeUnit.SECONDS.sleep(10);
+            TimeUnit.SECONDS.sleep(_FREEZE_BEFORE_TEARDOWN);
         } catch (InterruptedException e)
         {
             throw new RuntimeException(e);
@@ -66,17 +71,20 @@ public class LanternaUI implements MTCQEngineUI {
     }
 
     @Override
-    public void informAboutStartOfIteration(int timePoint) {
+    public void informAboutStartOfIteration(int timePoint)
+    {
 
     }
 
     @Override
-    public void informAboutEndOfIteration(int timePoint) {
+    public void informAboutEndOfIteration(int timePoint)
+    {
         _resultsToPrintInStreamingMode.clear();
     }
 
     @Override
-    public void informAboutResults(int timePoint, KnowledgeBase kb, Query<?> query, QueryResult result) {
+    public void informAboutResults(int timePoint, KnowledgeBase kb, Query<?> query, QueryResult result)
+    {
         if (result != null && query instanceof MetricTemporalConjunctiveQuery q) {
             _resultsToPrintInStreamingMode.put(q, result);
             refresh(timePoint, kb);
@@ -89,7 +97,7 @@ public class LanternaUI implements MTCQEngineUI {
         panel.setSize(_screen.getTerminalSize());
         panel.setLayoutManager(new LinearLayout(Direction.VERTICAL));
         _window.setComponent(panel);
-        Label toplletLabel = new Label("Topllet Stream Reasoner");
+        Label toplletLabel = new Label(_HEADER_TITLE);
         panel.addComponent(toplletLabel);
 
         String aboxText = printAboxInfo(kb);
