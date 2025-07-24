@@ -25,9 +25,9 @@ import static openllet.mtcq.engine.rewriting.MTCQSimplifier.flattenOr;
 
 /**
  * Engine for answering Boolean Disjunctive Queries (BDQs), i.e., a union of (possibly negated) CQs.
- * Required by the {@code MTCQNormalFormEngine}.
+ * Required as a non-temporal base case of the {@code MTCQNormalFormEngine}.
  * TODO:
- *  - handle that case that the given BDQ contains parts that are over different result variables (handle separately)
+ *  - Handle that case that the given BDQ contains parts that are over different result variables (answer separately)
  */
 public class BDQEngine extends AbstractQueryEngine<MetricTemporalConjunctiveQuery>
 {
@@ -162,6 +162,16 @@ public class BDQEngine extends AbstractQueryEngine<MetricTemporalConjunctiveQuer
         return result;
     }
 
+    /**
+     * Executes a semi-Boolean disjunctive query with positive and negative parts, i.e., the negative disjuncts are
+     * already Boolean (no variables remain) and the positive disjuncts have to be answered. For this, it puts the
+     * negative Boolean disjuncts into the ABox as data axioms.
+     * @param negativeBooleanDisjuncts The list of conjunctive queries from the negated part of the BDQ.
+     * @param positiveDisjuncts The union of conjunctive queries from the positive part of the BDQ.
+     * @param excludeBindings A set of bindings to be excluded from the result.
+     * @param restrictToBindings If not null, the answer will be restricted to this set of bindings.
+     * @return The query result for the given positive disjuncts.
+     */
     private QueryResult execSemiBooleanBDQ(List<ConjunctiveQuery> negativeBooleanDisjuncts,
                                            UnionQuery positiveDisjuncts, QueryResult excludeBindings,
                                            QueryResult restrictToBindings)
@@ -186,6 +196,15 @@ public class BDQEngine extends AbstractQueryEngine<MetricTemporalConjunctiveQuer
         return results;
     }
 
+    /**
+     * Answers the given UCQ. A wrapper around the UCQ engine, but handles consistency checks: If the ABox is
+     * inconsistent (e.g. due to negated disjuncts added earlier), considers the query as entailed.
+     * Handles the edge cases when no positive query is present or when restrict bindings are given.
+     * @param query The union of conjunctive queries to evaluate.
+     * @param excludeBindings Bindings to exclude from the result.
+     * @param restrictToBindings Bindings to restrict the result to.
+     * @return Answers to the UCQ.
+     */
     private QueryResult computeEntailedBindings(UnionQuery query, QueryResult excludeBindings,
                                                 QueryResult restrictToBindings)
     {
@@ -213,6 +232,12 @@ public class BDQEngine extends AbstractQueryEngine<MetricTemporalConjunctiveQuer
         return result;
     }
 
+    /**
+     * Applies all atoms of a given query into the current ABox, converting them into temporary assertions.
+     * Supports only Type and PropertyValue predicates. Used to model negated conjunctive queries by turning their
+     * positive form into a test for inconsistency.
+     * @param query The query whose atoms should be added to the ABox.
+     */
     private void putQueryAtomsInABox(AtomQuery<?> query)
     {
         for (QueryAtom atom : query.getAtoms())
@@ -236,6 +261,12 @@ public class BDQEngine extends AbstractQueryEngine<MetricTemporalConjunctiveQuer
             }
     }
 
+    /**
+     * Retrieves or creates a fresh individual in the ABox for a given query variable; uses a cache internally.
+     * Ensures variables used in negative conjunctive queries are grounded as individuals.
+     * @param var The query variable to convert into an individual.
+     * @return A fresh or existing individual term corresponding to the query variable.
+     */
     private ATermAppl getIndividual(ATermAppl var)
     {
         ATermAppl res = var;
@@ -252,6 +283,10 @@ public class BDQEngine extends AbstractQueryEngine<MetricTemporalConjunctiveQuer
         return res;
     }
 
+    /**
+     * Cleans up variables to fresh individual mapping.
+     * Should be called after ABox modifications to ensure the next query is processed cleanly.
+     */
     private void cleanUp()
     {
         _queryVarsToFreshInds = new HashMap<>();
