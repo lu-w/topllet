@@ -95,7 +95,7 @@ public class MTCQNormalFormEngine extends AbstractQueryEngine<MetricTemporalConj
     private QueryResult answer(MetricTemporalConjunctiveQuery query)
     {
         TemporalQueryResult temporalResultAt0 = new TemporalQueryResult(query);
-        TemporalIterationState iteration = new TemporalIterationState(query, _streaming, _port, _timer);
+        TemporalIterationState iteration = new TemporalIterationState(query, _streaming, _port, _ui, _timer);
         List<MTCQAnsweringToDo> todoList = new ArrayList<>();
         todoList.add(new MTCQAnsweringToDo(query, temporalResultAt0));
 
@@ -107,6 +107,7 @@ public class MTCQNormalFormEngine extends AbstractQueryEngine<MetricTemporalConj
             {
                 QueryResult candidates = todo.candidates;
                 MetricTemporalConjunctiveQuery transformed = CXNFTransformer.transform(todo.query);
+                // Verification of normal form not strictly necessary, but still done for safety.
                 CXNFVerifier verifier = new CXNFVerifier();
                 if (!verifier.verify(transformed))
                     throw new RuntimeException("Unexpected: After transformation, MTCQ is not in normal form. " +
@@ -119,7 +120,8 @@ public class MTCQNormalFormEngine extends AbstractQueryEngine<MetricTemporalConj
                     // 1. a conjunct is non-temporal (can be answered directly)
                     // 2. it is temporal (required recursive answering)
                     if (!conjunct.isTemporal())
-                        answerNonTemporalConjunct(conjunct, candidates, query.getResultVars(), todo, iteration);
+                        candidates = answerNonTemporalConjunct(conjunct, candidates, query.getResultVars(), todo,
+                                iteration);
                     else
                     {
                         // According to the normal form, the formula can either be a StrongNextFormula or an OrFormula
@@ -168,14 +170,14 @@ public class MTCQNormalFormEngine extends AbstractQueryEngine<MetricTemporalConj
      * TODO
      * Can, for efficiency reasons, modify existing temporal query results in the To-Do list.
      * @param nextFormula StrongNextFormula contained in the OrFormula according to the normal form.
-     * @param atempOrResult Result of the nontemporal part of the OrFormula.
+     * @param atemporalOrResult Result of the nontemporal part of the OrFormula.
      * @param candidates Already gathered candidates that have to be examined. If null, no candidates exist.
      * @param nextTodoList To-Do list for the next iteration. Required for performance reasons.
      *                     Warning: Can be modified!
      * @return The temporal query result representing the result for the temporal OrFormula.
      */
     private TemporalQueryResult answerTemporalPartOfNormalFormOr(StrongNextFormula nextFormula,
-                                                                 QueryResult atempOrResult,
+                                                                 QueryResult atemporalOrResult,
                                                                  @Nullable QueryResult candidates,
                                                                  List<MTCQAnsweringToDo> nextTodoList)
     {
@@ -183,9 +185,9 @@ public class MTCQNormalFormEngine extends AbstractQueryEngine<MetricTemporalConj
         if (candidates != null)
         {
             nextCandidates = candidates.copy();
-            if (atempOrResult != null)
+            if (atemporalOrResult != null)
                 // Already found answer - no need to check anymore
-                nextCandidates.removeAll(atempOrResult);
+                nextCandidates.removeAll(atemporalOrResult);
         }
         // Check if we can merge with some existing todos
         //  -> then we just use the existing temporal query result
@@ -249,7 +251,7 @@ public class MTCQNormalFormEngine extends AbstractQueryEngine<MetricTemporalConj
      * @param todo The data storage to put the results into.
      * @param iteration The current iteration state (for time and knowledge base information).
      */
-    private void answerNonTemporalConjunct(MetricTemporalConjunctiveQuery conjunct, QueryResult candidates,
+    private QueryResult answerNonTemporalConjunct(MetricTemporalConjunctiveQuery conjunct, QueryResult candidates,
                                            Collection<ATermAppl> vars,  MTCQAnsweringToDo todo,
                                            TemporalIterationState iteration) {
         QueryResult atempResult = null;
@@ -267,6 +269,7 @@ public class MTCQNormalFormEngine extends AbstractQueryEngine<MetricTemporalConj
                 candidates.retainAll(ucqResult);
         }
         todo.temporalQueryResult.addNewConjunct(atempResult);
+        return candidates;
     }
 
     /**
@@ -341,7 +344,7 @@ public class MTCQNormalFormEngine extends AbstractQueryEngine<MetricTemporalConj
             result.explicate();
         }
         _queryCache.add(q, candidates, result);
-        iteration.notifyUIAboutResult(result);
+        iteration.notifyUIAboutResult(q, result);
         return result;
     }
 }

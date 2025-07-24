@@ -30,7 +30,18 @@ public class TemporalIterationState {
      */
     public TemporalIterationState(MetricTemporalConjunctiveQuery query)
     {
-        this(query, false, 0,null);
+        this(query, false, 0, null, null);
+    }
+
+    /**
+     * Handles initialization of the *first* iteration, including loading of the first knowledge base of a temporal
+     * knowledge base. Use {@link #loadNextIteration loadNextIteration} for preparing subsequent iterations.
+     * @param query The query containing the temporal knowledge base to initialize the first data for.
+     * @param ui The optional user interface of the engine to inform about results.
+     */
+    public TemporalIterationState(MetricTemporalConjunctiveQuery query, MTCQEngineUI ui)
+    {
+        this(query, false, 0, ui, null);
     }
 
     /**
@@ -44,7 +55,22 @@ public class TemporalIterationState {
      */
     public TemporalIterationState(MetricTemporalConjunctiveQuery query, boolean streaming, int port)
     {
-        this(query, streaming, port, null);
+        this(query, streaming, port, null, null);
+    }
+
+    /**
+     * Handles initialization of the *first* iteration, including loading of the first knowledge base of a temporal
+     * knowledge base. Considers whether we are in streaming mode or not.
+     * The maximum time point is {@code Integer.MAX_VALUE} if in streaming mode.
+     * Use {@link #loadNextIteration loadNextIteration} for preparing subsequent iterations.
+     * @param query The query containing the temporal knowledge base to initialize the first data for.
+     * @param streaming Whether to load the knowledge base from a streaming 0MQ source.
+     * @param port The port to use for 0MQ if in streaming mode.
+     * @param ui The optional user interface of the engine to inform about results.
+     */
+    public TemporalIterationState(MetricTemporalConjunctiveQuery query, boolean streaming, int port, MTCQEngineUI ui)
+    {
+        this(query, streaming, port, ui, null);
     }
 
     /**
@@ -55,11 +81,14 @@ public class TemporalIterationState {
      * @param query The query containing the temporal knowledge base to initialize the first data for.
      * @param streaming Whether to load the knowledge base from a streaming 0MQ source.
      * @param port The port to use for 0MQ if in streaming mode.
+     * @param ui The optional user interface of the engine to inform about results.
      * @param timer The timer to disable during loading.
      */
-    public TemporalIterationState(MetricTemporalConjunctiveQuery query, boolean streaming, int port, Timer timer)
+    public TemporalIterationState(MetricTemporalConjunctiveQuery query, boolean streaming, int port, MTCQEngineUI ui,
+                                  Timer timer)
     {
         _timer = timer;
+        _ui = ui;
         if (_timer != null) _timer.stop();
         _query = query;
         if (streaming)
@@ -185,8 +214,8 @@ public class TemporalIterationState {
             _streamer.sendResult(result);
     }
 
-    public void notifyUIAboutResult(QueryResult result) {
+    public void notifyUIAboutResult(MetricTemporalConjunctiveQuery query, QueryResult result) {
         if (_ui != null)
-            _ui.informAboutResults(_t, _kb, _query, result);
+            _ui.informAboutResults(_t, _kb, query, result);
     }
 }
