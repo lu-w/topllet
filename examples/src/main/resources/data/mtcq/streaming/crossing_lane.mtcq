@@ -1,0 +1,18 @@
+# Ego crosses lanes
+PREFIX : <uc:2#>
+
+G
+(
+	:Ego(?e)
+	&
+	:Lane(?l1)
+	&
+	:Lane(?l2)
+)
+&
+F
+(
+	:isOn(?e,?l1)
+	&
+	X[!] (:isOn(?e,?l2))
+)

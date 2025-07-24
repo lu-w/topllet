@@ -95,6 +95,7 @@ public class TemporalIterationState {
         {
             _kb = query.getTemporalKB().get(0);
             _streamer = new StreamingDataHandler(_kb, port, query.getTemporalKB().getTimer());
+            _streamer.waitAndUpdateKB();
             _maxTime = Integer.MAX_VALUE;
         }
         else
@@ -156,7 +157,7 @@ public class TemporalIterationState {
     boolean hasNext()
     {
         if (_streamer != null)
-            return _streamer.isLast();
+            return !_streamer.isLast();
         else
             return _t < _maxTime;
     }

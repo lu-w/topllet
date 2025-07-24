@@ -112,7 +112,6 @@ public class StreamingDataHandler
                         }
                         else
                             _logger.warning("Restriction " + restriction + " not yet supported. Ignoring.");
-
                     }
                     else if (line.startsWith("ADD http://www.w3.org/2002/07/owl#complementOf"))
                         addComplement(data);

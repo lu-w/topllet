@@ -1,0 +1,121 @@
+Prefix(:=<http://www.semanticweb.org/adso//>)
+Prefix(owl:=<http://www.w3.org/2002/07/owl#>)
+Prefix(rdf:=<http://www.w3.org/1999/02/22-rdf-syntax-ns#>)
+Prefix(xml:=<http://www.w3.org/XML/1998/namespace>)
+Prefix(xsd:=<http://www.w3.org/2001/XMLSchema#>)
+Prefix(rdfs:=<http://www.w3.org/2000/01/rdf-schema#>)
+
+
+Ontology(<uc:2>
+
+Declaration(Class(<uc:2#Color>))
+Declaration(Class(<uc:2#DrivingObject>))
+Declaration(Class(<uc:2#Ego>))
+Declaration(Class(<uc:2#Green>))
+Declaration(Class(<uc:2#Intersection>))
+Declaration(Class(<uc:2#Lane>))
+Declaration(Class(<uc:2#Orange>))
+Declaration(Class(<uc:2#Red>))
+Declaration(Class(<uc:2#RedTrafficLight>))
+Declaration(Class(<uc:2#Road>))
+Declaration(Class(<uc:2#SpatialObject>))
+Declaration(Class(<uc:2#TrafficLight>))
+Declaration(ObjectProperty(<uc:2#aheadOf>))
+Declaration(ObjectProperty(<uc:2#closeTo>))
+Declaration(ObjectProperty(<uc:2#hasColor>))
+Declaration(ObjectProperty(<uc:2#hasLane>))
+Declaration(ObjectProperty(<uc:2#isOn>))
+Declaration(ObjectProperty(<uc:2#regulatesLane>))
+Declaration(DataProperty(<uc:2#hasSpeed>))
+############################
+#   Object Properties
+############################
+
+# Object Property: <uc:2#aheadOf> (<uc:2#aheadOf>)
+
+SubObjectPropertyOf(<uc:2#aheadOf> owl:topObjectProperty)
+ObjectPropertyDomain(<uc:2#aheadOf> <uc:2#SpatialObject>)
+ObjectPropertyRange(<uc:2#aheadOf> <uc:2#SpatialObject>)
+
+# Object Property: <uc:2#closeTo> (<uc:2#closeTo>)
+
+SubObjectPropertyOf(<uc:2#closeTo> owl:topObjectProperty)
+ObjectPropertyDomain(<uc:2#closeTo> <uc:2#SpatialObject>)
+ObjectPropertyRange(<uc:2#closeTo> <uc:2#SpatialObject>)
+
+# Object Property: <uc:2#hasColor> (<uc:2#hasColor>)
+
+SubObjectPropertyOf(<uc:2#hasColor> owl:topObjectProperty)
+ObjectPropertyDomain(<uc:2#hasColor> <uc:2#SpatialObject>)
+ObjectPropertyRange(<uc:2#hasColor> <uc:2#Color>)
+
+# Object Property: <uc:2#hasLane> (<uc:2#hasLane>)
+
+SubObjectPropertyOf(<uc:2#hasLane> owl:topObjectProperty)
+ObjectPropertyDomain(<uc:2#hasLane> <uc:2#Road>)
+ObjectPropertyRange(<uc:2#hasLane> <uc:2#Lane>)
+
+# Object Property: <uc:2#isOn> (<uc:2#isOn>)
+
+SubObjectPropertyOf(<uc:2#isOn> owl:topObjectProperty)
+ObjectPropertyDomain(<uc:2#isOn> <uc:2#SpatialObject>)
+ObjectPropertyRange(<uc:2#isOn> <uc:2#SpatialObject>)
+
+# Object Property: <uc:2#regulatesLane> (<uc:2#regulatesLane>)
+
+SubObjectPropertyOf(<uc:2#regulatesLane> <uc:2#aheadOf>)
+ObjectPropertyDomain(<uc:2#regulatesLane> <uc:2#TrafficLight>)
+ObjectPropertyRange(<uc:2#regulatesLane> <uc:2#Lane>)
+
+
+############################
+#   Data Properties
+############################
+
+# Data Property: <uc:2#hasSpeed> (<uc:2#hasSpeed>)
+
+SubDataPropertyOf(<uc:2#hasSpeed> owl:topDataProperty)
+FunctionalDataProperty(<uc:2#hasSpeed>)
+DataPropertyDomain(<uc:2#hasSpeed> <uc:2#SpatialObject>)
+DataPropertyRange(<uc:2#hasSpeed> xsd:decimal)
+
+
+
+############################
+#   Classes
+############################
+
+# Class: <uc:2#DrivingObject> (<uc:2#DrivingObject>)
+
+SubClassOf(<uc:2#DrivingObject> <uc:2#SpatialObject>)
+
+# Class: <uc:2#Ego> (<uc:2#Ego>)
+
+SubClassOf(<uc:2#Ego> <uc:2#SpatialObject>)
+
+# Class: <uc:2#Green> (<uc:2#Green>)
+
+SubClassOf(<uc:2#Green> <uc:2#Color>)
+
+# Class: <uc:2#Lane> (<uc:2#Lane>)
+
+SubClassOf(<uc:2#Lane> <uc:2#SpatialObject>)
+
+# Class: <uc:2#Orange> (<uc:2#Orange>)
+
+SubClassOf(<uc:2#Orange> <uc:2#Color>)
+
+# Class: <uc:2#Red> (<uc:2#Red>)
+
+SubClassOf(<uc:2#Red> <uc:2#Color>)
+
+# Class: <uc:2#RedTrafficLight> (<uc:2#RedTrafficLight>)
+
+SubClassOf(<uc:2#RedTrafficLight> <uc:2#TrafficLight>)
+
+# Class: <uc:2#Road> (<uc:2#Road>)
+
+SubClassOf(<uc:2#Road> <uc:2#SpatialObject>)
+
+
+)
