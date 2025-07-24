@@ -1,9 +1,7 @@
 # Topllet
 
 Topllet is an engine for answering Metric Temporal Conjunctive Queries over OWL2-based Temporal Knowledge Bases.
-Topllet is a fork of Openllet v2.6.6.
-
-> **``📝``**  This is an early version of Topllet, which is under active development. It is possible that you experience performance deficiencies with very large data inputs.
+Topllet is a fork of Openllet v2.6.6. and implements the algorithm presented in [Temporal Conjunctive Query Answering via Rewriting](https://lu-w.github.io/aaai25/).
 
 ## Table of Contents
 
@@ -35,7 +33,7 @@ Follow the [official instructions](https://docs.docker.com/engine/install/ubuntu
 After installation, you need to start the Docker daemon using `sudo systemctl start docker`.
 Later, we will use `docker run` without root rights, therefore, please add your user to the `docker` group as per the [documentation](https://docs.docker.com/engine/install/linux-postinstall).
 
-Navigate to the `docker` folder an run:
+Navigate to the `docker` folder and run:
 
 1. `./build.sh` (to build the Docker image)
 2. `./run.sh` (to run Topllet afterwards)
@@ -45,7 +43,7 @@ Note that by default, the current folder is mounted into the Docker container. T
 You can also make `topllet` callable by adding it as an alias: Call `echo "alias topllet=\"$(pwd)/run.sh\"" >> ~/.bashrc && source ~/.bashrc`.
 
 ### From Scratch
- 
+
 This installation assumes a Ubuntu system with `bash`, however, it will work analogously on other Linux distributions or shells.
 
 #### Prerequisites
@@ -54,32 +52,10 @@ We require the following software to be installed on your system:
 
 - Java version >= 17 (you can check your version with `java --version`)
 - Maven (fitting to the Java version, you can check your version with `mvn --version`)
-- Python 3 with PIP
-- Docker (optional, if Lydia shall not be compiled from source - instructions to install and set up Docker are given above)
 
-To install Python, PIP, Java, and Maven, call `sudo apt-get update && sudo apt-get install python3 python3-pip openjdk-17-jdk maven`.
+To install Java and Maven, call `sudo apt-get update && sudo apt-get install openjdk-17-jdk maven`.
 
-#### Step-by-Step Instructions
-
-We first have to install the dependencies MLTL2LTLf and Lydia.
-
-##### Installing MLTL2LTLf
-
-1. Get a copy of MLTL2LTLf from https://github.com/lu-w/mltl2ltlf and navigate into the folder.
-2. Install via: `pip install .`
-3. The script may be installed to a location not in your `$PATH`. PIP warns you about that. If so, please add the path that pip outputs to your `$PATH` by calling `echo "export PATH=\"/path/pip/warned/you/about:$PATH\"" >> ~/.bashrc && source ~/.bashrc`.
-4. `mltl2ltlf` should now be callable from your command line.
-
-##### Installing Lydia
-
-1. Navigate into an appropriate, persistent directory.
-2. Pull the Docker image: `docker pull whitemech/lydia:latest`
-3. Make an executable for Lydia: `mkdir -p bin && cd bin && echo "docker run --mount src=/tmp,target=/tmp,type=bind -v$(pwd):/home/default whitemech/lydia lydia \"\$@\"" > lydia && chmod +x lydia && echo "export PATH=$(pwd):$PATH" >> ~/.bashrc && source ~/.bashrc && cd ..`
-4. `lydia` should now be callable from your command line.
-
-If you do not have Docker, you can also build Lydia from the source, as documented at https://github.com/whitemech/lydia.
-
-##### Installing Topllet
+#### Installing Topllet
 
 1. Call `mvn -DskipTests install` from this directory.
 2. Add `topllet` to your `$PATH`, as the binary is now located in `tools-cli/target/openlletcli/bin`: Call `echo "export PATH=\"$(pwd)/tools-cli/target/openlletcli/bin:$PATH\"" >> ~/.bashrc && source ~/.bashrc`.
@@ -141,6 +117,8 @@ If you specify a non-`?`-preceeded, non-individual variable in some query atom, 
 You can add comments by `# my comment`.
 For inline comments, note that the `#` needs to be succeeded by a whitespace (i.e., `#mycomment` is not a valid comment).
 
+The full grammar can be found at [`module-mtcq/src/main/java/openllet/mtcq/parser/grammar.g4`](module-mtcq/src/main/java/openllet/mtcq/parser/grammar.g4).
+
 Right now, the tool checks only temporal queries whose CQs are tree-shaped, i.e., the induced query graph is acyclic w.r.t. the existentially quantified variables and each node has at most one incoming edge.
 
 #### 2. Temporal Knowledge Bases
@@ -174,6 +152,60 @@ Query results (i.e., the certain answers) are displayed to the user after the ex
 Note that, when answering the given query, the implementation assumes `x != y` for all answer variables `x` and `y`, as this seems to be the more natural behavior by default.
 This means that if `x` is answered by the individual `a`, `y` can not be mapped to `a` anymore.
 This behavior can be changed by adding the `-e` flag.
+
+To show intermediate computation steps, `topllet` provides two optional GUIs that can be activated by `-u print` and `-u graphical`, respectively.
+
+### Streaming Mode
+
+Besides the above described offline analysis setting, `topllet` also offers a (somewhat experimental) streaming mode where data can be incrementally send to `topllet`, which then computes answers on-the-fly. 
+This setting is most useful for an online analysis setting, but, for adequate performance, requires somewhat reduced data and ontology.
+
+The streaming mode is activated by giving an ontology as a `.owl` instead of a `.kbs` file, so, for the example located in `examples/src/main/resources/data/mtcq/streaming`:
+
+`topllet crossing_lane.mtcq ontology.owl`
+
+The tool waits until initial data is sent. 
+A Python example of a data sender is given in `streaming_example.py`, which requires `zmq` to be installed via `pip`.
+It then computes results for the first steps and again waits for new data.
+After each step, `topllet` sends an `ACK` to acknowledge the end of computation.
+Upon a final message, the overall result of the query is assembled and printed to the user.
+
+#### Protocol Specification
+
+To use the streaming setting, `toplet` uses a 0MQ Request-Reply socket on a specifiable port (default: 5555).
+Each message represents an (incremental) specification of the new data and are newline-separated commands of the form:
+
+`[PREFIX|ADD|DELETE|UPDATE] <data>`
+
+- `PREFIX prefix: <IRI>` defines prefixes that are later resolved.
+- `ADD` adds ABox assertions (class assertions and object/data properties).
+- `DELETE` removes ABox assertions.
+- `UPDATE` replaces the property value with a new one (only applies to properties, not classes).
+- `LAST` can be appended as a line to the data of a time point to mark the end of the data stream and asks `topllet` to return the answers to the query.
+
+Only numeric literals are supported (typed as integer or decimal). Invalid or unsupported lines are ignored.
+
+Example messages using the supported features are:
+
+```
+PREFIX ex: <http://example.org#>
+# start of first data
+ADD ex:Person(john)
+ADD ex:Person(alice)
+ADD ex:hasFriend(john, alice)
+ADD ex:hasAge(john, 42)
+```
+
+In a second (and final) message, we exchange Alice for Jane and delete John's age:
+
+```
+PREFIX ex: <http://example.org#>
+# start of second data
+DELETE ex:hasAge(john, 42)
+ADD ex:Person(jane)
+UPDATE ex:hasFriend(john, jane)
+LAST
+```
 
 ## Even More Examples
 
