@@ -122,25 +122,20 @@ public class MTCQNormalFormEngine extends AbstractQueryEngine<MetricTemporalConj
                         answerNonTemporalConjunct(conjunct, candidates, query.getResultVars(), todo, iteration);
                     else
                     {
-                        MetricTemporalConjunctiveQuery temporalFormula;
-                        QueryResult atemporalOrResult;
                         // According to the normal form, the formula can either be a StrongNextFormula or an OrFormula
+                        // containing a StrongNextFormula and a non-temporal formula (which we answer directly).
+                        StrongNextFormula nextFormula;
+                        QueryResult atemporalOrResult = null;
                         if (conjunct instanceof OrFormula or)
                         {
                             Pair<MetricTemporalConjunctiveQuery, MetricTemporalConjunctiveQuery> parts =
                                     or.splitIntoTemporalAndNonTemporalPart();
                             atemporalOrResult = answerNonTemporalPartOfNormalFormOr(parts.first, candidates, iteration,
                                     query.getResultVars());
-                            temporalFormula = parts.second;
+                            nextFormula = (StrongNextFormula) parts.second;
                         }
                         else
-                        {
-                            atemporalOrResult = null;
-                            temporalFormula = conjunct;
-                        }
-                        // Sanity check; we should never run into this (otherwise, the normal form is broken)
-                        if (!(temporalFormula instanceof StrongNextFormula nextFormula))
-                            throw new RuntimeException("Unexpected temporal operator: " + temporalFormula.getClass());
+                            nextFormula = (StrongNextFormula) conjunct;
                         // Assembles candidates for inner part of next formula
                         TemporalQueryResult nextTemporalQueryResult = answerTemporalPartOfNormalFormOr(nextFormula,
                                 atemporalOrResult, candidates, nextTodoList);
