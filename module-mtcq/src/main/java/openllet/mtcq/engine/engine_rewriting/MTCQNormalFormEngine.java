@@ -116,7 +116,7 @@ public class MTCQNormalFormEngine extends AbstractQueryEngine<MetricTemporalConj
                 List<MetricTemporalConjunctiveQuery> flattenedCNF = _sorter.sort(flattenAnd(transformed));
                 for (MetricTemporalConjunctiveQuery conjunct : flattenedCNF)
                 {
-                    // Two cases:
+                    // Two cases according to the normal form:
                     // 1. a conjunct is non-temporal (can be answered directly)
                     // 2. it is temporal (required recursive answering)
                     if (!conjunct.isTemporal())
@@ -167,7 +167,8 @@ public class MTCQNormalFormEngine extends AbstractQueryEngine<MetricTemporalConj
     }
 
     /**
-     * TODO
+     * Answers the temporal subformula B of a formula of the form (A | B) where A is non-temporal and B is of the form
+     * X[!] C, where B is optional. Does not modify the candidates or the iteration state.
      * Can, for efficiency reasons, modify existing temporal query results in the To-Do list.
      * @param nextFormula StrongNextFormula contained in the OrFormula according to the normal form.
      * @param atemporalOrResult Result of the nontemporal part of the OrFormula.
@@ -211,32 +212,28 @@ public class MTCQNormalFormEngine extends AbstractQueryEngine<MetricTemporalConj
     }
 
     /**
-     * TODO
-     * @param nonTemporalFormula
-     * @param candidates
-     * @param iteration
-     * @param vars
-     * @return
+     * Answers the non-temporal subformula A of a formula of the form (A | B) where A is non-temporal and B is of the
+     * form X[!] C, where B is optional. Does not modify the candidates or the iteration state.
+     * @param nonTemporalFormula The non-temporal MTCQ that is to be answered.
+     * @param candidates The candidates to consider during answering. If null, all possible candidates are considered.
+     * @param iteration The current iteration state (for time and knowledge base information).
+     * @param vars Variables of the overall MTCQ (results get possibly expanded if the conjunct refers to only a subset
+     *             of them).
+     * @return Answers to the given query, respecting the given candidates and current iteration.
      */
     private QueryResult answerNonTemporalPartOfNormalFormOr(MetricTemporalConjunctiveQuery nonTemporalFormula,
-                                                            QueryResult candidates, TemporalIterationState iteration,
+                                                            @Nullable  QueryResult candidates,
+                                                            TemporalIterationState iteration,
                                                             Collection<ATermAppl> vars)
     {
         QueryResult result = null;
-        QueryResult localCandidates = null;
-        if (candidates != null)
-            localCandidates = candidates.copy();
         for (MetricTemporalConjunctiveQuery ucq : _sorter.sort(flattenAnd(nonTemporalFormula)))
         {
-            QueryResult ucqResult = answerUCQWithNegations(ucq, iteration, localCandidates, vars);
+            QueryResult ucqResult = answerUCQWithNegations(ucq, iteration, candidates, vars);
             if (result == null)
                 result = ucqResult;
             else
                 result.retainAll(ucqResult);
-            if (localCandidates == null)
-                localCandidates = result.copy();
-            else
-                localCandidates.retainAll(ucqResult);
         }
         return result;
     }
@@ -244,12 +241,14 @@ public class MTCQNormalFormEngine extends AbstractQueryEngine<MetricTemporalConj
     /**
      * Answers a non-temporal conjunct in some conjunction, by respecting previously generated candidates and updating
      * them accordingly after result computation. Updates the {@code todo} such that the results are stored there.
+     * Warning: Modifies the given candidates (which are also returned).
      * @param conjunct The conjunct to check.
      * @param candidates The candidates generated for previous conjuncts.
      * @param vars Variables of the overall MTCQ (results get possibly expanded if the conjunct refers to only a subset
      *             of them).
      * @param todo The data storage to put the results into.
      * @param iteration The current iteration state (for time and knowledge base information).
+     * @return Answers to the given query, respecting the given candidates and current iteration.
      */
     private QueryResult answerNonTemporalConjunct(MetricTemporalConjunctiveQuery conjunct, QueryResult candidates,
                                            Collection<ATermAppl> vars,  MTCQAnsweringToDo todo,
