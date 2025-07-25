@@ -1,4 +1,4 @@
-package openllet.mtcq.engine.mltl;
+package openllet.mtcq.engine.automaton;
 
 import openllet.mtcq.parser.ParseException;
 import org.apache.commons.io.IOUtils;

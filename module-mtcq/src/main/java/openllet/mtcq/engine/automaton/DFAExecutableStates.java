@@ -1,4 +1,4 @@
-package openllet.mtcq.engine.engine_automaton;
+package openllet.mtcq.engine.automaton;
 
 import openllet.mtcq.model.automaton.DFA;
 

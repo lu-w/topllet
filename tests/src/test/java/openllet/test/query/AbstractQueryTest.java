@@ -8,7 +8,7 @@ package openllet.test.query;
 
 import openllet.aterm.ATermAppl;
 import openllet.core.utils.ATermUtils;
-import openllet.mtcq.engine.engine_rewriting.MTCQNormalFormEngine;
+import openllet.mtcq.engine.rewriting.MTCQNormalFormEngine;
 import openllet.query.sparqldl.engine.bcq.BCQQueryEngineSimple;
 import openllet.query.sparqldl.engine.cq.QueryEngine;
 import openllet.query.sparqldl.engine.ucq.UnionQueryEngineSimple;

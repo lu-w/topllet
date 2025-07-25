@@ -1,6 +1,5 @@
-package openllet.mtcq.engine.engine_rewriting;
+package openllet.mtcq.engine.rewriting;
 
-import openllet.mtcq.engine.engine_rewriting.TemporalQueryResult;
 import openllet.mtcq.model.query.MetricTemporalConjunctiveQuery;
 import openllet.query.sparqldl.model.results.QueryResult;
 

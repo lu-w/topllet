@@ -1,12 +1,8 @@
 package openllet.test.mtcq;
 
-import openllet.mtcq.engine.automaton.MLTL2DFA;
-import openllet.mtcq.engine.mltl.MLTL2LTLf;
-import openllet.mtcq.model.automaton.DFA;
+import openllet.mtcq.engine.automaton.MLTL2LTLf;
 import openllet.mtcq.parser.ParseException;
 import org.junit.Test;
-
-import java.io.IOException;
 
 import static org.junit.Assert.*;
 

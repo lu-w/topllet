@@ -1,10 +1,8 @@
-package openllet.mtcq.engine.engine_rewriting;
+package openllet.mtcq.engine.rewriting;
 
 import openllet.aterm.ATermAppl;
 import openllet.core.utils.Pair;
 import openllet.mtcq.engine.atemporal.BDQEngine;
-import openllet.mtcq.engine.rewriting.CXNFTransformer;
-import openllet.mtcq.engine.rewriting.CXNFVerifier;
 import openllet.mtcq.model.query.*;
 import openllet.mtcq.ui.MTCQEngineUI;
 import openllet.query.sparqldl.engine.AbstractQueryEngine;

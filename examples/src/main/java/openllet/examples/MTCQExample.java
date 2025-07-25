@@ -1,7 +1,7 @@
 package openllet.examples;
 import openllet.core.KnowledgeBase;
 import openllet.core.KnowledgeBaseImpl;
-import openllet.mtcq.engine.engine_rewriting.MTCQNormalFormEngine;
+import openllet.mtcq.engine.rewriting.MTCQNormalFormEngine;
 import openllet.mtcq.model.kb.InMemoryTemporalKnowledgeBaseImpl;
 import openllet.mtcq.model.kb.TemporalKnowledgeBase;
 import openllet.mtcq.model.query.MetricTemporalConjunctiveQuery;

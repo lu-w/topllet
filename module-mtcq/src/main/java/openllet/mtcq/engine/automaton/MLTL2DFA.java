@@ -2,7 +2,6 @@ package openllet.mtcq.engine.automaton;
 
 import net.automatalib.serialization.dot.DOTParsers;
 import openllet.shared.tools.Log;
-import openllet.mtcq.engine.mltl.MLTL2LTLf;
 import openllet.mtcq.model.automaton.DFA;
 import openllet.mtcq.model.query.MetricTemporalConjunctiveQuery;
 import openllet.mtcq.parser.ParseException;

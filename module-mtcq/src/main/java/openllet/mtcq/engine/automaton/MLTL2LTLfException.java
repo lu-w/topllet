@@ -1,4 +1,4 @@
-package openllet.mtcq.engine.mltl;
+package openllet.mtcq.engine.automaton;
 
 @Deprecated
 public class MLTL2LTLfException extends RuntimeException

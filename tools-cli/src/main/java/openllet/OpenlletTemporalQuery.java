@@ -6,7 +6,7 @@ import openllet.core.OpenlletOptions;
 import openllet.core.exceptions.InconsistentOntologyException;
 import openllet.core.output.TableData;
 import openllet.core.utils.Timer;
-import openllet.mtcq.engine.engine_rewriting.MTCQNormalFormEngine;
+import openllet.mtcq.engine.rewriting.MTCQNormalFormEngine;
 import openllet.mtcq.ui.LanternaUI;
 import openllet.mtcq.ui.SimplePrintUI;
 import openllet.mtcq.ui.MTCQEngineUI;

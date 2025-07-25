@@ -1,4 +1,4 @@
-package openllet.mtcq.engine.engine_rewriting;
+package openllet.mtcq.engine.rewriting;
 
 import openllet.mtcq.model.query.MetricTemporalConjunctiveQuery;
 

@@ -1,4 +1,4 @@
-package openllet.mtcq.engine.engine_automaton;
+package openllet.mtcq.engine.automaton;
 
 import openllet.core.KnowledgeBase;
 import openllet.query.sparqldl.engine.AbstractBooleanQueryEngine;
@@ -7,7 +7,6 @@ import openllet.query.sparqldl.engine.bcq.BCQQueryEngineSimple;
 import openllet.query.sparqldl.model.bcq.BCQQuery;
 import openllet.query.sparqldl.model.results.QueryResult;
 import openllet.shared.tools.Log;
-import openllet.mtcq.engine.automaton.MLTL2DFA;
 import openllet.mtcq.model.automaton.DFA;
 import openllet.mtcq.model.automaton.Edge;
 import openllet.mtcq.model.query.MetricTemporalConjunctiveQuery;
