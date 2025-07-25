@@ -5,6 +5,7 @@ import openllet.core.KnowledgeBase;
 import openllet.core.KnowledgeBaseImpl;
 import openllet.mtcq.model.kb.InMemoryTemporalKnowledgeBaseImpl;
 import openllet.mtcq.model.kb.TemporalKnowledgeBase;
+import openllet.mtcq.model.query.MTCQFormula;
 import openllet.mtcq.model.query.MetricTemporalConjunctiveQuery;
 import openllet.mtcq.parser.ParseException;
 import openllet.mtcq.parser.MetricTemporalConjunctiveQueryParser;
@@ -102,14 +103,14 @@ public class AbstractMTCQTest extends AbstractQueryTest
         _tkb.add(new KnowledgeBaseImpl());
     }
 
-    protected MetricTemporalConjunctiveQuery temporalQuery(String formula)
+    protected MTCQFormula temporalQuery(String formula)
     {
         return temporalQuery(formula, true);
     }
 
-    protected MetricTemporalConjunctiveQuery temporalQuery(String formula, boolean distinct)
+    protected MTCQFormula temporalQuery(String formula, boolean distinct)
     {
-        MetricTemporalConjunctiveQuery mtcq = null;
+        MTCQFormula mtcq = null;
         try
         {
             mtcq = MetricTemporalConjunctiveQueryParser.parse(formula, _tkb, distinct);
@@ -121,7 +122,7 @@ public class AbstractMTCQTest extends AbstractQueryTest
         return mtcq;
     }
 
-    protected MetricTemporalConjunctiveQuery uncheckedTemporalQuery(String formula) throws ParseException
+    protected MTCQFormula uncheckedTemporalQuery(String formula) throws ParseException
     {
         return MetricTemporalConjunctiveQueryParser.parse(formula, _tkb);
     }
@@ -164,6 +165,38 @@ public class AbstractMTCQTest extends AbstractQueryTest
             if (i > 2)
                 kb.addType(_b, _B);
             kb.addPropertyValue(_r, _a, _b);
+            i++;
+        }
+    }
+
+    public void simpleTKB3()
+    {
+        fillSimpleTKB(5);
+        int i = 0;
+        for (KnowledgeBase kb : _tkb)
+        {
+            if (i > 1)
+                kb.addType(_a, _A);
+            if (i > 3)
+                kb.addType(_a, _B);
+            i++;
+        }
+    }
+
+    public void simpleTKB4()
+    {
+        timeSteps(3);
+        classes(_A, _B);
+        individuals(_a);
+        subClass(TOP, or(_A, _B));
+
+        int i = 0;
+        for (KnowledgeBase kb : _tkb)
+        {
+            if (i == 0)
+                kb.addType(_a, _A);
+            if (i == 2)
+                kb.addType(_a, _B);
             i++;
         }
     }
@@ -459,7 +492,7 @@ public class AbstractMTCQTest extends AbstractQueryTest
     {
         timeSteps(size);
 
-        classes(_A, _B, _C, _D, _E);
+        classes(_A, _B, _C, _D, _E, _H);
         individuals(_a, _b, _c, _d, _e, _f);
         for (int i = 0; i < numberAdditionalIndividuals; i++)
             individuals(term("i" + i));

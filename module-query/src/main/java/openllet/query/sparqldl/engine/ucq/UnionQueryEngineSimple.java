@@ -6,6 +6,7 @@ import openllet.query.sparqldl.engine.QueryBindingCandidateGenerator;
 import openllet.query.sparqldl.engine.QueryExec;
 import openllet.query.sparqldl.engine.QueryResultBasedBindingCandidateGenerator;
 import openllet.query.sparqldl.engine.cq.CombinedQueryEngine;
+import openllet.query.sparqldl.engine.cq.QueryEngine;
 import openllet.query.sparqldl.model.cq.ConjunctiveQuery;
 import openllet.query.sparqldl.model.results.MultiQueryResults;
 import openllet.query.sparqldl.model.results.QueryResult;
@@ -14,7 +15,6 @@ import openllet.query.sparqldl.model.results.ResultBinding;
 import openllet.query.sparqldl.model.ucq.CNFQuery;
 import openllet.query.sparqldl.model.ucq.UnionQuery;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
@@ -51,32 +51,55 @@ public class UnionQueryEngineSimple extends AbstractUnionQueryEngine
 
     @Override
     protected QueryResult execABoxQuery(UnionQuery q, QueryResult excludeBindings, QueryResult restrictToBindings)
-            throws IOException, InterruptedException
     {
-        if (q.getQueries().size() == 0)
+        QueryResult cqEngineResults = null;
+        QueryResult candidates = restrictToBindings;
+        if (q.getQueries().isEmpty())
             return new QueryResultImpl(q);
         else if (q.getQueries().size() == 1)
-            return new CombinedQueryEngine().exec(q.getQueries().get(0));
-        else if (OpenlletOptions.UCQ_ENGINE_USE_UNDERAPPROXIMATING_SEMANTICS)
+            return new QueryEngine().exec(q.getQueries().get(0), excludeBindings, restrictToBindings);
+        // If all disjuncts are over separate result variables, we can safely check them separately by CQ answering.
+        boolean isOverDisjointResultVars = q.isOverDisjointResultVars();
+        if (OpenlletOptions.UCQ_ENGINE_USE_UNDERAPPROXIMATING_SEMANTICS || isOverDisjointResultVars)
         {
-            QueryExec<ConjunctiveQuery> cqEngine = new CombinedQueryEngine();
-            QueryResult disjunctAnswers = cqEngine.exec(q.getQueries().get(0));
+            QueryExec<ConjunctiveQuery> cqEngine = new QueryEngine();
+            cqEngineResults = cqEngine.exec(q.getQueries().get(0), excludeBindings, restrictToBindings);
+            if (cqEngineResults instanceof MultiQueryResults mqr)
+                cqEngineResults = mqr.toQueryResultImpl(q.getQueries().get(0));
+            cqEngineResults.expandToAllVariables(q.getResultVars());
             for (ConjunctiveQuery disjunct : q.getQueries().subList(1, q.getQueries().size()))
-                disjunctAnswers.addAll(cqEngine.exec(disjunct));
-            QueryResult missingAnswers = disjunctAnswers.invert();
+            {
+                // TODO remove cqEngineResults from restrictToBindings
+                QueryResult cqAnswer = cqEngine.exec(disjunct, excludeBindings, restrictToBindings);
+                if (cqAnswer instanceof MultiQueryResults mqr)
+                    cqAnswer = mqr.toQueryResultImpl(disjunct);
+                cqAnswer.expandToAllVariables(q.getResultVars());
+                cqEngineResults.addAll(cqAnswer);
+            }
             if (restrictToBindings != null)
-                restrictToBindings.addAll(missingAnswers);
+            {
+                candidates = restrictToBindings.copy();
+                candidates.removeAll(cqEngineResults);
+            }
         }
-        return switch (_bindingTime)
+        QueryResult result;
+        if (isOverDisjointResultVars)
+            result = cqEngineResults;
+        else
         {
-            case BEFORE_CNF -> execABoxQueryBindingBeforeCNF(q, excludeBindings, restrictToBindings);
-            case AFTER_CNF -> execABoxQueryBindingAfterCNF(q, excludeBindings, restrictToBindings);
-        };
+            result = switch (_bindingTime)
+            {
+                case BEFORE_CNF -> execABoxQueryBindingBeforeCNF(q, excludeBindings, candidates);
+                case AFTER_CNF -> execABoxQueryBindingAfterCNF(q, excludeBindings, candidates);
+            };
+            if (cqEngineResults != null)
+                result.addAll(cqEngineResults);
+        }
+        return result;
     }
 
     protected QueryResult execABoxQueryBindingBeforeCNF(UnionQuery q, QueryResult excludeBindings,
                                                         QueryResult restrictToBindings)
-            throws IOException, InterruptedException
     {
         // Note: we can not split the query here due to semantics. Queries can only be split after conversion to CNF.
         QueryResult result = new QueryResultImpl(q);
@@ -103,7 +126,6 @@ public class UnionQueryEngineSimple extends AbstractUnionQueryEngine
 
     protected QueryResult execABoxQueryBindingAfterCNF(UnionQuery q, QueryResult excludeBindings,
                                                        QueryResult restrictToBindings)
-            throws IOException, InterruptedException
     {
         // 1. ROLL-UP UCQ
         UnionQuery rolledUpUnionQuery = q.rollUp(true);

@@ -147,13 +147,12 @@ public class QueryResultImpl implements QueryResult
 	{
 		if (variables.size() > _resultVars.size())
 		{
-			boolean equals = _resultVars.addAll(variables);
-			if (!equals)
+			boolean notEquals = _resultVars.addAll(variables);
+			if (notEquals)
 			{
 				_maxSize = -1;
 				explicate();
 			}
-			_resultVars = new HashSet<>(variables);
 		}
 	}
 
@@ -393,13 +392,72 @@ public class QueryResultImpl implements QueryResult
 	@Override
 	public boolean contains(ResultBinding binding)
 	{
-		Collection<ResultBinding> explicated = explicate(binding);
+		return contains(binding, false);
+	}
+
+	@Override
+	public boolean contains(ResultBinding binding, boolean considerPartials)
+	{
 		boolean contains = true;
-		for (ResultBinding explBinding : explicated)
-			contains &= _bindings.contains(explBinding);
+		if (!considerPartials)
+		{
+			Collection<ResultBinding> explicated = explicate(binding);
+			for (ResultBinding explBinding : explicated)
+				contains &= _bindings.contains(explBinding);
+		}
+		else if (!_bindings.contains(binding))
+		{
+			explicate();
+			contains = explicate(binding).containsAll(_bindings);
+		}
 		if (_isInverted)
 			contains = !contains;
 		return contains;
+	}
+
+	@Override
+	public boolean possiblyContains(ResultBinding binding)
+	{
+		// example: the partial binding x->a is possibly contained in the query result x->a, y->b.
+		boolean possiblyContains = false;
+		if (_bindings.contains(binding))
+		{
+			possiblyContains = true;
+		}
+		else
+		{
+			// TODO check for performance... this is often used
+			for (ResultBinding thisBinding : _bindings)
+				if (thisBinding.contains(binding))
+				{
+					possiblyContains = true;
+					break;
+				}
+		}
+		if (_isInverted)
+			possiblyContains = !possiblyContains;
+		return possiblyContains;
+	}
+
+	@Override
+	public QueryResult getRestOfPartialBinding(ResultBinding binding, Query<?> query)
+	{
+		if (Collections.disjoint(query.getResultVars(), binding.getAllVariables()))
+		{
+			Collection<ResultBinding> explicated = explicate(binding);
+			QueryResult res = new QueryResultImpl(query);
+			for (ResultBinding explBinding : explicated)
+				if ((!_isInverted && _bindings.contains(explBinding)) || (_isInverted && !_bindings.contains(explBinding)))
+				{
+					ResultBinding explReducedBinding = new ResultBindingImpl();
+					for (ATermAppl var : query.getResultVars())
+						explReducedBinding.setValue(var, explBinding.getValue(var));
+					res.add(explReducedBinding);
+				}
+			return res;
+		}
+		else
+			throw new UnsupportedOperationException("Can not examine partial binding that is not disjoint with query result");
 	}
 
 	@Override

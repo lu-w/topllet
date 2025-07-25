@@ -8,7 +8,6 @@ import openllet.query.sparqldl.model.results.QueryResultImpl;
 import openllet.query.sparqldl.model.results.ResultBindingImpl;
 import openllet.shared.tools.Log;
 
-import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -26,7 +25,7 @@ public abstract class AbstractBooleanQueryEngine<QueryType extends Query<QueryTy
     }
 
     @Override
-    public QueryResult exec(QueryType q, ABox abox, Timer timer) throws IOException, InterruptedException
+    public QueryResult exec(QueryType q, ABox abox, Timer timer)
     {
         _timer = timer;
         _timer.start();
@@ -36,14 +35,14 @@ public abstract class AbstractBooleanQueryEngine<QueryType extends Query<QueryTy
     }
 
     @Override
-    public QueryResult exec(QueryType q, ABox abox) throws IOException, InterruptedException
+    public QueryResult exec(QueryType q, ABox abox)
     {
         _abox = abox;
         return exec(q);
     }
 
     @Override
-    public QueryResult exec(QueryType q) throws IOException, InterruptedException
+    public QueryResult exec(QueryType q)
     {
         if (_abox == null)
             _abox = q.getKB().getABox();
@@ -88,5 +87,5 @@ public abstract class AbstractBooleanQueryEngine<QueryType extends Query<QueryTy
      * @param q The Boolean query to execute
      * @return True iff. the Boolean query is entailed in its knowledge base
      */
-    abstract protected boolean execBooleanABoxQuery(QueryType q) throws IOException, InterruptedException;
+    abstract protected boolean execBooleanABoxQuery(QueryType q);
 }

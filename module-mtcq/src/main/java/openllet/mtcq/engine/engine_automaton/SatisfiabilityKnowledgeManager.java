@@ -1,4 +1,4 @@
-package openllet.mtcq.engine;
+package openllet.mtcq.engine.engine_automaton;
 
 import openllet.core.KnowledgeBase;
 import openllet.core.OpenlletOptions;
@@ -20,7 +20,6 @@ import openllet.mtcq.model.automaton.Edge;
 import openllet.mtcq.model.query.MetricTemporalConjunctiveQuery;
 
 import javax.annotation.Nullable;
-import java.io.IOException;
 import java.util.*;
 import java.util.logging.Logger;
 import java.util.stream.IntStream;
@@ -31,6 +30,7 @@ import java.util.stream.IntStream;
  * query with the unsatisfiability of its negation.
  * It can also propagate knowledge around based on similarities of ABoxes to certain time points.
  */
+@Deprecated
 public class SatisfiabilityKnowledgeManager
 {
     public static final Logger _logger = Log.getLogger(SatisfiabilityKnowledgeManager.class);
@@ -229,11 +229,8 @@ public class SatisfiabilityKnowledgeManager
      * point and propagates the gained knowledge within this knowledge manager.
      * @param query The CQ to answer.
      * @param timePoint The time point for which the query is executed.
-     * @throws IOException If CQ engine encountered an IO exception.
-     * @throws InterruptedException If CQ engine was interrupted.
      */
     private void execConjunctiveQueryEngine(ConjunctiveQuery query, int timePoint)
-            throws IOException, InterruptedException
     {
         if (!_cqCache.containsKey(timePoint) || !_cqCache.get(timePoint).contains(query))
         {
@@ -283,11 +280,9 @@ public class SatisfiabilityKnowledgeManager
      * @param timePoint The time point for which the query is executed.
      * @param knowledgeOnQuery Already gathered knowledge on the BCQ from a possible previous run with the CQ engine.
      * @param restrictSatToBindings If not null, satisfiability results are restricted to this set of bindings
-     * @throws IOException If BCQ query engine encountered an IO exception.
-     * @throws InterruptedException If BCQ query engine was interrupted.
      */
     private void execBCQQueryEngine(BCQQuery query, int timePoint, SatisfiabilityKnowledge knowledgeOnQuery,
-                                     QueryResult restrictSatToBindings) throws IOException, InterruptedException
+                                     QueryResult restrictSatToBindings)
     {
         QueryResult restrictTo;
         QueryResult certainSatKnowledge = knowledgeOnQuery.getCertainSatisfiabilityKnowledge(timePoint).get(Bool.TRUE);
@@ -343,13 +338,10 @@ public class SatisfiabilityKnowledgeManager
      * @param restrictSatToBindings Restricts satisfiable answers to the given set of bindings, if not null.
      * @return A pointer to the current query result for satisfiable and unsatisfiable knowledge, as a mapping from
      * true (satisfiable) and false (unsatisfiable) to a query result.
-     * @throws IOException If BCQ query engine encountered an IO exception.
-     * @throws InterruptedException If BCQ query engine was interrupted.
      */
     public Map<Bool, QueryResult> computeSatisfiableBindings(BCQQuery query, int timePoint, KnowledgeBase kb,
                                                              boolean useUnderapproximatingSemantics,
                                                              QueryResult restrictSatToBindings)
-            throws IOException, InterruptedException
     {
         query.setKB(kb);
         SatisfiabilityKnowledge knowledgeOnQuery = transferAndGetKnowledgeOnQuery(query, timePoint);

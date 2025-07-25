@@ -166,15 +166,7 @@ public class ProfileBCQQuery
         {
             System.out.println("Executing:");
             System.out.println(q);
-            QueryResult res = null;
-            try
-            {
-                res = eng.exec(q);
-            }
-            catch (IOException | InterruptedException e)
-            {
-                res = new QueryResultImpl(q);
-            }
+            QueryResult res = eng.exec(q);
             System.out.println(res.size());
         }
         t.stop();

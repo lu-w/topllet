@@ -26,7 +26,6 @@ public class BCQQueryEngineSimple extends AbstractBCQQueryEngine
 
     @Override
     protected QueryResult execABoxQuery(BCQQuery q, QueryResult excludeBindings, QueryResult restrictToBindings)
-            throws IOException, InterruptedException
     {
         QueryResult result;
 
@@ -66,7 +65,6 @@ public class BCQQueryEngineSimple extends AbstractBCQQueryEngine
 
     @Override
     public QueryResult exec(BCQQuery query, QueryResult excludeBindings, QueryResult restrictToBindings)
-            throws IOException, InterruptedException
     {
         return execABoxQuery(query, excludeBindings, restrictToBindings);
     }

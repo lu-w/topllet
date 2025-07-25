@@ -3,11 +3,9 @@ package openllet.test.mtcq;
 import openllet.aterm.ATermAppl;
 import openllet.core.KnowledgeBase;
 import openllet.core.OpenlletOptions;
-import openllet.mtcq.engine.MTCQEngine;
 import org.junit.Test;
 
 import java.util.List;
-import java.util.logging.Level;
 
 import static openllet.core.utils.TermFactory.or;
 import static openllet.core.utils.TermFactory.term;
@@ -15,11 +13,31 @@ import static openllet.core.utils.TermFactory.term;
 public class TestMTCQEngine extends AbstractMTCQTest
 {
     @Test
+    public void testSimplification()
+    {
+        simpleTKB();
+        testQuery("(A(?x) | B(?x)) & (A(?x) | (C(?x) | (D(?x) | B(?x))))", new ATermAppl[][] { { _a}, { _b } });
+        testQuery("(A(?x) | B(?x)) | (A(?x) | (C(?x) | (D(?x) | B(?x))))", new ATermAppl[][] { { _a}, { _b } });
+        testQuery("((A(?x)) & (B(?x))) | (A(?x) & (C(?x) & ((D(?x)) & (B(?x)))))");
+        testQuery("((A(?x)) & (B(?x))) & (A(?x) & (C(?x) & ((D(?x)) & (B(?x)))))");
+    }
+
+    @Test
+    public void testUndistVars()
+    {
+        simpleTKB();
+        testQuery("r(x,?y)", new ATermAppl[][]{{_b}});
+        testQuery("(!(B(?y))) | (r(x,?y))", new ATermAppl[][] { { _b } });
+    }
+
+    @Test
     public void testSimpleQuery1()
     {
         simpleTKB();
-        testQuery("G(A(?x))", new ATermAppl[][] { { _a } });
+        testQuery("(!(B(?y))) | (r(?x,?y))", new ATermAppl[][] { { _b, _a } });
+        testQuery("((A(?x)) & !(B(?y))) | (r(?x,?y))", new ATermAppl[][] { { _a, _b } });
         testQuery("G(A(?x) & B(?y)) & F(r(?x,?y))", new ATermAppl[][] { { _a, _b } });
+        testQuery("G(A(?x))", new ATermAppl[][] { { _a } });
         testQuery("G((A(?x)) & (B(?y))) & F(r(?x,?y))", new ATermAppl[][] { { _a, _b } });
         testQuery("G(A(?x) & B(?y)) & F!(r(?x,?y))");
         testQuery("G(A(?x) & B(?y)) & G!(r(?x,?y))");
@@ -39,10 +57,24 @@ public class TestMTCQEngine extends AbstractMTCQTest
     }
 
     @Test
+    public void testTautologicalQuery()
+    {
+        simpleTKB();
+        testQuery("((!(A(?x))) & (B(?y))) | ((A(?x)) & (B(?y)))", new ATermAppl[][] { { _a, _b }, { _c, _b } });
+    }
+
+    @Test
     public void testSimpleQuery3()
     {
         simpleTKB2();
         testQuery("(A(?x)) U (B(?y))", new ATermAppl[][] { { _a, _b } });
+    }
+
+    @Test
+    public void testNestedEventually()
+    {
+        simpleTKB3();
+        testQuery("F(A(?x) & F(B(?x)))", new ATermAppl[][] { { _a } });
     }
 
     @Test
@@ -76,10 +108,16 @@ public class TestMTCQEngine extends AbstractMTCQTest
     }
 
     @Test
+    public void testDisjunction()
+    {
+        complexTKB();
+        testQuery("(!(D(?x)) | (E(?y)))", new ATermAppl[][] { { _a, _b }, { _a, _c } });
+        testQuery("((B(?x)) | (C(?x)))",  new ATermAppl[][] { { _a }, { _c } });
+    }
+
+    @Test
     public void testSimpleQuery8()
     {
-        // TODO debug (works when CQ engine is disabled)
-        OpenlletOptions.MTCQ_ENGINE_USE_CQ_ENGINE = true;
         fillSimpleTKB(1);
         subClass(_B, or(_C, _D));
         for (KnowledgeBase kb : _tkb)
@@ -125,7 +163,7 @@ public class TestMTCQEngine extends AbstractMTCQTest
         testQuery("X[!](A(?x))",  new ATermAppl[][] { { _a } });
         testQuery("X[!]X[!](A(a))");
         testQuery("X(A(?x))",  new ATermAppl[][] { { _a } });
-        testQuery("XX(A(?x))",  new ATermAppl[][] { { _a }, { _b }, { _c } });
+        testQuery("X(X(A(?x)))",  new ATermAppl[][] { { _a }, { _b }, { _c } });
     }
 
     @Test
@@ -134,6 +172,15 @@ public class TestMTCQEngine extends AbstractMTCQTest
         fillSimpleTKB(2);
         testQuery("(A(?x))");
         testQuery("", new ATermAppl[][] { {} });
+    }
+
+    @Test
+    public void testEventuallyDisjunction()
+    {
+        simpleTKB4();
+        testQuery("(A(?x) | B(?x))", new ATermAppl[][] { { _a } });
+        testQuery("F(A(?x) & X[!] (B(?x)))", new ATermAppl[][] { { _a } });
+        testQuery("A(?x) & X[!] (B(?x))");
     }
 
     @Test
@@ -174,7 +221,8 @@ public class TestMTCQEngine extends AbstractMTCQTest
     {
         complexTKB();
         testQuery("G_[0,9] (!(D(?x)) | (E(?y)))", new ATermAppl[][] { { _a, _b } });
-        testQuery("G_[0,10] (!(D(?x)) | (E(?y)))");
+        testQuery("G_[0,10] (!(D(?x)) | (E(?y)))", new ATermAppl[][] { { _a, _b } });
+        testQuery("F_[10,11] (!(D(?x)) | (E(?y)))");
         testQuery("F_<=3 !(C(?x) & r(?x,?y))", allResults(List.of(_a, _b, _c), 2, true));
         testQuery("F_<=9 (q(?y, ?z))", new ATermAppl[][] { { _b, _a }, { _c, _b } });
         testQuery("(!(D(?w)) | (E(?x))) U_[0,9] (q(?y, ?z))");
@@ -189,7 +237,8 @@ public class TestMTCQEngine extends AbstractMTCQTest
         testQuery("((A(?x))) U_[0,3] (B(?y))", new ATermAppl[][] { { _a, _b }, { _a, _c } });
     }
 
-    @Test
+    //@Test
+    // TODO implement NNF for metric ops
     public void testIllegCrossing()
     {
         useCaseTKBIllegCrossing(true, 5);

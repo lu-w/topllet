@@ -98,14 +98,7 @@ public class QuerySubsumption
 		kb.isConsistent();
 
 		sup.setKB(kb);
-		QueryResult results = new QueryResultImpl(sup);
-		try
-		{
-			results = QueryEngine.execQuery(sup);
-		}
-		catch (IOException | InterruptedException ignored)
-		{
-		}
+		QueryResult results = QueryEngine.execQuery(sup);
 		sup.setKB(sup.getKB());
 
 		return results;

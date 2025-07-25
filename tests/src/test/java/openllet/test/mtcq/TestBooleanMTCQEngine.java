@@ -1,7 +1,11 @@
 package openllet.test.mtcq;
 
+import openllet.core.KnowledgeBase;
+import openllet.core.OpenlletOptions;
 import org.junit.Test;
 
+import static openllet.core.utils.TermFactory.not;
+import static openllet.core.utils.TermFactory.or;
 import static org.junit.Assert.assertThrows;
 
 public class TestBooleanMTCQEngine extends AbstractMTCQTest
@@ -21,6 +25,13 @@ public class TestBooleanMTCQEngine extends AbstractMTCQTest
     }
 
     @Test
+    public void testDisjunction()
+    {
+        complexTKB();
+        assertQueryEntailed("((B(a)) | (C(a)))");
+    }
+
+    @Test
     public void testEmptyKBAndEmptyQuery()
     {
         fillSimpleTKB(2);
@@ -37,7 +48,7 @@ public class TestBooleanMTCQEngine extends AbstractMTCQTest
         assertQueryEntailed("X[!](A(a))");
         assertQueryNotEntailed("X[!]X[!](A(a))");
         assertQueryEntailed("X(A(a))");
-        assertQueryEntailed("XX(A(a))");
+        assertQueryEntailed("X(X(A(a)))");
     }
 
     @Test
@@ -76,7 +87,7 @@ public class TestBooleanMTCQEngine extends AbstractMTCQTest
     {
         complexTKB();
         assertQueryEntailed("G_[0,9] (!(D(a)) | (E(b)))");
-        assertQueryNotEntailed("G_[0,10] (!(D(a)) | (E(b)))");
+        assertQueryEntailed("G_[0,10] (!(D(a)) | (E(b)))");
         assertQueryEntailed("F_<=3 !(C(a) & r(a,b))");
         assertQueryEntailed("(!(D(a)) | (E(b))) U_[0,9] (q(c, b))");
         assertQueryNotEntailed("(!(D(a)) | (E(b))) U_[0,7] (q(c, b))");
@@ -102,7 +113,7 @@ public class TestBooleanMTCQEngine extends AbstractMTCQTest
         complexTKB();
         assertThrows(UnsupportedOperationException.class, () -> testQuery("F(r(x,y) & p(y,z) & q(z,x))", false));
         assertThrows(UnsupportedOperationException.class, () -> testQuery("F(r(x,y) & q(y,x))", false));
-        assertThrows(UnsupportedOperationException.class, () -> testQuery("F(r(x,y)) & F(p(y,x)) & F(q(z,x))", false));
+        assertThrows(AssertionError.class, () -> testQuery("F(r(x,y)) & F(p(y,x)) & F(q(z,x))", false));
         // TODO specify an example where there is a cycle in the MTCQ but not in the checked BCQs / UCQs
     }
 

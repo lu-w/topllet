@@ -13,7 +13,6 @@ import openllet.query.sparqldl.model.results.*;
 import openllet.query.sparqldl.model.ucq.UnionQuery;
 import openllet.query.sparqldl.model.ucq.UnionQueryImpl;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -36,7 +35,6 @@ public class SemiBooleanBCQEngineSimple extends AbstractSemiBooleanBCQEngine
 
     @Override
     protected QueryResult execABoxQuery(BCQQuery q, QueryResult excludeBindings, QueryResult restrictToBindings)
-            throws IOException, InterruptedException
     {
         QueryResult satResult = new QueryResultImpl(q);
 
@@ -44,7 +42,7 @@ public class SemiBooleanBCQEngineSimple extends AbstractSemiBooleanBCQEngine
         q.getKB().ensureConsistency();
 
         // If there are 0 negated subqueries in q, we can check for entailment: if q is entailed, then it is satisfiable
-        if (OpenlletOptions.BCQ_ENGINE_USE_CQ_ENTAILMENT_AS_SUFFICIENT_CONDITION && q.getNegativeQueries().size() == 0)
+        if (OpenlletOptions.BCQ_ENGINE_USE_CQ_ENTAILMENT_AS_SUFFICIENT_CONDITION && q.getNegativeQueries().isEmpty())
         {
             boolean isEntailed = true;
             for (ConjunctiveQuery cq : q.getPositiveQueries())
@@ -120,7 +118,6 @@ public class SemiBooleanBCQEngineSimple extends AbstractSemiBooleanBCQEngine
 
     private QueryResult computeSatisfiableBindings(BCQQuery query, QueryResult excludeBindings,
                                                    QueryResult restrictToBindings)
-            throws IOException, InterruptedException
     {
         QueryResult res = new QueryResultImpl(query);
         if (_abox.isConsistent())

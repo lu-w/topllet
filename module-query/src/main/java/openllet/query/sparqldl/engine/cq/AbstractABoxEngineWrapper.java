@@ -57,7 +57,7 @@ public abstract class AbstractABoxEngineWrapper implements QueryExec<Conjunctive
 	protected ConjunctiveQuery aboxQuery;
 
 	@Override
-	public QueryResult exec(ConjunctiveQuery q, ABox abox, Timer timer) throws IOException, InterruptedException
+	public QueryResult exec(ConjunctiveQuery q, ABox abox, Timer timer)
 	{
 		timer.start();
 		QueryResult result = exec(q, abox);
@@ -66,7 +66,7 @@ public abstract class AbstractABoxEngineWrapper implements QueryExec<Conjunctive
 	}
 
 	@Override
-	public QueryResult exec(ConjunctiveQuery q, ABox abox) throws IOException, InterruptedException
+	public QueryResult exec(ConjunctiveQuery q, ABox abox)
 	{
 		return exec(q);
 	}
@@ -75,7 +75,7 @@ public abstract class AbstractABoxEngineWrapper implements QueryExec<Conjunctive
 	 * {@inheritDoc}
 	 */
 	@Override
-	public QueryResult exec(final ConjunctiveQuery query) throws IOException, InterruptedException
+	public QueryResult exec(final ConjunctiveQuery query)
 	{
 		assert(supports(query));
 		_logger.fine(() -> "Executing query " + query);

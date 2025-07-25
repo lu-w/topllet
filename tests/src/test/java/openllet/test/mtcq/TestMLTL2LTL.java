@@ -14,24 +14,15 @@ public class TestMLTL2LTL
 {
     protected String convert(String mltlFormula)
     {
-        String ltlf = "";
-        try
-        {
-            ltlf = MLTL2LTLf.convert(mltlFormula);
-        }
-        catch (IOException | InterruptedException | ParseException e)
-        {
-            fail("Can not convert " + mltlFormula + " to LTLf: " + e);
-        }
-        return ltlf;
+        return MLTL2LTLf.convert(mltlFormula);
     }
 
     @Test
     public void testMLTLConversion1()
     {
         String ltlf = convert("G_[10,20] a");
-        assertEquals("(X[!](X[!](X[!](X[!](X[!](X[!](X[!](X[!](X[!](X[!](a&(X[!](a&(X[!](a&(X[!](a&(X[!](a&" +
-                "(X[!](a&(X[!](a&(X[!](a&(X[!](a&(X[!](a&(X[!]a))))))))))))))))))))))))))))))\n", ltlf);
+        assertEquals("(X(X(X(X(X(X(X(X(X(X(a&(X(a&(X(a&(X(a&(X(a&(X(a&(X(a&(X(a&(X(a&(X(a&(Xa)))))))))))))))" +
+                ")))))))))))))))\n", ltlf);
     }
 
     @Test

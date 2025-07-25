@@ -30,4 +30,6 @@ public interface UnionQuery extends CompositeQuery<ConjunctiveQuery, UnionQuery>
      * @return A new rolled-up union query.
      */
     UnionQuery rollUp(boolean stopRollingOnDistVars);
+
+    boolean isOverDisjointResultVars();
 }

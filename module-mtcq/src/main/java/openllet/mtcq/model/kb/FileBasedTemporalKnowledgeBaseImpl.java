@@ -11,7 +11,6 @@ import openllet.shared.tools.Log;
 import openllet.mtcq.model.kb.loader.IncrementalKnowledgeBaseLoader;
 import openllet.mtcq.model.kb.loader.KnowledgeBaseLoader;
 import org.apache.jena.atlas.io.IO;
-import org.apache.jena.base.Sys;
 import org.jgrapht.graph.DefaultDirectedGraph;
 import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.traverse.BreadthFirstIterator;
@@ -41,8 +40,8 @@ public class FileBasedTemporalKnowledgeBaseImpl extends ArrayList<KnowledgeBase>
     private KnowledgeBase _curKb;
     private int _curKbIndex = -1;
     private final String _catalogFile;
-    private final Timer _timer;
     private DefaultDirectedGraph<ATerm, DefaultEdge> _axiomGraph;
+    private final Timer _timer;
     private Set<ATermAppl> _prevInds = null;
 
     static public List<String> parseKBSFile(String kbsFile) throws FileNotFoundException
@@ -101,6 +100,21 @@ public class FileBasedTemporalKnowledgeBaseImpl extends ArrayList<KnowledgeBase>
                 _curKbIndex = index;
                 if (_curKb != null && _prevInds == null)
                     _prevInds = _curKb.getIndividuals();
+                // Check disabled for now
+                // TODO: re-add?
+                else if (false && _curKb != null && !_curKb.getIndividuals().equals(_prevInds))
+                {
+                    Set<ATermAppl> mis1 = new HashSet<>(_prevInds);
+                    Set<ATermAppl> mis2 = new HashSet<>(_curKb.getIndividuals());
+                    mis1.removeAll(_curKb.getIndividuals());
+                    mis2.removeAll(_prevInds);
+                    throw new RuntimeException("Individuals of ABox base at time " + index + " and " +
+                            "previously loaded one do not match." +
+                            (!mis2.isEmpty() ? " " + mis2.size() +
+                                    " individuals present in new ABox but not in previous: " + mis2 + "." : "") +
+                            (!mis1.isEmpty() ? " " + mis1.size() +
+                                    " individuals present in previous ABox but not in new: " + mis1 + "." : ""));
+                }
                 if (_curKb != null && _curKb.getExpressivity().hasNominal())
                 {
                     throw new RuntimeException("Nominals are not allowed in components TKBs.");
@@ -232,6 +246,18 @@ public class FileBasedTemporalKnowledgeBaseImpl extends ArrayList<KnowledgeBase>
                         connected.add(vertex);
                 }
         return connected;
+    }
+
+    @Override
+    public KnowledgeBase getLastLoadedKB()
+    {
+        return _curKb;
+    }
+
+    @Override
+    public Timer getTimer()
+    {
+        return _timer;
     }
 
     protected static Collection<ATerm> computeReachableSetDirected(DefaultDirectedGraph<ATerm, DefaultEdge> graph, ATerm node)

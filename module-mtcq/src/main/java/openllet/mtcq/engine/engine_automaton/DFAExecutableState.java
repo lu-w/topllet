@@ -1,4 +1,4 @@
-package openllet.mtcq.engine;
+package openllet.mtcq.engine.engine_automaton;
 
 import openllet.core.KnowledgeBase;
 import openllet.core.utils.Bool;
@@ -12,7 +12,6 @@ import openllet.mtcq.model.automaton.DFA;
 import openllet.mtcq.model.automaton.Edge;
 import openllet.mtcq.model.query.MetricTemporalConjunctiveQuery;
 
-import java.io.IOException;
 import java.util.*;
 import java.util.logging.Logger;
 
@@ -23,6 +22,7 @@ import java.util.logging.Logger;
  * states are created that represented the propagated (un)satisfiability information from the current state to these new
  * states.
  */
+@Deprecated
 public class DFAExecutableState
 {
     public static final Logger _logger = Log.getLogger(DFAExecutableState.class);
@@ -198,10 +198,8 @@ public class DFAExecutableState
      * Execute this state, i.e., it checks all edges of the current state and propagates (un)satisfiability knowledge
      * according to the (un)satisfiability of the BCQs on the edges. Thus, a new collection of new states is created.
      * @return The new collection of states after execution.
-     * @throws IOException If BCQ query engine encountered an IO exception.
-     * @throws InterruptedException If BCQ query engine was interrupted.
      */
-    public Collection<DFAExecutableState> execute() throws IOException, InterruptedException
+    public Collection<DFAExecutableState> execute()
     {
         Collection<DFAExecutableState> newExecutableStates = new ArrayList<>();
         QueryResult restrictSatToBindings = null;

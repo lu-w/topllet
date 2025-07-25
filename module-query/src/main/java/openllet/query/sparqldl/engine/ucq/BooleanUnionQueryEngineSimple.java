@@ -21,11 +21,9 @@ import openllet.query.sparqldl.model.ucq.CNFQuery;
 import openllet.query.sparqldl.model.ucq.UnionQuery;
 import openllet.shared.tools.Log;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.List;
-import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -36,8 +34,10 @@ public class BooleanUnionQueryEngineSimple extends AbstractBooleanUnionQueryEngi
 {
     public static final Logger _logger = Log.getLogger(BooleanUnionQueryEngineSimple.class);
 
+    public static long calls = 0;
+
     @Override
-    protected boolean execBooleanABoxQuery(CNFQuery q, ABox abox) throws IOException, InterruptedException
+    protected boolean execBooleanABoxQuery(CNFQuery q, ABox abox)
     {
         _abox = abox;
 
@@ -69,7 +69,7 @@ public class BooleanUnionQueryEngineSimple extends AbstractBooleanUnionQueryEngi
     }
 
     @Override
-    protected boolean execBooleanABoxQuery(UnionQuery q) throws IOException, InterruptedException
+    protected boolean execBooleanABoxQuery(UnionQuery q)
     {
         // 1. TRY TO USE STANDARD CQ ENGINE
         if (OpenlletOptions.UCQ_ENGINE_USE_STANDARD_CQ_ENGINE_IF_POSSIBLE && q.getQueries().size() == 1)
@@ -111,6 +111,7 @@ public class BooleanUnionQueryEngineSimple extends AbstractBooleanUnionQueryEngi
      */
     private boolean isEntailed(CNFQuery cnfQuery, KnowledgeBase kb)
     {
+        calls++;
         boolean isEntailed = true;
         // Query is entailed iff. all conjuncts are entailed
         for (DisjunctiveQuery disjunctiveQuery : cnfQuery.getQueries())
@@ -216,7 +217,7 @@ public class BooleanUnionQueryEngineSimple extends AbstractBooleanUnionQueryEngi
      * @param q The query to check
      * @return True only if the query is entailed
      */
-    private boolean execUnderapproximatingSemanticsBoolean(UnionQuery q) throws IOException, InterruptedException
+    private boolean execUnderapproximatingSemanticsBoolean(UnionQuery q)
     {
         return !execUnderapproximatingSemantics(q).isEmpty();
     }
@@ -227,7 +228,7 @@ public class BooleanUnionQueryEngineSimple extends AbstractBooleanUnionQueryEngi
      * @param q The query to check
      * @return The answers for all its disjuncts
      */
-    private QueryResult execUnderapproximatingSemantics(UnionQuery q) throws IOException, InterruptedException
+    private QueryResult execUnderapproximatingSemantics(UnionQuery q)
     {
         QueryResult result = new QueryResultImpl(q);
         UnionQuery qCopy = q.copy();
@@ -238,5 +239,11 @@ public class BooleanUnionQueryEngineSimple extends AbstractBooleanUnionQueryEngi
                 result.add(binding);
         }
         return result;
+    }
+
+    @Override
+    public QueryResult exec(UnionQuery q, QueryResult excludeBindings, QueryResult restrictToBindings)
+    {
+        return exec(q);
     }
 }

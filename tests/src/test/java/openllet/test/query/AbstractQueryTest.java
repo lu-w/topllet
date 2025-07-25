@@ -8,6 +8,7 @@ package openllet.test.query;
 
 import openllet.aterm.ATermAppl;
 import openllet.core.utils.ATermUtils;
+import openllet.mtcq.engine.engine_rewriting.MTCQNormalFormEngine;
 import openllet.query.sparqldl.engine.bcq.BCQQueryEngineSimple;
 import openllet.query.sparqldl.engine.cq.QueryEngine;
 import openllet.query.sparqldl.engine.ucq.UnionQueryEngineSimple;
@@ -21,12 +22,10 @@ import openllet.query.sparqldl.model.Query.VarType;
 import openllet.query.sparqldl.model.cq.ConjunctiveQuery;
 import openllet.query.sparqldl.model.cq.QueryAtom;
 import openllet.query.sparqldl.model.cq.ConjunctiveQueryImpl;
-import openllet.mtcq.engine.MTCQEngine;
 import openllet.mtcq.model.query.MetricTemporalConjunctiveQuery;
 import openllet.test.AbstractKBTests;
 import org.junit.Assert;
 
-import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.util.*;
 
@@ -217,28 +216,20 @@ public abstract class AbstractQueryTest extends AbstractKBTests
 	 */
 
 	private QueryResult execQuery(Query<?> query)
-	{
+	{ 
 		QueryResult result = null;
-		try
-		{
-			if (query instanceof ConjunctiveQuery)
-				result = new QueryEngine().exec((ConjunctiveQuery) query);
-			else if (query instanceof UnionQuery)
-				result = new UnionQueryEngineSimple(UnionQueryEngineSimple.BindingTime.AFTER_CNF).
-						exec((UnionQuery) query);
-			else if (query instanceof BCQQuery)
-				result = new BCQQueryEngineSimple().exec((BCQQuery) query);
-			else if (query instanceof MetricTemporalConjunctiveQuery)
-				result = new MTCQEngine().exec((MetricTemporalConjunctiveQuery) query);
-			else
-				fail("Unknown query type " + query.getClass());
-			if (result == null)
-				fail("No result returned for query " + query);
-		}
-		catch (IOException | InterruptedException e)
-		{
-			fail(e.toString());
-		}
+		if (query instanceof ConjunctiveQuery)
+			result = new QueryEngine().exec((ConjunctiveQuery) query);
+		else if (query instanceof UnionQuery)
+			result = new UnionQueryEngineSimple(UnionQueryEngineSimple.BindingTime.AFTER_CNF).exec((UnionQuery) query);
+		else if (query instanceof BCQQuery)
+			result = new BCQQueryEngineSimple().exec((BCQQuery) query);
+		else if (query instanceof MetricTemporalConjunctiveQuery)
+			result = new MTCQNormalFormEngine().exec((MetricTemporalConjunctiveQuery) query);
+		else
+			fail("Unknown query type " + query.getClass());
+		if (result == null)
+			fail("No result returned for query " + query);
 		return result;
 	}
 

@@ -46,6 +46,14 @@ abstract public class AbstractCompositeQuery<SubQueryType extends Query<SubQuery
     }
 
     @Override
+    public void setKB(final KnowledgeBase kb)
+    {
+        super.setKB(kb);
+        for (SubQueryType q : _queries)
+            q.setKB(kb);
+    }
+
+    @Override
     public void addQuery(final SubQueryType query)
     {
         _queries.add(query);

@@ -177,6 +177,16 @@ public class UnionQueryImpl extends AbstractCompositeQuery<ConjunctiveQuery, Uni
     }
 
     @Override
+    public boolean isOverDisjointResultVars()
+    {
+        for (ConjunctiveQuery disjunct : _queries)
+            for (ConjunctiveQuery other : _queries)
+                if (disjunct != other && !Collections.disjoint(disjunct.getResultVars(), other.getResultVars()))
+                    return false;
+        return true;
+    }
+
+    @Override
     public List<UnionQuery> split()
     {
         // UCQs shall not be split due to their semantics.

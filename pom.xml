@@ -79,6 +79,11 @@
   <dependencyManagement>
     <dependencies>
       <dependency>
+        <groupId>org.antlr</groupId>
+        <artifactId>antlr4-runtime</artifactId>
+        <version>4.13.1</version>
+      </dependency>
+      <dependency>
         <groupId>org.apache.jena</groupId>
         <artifactId>jena-core</artifactId>
         <version>[4.2.0,4.2.99]</version>

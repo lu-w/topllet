@@ -104,6 +104,11 @@ public interface InstancesBase extends MessageBase, Logging, Base
 	 */
 	default Set<ATermAppl> getInstances(final ATermAppl c)
 	{
+		return getInstances(c, null);
+	}
+
+	default Set<ATermAppl> getInstances(final ATermAppl c, Set<ATermAppl> restrictToInstances)
+	{
 		if (null == c)
 			return Collections.emptySet();
 
@@ -127,7 +132,13 @@ public interface InstancesBase extends MessageBase, Logging, Base
 					return TaxonomyUtils.getAllInstances(taxonomy, c);
 			}
 
-		return new HashSet<>(retrieve(c, getIndividuals()));
+		Set<ATermAppl> candidates;
+		if (restrictToInstances == null)
+			candidates = getIndividuals();
+		else
+			candidates = restrictToInstances;
+
+		return new HashSet<>(retrieve(c, candidates));
 	}
 
 	/**
@@ -143,6 +154,11 @@ public interface InstancesBase extends MessageBase, Logging, Base
 	 */
 	default Set<ATermAppl> getInstances(final ATermAppl c, final boolean direct)
 	{
+		return getInstances(c, direct, null);
+	}
+
+	default Set<ATermAppl> getInstances(final ATermAppl c, final boolean direct, Set<ATermAppl> restrictToInstances)
+	{
 		if (null == c)
 			return Collections.emptySet();
 
@@ -154,7 +170,7 @@ public interface InstancesBase extends MessageBase, Logging, Base
 
 		// All getInstances() for anonymous concepts
 		if (!direct)
-			return getInstances(c);
+			return getInstances(c, restrictToInstances);
 
 		realize();
 

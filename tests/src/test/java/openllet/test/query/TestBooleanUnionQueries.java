@@ -161,9 +161,10 @@ public class TestBooleanUnionQueries extends AbstractQueryTest
     @Test
     public void sharedUndistinguishedVarTest()
     {
-        classes(_A, _B, _C);
-        individuals(_a, _b);
-
+        _kb.addClass(_A);
+        _kb.addClass(_B);
+        _kb.addIndividual(_a);
+        _kb.addIndividual(_b);
         _kb.addType(_a, _A);
         _kb.addType(_b, _B);
 
@@ -177,7 +178,11 @@ public class TestBooleanUnionQueries extends AbstractQueryTest
                                      query(TypeAtom(_b, _B)));
         UnionQuery ucq4 = unionQuery(query(TypeAtom(x, _A)),
                                      query(TypeAtom(_b, _B)));
-        UnionQuery ucq5 = unionQuery(query(TypeAtom(_b, _A)),
+        UnionQuery ucq5 = unionQuery(query(TypeAtom(_a, _B)));
+        UnionQuery ucq6 = unionQuery(query(TypeAtom(_b, _A)));
+        UnionQuery ucq7 = unionQuery(query(TypeAtom(_a, _B)),
+                                     query(TypeAtom(_b, _A)));
+        UnionQuery ucq8 = unionQuery(query(TypeAtom(_b, _A)),
                                      query(TypeAtom(_a, _B)));
 
         testQuery(ucq1, true);
@@ -185,6 +190,9 @@ public class TestBooleanUnionQueries extends AbstractQueryTest
         testQuery(ucq3, true);
         testQuery(ucq4, true);
         testQuery(ucq5, false);
+        testQuery(ucq6, false);
+        testQuery(ucq7, false);
+        testQuery(ucq8, false);
     }
 
     @Test

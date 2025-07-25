@@ -1,6 +1,7 @@
 package openllet.mtcq.model.query;
 
 import openllet.query.sparqldl.model.CompositeQuery;
+import openllet.query.sparqldl.model.Query;
 import openllet.query.sparqldl.model.cq.ConjunctiveQuery;
 import openllet.mtcq.model.kb.TemporalKnowledgeBase;
 
@@ -16,28 +17,9 @@ import java.util.Map;
 public interface MetricTemporalConjunctiveQuery extends CompositeQuery<ConjunctiveQuery, MetricTemporalConjunctiveQuery>
 {
     /**
-     * @return A copy of a collection of the propositions used in the propositional abstraction.
-     */
-    Collection<Proposition> getPropositionsInAbstraction();
-
-    /**
      * @return An unmodifiable view on the map representing the propositional abstraction used in this query.
      */
     Map<Proposition, ConjunctiveQuery> getPropositionalAbstraction();
-
-    /**
-     * @return A copy of a collection of the conjunctive queries used in this query.
-     */
-    Collection<ConjunctiveQuery> getConjunctiveQueries();
-
-    /**
-     * Can be used to build the propositional abstraction. Replaces every occurence of the query with the given
-     * proposition and adds the query and proposition to the propositions and CQs stored in this query.
-     * @param proposition The proposition for the CQ.
-     * @param query The query to replace in the MTCQ.
-     * @param queryString The string representation of the query that is given.
-     */
-    void addConjunctiveQuery(Proposition proposition, ConjunctiveQuery query, String queryString);
 
     /**
      * @return The string representation of the propositional abstraction of this MTCQ.
@@ -53,4 +35,19 @@ public interface MetricTemporalConjunctiveQuery extends CompositeQuery<Conjuncti
      * @return The temporal knowledge base this query operates on.
      */
     TemporalKnowledgeBase getTemporalKB();
+
+    void setTemporalKB(TemporalKnowledgeBase tkb);
+
+    void setParentFormula(MetricTemporalConjunctiveQuery parentFormula);
+
+    MetricTemporalConjunctiveQuery getParentFormula();
+
+    /**
+     * @return True iff. this formula is temporal, i.e., it does not contain a temporal operator also in its subformulae
+     */
+    boolean isTemporal();
+
+    void accept(MTCQVisitor visitor);
+
+    String toString(PropositionFactory propositions);
 }

@@ -13,7 +13,6 @@ import static openllet.core.utils.TermFactory.TOP_OBJECT_PROPERTY;
 import static openllet.core.utils.TermFactory.hasValue;
 import static openllet.core.utils.TermFactory.not;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -33,10 +32,8 @@ import openllet.core.boxes.rbox.Role;
 import openllet.core.datatypes.DatatypeReasoner;
 import openllet.core.datatypes.exceptions.DatatypeReasonerException;
 import openllet.core.exceptions.InternalReasonerException;
-import openllet.core.utils.ATermUtils;
-import openllet.core.utils.Bool;
-import openllet.core.utils.SetUtils;
-import openllet.core.utils.Timer;
+import openllet.core.utils.*;
+import openllet.query.sparqldl.engine.QueryCache;
 import openllet.query.sparqldl.engine.QueryExec;
 import openllet.query.sparqldl.model.results.MultiQueryResults;
 import openllet.query.sparqldl.model.cq.NotKnownQueryAtom;
@@ -67,6 +64,7 @@ import openllet.shared.tools.Log;
 public class QueryEngine implements QueryExec<ConjunctiveQuery>
 {
 	public static Logger _logger = Log.getLogger(QueryEngine.class);
+	private final static QueryCache _cache = new QueryCache();
 
 	public static CoreStrategy STRATEGY = CoreStrategy.ALLFAST;
 
@@ -85,19 +83,19 @@ public class QueryEngine implements QueryExec<ConjunctiveQuery>
 		return getQueryExec().supports(query);
 	}
 
-	public QueryResult exec(final ConjunctiveQuery query) throws IOException, InterruptedException
+	public QueryResult exec(final ConjunctiveQuery query)
 	{
 		return execQuery(query);
 	}
 
 	@Override
-	public QueryResult exec(ConjunctiveQuery q, ABox abox) throws IOException, InterruptedException
+	public QueryResult exec(ConjunctiveQuery q, ABox abox)
 	{
 		return exec(q);
 	}
 
 	@Override
-	public QueryResult exec(ConjunctiveQuery q, ABox abox, Timer timer) throws IOException, InterruptedException
+	public QueryResult exec(ConjunctiveQuery q, ABox abox, Timer timer)
 	{
 		timer.start();
 		QueryResult result = exec(q, abox);
@@ -105,59 +103,83 @@ public class QueryEngine implements QueryExec<ConjunctiveQuery>
 		return result;
 	}
 
-	public static QueryResult execQuery(final ConjunctiveQuery query, final KnowledgeBase kb) throws IOException,
-			InterruptedException
+	@Override
+	public QueryResult exec(ConjunctiveQuery q, QueryResult excludeBindings, QueryResult restrictToBindings)
+	{
+		return execQuery(q, excludeBindings, restrictToBindings);
+	}
+
+	public static QueryResult execQuery(final ConjunctiveQuery query, final KnowledgeBase kb,
+										QueryResult excludeBindings, QueryResult restrictToBindings)
 	{
 		final KnowledgeBase queryKB = query.getKB();
 		query.setKB(kb);
-		final QueryResult result = execQuery(query);
+		final QueryResult result = execQuery(query, excludeBindings, restrictToBindings);
 		query.setKB(queryKB);
 		return result;
 	}
 
-	public static QueryResult execQuery(final ConjunctiveQuery query) throws IOException, InterruptedException
+	public static QueryResult execQuery(final ConjunctiveQuery query)
 	{
-		if (query.getAtoms().isEmpty())
+		return execQuery(query, null, null);
+	}
+
+	public static QueryResult execQuery(final ConjunctiveQuery query, QueryResult excludeBindings,
+										QueryResult restrictToBindings)
+	{
+		Pair<QueryResult, QueryResult> cachedResults = _cache.fetch(query, restrictToBindings);
+		QueryResult result = cachedResults.first;
+		QueryResult candidates = cachedResults.second;
+
+		if (!candidates.isEmpty())
 		{
-			final QueryResultImpl results = new QueryResultImpl(query);
-			results.add(new ResultBindingImpl());
-			return results;
-		}
-		query.getKB().ensureConsistency();
-
-		// PREPROCESSING
-		_logger.fine(() -> "Preprocessing:\n" + query);
-		final ConjunctiveQuery preprocessed = preprocess(query);
-
-		// SIMPLIFICATION
-		if (OpenlletOptions.SIMPLIFY_QUERY)
-		{
-			_logger.fine(() -> "Simplifying:\n" + preprocessed);
-
-			simplify(preprocessed);
-		}
-
-		// SPLITTING
-		_logger.fine(() -> "Splitting:\n" + preprocessed);
-
-		final List<ConjunctiveQuery> queries = split(preprocessed);
-
-		QueryResult r = null;
-		if (queries.isEmpty())
-			throw new InternalReasonerException("Splitting query returned no results!");
-		else
-			if (queries.size() == 1)
-				r = execSingleQuery(queries.get(0));
-			else
+			if (query.getAtoms().isEmpty())
 			{
-				final List<QueryResult> results = new ArrayList<>(queries.size());
-				for (final ConjunctiveQuery q : queries)
-					results.add(execSingleQuery(q));
+				final QueryResultImpl results = new QueryResultImpl(query);
+				results.add(new ResultBindingImpl());
+				return results;
+			}
+			query.getKB().ensureConsistency();
 
-				r = new MultiQueryResults(query.getResultVars(), results);
+			// PREPROCESSING
+			_logger.fine(() -> "Preprocessing:\n" + query);
+			final ConjunctiveQuery preprocessed = preprocess(query);
+
+			// SIMPLIFICATION
+			if (OpenlletOptions.SIMPLIFY_QUERY)
+			{
+				_logger.fine(() -> "Simplifying:\n" + preprocessed);
+
+				simplify(preprocessed);
 			}
 
-		return r;
+			// SPLITTING
+			_logger.fine(() -> "Splitting:\n" + preprocessed);
+
+			final List<ConjunctiveQuery> queries = split(preprocessed);
+
+			if (queries.isEmpty())
+				throw new InternalReasonerException("Splitting query returned no results!");
+			else
+				if (queries.size() == 1)
+					result = execSingleQuery(queries.get(0), excludeBindings, candidates);
+				else
+				{
+					final List<QueryResult> results = new ArrayList<>(queries.size());
+					for (final ConjunctiveQuery q : queries)
+						results.add(execSingleQuery(q, excludeBindings, candidates));
+
+					result = new MultiQueryResults(query.getResultVars(), results);
+				}
+			_cache.add(query, candidates, result);
+		}
+
+		return result;
+	}
+
+	public static QueryCache getCache()
+	{
+		return _cache;
 	}
 
 	private static boolean isObjectProperty(final ATermAppl t, final KnowledgeBase kb)
@@ -328,12 +350,13 @@ public class QueryEngine implements QueryExec<ConjunctiveQuery>
 		return hasUndefinedTerm(query.getAtoms(), query.getKB());
 	}
 
-	private static QueryResult execSingleQuery(final ConjunctiveQuery query) throws IOException, InterruptedException
+	private static QueryResult execSingleQuery(final ConjunctiveQuery query, QueryResult excludeBindings,
+											   QueryResult restrictToBindings)
 	{
 		if (hasUndefinedTerm(query))
 			return new QueryResultImpl(query);
 
-		return getQueryExec().exec(query);
+		return getQueryExec().exec(query, excludeBindings, restrictToBindings);
 	}
 
 	/**

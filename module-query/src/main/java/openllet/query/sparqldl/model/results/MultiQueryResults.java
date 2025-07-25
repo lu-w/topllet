@@ -126,7 +126,7 @@ public class MultiQueryResults implements QueryResult
 	@Override
 	public int getMaxSize()
 	{
-		if (_queryResults.size() > 0)
+		if (!_queryResults.isEmpty())
 			return (int) Math.pow(_queryResults.get(0).getQuery().getKB().getIndividuals().stream().toList().size(),
 					getResultVars().size());
 		else
@@ -136,7 +136,7 @@ public class MultiQueryResults implements QueryResult
 	@Override
 	public Query<?> getQuery()
 	{
-		if (_queryResults.size() > 0)
+		if (!_queryResults.isEmpty())
 			return _queryResults.get(0).getQuery();
 		else
 			return null;
@@ -258,11 +258,32 @@ public class MultiQueryResults implements QueryResult
 	@Override
 	public boolean contains(ResultBinding binding)
 	{
-		for (final QueryResult result : _queryResults)
-			if (result.contains(binding))
-				return true;
+		return contains(binding, false);
+	}
 
+	@Override
+	public boolean contains(ResultBinding binding, boolean considerPartials)
+	{
+		for (final QueryResult result : _queryResults)
+			if (result.contains(binding, considerPartials))
+				return true;
 		return false;
+	}
+
+	@Override
+	public boolean possiblyContains(ResultBinding binding)
+	{
+		for (final QueryResult result : _queryResults)
+			if (result.possiblyContains(binding))
+				return true;
+		return false;
+	}
+
+	@Override
+	public QueryResult getRestOfPartialBinding(ResultBinding binding, Query<?> query)
+	{
+		// TODO implement
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
@@ -322,7 +343,8 @@ public class MultiQueryResults implements QueryResult
 	{
 		QueryResultImpl qr = new QueryResultImpl(originalQuery);
 		for (ResultBinding binding : this)
-			qr.add(binding);
+			if (!originalQuery.isDistinct() || binding.isDistinct())
+				qr.add(binding);
 		return qr;
 	}
 }

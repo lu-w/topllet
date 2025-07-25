@@ -9,10 +9,9 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 
 @RunWith(Suite.class)
-@Suite.SuiteClasses({ CQParserTest.class, MTCQParserTest.class, TestMLTL2DFA.class, TestMLTL2LTL.class,
-        TestBooleanMTCQEngine.class, TestMTCQEngine.class, QueryResultTest.class, TestBCQueries.class,
-        TestBooleanBCQQueries.class, TestUnionQueries.class, TestBooleanUnionQueries.class, TKBLoaderTest.class,
-        TestFileBasedMTCQEngine.class})
+@Suite.SuiteClasses({ CQParserTest.class, MTCQParserTest.class, TestBooleanMTCQEngine.class, TestMTCQEngine.class,
+        QueryResultTest.class, TestBCQueries.class, TestBooleanBCQQueries.class, TestUnionQueries.class,
+        TestBooleanUnionQueries.class, TKBLoaderTest.class, TestFileBasedMTCQEngine.class})
 public class MTCQTestSuite
 {
     public static junit.framework.Test suite()

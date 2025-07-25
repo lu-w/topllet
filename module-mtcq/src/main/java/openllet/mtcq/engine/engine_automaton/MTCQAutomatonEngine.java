@@ -1,4 +1,4 @@
-package openllet.mtcq.engine;
+package openllet.mtcq.engine.engine_automaton;
 
 import openllet.core.OpenlletOptions;
 import openllet.query.sparqldl.engine.AbstractQueryEngine;
@@ -10,27 +10,26 @@ import openllet.shared.tools.Log;
 import openllet.mtcq.engine.automaton.MLTL2DFA;
 import openllet.mtcq.model.automaton.DFA;
 import openllet.mtcq.model.query.MetricTemporalConjunctiveQuery;
-import openllet.mtcq.parser.ParseException;
 
-import java.io.IOException;
 import java.util.*;
 import java.util.logging.Logger;
 
 /**
- * Query engine for answering non-Boolean metric temporal conjunctive queries.
+ * Query engine for answering non-Boolean metric temporal conjunctive queries via finite automata (FA).
  * It basically steps through the FA corresponding to the given formula and propagates (un)satisfiability knowledge
  * along the breadth-first state traversal.
  * As an optimization, it uses CQ answering in a pre-processing run to efficiently generate (partial)
  * (un)satisfiability knowledge.
  */
-public class MTCQEngine extends AbstractQueryEngine<MetricTemporalConjunctiveQuery>
+@Deprecated
+public class MTCQAutomatonEngine extends AbstractQueryEngine<MetricTemporalConjunctiveQuery>
         implements QueryExec<MetricTemporalConjunctiveQuery>
 {
-    public static final Logger _logger = Log.getLogger(MTCQEngine.class);
+    public static final Logger _logger = Log.getLogger(MTCQAutomatonEngine.class);
 
     private EdgeConstraintChecker _edgeChecker;
 
-    public MTCQEngine()
+    public MTCQAutomatonEngine()
     {
         _booleanEngine = null; // Enforces this engine also as the Boolean engine.
     }
@@ -39,25 +38,15 @@ public class MTCQEngine extends AbstractQueryEngine<MetricTemporalConjunctiveQue
      * Answers the given query on its temporal knowledge base.
      * @param q The query to answer
      * @return The set of certain answers
-     * @throws IOException If CLI interaction with Lydia or MLTL2LTLf was not possible
-     * @throws InterruptedException If CLI interaction with Lydia or MLTL2LTLf was interrupted
      */
     @Override
     protected QueryResult execABoxQuery(MetricTemporalConjunctiveQuery q)
-            throws IOException, InterruptedException
     {
         _logger.fine("Starting entailment check for MTCQ " + q);
         String negMtcqProp = q.toNegatedPropositionalAbstractionString();
         _logger.finer("Checking DFA satisfiability for negated and propositionally abstracted MTCQ " + negMtcqProp);
         DFA automaton;
-        try
-        {
-            automaton = MLTL2DFA.convert(negMtcqProp, q);
-        }
-        catch (ParseException e)
-        {
-            throw new IOException(e.getMessage());
-        }
+        automaton = MLTL2DFA.convert(negMtcqProp, q);
         _edgeChecker = new EdgeConstraintChecker(q, automaton);
         // FIRST RUN - USE CQ ENGINE ONLY
         QueryResult excludeResults = null;
@@ -117,12 +106,10 @@ public class MTCQEngine extends AbstractQueryEngine<MetricTemporalConjunctiveQue
      * @param q The query to answer
      * @param excludeBindings ignored
      * @return The set of certain answers
-     * @throws IOException If CLI interaction with Lydia or MLTL2LTLf was not possible
-     * @throws InterruptedException If CLI interaction with Lydia or MLTL2LTLf was interrupted
      */
     @Override
     protected QueryResult execABoxQuery(MetricTemporalConjunctiveQuery q, QueryResult excludeBindings,
-                                        QueryResult restrictToBindings) throws IOException, InterruptedException
+                                        QueryResult restrictToBindings)
     {
         return execABoxQuery(q);
     }
@@ -134,12 +121,9 @@ public class MTCQEngine extends AbstractQueryEngine<MetricTemporalConjunctiveQue
      * @param mtcq The MTCQ to check satisfiability for.
      * @return Guaranteed satisfiability information, i.e., true -> final state has been reached, false -> it is certain
      *  that no final state can be reached
-     * @throws IOException If CLI interaction with Lydia or MLTL2LTLf was not possible
-     * @throws InterruptedException If CLI interaction with Lydia or MLTL2LTLf was interrupted
      */
     private Map<Boolean, QueryResult> _checkDFASatisfiability(DFA dfa, MetricTemporalConjunctiveQuery mtcq,
                                                               Map<Boolean, QueryResult> knownResults)
-            throws IOException, InterruptedException
     {
         Integer initState = dfa.getInitialState();
         DFAExecutableStates states = new DFAExecutableStates(dfa);

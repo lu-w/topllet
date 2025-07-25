@@ -52,6 +52,10 @@ public interface QueryResult extends Iterable<ResultBinding>
 	 */
 	boolean containsPartialBindings();
 
+	/**
+	 * TODO
+	 * @param variables
+	 */
 	void expandToAllVariables(Collection<ATermAppl> variables);
 
 	/**
@@ -109,10 +113,32 @@ public interface QueryResult extends Iterable<ResultBinding>
 	QueryResult invert();
 
 	/**
+	 * Checks whether the given binding is contained in this query result. By default, does not consider partial
+	 * bindings. It thus expects the given query result to be fully explicated w.r.t. to the result variables.
 	 * @param binding The binding to find.
 	 * @return True iff. the query result contains the given binding
 	 */
 	boolean contains(ResultBinding binding);
+
+	/**
+	 * Checks whether the given binding is contained in this query result. Can also consider partial bindings, i.e., if
+	 * the given binding is partial and the query result in fact contains all explications of this partial binding, it
+	 * is correctly identified as "contained" in this query result.
+	 * @param binding The binding to find.
+	 * @param considerPartials Whether to consider partial bindings.
+	 * @return True iff. the query result contains the given binding
+	 */
+	boolean contains(ResultBinding binding, boolean considerPartials);
+
+	/**
+	 * Checks whether for a (partial) binding it is still possible to extend it in way s.t. it is contained in this
+	 * query result. For example, the partial binding x->a is possibly contained in the query result x->a, y->b.
+	 * @param binding The binding to find.
+	 * @return True iff. the query result contains the given binding
+	 */
+	boolean possiblyContains(ResultBinding binding);
+
+	QueryResult getRestOfPartialBinding(ResultBinding binding, Query<?> query);
 
 	/**
 	 * @param binding Binding to check whether it is partial or fully explicated.

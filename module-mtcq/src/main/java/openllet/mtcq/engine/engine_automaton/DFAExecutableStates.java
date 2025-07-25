@@ -1,4 +1,4 @@
-package openllet.mtcq.engine;
+package openllet.mtcq.engine.engine_automaton;
 
 import openllet.mtcq.model.automaton.DFA;
 
@@ -10,6 +10,7 @@ import java.util.Set;
 /**
  * This class manages a set of executable states.
  */
+@Deprecated
 public class DFAExecutableStates extends ArrayList<DFAExecutableState>
 {
     private final DFA _dfa;

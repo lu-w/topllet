@@ -1,4 +1,4 @@
-package openllet.mtcq.engine;
+package openllet.mtcq.engine.engine_automaton;
 
 import openllet.aterm.ATerm;
 import openllet.core.utils.ATermUtils;
@@ -18,6 +18,7 @@ import java.util.logging.Logger;
  * Stores satisfiability and unsatisfiability information of an arbitrary BCQ w.r.t. different time points.
  * This knowledge is updated by the satisfiability knowledge manager, which globally manages all knowledge.
  */
+@Deprecated
 public class SatisfiabilityKnowledge
 {
     public static final Logger _logger = Log.getLogger(SatisfiabilityKnowledge.class);

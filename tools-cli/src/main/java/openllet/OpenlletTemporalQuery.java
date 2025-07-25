@@ -2,13 +2,16 @@ package openllet;
 
 import openllet.aterm.ATermAppl;
 import openllet.core.KnowledgeBase;
+import openllet.core.OpenlletOptions;
 import openllet.core.exceptions.InconsistentOntologyException;
 import openllet.core.output.TableData;
 import openllet.core.utils.Timer;
-import openllet.query.sparqldl.engine.QueryExec;
+import openllet.mtcq.engine.engine_rewriting.MTCQNormalFormEngine;
+import openllet.mtcq.ui.LanternaUI;
+import openllet.mtcq.ui.SimplePrintUI;
+import openllet.mtcq.ui.MTCQEngineUI;
 import openllet.query.sparqldl.model.results.QueryResult;
 import openllet.query.sparqldl.model.results.ResultBinding;
-import openllet.mtcq.engine.MTCQEngine;
 import openllet.mtcq.model.kb.TemporalKnowledgeBase;
 import openllet.mtcq.model.kb.FileBasedTemporalKnowledgeBaseImpl;
 import openllet.mtcq.model.query.MetricTemporalConjunctiveQuery;
@@ -24,10 +27,7 @@ import java.io.StringWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 
 import static openllet.OpenlletCmdOptionArg.*;
 
@@ -35,26 +35,25 @@ public class OpenlletTemporalQuery extends OpenlletCmdApp
 {
     private String queryFile;
     private String catalogFile;
+    private boolean streamingMode = false;
+    private int zmqPort = OpenlletOptions.MTCQ_ENGINE_STREAMING_ZMQ_PORT;
     private boolean equalAnswersAllowed;
     private QueryResult queryResults;
     private String queryString;
     private MetricTemporalConjunctiveQuery query;
     private TemporalKnowledgeBase kb;
-    private final QueryExec<MetricTemporalConjunctiveQuery> queryEngine = new MTCQEngine();
     private OutputFormat outputFormat = OutputFormat.TABULAR;
+    private MTCQEngineUI ui = null;
 
     private enum OutputFormat
     {
         TABULAR, XML, JSON
     }
 
-    // TODO: remove input format from options (maybe a posteriori remove()?)
-    // TODO: what about ignore imports in options?
-
     @Override
     public String getAppId()
     {
-        return "Topplet: An Engine for Answering Metric Temporal Conjunctive Queries";
+        return "Topplet: An Engine for Answering Metric Temporal Conjunctive Queries (Rewriting-Based)";
     }
 
     @Override
@@ -84,6 +83,21 @@ public class OpenlletTemporalQuery extends OpenlletCmdApp
         distinctOption.setIsMandatory(false);
         options.add(distinctOption);
 
+        final OpenlletCmdOption sendingOption = new OpenlletCmdOption("port");
+        sendingOption.setShortOption("p");
+        sendingOption.setDescription("The 0MQ port to use when in streaming mode (which is activated giving only a " +
+                "single .owl instead of a .kbs file). Default: " + OpenlletOptions.MTCQ_ENGINE_STREAMING_ZMQ_PORT);
+        sendingOption.setArg(REQUIRED);
+        sendingOption.setIsMandatory(false);
+        options.add(sendingOption);
+
+        final OpenlletCmdOption uiOption = new OpenlletCmdOption("ui");
+        uiOption.setShortOption("u");
+        uiOption.setDescription("The UI, if one shall be used. Options: print, graphical.");
+        uiOption.setArg(REQUIRED);
+        uiOption.setIsMandatory(false);
+        options.add(uiOption);
+
         return options;
     }
 
@@ -102,6 +116,10 @@ public class OpenlletTemporalQuery extends OpenlletCmdApp
             super.parseArgs(args);
         setCatalogFile(_options.getOption("catalog").getValueAsString());
         setEqualAnswers(_options.getOption("equal").getValueAsBoolean());
+        if (_options.getOption("port").exists())
+            setPort(_options.getOption("port").getValueAsNonNegativeInteger());
+        if (_options.getOption("ui").exists())
+            setUi(_options.getOption("ui").getValueAsString());
         setOutputFormat("Tabular"); // Currently, no other output format is supported, so no option for it.
     }
 
@@ -113,6 +131,22 @@ public class OpenlletTemporalQuery extends OpenlletCmdApp
     private void setEqualAnswers(Boolean e)
     {
         equalAnswersAllowed = e;
+    }
+
+    private void setUi(final String uiString)
+    {
+        if ("graphical".equals(uiString))
+            ui = new LanternaUI();
+        else if ("print".equals(uiString))
+            ui = new SimplePrintUI();
+        else
+            throw new OpenlletCmdException("Unknown UI: " + uiString + ". Please choose one of: print, graphical.");
+    }
+
+    private void setPort(Integer p)
+    {
+        if (p > 0)
+            zmqPort = p;
     }
 
     protected List<String> parseInputFilesFromFile(String inputFile)
@@ -164,17 +198,27 @@ public class OpenlletTemporalQuery extends OpenlletCmdApp
         try
         {
             List<String> inputFiles = Arrays.asList(getInputFiles());
+            List<String> kbsFiles;
             if (inputFiles.size() == 2)
             {
                 setQueryFile(inputFiles.get(0));
                 // tries to parse from input files. if unsuccessful, the original input file is returned.
-                inputFiles = parseInputFilesFromFile(inputFiles.get(1));
+                try
+                {
+                    kbsFiles = FileBasedTemporalKnowledgeBaseImpl.parseKBSFile(inputFiles.get(1));
+                }
+                catch (FileNotFoundException e)
+                {
+                    // streaming mode is enabled if not a .KBS file is given but just a single OWL file (a TBox)
+                    streamingMode = true;
+                    kbsFiles = Collections.singletonList(inputFiles.get(1));
+                }
             }
             else
                 throw new OpenlletCmdException("Expected two required input arguments. Received " + inputFiles.size());
-            kb = new FileBasedTemporalKnowledgeBaseImpl(inputFiles, catalogFile, timer);
             try
             {
+                kb = new FileBasedTemporalKnowledgeBaseImpl(kbsFiles, catalogFile, timer);
                 KnowledgeBase firstKb = kb.get(0);
                 if (firstKb != null)
                 {
@@ -235,14 +279,10 @@ public class OpenlletTemporalQuery extends OpenlletCmdApp
     private void execQuery()
     {
         Timer timer = _timers.createTimer("query execution (w/o loading & initial consistency check)");
-        try
-        {
-            queryResults = queryEngine.exec(query, null, timer);
-        }
-        catch (RuntimeException | IOException | InterruptedException e)
-        {
-            throw new OpenlletCmdException(e);
-        }
+        if (ui != null) ui.setup(query);
+        queryResults = new MTCQNormalFormEngine(streamingMode, ui, zmqPort).
+                exec(query, null, timer);
+        if (ui != null) ui.tearDown();
     }
 
     private void printQueryResults()

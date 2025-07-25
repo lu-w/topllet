@@ -442,7 +442,7 @@ public class OpenlletOptions
 	 * The UCQ engine can check whether all the disjuncts are entailed separately. If this is the case, it can return
 	 * true directly, otherwise it has to run the expensive full semantics check.
 	 */
-	public static boolean UCQ_ENGINE_USE_UNDERAPPROXIMATING_SEMANTICS = false;
+	public static boolean UCQ_ENGINE_USE_UNDERAPPROXIMATING_SEMANTICS = true;
 
 	/**
 	 * The UCQ engine can check whether all the disjuncts are entailed separately. If this is the case, it can return
@@ -479,6 +479,11 @@ public class OpenlletOptions
 	 * the BCQ.
 	 */
 	public static boolean MTCQ_ENGINE_TEMPORAL_BCQ_TRANSFER = false;
+
+	/**
+	 * The port which to use for 0MQ when MTCQ engine is in stremaing mode.
+	 */
+	public static int MTCQ_ENGINE_STREAMING_ZMQ_PORT = 5555;
 
 	static
 	{
@@ -694,6 +699,8 @@ public class OpenlletOptions
 		MTCQ_ENGINE_USE_CQ_ENGINE = getBooleanProperty(newOptions, "MTCQ_ENGINE_USE_CQ_ENGINE", MTCQ_ENGINE_USE_CQ_ENGINE, oldOptions);
 
 		MTCQ_ENGINE_TEMPORAL_BCQ_TRANSFER = getBooleanProperty(newOptions, "MTCQ_ENGINE_USE_CQ_ENGINE", MTCQ_ENGINE_TEMPORAL_BCQ_TRANSFER, oldOptions);
+
+		MTCQ_ENGINE_STREAMING_ZMQ_PORT = getIntProperty(newOptions, "MTCQ_ENGINE_STREAMING_ZMQ_PORT", MTCQ_ENGINE_STREAMING_ZMQ_PORT, oldOptions);
 
 		return oldOptions;
 	}

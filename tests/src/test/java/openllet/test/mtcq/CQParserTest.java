@@ -33,7 +33,7 @@ public class CQParserTest extends AbstractMTCQTest
     public void testSimpleQuery()
     {
         MetricTemporalConjunctiveQuery q = temporalQuery("(C(a) & D(b))");
-        assertEquals("!((a))", q.toNegatedPropositionalAbstractionString());
+        assertEquals("!(a)", q.toNegatedPropositionalAbstractionString());
         assertEquals(1, q.getQueries().size());
         assertEquals(2, q.getQueries().get(0).getAtoms().size());
         List<QueryAtom> atoms = q.getQueries().get(0).getAtoms();
@@ -45,7 +45,7 @@ public class CQParserTest extends AbstractMTCQTest
     public void testConjunctiveQuery1()
     {
         MetricTemporalConjunctiveQuery q = temporalQuery("(C(a) & r(?x, y) & A(?x) & C(b) & p(y,a))");
-        assertEquals("!((a))", q.toNegatedPropositionalAbstractionString());
+        assertEquals("!(a)", q.toNegatedPropositionalAbstractionString());
         assertEquals(1, q.getQueries().size());
         assertEquals(5, q.getQueries().get(0).getAtoms().size());
         List<QueryAtom> atoms = q.getQueries().get(0).getAtoms();
@@ -85,7 +85,7 @@ public class CQParserTest extends AbstractMTCQTest
     @Test
     public void testWrongTokenInCQ()
     {
-        assertThrows(ParseException.class, () -> uncheckedTemporalQuery("(C(a) ^ C(b))"));
+        assertThrows(ParseException.class, () -> uncheckedTemporalQuery("(C(a) / C(b))"));
     }
 
     @Test

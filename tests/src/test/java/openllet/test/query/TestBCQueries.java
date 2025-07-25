@@ -327,7 +327,7 @@ public class TestBCQueries extends AbstractQueryTest
                 negatedQuery(TypeAtom(x, Patricide), PropertyValueAtom(iokaste, hasChild, x),
                     TypeAtom(y, not(Patricide)), PropertyValueAtom(x, hasChild, y)),
                 negatedQuery(TypeAtom(x1, Patricide), PropertyValueAtom(iokaste, hasChild, x1),
-                    TypeAtom(y1, not(Patricide)), PropertyValueAtom(x1, hasChild, y1))
+                    TypeAtom(y1, not(Patricide)), PropertyValueAtom(x1, hasChild, y1), TypeAtom(x, TOP))
             )
         );
         BCQQuery bcqq2 = bcqQuery(

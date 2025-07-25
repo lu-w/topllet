@@ -55,6 +55,12 @@ public class OptimizedQueryEngine3 extends AbstractABoxEngineWrapper
 	}
 
 	@Override
+	public QueryResult exec(ConjunctiveQuery q, QueryResult excludeBindings, QueryResult restrictToBindings)
+	{
+		return exec(q);
+	}
+
+	@Override
 	public QueryResult execABoxQuery(final ConjunctiveQuery q)
 	{
 		final QueryResult results = new QueryResultImpl(q);

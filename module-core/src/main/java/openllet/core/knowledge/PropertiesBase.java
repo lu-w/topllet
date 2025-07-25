@@ -2,14 +2,7 @@ package openllet.core.knowledge;
 
 import static java.lang.String.format;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -29,6 +22,7 @@ import openllet.core.datatypes.exceptions.InvalidLiteralException;
 import openllet.core.datatypes.exceptions.UnrecognizedDatatypeException;
 import openllet.core.taxonomy.Taxonomy;
 import openllet.core.utils.ATermUtils;
+import openllet.core.utils.Pair;
 import openllet.shared.tools.Logging;
 
 /**
@@ -1040,6 +1034,12 @@ public interface PropertiesBase extends MessageBase, Logging, Base
 	 */
 	default Set<ATermAppl> getObjectPropertyValuesSet(final ATermAppl r, final ATermAppl x)
 	{
+		return getObjectPropertyValuesSet(r, x, null);
+	}
+
+	default Set<ATermAppl> getObjectPropertyValuesSet(final ATermAppl r, final ATermAppl x,
+													  Set<ATermAppl> restrictToInstances)
+	{
 		if (null == r || null == x)
 			return Collections.emptySet();
 
@@ -1061,7 +1061,11 @@ public interface PropertiesBase extends MessageBase, Logging, Base
 
 		// TODO get rid of unnecessary Set + List creation
 		Set<ATermAppl> knowns = new HashSet<>();
-		final Set<ATermAppl> unknowns = new HashSet<>();
+		final Set<ATermAppl> unknowns;
+		if (restrictToInstances != null)
+			unknowns = new HashSet<>(restrictToInstances);
+		else
+			unknowns = new HashSet<>();
 
 		if (role.isTop())
 		{
@@ -1085,7 +1089,13 @@ public interface PropertiesBase extends MessageBase, Logging, Base
 
 	default List<ATermAppl> getObjectPropertyValues(final ATermAppl r, final ATermAppl x)
 	{
-		return new ArrayList<>(getObjectPropertyValuesSet(r, x));
+		return getObjectPropertyValues(r, x, null);
+	}
+
+	default List<ATermAppl> getObjectPropertyValues(final ATermAppl r, final ATermAppl x,
+													Set<ATermAppl> restrictToInstances)
+	{
+		return new ArrayList<>(getObjectPropertyValuesSet(r, x, restrictToInstances));
 	}
 
 	default Stream<ATermAppl> objectPropertyValues(final ATermAppl r, final ATermAppl x)
@@ -1334,6 +1344,19 @@ public interface PropertiesBase extends MessageBase, Logging, Base
 	 */
 	default List<ATermAppl> getPropertyValues(final ATermAppl r, final ATermAppl x)
 	{
+		return getPropertyValues(r, x, null);
+	}
+
+	/**
+	 * Return all property values for a given property and subject value, considering the given restriction.
+	 *
+	 * @param r
+	 * @param x
+	 * @param restrictToInstances
+	 * @return List of ATermAppl objects.
+	 */
+	default List<ATermAppl> getPropertyValues(final ATermAppl r, final ATermAppl x, Set<ATermAppl> restrictToInstances)
+	{
 		if (null == r || null == x)
 			return Collections.emptyList();
 
@@ -1346,7 +1369,7 @@ public interface PropertiesBase extends MessageBase, Logging, Base
 		}
 
 		if (role.isObjectRole())
-			return getObjectPropertyValues(r, x);
+			return getObjectPropertyValues(r, x, restrictToInstances);
 		else
 			if (role.isDatatypeRole())
 				return getDataPropertyValues(r, x);

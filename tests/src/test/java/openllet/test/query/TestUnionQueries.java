@@ -199,7 +199,7 @@ public class TestUnionQueries extends AbstractQueryTest
                 query(TypeAtom(x, Patricide), PropertyValueAtom(iokaste, hasChild, x), TypeAtom(y, not(Patricide)),
                         PropertyValueAtom(x, hasChild, y)),
                 query(TypeAtom(x1, Patricide), PropertyValueAtom(iokaste, hasChild, x1), TypeAtom(y1, not(Patricide)),
-                        PropertyValueAtom(x1, hasChild, y1))));
+                        PropertyValueAtom(x1, hasChild, y1), TypeAtom(x, TOP))));
         UnionQuery ucq2 = unionQuery(select(x, y), where(query(TypeAtom(x, Patricide), PropertyValueAtom(iokaste,
                         hasChild, x), TypeAtom(y, not(Patricide)), PropertyValueAtom(x, hasChild, y))));
 

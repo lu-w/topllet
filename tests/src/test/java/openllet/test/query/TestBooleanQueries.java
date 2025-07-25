@@ -60,14 +60,7 @@ public class TestBooleanQueries extends AbstractKBTests
 
 	private static void testQuery(final boolean expected, final ConjunctiveQuery query)
 	{
-		try
-		{
-			assertEquals(expected, !QueryEngine.execQuery(query).isEmpty());
-		}
-		catch (IOException | InterruptedException e)
-		{
-			fail(e.toString());
-		}
+		assertEquals(expected, !QueryEngine.execQuery(query).isEmpty());
 	}
 
 	private static void testABoxQuery(final boolean expected, final ConjunctiveQuery query)
@@ -135,21 +128,13 @@ public class TestBooleanQueries extends AbstractKBTests
 		q1.addDistVar(x, VarType.CLASS);
 		q1.addResultVar(x);
 
-		final QueryResult qr;
-		try
-		{
-			qr = QueryEngine.execQuery(q1);
+		final QueryResult qr = QueryEngine.execQuery(q1);
 
-			final List<ATermAppl> results = new ArrayList<>();
-			for (final ResultBinding result : qr)
-				results.add(result.getValue(x));
+		final List<ATermAppl> results = new ArrayList<>();
+		for (final ResultBinding result : qr)
+			results.add(result.getValue(x));
 
-			assertIteratorValues(results.iterator(), _A, _C);
-		}
-		catch (IOException | InterruptedException e)
-		{
-			fail(e.toString());
-		}
+		assertIteratorValues(results.iterator(), _A, _C);
 	}
 
 	@Test
