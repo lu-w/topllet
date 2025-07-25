@@ -26,7 +26,7 @@ preferred-citation:
   month: 5
   year: 2024
   conference:
-  	- name: "NASA Formal Methods"
+    - name: "NASA Formal Methods"
   editors:
     - family-names: "Benz"
       given-names: "Nathaniel"
@@ -35,7 +35,7 @@ preferred-citation:
     - family-names: "Shi"
       given-names: "Nija"
   publisher: "Springer Nature Switzerland"
-  isbn: 978-3-031-60698-4
+  isbn: "978-3-031-60698-4"
   start: 314
   end: 321
   doi: "10.1007/978-3-031-60698-4_18"
