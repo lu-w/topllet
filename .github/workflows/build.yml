@@ -20,4 +20,4 @@ jobs:
         distribution: 'temurin'
         cache: maven
     - name: Build with Maven
-      run: mvn install
+      run: mvn -pl tests test -Dtest=MTCQTestSuite
