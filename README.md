@@ -118,7 +118,7 @@ If you specify a non-`?`-preceeded, non-individual variable in some query atom, 
 You can add comments by `# my comment`.
 For inline comments, note that the `#` needs to be succeeded by a whitespace (i.e., `#mycomment` is not a valid comment).
 
-The full grammar can be found at [`module-mtcq/src/main/java/openllet/mtcq/parser/grammar.g4`](module-mtcq/src/main/java/openllet/mtcq/parser/grammar.g4).
+The full grammar can be found at [`module-mtcq/src/main/java/openllet/mtcq/parser/MTCQ.g4`](module-mtcq/src/main/java/openllet/mtcq/parser/MTCQ.g4).
 
 Right now, the tool checks only temporal queries whose CQs are tree-shaped, i.e., the induced query graph is acyclic w.r.t. the existentially quantified variables and each node has at most one incoming edge.
 
