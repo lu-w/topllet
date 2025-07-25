@@ -11,6 +11,7 @@ Topllet is a fork of Openllet v2.6.6. and implements the algorithm presented in 
 2. [Usage](#usage)
 	1. [Inputs](#inputs)
 	2. [Output](#output)
+	2. [Streaming Mode](#streaming-mode)
 3. [Even More Examples](#even-more-examples)
 	1. [Right of Way Example](#right-of-way-example)
 	2. [Automotive Urban Traffic Ontology Example](#automotive-urban-traffic-ontology-example)
