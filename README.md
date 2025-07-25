@@ -186,7 +186,7 @@ Each message represents an (incremental) specification of the new data and are n
 
 Only numeric literals are supported (typed as integer or decimal). Invalid or unsupported lines are ignored.
 
-Example messages using the supported features are:
+An example message using the supported features is:
 
 ```
 PREFIX ex: <http://example.org#>
