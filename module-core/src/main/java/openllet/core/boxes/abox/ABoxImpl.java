@@ -724,8 +724,8 @@ public class ABoxImpl implements ABox
 		assert isComplete() : "Initial consistency check has not been performed!";
 		Individual pNode = getIndividual(x);
 
-        if (pNode == null)
-            throw new IllegalArgumentException("Individual " + x + " was not found in ABox");
+		if (pNode == null)
+			throw new IllegalArgumentException("Individual " + x + " was not found in ABox");
 
 		boolean isIndependent = true;
 		if (pNode.isMerged())
