@@ -1,7 +1,5 @@
-// Generated from MTCQ.g4 by ANTLR 4.13.1
-
+// Generated from MTCQ.g4 by ANTLR 4.13.2
 package openllet.mtcq.parser;
-
 
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.ErrorNode;
@@ -206,6 +204,18 @@ public class MTCQBaseListener implements MTCQListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitUntil(MTCQParser.UntilContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterRelease(MTCQParser.ReleaseContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitRelease(MTCQParser.ReleaseContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -458,6 +468,18 @@ public class MTCQBaseListener implements MTCQListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitAndFormula(MTCQParser.AndFormulaContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterReleaseFormula(MTCQParser.ReleaseFormulaContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitReleaseFormula(MTCQParser.ReleaseFormulaContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *

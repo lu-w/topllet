@@ -185,6 +185,10 @@ public class MTCQBuilder extends AbstractParseTreeVisitor<MTCQFormula> implement
         return null;
     }
 
+    public MTCQFormula visitRelease(MTCQParser.ReleaseContext ctx) {
+        return null;
+    }
+
     @Override
     public MTCQFormula visitEventually(MTCQParser.EventuallyContext ctx)
     {
@@ -340,6 +344,17 @@ public class MTCQBuilder extends AbstractParseTreeVisitor<MTCQFormula> implement
     public MTCQFormula visitAndFormula(MTCQParser.AndFormulaContext ctx)
     {
         return new AndFormula(_tkb, _isDistinct, visit(ctx.mtcq_formula(0)), visit(ctx.mtcq_formula(1)));
+    }
+
+    public MTCQFormula visitReleaseFormula(MTCQParser.ReleaseFormulaContext ctx) {
+        if (isBounded(ctx, false))
+        {
+            Pair<Integer, Integer> bounds = getBounds(ctx, false);
+            return new BoundedReleaseFormula(_tkb, _isDistinct, visit(ctx.mtcq_formula(0)),
+                    visit(ctx.mtcq_formula(1)), bounds.first, bounds.second);
+        }
+        else
+            return new ReleaseFormula(_tkb, _isDistinct, visit(ctx.mtcq_formula(0)), visit(ctx.mtcq_formula(1)));
     }
 
     @Override

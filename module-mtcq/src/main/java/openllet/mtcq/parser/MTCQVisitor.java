@@ -1,5 +1,4 @@
-// Generated from MTCQ.g4 by ANTLR 4.13.1
-
+// Generated from MTCQ.g4 by ANTLR 4.13.2
 package openllet.mtcq.parser;
 
 import org.antlr.v4.runtime.tree.ParseTreeVisitor;
@@ -108,6 +107,12 @@ public interface MTCQVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitUntil(MTCQParser.UntilContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link MTCQParser#release}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitRelease(MTCQParser.ReleaseContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link MTCQParser#eventually}.
 	 * @param ctx the parse tree
@@ -247,6 +252,13 @@ public interface MTCQVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitAndFormula(MTCQParser.AndFormulaContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code ReleaseFormula}
+	 * labeled alternative in {@link MTCQParser#mtcq_formula}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitReleaseFormula(MTCQParser.ReleaseFormulaContext ctx);
 	/**
 	 * Visit a parse tree produced by the {@code UntilFormula}
 	 * labeled alternative in {@link MTCQParser#mtcq_formula}.
