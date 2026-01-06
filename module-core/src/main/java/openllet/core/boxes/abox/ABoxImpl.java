@@ -722,8 +722,10 @@ public class ABoxImpl implements ABox
 	public Bool isKnownType(final ATermAppl x, final ATermAppl c, final Collection<ATermAppl> subs)
 	{
 		assert isComplete() : "Initial consistency check has not been performed!";
-
 		Individual pNode = getIndividual(x);
+
+        if (pNode == null)
+            throw new IllegalArgumentException("Individual " + x + " was not found in ABox");
 
 		boolean isIndependent = true;
 		if (pNode.isMerged())
