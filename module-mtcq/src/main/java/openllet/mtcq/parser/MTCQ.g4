@@ -8,6 +8,8 @@ X_TERMINAL          : 'X';
 XB_TERMINAL         : 'X[!]';
 UI_TERMINAL         : 'U_';
 U_TERMINAL          : 'U';
+RI_TERMINAL         : 'R_';
+R_TERMINAL          : 'R';
 FI_TERMINAL         : 'F_';
 F_TERMINAL          : 'F';
 GI_TERMINAL         : 'G_';
@@ -56,6 +58,7 @@ interval                       : full_interval
 weak_next                      : X_TERMINAL;
 next                           : XB_TERMINAL;
 until                          : U_TERMINAL | UI_TERMINAL interval;
+release                        : R_TERMINAL | RI_TERMINAL interval;
 eventually                     : F_TERMINAL | FI_TERMINAL interval;
 globally                       : G_TERMINAL | GI_TERMINAL interval;
 
@@ -79,6 +82,7 @@ mtcq_formula : conjunctive_query					#ConjunctiveQueryFormula
                 | eventually mtcq_formula			#EventuallyFormula
                 | globally mtcq_formula				#GloballyFormula
                 | mtcq_formula until mtcq_formula	#UntilFormula
+                | mtcq_formula release mtcq_formula	#ReleaseFormula
                 | mtcq_formula and mtcq_formula		#AndFormula
                 | mtcq_formula equiv mtcq_formula	#EquivFormula
                 | mtcq_formula impl mtcq_formula	#ImplFormula

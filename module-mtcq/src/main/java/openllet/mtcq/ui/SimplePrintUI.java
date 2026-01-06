@@ -38,8 +38,7 @@ public class SimplePrintUI implements MTCQEngineUI {
     }
 
     @Override
-    public void informAboutResults(int timePoint, KnowledgeBase kb, Query<?> query, QueryResult result)
-    {
+    public void informAboutResults(int timePoint, KnowledgeBase kb, Query<?> query, QueryResult result) {
         if (result != null)
             System.out.println("[t = " + timePoint + "] Computed " + result.size() + " result(s) for " + query);
     }
