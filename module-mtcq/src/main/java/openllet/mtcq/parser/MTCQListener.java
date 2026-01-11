@@ -1,5 +1,4 @@
-// Generated from MTCQ.g4 by ANTLR 4.13.1
-
+// Generated from MTCQ.g4 by ANTLR 4.13.2
 package openllet.mtcq.parser;
 
 import org.antlr.v4.runtime.tree.ParseTreeListener;
@@ -169,6 +168,16 @@ public interface MTCQListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitUntil(MTCQParser.UntilContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link MTCQParser#release}.
+	 * @param ctx the parse tree
+	 */
+	void enterRelease(MTCQParser.ReleaseContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link MTCQParser#release}.
+	 * @param ctx the parse tree
+	 */
+	void exitRelease(MTCQParser.ReleaseContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link MTCQParser#eventually}.
 	 * @param ctx the parse tree
@@ -405,6 +414,18 @@ public interface MTCQListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitAndFormula(MTCQParser.AndFormulaContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code ReleaseFormula}
+	 * labeled alternative in {@link MTCQParser#mtcq_formula}.
+	 * @param ctx the parse tree
+	 */
+	void enterReleaseFormula(MTCQParser.ReleaseFormulaContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code ReleaseFormula}
+	 * labeled alternative in {@link MTCQParser#mtcq_formula}.
+	 * @param ctx the parse tree
+	 */
+	void exitReleaseFormula(MTCQParser.ReleaseFormulaContext ctx);
 	/**
 	 * Enter a parse tree produced by the {@code UntilFormula}
 	 * labeled alternative in {@link MTCQParser#mtcq_formula}.

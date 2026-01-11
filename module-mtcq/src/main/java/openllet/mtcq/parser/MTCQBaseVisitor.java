@@ -1,5 +1,4 @@
-// Generated from MTCQ.g4 by ANTLR 4.13.1
-
+// Generated from MTCQ.g4 by ANTLR 4.13.2
 package openllet.mtcq.parser;
 
 import org.antlr.v4.runtime.tree.AbstractParseTreeVisitor;
@@ -126,6 +125,13 @@ public class MTCQBaseVisitor<T> extends AbstractParseTreeVisitor<T> implements M
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
 	@Override public T visitUntil(MTCQParser.UntilContext ctx) { return visitChildren(ctx); }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation returns the result of calling
+	 * {@link #visitChildren} on {@code ctx}.</p>
+	 */
+	@Override public T visitRelease(MTCQParser.ReleaseContext ctx) { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -273,6 +279,13 @@ public class MTCQBaseVisitor<T> extends AbstractParseTreeVisitor<T> implements M
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
 	@Override public T visitAndFormula(MTCQParser.AndFormulaContext ctx) { return visitChildren(ctx); }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation returns the result of calling
+	 * {@link #visitChildren} on {@code ctx}.</p>
+	 */
+	@Override public T visitReleaseFormula(MTCQParser.ReleaseFormulaContext ctx) { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}
 	 *

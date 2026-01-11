@@ -84,10 +84,9 @@ public class InMemoryTemporalKnowledgeBaseImpl extends ArrayList<KnowledgeBase> 
     {
         if (this.size() > 0 && kb != null)
         {
+            // TODO merge me into one
             KnowledgeBase prevKb = this.get(this.size() - 1);
-            // Disabled for now
-            // TODO: re-add?
-            if (false && !kb.getIndividuals().equals(prevKb.getIndividuals()))
+            if (!kb.getIndividuals().equals(prevKb.getIndividuals()))
             {
                 Set<ATermAppl> mis1 = new HashSet<>(prevKb.getIndividuals());
                 Set<ATermAppl> mis2 = new HashSet<>(kb.getIndividuals());
