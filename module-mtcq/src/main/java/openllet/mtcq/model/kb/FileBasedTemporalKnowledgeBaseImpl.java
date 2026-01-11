@@ -100,6 +100,7 @@ public class FileBasedTemporalKnowledgeBaseImpl extends ArrayList<KnowledgeBase>
                 _curKbIndex = index;
                 if (_curKb != null && _prevInds == null)
                     _prevInds = _curKb.getIndividuals();
+                // TODO merge me into one
                 else if (_curKb != null && !_curKb.getIndividuals().equals(_prevInds))
                 {
                     Set<ATermAppl> mis1 = new HashSet<>(_prevInds);
